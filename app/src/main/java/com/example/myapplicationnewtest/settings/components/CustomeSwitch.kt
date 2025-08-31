@@ -30,7 +30,6 @@ fun CustomSwitch(
     val backgroundColor by animateColorAsState(
         targetValue = if (checked)
             MaterialTheme.colorScheme.tertiary
-//        else Color(0xFFBDBDBD),
         else MaterialTheme.colorScheme.onSecondaryContainer,
         label = "bgColor"
     )
