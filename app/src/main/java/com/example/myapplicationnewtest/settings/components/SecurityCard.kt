@@ -1,0 +1,93 @@
+package com.example.myapplicationnewtest.settings.components
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.SharedPrefManager
+
+
+@Composable
+fun SecurityCard(
+    navController: NavController,
+) {
+
+    val context = LocalContext.current
+    val sharedPrefManager = remember { SharedPrefManager(context) }
+    val protectionMethod = sharedPrefManager.getProtectionMethod()
+
+
+    Column {
+        Text(
+            stringResource(R.string.security),
+            color = MaterialTheme.colorScheme.tertiary,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Normal
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    BorderStroke(
+                        2.dp,
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) {
+            Column {
+                SettingsItem(
+                    label = stringResource(R.string.change_protection_method),
+                    icon = Icons.Default.Lock,
+                    onClick = {
+                        when (protectionMethod) {
+                            1 -> navController.navigate("FingerPrintScreen?changeMethod=true")
+                            2 -> navController.navigate("EnterPinScreen?changeMethod=true")
+                            3 -> navController.navigate("ProtectionScreen")
+                            else -> navController.navigate("ProtectionScreen")
+                        }
+                    }
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                SettingsItem(
+                    stringResource(R.string.notification),
+                    icon = Icons.Default.Notifications,
+                    onClick = {}
+                )
+            }
+        }
+    }
+}

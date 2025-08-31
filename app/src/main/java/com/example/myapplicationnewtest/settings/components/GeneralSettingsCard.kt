@@ -1,0 +1,200 @@
+package com.example.myapplicationnewtest.settings.components
+
+import android.app.Activity
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apartment
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.settings.data.SettingsViewModel
+import com.example.myapplicationnewtest.ui.theme.LocalDarkMode
+import java.util.Locale
+import android.content.res.Configuration
+
+
+
+@Composable
+fun GeneralSettingsCard(
+    navController: NavController,
+    viewModel: SettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
+
+    val context = LocalContext.current
+    val sharedPrefManager = remember { SharedPrefManager(context) }
+    val activity = context as? Activity
+    var locale by remember { mutableStateOf(Locale(sharedPrefManager.getLanguage())) }
+    var expanded by remember { mutableStateOf(false) }
+    val darkModeState = LocalDarkMode.current
+
+
+    fun updateLocale(newLocale: Locale) {
+        locale = newLocale
+        sharedPrefManager.saveLanguage(newLocale.language)
+
+        Locale.setDefault(newLocale)
+        val resources = context.resources
+        val configuration = Configuration(resources.configuration)
+        configuration.setLocale(newLocale)
+        resources.updateConfiguration(configuration, resources.displayMetrics)
+
+        val activity = context as Activity
+        activity.recreate()
+    }
+
+    Column {
+        Text(
+            stringResource(R.string.general_settings),
+            color = MaterialTheme.colorScheme.tertiary,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Normal
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    BorderStroke(
+                        2.dp,
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) {
+            Column {
+                SettingsItem(
+                    label = stringResource(R.string.change_company),
+                    icon = Icons.Default.Apartment,
+                    onClick = {
+                        viewModel.changeCompany()
+                        navController.navigate("ScanQrCodeScreen")
+                        sharedPrefManager.setProtectionSkipped(false)
+                    }
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                SettingsItem(
+                    label = stringResource(R.string.language),
+                    icon = Icons.Default.Language,
+                    onClick = { expanded = !expanded },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = "expand",
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                )
+
+                if (expanded) {
+                    Column {
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 35.dp),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        SettingsLanguage(
+                            label = stringResource(R.string.arabic),
+                            icon = painterResource(id = R.drawable.egypt),
+                            onClick = {
+                                if (locale.language != "ar") {
+                                    updateLocale(Locale("ar"))
+                                }
+                                expanded = false
+                            }
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 35.dp),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+
+                        SettingsLanguage(
+                            label = stringResource(R.string.english),
+                            icon = painterResource(id = R.drawable.america),
+                            onClick = {
+                                if (locale.language != "en") {
+                                    updateLocale(Locale("en"))
+                                }
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                SettingsItem(
+                    label = stringResource(R.string.dark_mode),
+                    icon = Icons.Default.DarkMode,
+                    onClick = {
+//                        val newMode = !darkModeState.value
+//                        darkModeState.value = newMode
+//                        sharedPrefManager.setDarkModeEnabled(newMode)
+                    },
+                    trailingIcon = {
+                        CustomSwitch(
+                            checked = darkModeState.value,
+                            onCheckedChange = { isChecked ->
+                                darkModeState.value = isChecked
+                                sharedPrefManager.setDarkModeEnabled(isChecked)
+                            },
+
+                            )
+                    }
+                )
+
+
+
+            }
+        }
+    }
+}
+
