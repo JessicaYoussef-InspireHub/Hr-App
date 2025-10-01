@@ -1,6 +1,7 @@
 package com.example.myapplicationnewtest.qr_code.presentation
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ fun QRCodeScreen(viewModel: QrCodeViewModel = viewModel()) {
 
     Column(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.onPrimary)
             .fillMaxSize()
             .padding(horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

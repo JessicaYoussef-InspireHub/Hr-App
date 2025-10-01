@@ -12,10 +12,11 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun DurationDays(
-    days: Int,
+fun DurationHours(
+    hours: Double,
     modifier: Modifier = Modifier
 ){
+
     val context = LocalContext.current
     val currentLocale = Locale.getDefault()
     val currentLanguage = currentLocale.language
@@ -25,30 +26,24 @@ fun DurationDays(
         return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }.joinToString("")
     }
 
-    fun getLocalizedDayText(count: Int, language: String): String {
+    fun getLocalizedHourText(language: String): String {
         return if (language == "ar") {
-            when (count) {
-                1 -> "يوم"
-                2 -> "يومين"
-                in 3..10 -> "أيام"
-                else -> "يومًا"
-            }
+            "ساعات"
         } else {
-            if (count == 1) context.getString(R.string.day)
-            else context.getString(R.string.days)
+            context.getString(R.string.hours)
         }
     }
 
     val formattedNumber = if (currentLanguage == "ar") {
-        convertToArabicDigits(days.toString())
+        convertToArabicDigits(hours.toString())
     } else {
-        NumberFormat.getInstance(currentLocale).format(days)
+        NumberFormat.getInstance(currentLocale).format(hours)
     }
 
-    val dayLabel = getLocalizedDayText(days, currentLanguage)
+    val hourLabel = getLocalizedHourText(currentLanguage)
 
     Text(
-        text = "$formattedNumber $dayLabel",
+        text = "$formattedNumber $hourLabel",
         modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
         fontWeight = FontWeight.SemiBold,

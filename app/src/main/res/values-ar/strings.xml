@@ -50,8 +50,8 @@
     <string name="discard">إلغاء</string>
     <string name="save">حفظ</string>
     <string name="to_approve">في انتظار الموافقة</string>
-    <string name="first_approved">تمت الموافقة عليه أولاً</string>
-    <string name="second_approved">الموافقة الثانية</string>
+<!--    <string name="first_approved">تمت الموافقة عليه أولاً</string>-->
+    <string name="approved">تمت الموافقة</string>
     <string name="refused">تم الرفض</string>
     <string name="morning">صباحي</string>
     <string name="dates">تواريخ:</string>
@@ -63,6 +63,9 @@
 </string>
     <string name="delete_confirmation">حذف التأكيد</string>
     <string name="are_you_sure_you_want_to_delete_this_request">هل أنت متأكد أنك تريد حذف هذا الطلب؟</string>
+    <string name="are_you_sure_you_want_to_change_your_company">هل أنت متأكد أنك تريد تغيير شركتك؟</string>
+    <string name="are_you_sure_you_want_to_change_protection_method">هل أنت متأكد من تغيير طريقة الحماية؟</string>
+    <string name="are_you_sure_you_want_to_log_out">هل أنت متأكد من تسجيل الخروج؟</string>
     <string name="yes_delete">نعم، احذف</string>
     <string name="cancel">إلغاء</string>
     <string name="add_a_description">أضف وصفًا</string>
@@ -85,7 +88,7 @@
     <string name="night">مسائي</string>
     <string name="annual_leaves">الأجازات السنوية</string>
     <string name="days_available">من الأيام المتاحة</string>
-    <string name="permission">الاذونات</string>
+    <string name="permissions">الاذونات</string>
     <string name="hours_available">من الساعات المتاحة</string>
     <string name="valid_until_end_of_month">(صالحة حتى %1$s)</string>
     <string name="sun">أح</string>
@@ -122,4 +125,17 @@
     <string name="days_few">أيام</string>
     <string name="days_many">يومًا</string>
     <string name="yesterday">أمس</string>
+    <string name="home">الصفحة الرئيسية</string>
+    <string name="time_off">الاجازات</string>
+    <string name="settings">الإعدادات</string>
+    <string name="switch_on">تشغيل</string>
+    <string name="switch_off">إيقاف</string>
+    <string name="light_mode">الوضع الفاتح</string>
+    <string name="custom_hours">ساعات مخصصة</string>
+    <string name="from">من:</string>
+    <string name="to">إلي:</string>
+    <string name="hour">ساعة</string>
+    <string name="hours">ساعات</string>
+
+
 </resources>

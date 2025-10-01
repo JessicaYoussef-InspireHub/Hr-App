@@ -17,21 +17,32 @@ data class LeaveDurationRequest(
     val employee_token: String,
     val request_date_from: String,
     val request_date_to: String,
-    val leave_type_id: Int
+    val leave_type_id: Int,
+    val request_unit_half: Boolean? = null,
+    val request_unit_hours: Boolean? = null,
+    val request_date_from_period: String? = null,
+    val request_hour_from: Double? = null,
+    val request_hour_to: Double? = null
 )
 
 @Serializable
 data class LeaveDurationResponse(
     val jsonrpc: String,
     val id: String? = null,
-    val result: LeaveDurationResult
+    val result: LeaveDurationResultCommon
 )
 
 @Serializable
-data class LeaveDurationResult(
-    val success: Boolean,
-    val data: LeaveDurationData
+data class LeaveDurationResultCommon(
+    val status: String? = null,
+    val message: String? = null,
+    val error_code: String? = null,
+    val success: Boolean? = null,
+    val data: LeaveDurationData? = null
 )
+
+
+
 
 @Serializable
 data class LeaveDurationData(
@@ -40,8 +51,8 @@ data class LeaveDurationData(
     val request_date_to: String,
     val date_from: String,
     val date_to: String,
-    val days: Double,
-    val hours: Double
+    val days: Double? = null,
+    val hours: Double? = null,
 )
 
 
@@ -61,29 +72,37 @@ suspend fun getLeaveDuration(
     employeeToken: String,
     requestDateFrom: String,
     requestDateTo: String,
-    leaveTypeId: Int
+    leaveTypeId: Int,
+    requestUnitHalf: Boolean? = null,
+    requestUnitHours: Boolean? = null,
+    requestDateFromPeriod: String? = null,
+    requestHourFrom: Double? = null,
+    requestHourTo: Double? = null
 ): LeaveDurationResponse {
     val request = LeaveDurationRequest(
         employee_token = employeeToken,
         request_date_from = requestDateFrom,
         request_date_to = requestDateTo,
-        leave_type_id = leaveTypeId
+        leave_type_id = leaveTypeId,
+        request_unit_half = requestUnitHalf,
+        request_unit_hours = requestUnitHours,
+        request_date_from_period = requestDateFromPeriod,
+        request_hour_from = requestHourFrom,
+        request_hour_to = requestHourTo
     )
 
-    android.util.Log.d(
+  Log.d(
         "LEAVE_REQUEST",
         "Request Body: $request"
     )
 
-    val response = client.post("https://ahmedelzupeir-androidapp2.odoo.com/api/leave/duration") {
+    val response = client.post("https://ahmedelzupeir-androidapp21.odoo.com/api/leave/duration") {
         contentType(ContentType.Application.Json)
         setBody(request)
     }
 
-    // اطبع الـ status code
     Log.d("LEAVE_REQUEST", "Status: ${response.status}")
 
-    // اطبع الـ response raw string
     val raw = response.bodyAsText()
     Log.d("LEAVE_REQUEST", "Raw response: $raw")
 

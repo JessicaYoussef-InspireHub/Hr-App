@@ -1,5 +1,6 @@
 package com.example.myapplicationnewtest.time_off.components
 
+import HourlyTimeOffRecord
 import TimeOffRecord
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -52,13 +53,12 @@ fun MyCalendarPicker(
     token: String,
     onRefreshRequest: () -> Unit,
     dailyRecords: List<TimeOffRecord> = emptyList(),
+    hourlyRecords: List<HourlyTimeOffRecord> = emptyList(),
     startDate: LocalDate? = null,
     endDate: LocalDate? = null,
     weekendDayNames: Set<String> = emptySet(),
     publicHolidayDates: Set<LocalDate> = emptySet(),
-
-
-    ) {
+) {
     var currentMonth by remember { mutableStateOf(initialMonth) }
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value % 7 // Sunday = 0
@@ -71,9 +71,16 @@ fun MyCalendarPicker(
     var selectedLeaveRecords by remember { mutableStateOf<List<TimeOffRecord>>(emptyList()) }
     val context = LocalContext.current
     val primaryColor = MaterialTheme.colorScheme.tertiary
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimaryContainer
+
+    var dailyAndHourlyRecords by remember { mutableStateOf<Pair<List<TimeOffRecord>, List<HourlyTimeOffRecord>>?>(null) }
+
+    var permissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
+
+    var doublePermissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
 
     fun String.replaceDigitsWithArabic(): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
+        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
         return this.map { char ->
             if (char.isDigit()) arabicDigits[char.digitToInt()] else char
         }.joinToString("")
@@ -95,6 +102,23 @@ fun MyCalendarPicker(
     } else {
         currentMonth.year.toString()
     }
+
+
+    val dateToHourlyStatesMap: Map<LocalDate, Set<String>> =
+        hourlyRecords.flatMap { record ->
+            val start = LocalDate.parse(record.leave_day)
+            val end = LocalDate.parse(record.leave_day)
+            val dates = generateSequence(start) { it.plusDays(1) }
+                .takeWhile { !it.isAfter(end) }
+                .map { it to record.state }
+            dates
+        }.groupBy({ it.first }, { it.second }).mapValues { it.value.toSet() }
+
+
+
+
+
+
 
     Column(
         modifier = Modifier
@@ -209,23 +233,19 @@ fun MyCalendarPicker(
                         .contains(date.dayOfWeek.name.lowercase())
 
                     val states = dateToStatesMap[date] ?: emptySet()
+                    val hourlyStates = dateToHourlyStatesMap[date] ?: emptySet()
+                    val isPermission = hourlyStates.isNotEmpty()
+                    val isRefusedPermission = hourlyStates.contains("refuse")
+                    val isConfirmedPermission = hourlyStates.contains("confirm")
+                    val isDraftPermission = hourlyStates.contains("draft")
+                    val isApprovedPermission = hourlyStates.contains("validate")
+
                     val hasMultipleStates = states.size > 1
                     val isRefused = states.contains("refuse")
                     val isConfirmed = states.contains("confirm")
                     val isDraft = states.contains("draft")
                     val isApproved = states.contains("validate")
 
-
-                    val textColor = when {
-                        (isWeekendHoliday || publicHolidayDates.contains(date)) -> primaryColor
-                        isToday -> MaterialTheme.colorScheme.onPrimary
-                        isRefused && isDraft -> MaterialTheme.colorScheme.onPrimary
-                        isRefused && isConfirmed -> MaterialTheme.colorScheme.onPrimary
-                        isRefused && isApproved -> MaterialTheme.colorScheme.onPrimary
-                        isConfirmed || isApproved || isDraft -> MaterialTheme.colorScheme.onPrimary
-
-                        else -> primaryColor
-                    }
 
                     Box(
                         modifier = Modifier
@@ -241,29 +261,101 @@ fun MyCalendarPicker(
                                     isWeekendHoliday -> MaterialTheme.colorScheme.onSecondaryContainer
                                     publicHolidayDates.contains(date) -> MaterialTheme.colorScheme.onSecondaryContainer
                                     isDialogMode && inSelectedRange -> MaterialTheme.colorScheme.onPrimary
+//                                    isRefusedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
                                     isRefused && isDraft -> MaterialTheme.colorScheme.onSecondaryContainer
+                                    isRefusedPermission && isDraftPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+
                                     isRefused && isConfirmed -> MaterialTheme.colorScheme.onSecondaryContainer
+                                    isRefusedPermission && isConfirmedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+
                                     isRefused && isApproved -> MaterialTheme.colorScheme.onSurface
+                                    isRefusedPermission && isApprovedPermission-> MaterialTheme.colorScheme.onSurface
+
                                     states.contains("confirm") -> MaterialTheme.colorScheme.onSecondaryContainer
+                                    isConfirmedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+
                                     states.contains("validate") -> MaterialTheme.colorScheme.onSurface
+                                    isApprovedPermission -> MaterialTheme.colorScheme.onSurface
+
                                     states.contains("draft") -> MaterialTheme.colorScheme.onSecondaryContainer
+                                    isDraftPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+
                                     states.contains("refuse") -> Color.Transparent
+                                    isRefusedPermission -> Color.Transparent
 
                                     isToday -> primaryColor
                                     else -> Color.Transparent
                                 },
-                                shape = if (isWeekendHoliday || publicHolidayDates.contains(date)) RoundedCornerShape(
-                                    0.dp
-                                ) else CircleShape
+                                shape = when {
+                                    isRefusedPermission && (isDraft || isConfirmed || isApproved) -> CircleShape
+
+                                    isPermission -> RoundedCornerShape(0.dp)
+
+                                    isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
+
+                                    else -> CircleShape
+                                }
                             )
                             .clickable {
+
+                                val matchedDailyRecords = dailyRecords.filter {
+                                    val start = LocalDate.parse(it.start_date)
+                                    val end = LocalDate.parse(it.end_date)
+                                    !date.isBefore(start) && !date.isAfter(end)
+                                }
+
+                                val matchedHourlyRecords = hourlyRecords.filter {
+                                    val start = LocalDate.parse(it.leave_day)
+                                    val end = LocalDate.parse(it.leave_day)
+                                    !date.isBefore(start) && !date.isAfter(end)
+                                }
+
                                 val matchedRecords = dailyRecords.filter {
                                     val start = LocalDate.parse(it.start_date)
                                     val end = LocalDate.parse(it.end_date)
                                     !date.isBefore(start) && !date.isAfter(end)
                                 }
 
+                                val isPermissionDay = matchedHourlyRecords.isNotEmpty()
+
                                 when {
+
+                                    isDialogMode && isPermissionDay -> {
+                                        val newDates = if (selectedDates.contains(date)) {
+                                            selectedDates - date
+                                        } else {
+                                            selectedDates + date
+                                        }
+                                        onDateSelectedChange(newDates)
+                                        onDateSelected?.invoke(date)
+                                    }
+
+
+                                    matchedDailyRecords.isNotEmpty() && matchedHourlyRecords.isNotEmpty() -> {
+                                        dailyAndHourlyRecords = matchedDailyRecords to matchedHourlyRecords
+                                        showDialogForDate = date
+                                    }
+
+
+                                    isPermission -> {
+                                        val matchedRecords = hourlyRecords.filter { record ->
+                                            val start = LocalDate.parse(record.leave_day)
+                                            val end = LocalDate.parse(record.leave_day)
+                                            !date.isBefore(start) && !date.isAfter(end)
+                                        }
+
+                                        if (matchedRecords.size > 1) {
+                                            doublePermissionDialogRecords = matchedRecords
+                                            showDialogForDate = date
+                                        } else {
+                                            permissionDialogRecords = matchedRecords
+                                        }
+                                    }
+
+
+
+
+
                                     isWeekendHoliday && publicHolidayDates.contains(date) -> {
                                         weekendAndPublicHolidayDialog =
                                             context.getString(R.string.lucky_you_a_weekend_and_a_public_holiday_together)
@@ -329,11 +421,19 @@ fun MyCalendarPicker(
                         contentAlignment = Alignment.Center
                     )
                     {
-                        if (states.contains("draft")) {
+                        if (states.contains("draft") || states.contains("confirm") || isConfirmedPermission || isDraftPermission) {
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
-                                    .clip(CircleShape)
+                                    .clip(
+                                        when {
+                                            isRefusedPermission && (isDraft || isConfirmed || isApproved) -> CircleShape
+                                            isPermission -> RoundedCornerShape(0.dp)
+                                            isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
+                                            else -> CircleShape
+                                        }
+                                    )
+
                             ) {
                                 DiagonalLinesIcon(
                                     modifier = Modifier
@@ -347,17 +447,17 @@ fun MyCalendarPicker(
                             text = dayText,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
-                            color = textColor,
+                            color = if (isToday) MaterialTheme.colorScheme.onPrimary else primaryColor,
                             textDecoration = if (validatedDates[date] == "refuse") TextDecoration.LineThrough else TextDecoration.None,
                             fontSize = 16.sp
                         )
-                        if (isRefused || hasMultipleStates) {
+                        if (isRefused || hasMultipleStates  || isRefusedPermission) {
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
                                     .drawBehind {
                                         drawLine(
-                                            color = primaryColor,
+                                            color = if(isRefusedPermission) onPrimaryColor else primaryColor,
                                             start = Offset(0f, size.height / 2),
                                             end = Offset(size.width, size.height / 2),
                                             strokeWidth = 10f
@@ -370,6 +470,51 @@ fun MyCalendarPicker(
             }
         }
 
+        doublePermissionDialogRecords?.let { records ->
+            DoublePermissionDialog(
+                records = records,
+                onDismiss = { doublePermissionDialogRecords = null },
+                token = token,
+                onRefreshRequest = onRefreshRequest,
+                dailyRecords = dailyRecords,
+                hourlyRecords = hourlyRecords,
+                weekendDayNames = weekendDayNames,
+                publicHolidayDates = publicHolidayDates,
+                clickedDate = showDialogForDate,
+                startDate = startDate,
+            )
+        }
+
+
+        dailyAndHourlyRecords?.let { (daily, hourly) ->
+            DailyAndHourlyDialog(
+                dailyRecords = daily,
+                hourlyRecords = hourly,
+                onDismiss = { dailyAndHourlyRecords = null },
+                token = token,
+                onRefreshRequest = onRefreshRequest,
+                clickedDate = showDialogForDate,
+
+
+                )
+        }
+
+
+        permissionDialogRecords?.let { records ->
+            PermissionDialog(
+                records = records,
+                onDismiss = { permissionDialogRecords = null },
+                token = token,
+                onRefreshRequest = onRefreshRequest,
+                dailyRecords = dailyRecords,
+                hourlyRecords = hourlyRecords,
+                weekendDayNames = weekendDayNames,
+                publicHolidayDates = publicHolidayDates,
+                clickedDate = showDialogForDate,
+            )
+        }
+
+
 
         if (showDoubleStateDialog && showDialogForDate != null) {
             DoubleStateDialog(
@@ -377,7 +522,15 @@ fun MyCalendarPicker(
                 leaveRecords = selectedLeaveRecords,
                 token = token,
                 onRefreshRequest = onRefreshRequest,
-
+                clickedDate = showDialogForDate,
+                startDate = startDate,
+                selectedDates = selectedDates,
+                onDateSelectedChange = onDateSelectedChange,
+                validatedDates = validatedDates,
+                weekendDayNames = weekendDayNames,
+                publicHolidayDates = publicHolidayDates,
+                dailyRecords = dailyRecords,
+                hourlyRecords = hourlyRecords,
                 onDismiss = {
                     showDoubleStateDialog = false
                     showDialogForDate = null
@@ -404,6 +557,7 @@ fun MyCalendarPicker(
                 token = token,
                 onRefreshRequest = onRefreshRequest,
                 dailyRecords = dailyRecords,
+                hourlyRecords = hourlyRecords,
                 weekendDayNames = weekendDayNames,
                 publicHolidayDates = publicHolidayDates,
                 clickedDate = showDialogForDate,
@@ -416,6 +570,11 @@ fun MyCalendarPicker(
                 onDismiss = { weekendAndPublicHolidayDialog = null }
             )
         }
+
+        println("🎨 MyCalendarPicker: hourlyRecords size = ${hourlyRecords.size}")
+        println("🎨 MyCalendarPicker: dailyRecords size = ${dailyRecords.size}")
+
+
         selectedDateForInfoDialog?.let { selectedDate ->
             DateInfoDialog(
                 date = selectedDate,
@@ -435,7 +594,8 @@ fun MyCalendarPicker(
                 onRefreshRequest = onRefreshRequest,
                 weekendDayNames = weekendDayNames,
                 publicHolidayDates = publicHolidayDates,
-                dailyRecords = dailyRecords
+                dailyRecords = dailyRecords,
+                hourlyRecords = hourlyRecords
             )
         }
     }

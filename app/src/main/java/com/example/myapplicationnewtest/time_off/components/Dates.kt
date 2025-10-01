@@ -32,9 +32,9 @@ fun Dates(
     modifier: Modifier = Modifier,
     isHalfDay: Boolean,
     halfDayOption: String,
-    onHalfDayOptionChange: (String) -> Unit
-
-) {
+    onHalfDayOptionChange: (String) -> Unit,
+    hideEndDate: Boolean = false
+){
     val locale = java.util.Locale.getDefault()
     val formatter = DateTimeFormatter.ofPattern("d-M-yyyy", locale)
 
@@ -53,28 +53,25 @@ fun Dates(
         formattedEnd = formattedEnd.replaceDigitsWithArabic()
     }
 
-
-
-
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
-    ) {
+    ){
         Text(
             text = formattedStart,
             color = MaterialTheme.colorScheme.surface,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable { onStartDateClick() }
-
         )
+
         if (isHalfDay) {
             HalfDayDropdown(
                 selectedOption = halfDayOption,
                 onOptionSelected = onHalfDayOptionChange
             )
-        } else {
+        }  else if (!hideEndDate) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {

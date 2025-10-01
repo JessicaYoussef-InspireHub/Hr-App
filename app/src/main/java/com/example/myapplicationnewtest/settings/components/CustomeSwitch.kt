@@ -19,8 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplicationnewtest.R
 
 @Composable
 fun CustomSwitch(
@@ -34,7 +37,7 @@ fun CustomSwitch(
         label = "bgColor"
     )
 
-    Box (
+    Box(
         modifier = Modifier
             .width(80.dp)
             .height(40.dp)
@@ -43,12 +46,13 @@ fun CustomSwitch(
             .clickable { onCheckedChange(!checked) }
     ){
         Text(
-            text = if (checked) "ON" else "OFF",
+            text = if (checked) stringResource(R.string.switch_on) else stringResource(R.string.switch_off),
             color = if (checked) Color.White else Color.Black.copy(alpha = 0.6f),
             fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .align(if (checked) Alignment.CenterStart else Alignment.CenterEnd)
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = 8.dp)
         )
         Box(
             modifier = Modifier

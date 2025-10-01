@@ -9,36 +9,50 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.myapplicationnewtest.BottomBar
 import com.example.myapplicationnewtest.MyAppBar
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
-import com.example.myapplicationnewtest.time_off.components.ColorsOfTimeOff
+import com.example.myapplicationnewtest.time_off.components.ColorsOfAnnualLeave
+import com.example.myapplicationnewtest.time_off.components.ColorsOfPermission
 import com.example.myapplicationnewtest.time_off.components.MyCalendarPicker
 import com.example.myapplicationnewtest.time_off.components.MyActualTimeOff
+import com.example.myapplicationnewtest.time_off.data.LeaveType
 import com.example.myapplicationnewtest.time_off.data.fetchAndPrintHolidays
+import com.example.myapplicationnewtest.time_off.data.fetchEmployeeLeaveTypes
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -56,7 +70,7 @@ fun TimeOffScreen(
     var annualLeaveRemaining by remember { mutableStateOf("0") }
 
     var yearTimeOffData by remember { mutableStateOf<TimeOffYearResponse?>(null) }
-    var TimeOffStatusResponse by remember { mutableStateOf<TimeOffStatusResponse?>(null) }
+    var timeOffStatusResponse by remember { mutableStateOf<TimeOffStatusResponse?>(null) }
     var monthTimeOffData by remember { mutableStateOf<TimeOffYearResponse?>(null) }
     val validatedDates = remember { mutableStateOf<Map<LocalDate, String>>(emptyMap()) }
 
@@ -74,6 +88,9 @@ fun TimeOffScreen(
 
     var publicHolidayDates by remember { mutableStateOf<Set<LocalDate>>(emptySet()) }
 
+    val leaveTypesState = remember { mutableStateOf<List<LeaveType>>(emptyList()) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     fun triggerRefresh() {
         shouldRefresh = !shouldRefresh
@@ -83,18 +100,21 @@ fun TimeOffScreen(
     LaunchedEffect(shouldRefresh) {
         isLoading.value = true
 
-        val result = fetchAndPrintHolidays(token)
-
-        holidayText = result.weekendText
-        weekendDayNames = result.weekendDays.toSet()
-        officialHolidayText = result.holidaysText
-        publicHolidayDates = result.publicHolidayDates
-
-        println("🟦 weekendDayNames = $weekendDayNames")
-        println("🟦 publicHolidayDates = $publicHolidayDates")
-
-
         try {
+            val leaveTypesResponse = fetchEmployeeLeaveTypes(token)
+            leaveTypesResponse?.let {
+                leaveTypesState.value = it.result.leave_types
+            }
+
+            val result = fetchAndPrintHolidays(token)
+
+            holidayText = result.weekendText
+            weekendDayNames = result.weekendDays.toSet()
+            officialHolidayText = result.holidaysText
+            publicHolidayDates = result.publicHolidayDates
+
+            println("weekendDayNames = $weekendDayNames")
+            println("publicHolidayDates = $publicHolidayDates")
 
             val monthResult = SendApiForTimeOff(
                 timeOffRequest = TimeOffRequest(
@@ -123,7 +143,7 @@ fun TimeOffScreen(
                 annualLeaveRemaining = annual?.remaining_days?.toString() ?: "0"
 
                 val permission = remainingResult.permission_summary.find {
-                    it.leave_type.equals("permissions", ignoreCase = true)
+                    it.leave_type.equals("permission", ignoreCase = true)
                 }
                 permissionRemainingHours = permission?.remaining_hours?.toString() ?: "0"
 
@@ -143,22 +163,22 @@ fun TimeOffScreen(
             }
 
 
-            val time_off_status = SendApiForTimeOff(
+            val timeOffStatus = SendApiForTimeOff(
                 timeOffRequest = TimeOffRequest(
                     employee_token = token,
                     action = "time_off_status"
                 )
             )
 
-            if (time_off_status is TimeOffStatusResponse) {
-                TimeOffStatusResponse = TimeOffStatusResponse(
-                    status = time_off_status.status,
-                    records = time_off_status.records
+            if (timeOffStatus is TimeOffStatusResponse) {
+                timeOffStatusResponse = TimeOffStatusResponse(
+                    status = timeOffStatus.status,
+                    records = timeOffStatus.records
                 )
 
                 Log.i("TimeOffScreen", "✅ time_off_status loaded")
 
-                val validated = time_off_status.records.daily_records
+                val validated = timeOffStatus.records.daily_records
                     .filter { it.state in listOf("confirm", "draft", "validate", "refuse") }
                     .flatMap { record ->
                         val start = LocalDate.parse(record.start_date)
@@ -171,8 +191,6 @@ fun TimeOffScreen(
 
                 validatedDates.value = validated
             }
-
-
 
 
             val yearResult = SendApiForTimeOff(
@@ -210,7 +228,9 @@ fun TimeOffScreen(
 
     if (isLoading.value) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.onPrimary),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
@@ -221,16 +241,22 @@ fun TimeOffScreen(
         Scaffold(
             containerColor = MaterialTheme.colorScheme.onPrimary,
             topBar = {
-                MyAppBar(label = stringResource(R.string.time_off_screen), navController = navController)
+                MyAppBar(
+                    label = stringResource(R.string.time_off_screen),
+                    navController = navController
+                )
             },
             bottomBar = {
+                BottomBar(navController = navController)
             }
         ) { paddingValues ->
             Column(
                 modifier = Modifier
+                    .background(MaterialTheme.colorScheme.onPrimary)
                     .padding(paddingValues)
                     .fillMaxWidth()
             ) {
+//                LeaveTypesList(leaveTypes = leaveTypesState.value)
 //                if (holidayText.isNotEmpty()) {
 //                    Text(
 //                        text = holidayText,
@@ -258,7 +284,7 @@ fun TimeOffScreen(
 //                    Text("Weekend")
 //                }
 
-
+//
 //            Button(
 //                onClick = {
 //                    coroutineScope.launch {
@@ -273,7 +299,7 @@ fun TimeOffScreen(
 //            ) {
 //                Text("this_month_time_off")
 //            }
-//
+
 //
 //            Button(
 //                onClick = {
@@ -310,7 +336,7 @@ fun TimeOffScreen(
 //                            annualLeaveRemaining = annual?.remaining_days?.toString() ?: "0"
 //
 //                            val permission = result.permission_summary.find {
-//                                it.leave_type.equals("permissions", ignoreCase = true)
+//                                it.leave_type.equals("permission", ignoreCase = true)
 //                            }
 //                            permissionRemainingHours =
 //                                permission?.remaining_hours?.toString() ?: "0"
@@ -335,8 +361,7 @@ fun TimeOffScreen(
 //                Text("remaining_leaves")
 //            }
                 MyActualTimeOff(
-                    annualLeaveRemainingDays = annualLeaveRemaining,
-                    permissionRemainingHours = permissionRemainingHours,
+                    leaveTypes = leaveTypesState.value
                 )
 
                 Spacer(modifier = Modifier.height(0.dp))
@@ -347,9 +372,9 @@ fun TimeOffScreen(
                     token = token,
                     onRefreshRequest = { triggerRefresh() },
                     dailyRecords = yearTimeOffData?.records?.daily_records ?: emptyList(),
-                    weekendDayNames = weekendDayNames ,
+                    hourlyRecords = timeOffStatusResponse?.records?.hourly_records ?: emptyList(),
+                    weekendDayNames = weekendDayNames,
                     publicHolidayDates = publicHolidayDates
-
                 )
                 HorizontalDivider(
                     modifier = Modifier
@@ -357,13 +382,14 @@ fun TimeOffScreen(
                         .background(MaterialTheme.colorScheme.onSurfaceVariant)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                ColorsOfTimeOff()
-                Spacer(modifier = Modifier.height(10.dp))
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ColorsOfAnnualLeave()
+                    ColorsOfPermission()
+                }
             }
         }
     }

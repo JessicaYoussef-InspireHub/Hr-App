@@ -81,6 +81,7 @@ fun PinCodeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+
             .padding(16.dp),
     ) {
         Column(

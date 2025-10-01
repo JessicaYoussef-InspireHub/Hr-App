@@ -1,5 +1,6 @@
 package com.example.myapplicationnewtest.settings.components
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -43,7 +44,6 @@ import java.util.Locale
 import android.content.res.Configuration
 
 
-
 @Composable
 fun GeneralSettingsCard(
     navController: NavController,
@@ -52,12 +52,12 @@ fun GeneralSettingsCard(
 
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
-    val activity = context as? Activity
     var locale by remember { mutableStateOf(Locale(sharedPrefManager.getLanguage())) }
     var expanded by remember { mutableStateOf(false) }
     val darkModeState = LocalDarkMode.current
+    var showDialog by remember { mutableStateOf(false) }
 
-
+    @SuppressLint("LocalContextConfigurationRead")
     fun updateLocale(newLocale: Locale) {
         locale = newLocale
         sharedPrefManager.saveLanguage(newLocale.language)
@@ -99,11 +99,24 @@ fun GeneralSettingsCard(
                     label = stringResource(R.string.change_company),
                     icon = Icons.Default.Apartment,
                     onClick = {
-                        viewModel.changeCompany()
-                        navController.navigate("ScanQrCodeScreen")
-                        sharedPrefManager.setProtectionSkipped(false)
+                        showDialog = true
                     }
                 )
+
+
+                if (showDialog) {
+                    ConfirmDialog(
+                        message = stringResource(R.string.change_company),
+                        confirmText = stringResource(R.string.are_you_sure_you_want_to_change_your_company),
+                        onConfirm = {
+                            showDialog = false
+                            viewModel.changeCompany()
+                            navController.navigate("ScanQrCodeScreen")
+                            sharedPrefManager.setProtectionSkipped(false)
+                        },
+                        onDismiss = { showDialog = false }
+                    )
+                }
 
                 HorizontalDivider(
                     modifier = Modifier
@@ -186,15 +199,10 @@ fun GeneralSettingsCard(
                                 darkModeState.value = isChecked
                                 sharedPrefManager.setDarkModeEnabled(isChecked)
                             },
-
-                            )
+                        )
                     }
                 )
-
-
-
             }
         }
     }
 }
-

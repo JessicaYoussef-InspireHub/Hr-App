@@ -2,6 +2,7 @@ package com.example.myapplicationnewtest.scan_qr_code.presentation
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -70,6 +71,7 @@ fun ScanQrCodeScreen(
     Column (
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.onPrimary)
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

@@ -3,8 +3,12 @@ package com.example.myapplicationnewtest.time_off.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,13 +34,19 @@ fun HalfDayDropdown(
     var expanded by remember { mutableStateOf(false) }
 
     Box {
-        Text(
-            text = selectedOption,
-            color = MaterialTheme.colorScheme.surface,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable { expanded = true }
-        )
+        Row ( modifier = Modifier.clickable { expanded = true }){
+            Text(
+                text = selectedOption,
+                color = MaterialTheme.colorScheme.surface,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = "ArrowDropDown",
+                tint = MaterialTheme.colorScheme.surface,
+            )
+        }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },

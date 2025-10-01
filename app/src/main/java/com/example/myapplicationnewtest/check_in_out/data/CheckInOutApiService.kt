@@ -6,6 +6,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
@@ -39,19 +40,29 @@ val httpClient = HttpClient {
     }
 }
 
-suspend fun sendAttendanceAction(token: String, action: String): AttendanceStatusResult? {
+suspend fun sendAttendanceAction(
+    token: String,
+    action: String,
+    latitude: String,
+    longitude: String ): AttendanceStatusResult? {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/employee_attendance") {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_attendance") {
             contentType(ContentType.Application.Json)
             setBody(
                 mapOf(
                     "params" to mapOf(
                         "employee_token" to token,
-                        "action" to action
+                        "action" to action,
+                        "lat" to latitude,
+                        "lng" to longitude
                     )
                 )
             )
         }
+
+        println("Status: ${response.status}")
+        println("Headers: ${response.headers}")
+        println("Body: ${response.bodyAsText()}")
 
         val responseBody = response.body<AttendanceStatusResponseWrapper>()
         println("⚪ Server response: $responseBody")
@@ -64,9 +75,10 @@ suspend fun sendAttendanceAction(token: String, action: String): AttendanceStatu
 }
 
 
+
 suspend fun fetchAttendanceStatus(token: String): AttendanceStatusResult? {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/employee_attendance") {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_attendance") {
             contentType(ContentType.Application.Json)
             setBody(
                 mapOf(
@@ -78,12 +90,17 @@ suspend fun fetchAttendanceStatus(token: String): AttendanceStatusResult? {
             )
         }
 
+        println("Status: ${response.status}")
+        println("Headers: ${response.headers}")
+        println("Body: ${response.bodyAsText()}")
+
         val responseBody = response.body<AttendanceStatusResponseWrapper>()
         println("⚪ Server response (status): $responseBody")
-
         responseBody.result
+
     } catch (e: Exception) {
         println("🔴 Exception fetching status: ${e.message}")
         null
     }
 }
+

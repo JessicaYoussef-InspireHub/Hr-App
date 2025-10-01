@@ -14,7 +14,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -35,6 +38,7 @@ fun AccountCard(
 
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
+    var showDialog by remember { mutableStateOf(false) }
 
 
     Column {
@@ -63,13 +67,25 @@ fun AccountCard(
                     stringResource(R.string.logout),
                     icon = Icons.AutoMirrored.Filled.Logout,
                     onClick = {
-                        viewModel.logout()
-                        val companyId = sharedPrefManager.getCompanyId() ?: ""
-                        val apiKey = sharedPrefManager.getApiKey() ?: ""
-                        sharedPrefManager.setProtectionSkipped(false)
-                        navController.navigate("SignInScreen/$companyId/$apiKey")
+                        showDialog = true
                     }
                 )
+
+                if (showDialog) {
+                    ConfirmDialog(
+                        message = stringResource(R.string.logout),
+                        confirmText = stringResource(R.string.are_you_sure_you_want_to_log_out),
+                        onConfirm = {
+                            showDialog = false
+                            viewModel.logout()
+                            val companyId = sharedPrefManager.getCompanyId() ?: ""
+                            val apiKey = sharedPrefManager.getApiKey() ?: ""
+                            sharedPrefManager.setProtectionSkipped(false)
+                            navController.navigate("SignInScreen/$companyId/$apiKey")
+                        },
+                        onDismiss = { showDialog = false }
+                    )
+                }
             }
         }
     }

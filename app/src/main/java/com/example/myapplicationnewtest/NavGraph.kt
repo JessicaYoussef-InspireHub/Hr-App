@@ -9,36 +9,36 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.myapplicationnewtest.time_off.presentation.TimeOffScreen
 import com.example.myapplicationnewtest.check_in_out.presentation.CheckInOutScreen
 import com.example.myapplicationnewtest.protection.presentation.ConfirmPinScreen
 import com.example.myapplicationnewtest.protection.presentation.EnterPinScreen
 import com.example.myapplicationnewtest.protection.presentation.FingerPrintScreen
 import com.example.myapplicationnewtest.protection.presentation.PinCodeScreen
 import com.example.myapplicationnewtest.protection.presentation.ProtectionScreen
-import com.example.myapplicationnewtest.sign_in.presentation.SignInScreen
 import com.example.myapplicationnewtest.scan_qr_code.data.ScanQrCodeViewModel
 import com.example.myapplicationnewtest.scan_qr_code.presentation.ScanQrCodeScreen
 import com.example.myapplicationnewtest.settings.presentation.SettingsScreen
+import com.example.myapplicationnewtest.sign_in.presentation.SignInScreen
+import com.example.myapplicationnewtest.time_off.presentation.TimeOffScreen
+
 
 @SuppressLint("NewApi")
 @Composable
 fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostController) {
-
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val savedPin = sharedPrefManager.getPin()
     val fingerprintSuccess = sharedPrefManager.isFingerprintAuthSuccess()
+    val protectionSkipped = sharedPrefManager.isProtectionSkipped()
     val token = sharedPrefManager.getToken()
     val apiKey = sharedPrefManager.getApiKey()
     val companyId = sharedPrefManager.getCompanyId()
-
-
     val startDestination = when {
         fingerprintSuccess -> "FingerPrintScreen"
         !token.isNullOrEmpty() && !savedPin.isNullOrEmpty() -> "EnterPinScreen"
-        !token.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey"
-//        !token.isNullOrEmpty() -> "SignInScreen/Com0001/Bo5eVrM5gVEgz3C8K8akaBWK"
+        protectionSkipped -> "CheckInOutScreen"
+//        !token.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey"
+        !token.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6"
         else -> "ScanQrCodeScreen"
     }
 
@@ -87,19 +87,9 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
 
         composable(
             route = "PinCodeScreen",
-//            arguments = listOf(navArgument("token") { type = NavType.StringType })
         ) {
-//            backStackEntry ->
-//            val token = backStackEntry.arguments?.getString("token") ?: ""
-//            val latitude = backStackEntry.arguments?.getString("latitude")?.toDoubleOrNull() ?: 0.0
-//            val longitude = backStackEntry.arguments?.getString("longitude")?.toDoubleOrNull() ?: 0.0
-//            val allowedDistance = backStackEntry.arguments?.getString("allowedDistance")?.toDoubleOrNull() ?: 0.0
             PinCodeScreen(
                 navController = navController,
-//                token = token ,
-//                latitude = latitude,
-//                longitude = longitude,
-//                allowedDistance = allowedDistance)
             )
         }
 

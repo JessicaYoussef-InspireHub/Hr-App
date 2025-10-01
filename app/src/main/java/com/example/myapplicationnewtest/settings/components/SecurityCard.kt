@@ -17,7 +17,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -37,6 +40,7 @@ fun SecurityCard(
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val protectionMethod = sharedPrefManager.getProtectionMethod()
+    var showDialog by remember { mutableStateOf(false) }
 
 
     Column {
@@ -66,14 +70,26 @@ fun SecurityCard(
                     label = stringResource(R.string.change_protection_method),
                     icon = Icons.Default.Lock,
                     onClick = {
-                        when (protectionMethod) {
-                            1 -> navController.navigate("FingerPrintScreen?changeMethod=true")
-                            2 -> navController.navigate("EnterPinScreen?changeMethod=true")
-                            3 -> navController.navigate("ProtectionScreen")
-                            else -> navController.navigate("ProtectionScreen")
-                        }
+                        showDialog = true
                     }
                 )
+
+                if (showDialog) {
+                    ConfirmDialog(
+                        message = stringResource(R.string.change_protection_method),
+                        confirmText = stringResource(R.string.are_you_sure_you_want_to_change_protection_method),
+                        onConfirm = {
+                            showDialog = false
+                            when (protectionMethod) {
+                                1 -> navController.navigate("FingerPrintScreen?changeMethod=true")
+                                2 -> navController.navigate("EnterPinScreen?changeMethod=true")
+                                3 -> navController.navigate("ProtectionScreen")
+                                else -> navController.navigate("ProtectionScreen")
+                            }
+                        },
+                        onDismiss = { showDialog = false }
+                    )
+                }
 
                 HorizontalDivider(
                     modifier = Modifier

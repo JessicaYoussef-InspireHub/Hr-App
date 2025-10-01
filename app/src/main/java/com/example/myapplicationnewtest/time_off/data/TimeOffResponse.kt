@@ -12,6 +12,8 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import io.ktor.http.contentType
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 
 //RemainingLeavesResponse
@@ -72,11 +74,13 @@ data class TimeOffRecords(
 
 @Serializable
 data class HourlyTimeOffRecord(
+    val leave_id: Int? = null,
     val leave_type: String,
-    val start_date: String,
-    val end_date: String,
+    val leave_day: String? = null,
     val state: String,
-    val duration_hours: Double
+    val duration_hours: Double,
+    val request_hour_from: String? = null,
+    val request_hour_to: String? = null
 )
 
 @Serializable
@@ -110,6 +114,14 @@ data class TimeOffStatusResponse(
     val records: TimeOffRecords
 )
 
+@Serializable
+data class ErrorResponse(
+    val status: String,
+    val message: String? = null,
+    val error_code: String? = null
+)
+
+
 
 
 private val httpClient = HttpClient {
@@ -134,7 +146,7 @@ suspend fun SendApiForTimeOff(
     return try {
         println("Sending TimeOff request...")
 
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/employee_time_off") {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_time_off") {
             contentType(ContentType.Application.Json)
             setBody(timeOffRequest)
         }
@@ -142,9 +154,21 @@ suspend fun SendApiForTimeOff(
         val rawResponse = response.bodyAsText()
         println("Raw API response: $rawResponse")
 
+        val jsonElement = Json.parseToJsonElement(rawResponse)
+        val resultObj = jsonElement.jsonObject["result"]?.jsonObject
+
+        if (resultObj?.get("status")?.jsonPrimitive?.content == "error") {
+            val error = Json.decodeFromString<JsonRpcResponse<ErrorResponse>>(rawResponse)
+            println("⚠️ API Error: ${error.result.message} (code=${error.result.error_code})")
+            return error.result
+        }
+
         when (timeOffRequest.action) {
             "this_month_time_off" -> {
                 val apiResponse = Json.decodeFromString<JsonRpcResponse<TimeOffResponse>>(rawResponse)
+                println("✅ hourlyRecords size from API = ${apiResponse.result.records.hourly_records.size}")
+                println("✅ dailyRecords size from API = ${apiResponse.result.records.daily_records.size}")
+
                 apiResponse.result
             }
 

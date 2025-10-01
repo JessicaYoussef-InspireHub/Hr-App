@@ -21,7 +21,6 @@ fun MyActualTimeOffText(
     label1: String,
     label2: String,
     label3: String,
-    label4: String,
     showIcon: Boolean = false
 ) {
     Column(
@@ -61,10 +60,5 @@ fun MyActualTimeOffText(
             fontWeight = FontWeight.Normal,
             color = MaterialTheme.colorScheme.tertiary)
 
-        Text(
-            label4 ,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.tertiary)
     }
 }

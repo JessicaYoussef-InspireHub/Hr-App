@@ -1,5 +1,6 @@
 package com.example.myapplicationnewtest.time_off.components
 
+import HourlyTimeOffRecord
 import TimeOffRecord
 import android.annotation.SuppressLint
 import android.content.Context
@@ -64,6 +65,7 @@ fun TimeOffDetailsDialog(
     selectedDates: Set<LocalDate>? = null,
     onDateSelectedChange: ((Set<LocalDate>) -> Unit)? = null,
     dailyRecords: List<TimeOffRecord>,
+    hourlyRecords: List<HourlyTimeOffRecord>,
     clickedDate: LocalDate? = null,
 ) {
 
@@ -103,15 +105,15 @@ fun TimeOffDetailsDialog(
 
 
     val formattedDuration = if (currentLanguage == "ar") {
-        convertToArabicDigits(record.duration_days.toInt().toString())
+        convertToArabicDigits(record.duration_days.toString())
     } else {
-        record.duration_days.toInt().toString()
+        record.duration_days.toString()
     }
 
 
     val buttonText = when (record.state) {
         "validate" -> stringResource(R.string.final_approved)
-        "confirm" -> stringResource(R.string.manager_approved)
+        "confirm" -> stringResource(R.string.pending_approval)
         "draft" -> stringResource(R.string.pending_approval)
         "refuse" -> stringResource(R.string.refused)
         else -> ""
@@ -119,8 +121,8 @@ fun TimeOffDetailsDialog(
 
     val colorCircle = when (record.state) {
         "validate" -> MaterialTheme.colorScheme.secondary
-        "confirm" -> MaterialTheme.colorScheme.secondary
         "draft" -> MaterialTheme.colorScheme.tertiary
+        "confirm" -> MaterialTheme.colorScheme.tertiary
         "refuse" -> MaterialTheme.colorScheme.error
         else -> Color.Transparent
     }
@@ -148,10 +150,10 @@ fun TimeOffDetailsDialog(
 
     fun getLocalizedDayText(context: Context, count: Int, language: String): String {
         return if (language == "ar") {
-            when {
-                count == 1 -> "يوم"
-                count == 2 -> "يومين"
-                count in 3..10 -> "أيام"
+            when (count) {
+                1 -> "يوم"
+                2 -> "يومين"
+                in 3..10 -> "أيام"
                 else -> "يومًا"
             }
         } else {
@@ -168,7 +170,7 @@ fun TimeOffDetailsDialog(
         containerColor = MaterialTheme.colorScheme.onPrimary,
         onDismissRequest = { onDismiss() },
         confirmButton = {
-            if (record.state == "draft") {
+            if (record.state == "draft" || record.state == "confirm") {
                 Button(
                     onClick = {
                         showDeleteConfirmation = true
@@ -188,7 +190,7 @@ fun TimeOffDetailsDialog(
                         fontWeight = FontWeight.Bold
                     )
                 }
-            } else if (record.state == "validate" || record.state == "confirm") {
+            } else if (record.state == "validate" ) {
                 Button(
                     onClick = {
                         onDismiss()
@@ -307,9 +309,9 @@ fun TimeOffDetailsDialog(
                             val request = TimeOffRequestForRequestEmployee(
                                 employee_token = token,
                                 action = "unlink_draft_annual_leaves",
-                                date_from = record.start_date,
-                                date_to = record.end_date,
-                                leave_type = 6,
+                                leave_type_id = 6,
+                                request_date_from = record.start_date,
+                                request_date_to = record.end_date,
                                 leave_id = record.leave_id
                             )
 
@@ -343,12 +345,11 @@ fun TimeOffDetailsDialog(
                         onRefreshRequest = onRefreshRequest,
                         weekendDayNames = weekendDayNames,
                         publicHolidayDates = publicHolidayDates,
-                        dailyRecords = dailyRecords
+                        dailyRecords = dailyRecords,
+                        hourlyRecords = hourlyRecords
                     )
                 }
             }
         }
     )
 }
-
-

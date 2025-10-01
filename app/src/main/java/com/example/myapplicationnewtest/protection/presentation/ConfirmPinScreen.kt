@@ -1,6 +1,7 @@
 package com.example.myapplicationnewtest.protection.presentation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -70,6 +71,7 @@ fun ConfirmPinScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.onPrimary)
             .padding(16.dp),
     ) {
         Column(

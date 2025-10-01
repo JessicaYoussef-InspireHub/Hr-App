@@ -32,8 +32,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     private val _currentLng = MutableStateFlow(0.0)
     val currentLng: StateFlow<Double> = _currentLng
 
-    private val _isWithinDistance = MutableStateFlow(false)
-    val isWithinDistance: StateFlow<Boolean> = _isWithinDistance
+    private val _isWithinDistance = MutableStateFlow<Boolean?>(null)
+    val isWithinDistance: StateFlow<Boolean?> = _isWithinDistance
 
     private val _message = MutableStateFlow("")
     val message: StateFlow<String> = _message
@@ -98,7 +98,11 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
     fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
         viewModelScope.launch {
-            val result = sendAttendanceAction(token, action)
+            val result = sendAttendanceAction(
+                token,
+                action,
+                _currentLat.value.toString(),
+                _currentLng.value.toString())
             if (result != null) {
                 _message.value = result.message
                 _attendanceStatus.value = result.attendance_status ?: "unknown"

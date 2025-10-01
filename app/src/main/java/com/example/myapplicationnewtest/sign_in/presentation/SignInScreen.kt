@@ -33,6 +33,7 @@ import com.example.myapplicationnewtest.sign_in.data.SignInViewModel
 import com.example.myapplicationnewtest.sign_in.data.SignInUiState
 import androidx.compose.ui.text.input.ImeAction
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.res.stringResource
 import com.example.myapplicationnewtest.R
@@ -77,6 +78,7 @@ fun SignInScreen(
     Column(
         Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.onPrimary)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -170,7 +172,7 @@ fun SignInScreen(
 //
 //                val middleware = com.example.myapplicationnewtest.scan_qr_code.data.Middleware.initialize(str)
 //                middleware.apiKey
-//                middleware.companyId
+//                 middleware.companyId
 //                middleware.baseUrl
             },
             enabled = isFormValid
@@ -204,8 +206,6 @@ fun SignInScreen(
                 if(protectionSkipped){
                     navController.navigate("CheckInOutScreen")
                 }else{
-
-
                     navController.navigate("ProtectionScreen") {
                         popUpTo("ScanQrCodeScreen") { inclusive = true }
                     }}

@@ -3,8 +3,12 @@ package com.example.myapplicationnewtest.time_off.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,10 +48,10 @@ fun DropDown(
     fun translateLeaveType(typeKey: String, language: String): String {
         return when (language) {
             "ar" -> when (typeKey) {
-                "annual leave" -> "إجازة سنوية"
+                "Annual Leave" -> "اجازة سنوية"
                 "Sick Time Off" -> "أجازة مرضية"
                 "Unpaid" -> "بدون راتب"
-                "permissions" -> "أذونات"
+                "Permission" -> "إذن"
                 "Customer Meeting" -> "اجتماع عميل"
                 "Overtime" -> "عمل إضافي"
                 else -> typeKey
@@ -67,22 +71,40 @@ fun DropDown(
 
 
     Column {
-        Text(
-            text = selectedLeaveType?.let {
-                val translatedName = translateLeaveType(it.name, currentLanguage)
-                val remaining = it.remaining_balance?.toString() ?: ""
-                val original = it.original_balance?.toString() ?: ""
+        Row (
+            modifier = modifier.clickable { expanded = true }
+        ){
+            Text(
+                text = selectedLeaveType?.let {
+                    val translatedName = translateLeaveType(it.name, currentLanguage)
+                    val remaining = it.remaining_balance?.toString() ?: ""
+                    val original = it.original_balance?.toString() ?: ""
 
-                if (it.remaining_balance != null)
-                    "$translatedName (${if (currentLanguage == "ar") convertToArabicNumbers(remaining) else remaining} ${stringResource(R.string.remaining_out_of)} ${if (currentLanguage == "ar") convertToArabicNumbers(original) else original})"
-                else
-                    translatedName
-            } ?: stringResource(R.string.select_leave_type),
-            modifier = modifier.clickable { expanded = true },
-            color = MaterialTheme.colorScheme.surface,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold
-        )
+                    if (it.remaining_balance != null)
+                        "$translatedName (${
+                            if (currentLanguage == "ar") convertToArabicNumbers(
+                                remaining
+                            ) else remaining
+                        } ${stringResource(R.string.remaining_out_of)} ${
+                            if (currentLanguage == "ar") convertToArabicNumbers(
+                                original
+                            ) else original
+                        })"
+                    else
+                        translatedName
+                } ?: stringResource(R.string.select_leave_type),
+                color = MaterialTheme.colorScheme.surface,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f)
+
+            )
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = "Dropdown arrow",
+                tint = MaterialTheme.colorScheme.surface
+            )
+        }
 
         DropdownMenu(
             expanded = expanded,
@@ -92,17 +114,18 @@ fun DropDown(
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
         ) {
-            leaveTypes.forEach { item ->
-                val translatedName = translateLeaveType(item.name, currentLanguage)
+            leaveTypes
+                .filter { it.remaining_balance != null && it.remaining_balance > 0 }
+                .forEach { item ->
+                    val translatedName = translateLeaveType(item.name, currentLanguage)
+                    val remaining = item.remaining_balance ?: 0
+                    val original = item.original_balance ?: 0
 
                 DropdownMenuItem(
                     text = {
-                        val remaining = item.remaining_balance?.toString() ?: ""
-                        val original = item.original_balance?.toString() ?: ""
-
                         Text(
                             if (item.remaining_balance != null)
-                                "$translatedName (${if (currentLanguage == "ar") convertToArabicNumbers(remaining) else remaining} ${stringResource(R.string.remaining_out_of)} ${if (currentLanguage == "ar") convertToArabicNumbers(original) else original})"
+                                "$translatedName (${if (currentLanguage == "ar") convertToArabicNumbers(remaining.toString()) else remaining} ${stringResource(R.string.remaining_out_of)} ${if (currentLanguage == "ar") convertToArabicNumbers(original.toString()) else original})"
                             else
                                 translatedName,
                             color = MaterialTheme.colorScheme.surface,

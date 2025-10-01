@@ -2,8 +2,9 @@ package com.example.myapplicationnewtest.time_off.components
 
 import HourlyTimeOffRecord
 import TimeOffRecord
-import android.annotation.SuppressLint
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,50 +49,32 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-
-@SuppressLint("NewApi")
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DoubleStateDialog(
-    selectedDate: LocalDate,
-    leaveRecords: List<TimeOffRecord>,
+fun DoublePermissionDialog(
+    records: List<HourlyTimeOffRecord>,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
     token: String,
     onRefreshRequest: () -> Unit,
-    clickedDate: LocalDate? = null,
-    startDate: LocalDate? = null,
+    dailyRecords: List<TimeOffRecord>,
+    hourlyRecords: List<HourlyTimeOffRecord>,
+    weekendDayNames: Set<String>,
+    publicHolidayDates: Set<LocalDate>,
+    clickedDate: LocalDate?,
     selectedDates: Set<LocalDate>? = null,
-    onDateSelectedChange: ((Set<LocalDate>) -> Unit)? = null,
     validatedDates: Map<LocalDate, String>? = null,
-    weekendDayNames: Set<String> = emptySet(),
-    publicHolidayDates: Set<LocalDate> = emptySet(),
-    dailyRecords: List<TimeOffRecord> = emptyList(),
-    hourlyRecords: List<HourlyTimeOffRecord> = emptyList()
-) {
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    onDateSelectedChange: ((Set<LocalDate>) -> Unit)? = null,
+    startDate: LocalDate? = null,
 
-    val currentLanguage = Locale.getDefault().language
+    ) {
 
-
-    val locale = if (currentLanguage == "ar") Locale("ar") else Locale.ENGLISH
-
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }.joinToString("")
-    }
-
-    val formattedDateRaw = selectedDate.format(
-        DateTimeFormatter.ofPattern("d MMMM yyyy", locale)
-    )
-
-    val formattedDate = if (currentLanguage == "ar") {
-        convertToArabicDigits(formattedDateRaw)
-    } else {
-        formattedDateRaw
-    }
+    val formattedDate = clickedDate?.format(
+        DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
+    ) ?: ""
 
     fun translateLeaveType(typeKey: String, language: String): String {
         return when (language) {
@@ -102,6 +85,7 @@ fun DoubleStateDialog(
                 "permissions" -> "أذونات"
                 else -> typeKey
             }
+
             else -> when (typeKey.lowercase(Locale.ROOT)) {
                 "annual leave" -> "Annual Leave"
                 "sick time off" -> "Sick Time Off"
@@ -112,53 +96,113 @@ fun DoubleStateDialog(
         }
     }
 
-    fun getLocalizedDayText(context: android.content.Context, count: Int, language: String): String {
+    val currentLanguage = Locale.getDefault().language
+
+    fun convertToArabicDigits(input: String): String {
+        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
+        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
+            .joinToString("")
+    }
+
+    fun getLocalizedHourText(count: Double?, language: String): String {
+        if (count == null) return ""
+
         return if (language == "ar") {
-            when (count) {
-                1 -> "يوم"
-                2 -> "يومين"
-                in 3..10 -> "أيام"
-                else -> "يومًا"
+            when {
+                count == 0.5 -> "نصف ساعة"
+                count == 1.0 -> "ساعة"
+                count == 1.5 -> "ساعة ونصف"
+                count == 2.0 -> "ساعتين"
+                count == 2.5 -> "ساعتين ونصف"
+                count in 3.0..10.0 && count % 1 == 0.0 -> "${count.toInt()} ساعات"
+                count > 10 && count % 1 == 0.0 -> "${count.toInt()} ساعة"
+                count % 1 == 0.5 -> "${count.toInt()} ساعة ونصف"
+                else -> "$count ساعة"
             }
         } else {
-            if (count == 1) context.getString(R.string.day)
-            else context.getString(R.string.days)
+            when {
+                count == 0.5 -> "Half an hour"
+                count == 1.0 -> "1 hour"
+                count == 1.5 -> "1 hour and a half"
+                count == 2.0 -> "2 hours"
+                count == 2.5 -> "2 hours and a half"
+                count % 1 == 0.0 -> "${count.toInt()} hours"
+                count % 1 == 0.5 -> "${count.toInt()} and a half hours"
+                else -> "$count hours"
+            }
         }
     }
 
+    fun formatDecimalHourToTime(decimalHour: Double?, currentLanguage: String): String {
+        if (decimalHour == null) return ""
+
+        val hours = decimalHour.toInt()
+        val minutes = ((decimalHour - hours) * 60).toInt()
+
+        val time = LocalTime.of(hours, minutes)
+
+        val formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH)
+        val formatted = time.format(formatter)
+
+        return if (currentLanguage == "ar") {
+            formatted.replace("AM", "ص").replace("PM", "م")
+        } else {
+            formatted
+        }
+    }
+
+    val allRefused = records.all { it.state == "refuse" }
+    val hasConfirmOrDraft = records.any { it.state == "confirm" || it.state == "draft" }
+    val hasValidate = records.any { it.state == "validate" }
+    val hasOtherThanConfirm = records.any { it.state != "confirm" }
+    val approveWithOtherThanConfirm = hasValidate && hasOtherThanConfirm && !hasConfirmOrDraft
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
     var showNewVacationDialog by remember { mutableStateOf(false) }
-
-    val allRefused = leaveRecords.isNotEmpty() && leaveRecords.all { it.state == "refuse" }
-
-
-    val hasDraftOrConfirm = leaveRecords.any { it.state == "draft" || it.state == "confirm" }
 
     AlertDialog(
         containerColor = MaterialTheme.colorScheme.onPrimary,
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onDismiss() },
         confirmButton = {
-//            if (!allRefused) {
-                Button(
-                onClick = {
-                    if (hasDraftOrConfirm) {
-                        showDeleteConfirmation = true
-                    } else {
-                        onConfirm()
+            when {
+                allRefused -> {
+                    Button(
+                        onClick = { onDismiss() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(text = stringResource(R.string.ok))
                     }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (hasDraftOrConfirm) MaterialTheme.colorScheme.tertiary else if (allRefused) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary ,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = RoundedCornerShape(10.dp)
+                }
 
-            ) {
-                Text(
-                    text = if (hasDraftOrConfirm)
-                        stringResource(R.string.remove_pending) else stringResource(R.string.ok),
-                )
+                hasConfirmOrDraft -> {
+                    Button(
+                        onClick = { showDeleteConfirmation = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(text = stringResource(R.string.remove_pending))
+                    }
+                }
+
+                approveWithOtherThanConfirm -> {
+                    Button(
+                        onClick = { onDismiss() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(text = stringResource(R.string.ok))
+                    }
+                }
             }
-//        }
         },
         text = {
             Column(
@@ -167,16 +211,14 @@ fun DoubleStateDialog(
                 horizontalAlignment = Alignment.Start
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
                         tint = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier
-                            .clickable { onDismiss() }
+                        modifier = Modifier.clickable { onDismiss() }
                     )
                 }
                 Text(
@@ -188,12 +230,11 @@ fun DoubleStateDialog(
                 )
                 Spacer(modifier = Modifier.height(15.dp))
                 Column {
-                    leaveRecords.forEach { record ->
+                    records.forEach { record ->
 
                         val stateLabel = when (record.state) {
                             "draft" -> stringResource(R.string.pending_approval)
                             "validate" -> stringResource(R.string.final_approved)
-//                            "confirm" -> stringResource(R.string.manager_approved)
                             "confirm" -> stringResource(R.string.pending_approval)
                             "refuse" -> stringResource(R.string.rejected)
                             else -> record.state
@@ -201,24 +242,25 @@ fun DoubleStateDialog(
 
                         val colorCircle = when (record.state) {
                             "validate" -> MaterialTheme.colorScheme.secondary
-//                            "confirm" -> MaterialTheme.colorScheme.secondary
                             "draft" -> MaterialTheme.colorScheme.tertiary
                             "confirm" -> MaterialTheme.colorScheme.tertiary
                             "refuse" -> MaterialTheme.colorScheme.error
                             else -> Color.Transparent
                         }
 
-                        val translatedLeaveType = translateLeaveType(record.leave_type, currentLanguage)
-                        val durationInt = record.duration_days.toInt()
-                        val daysText = if (currentLanguage == "ar") convertToArabicDigits(durationInt.toString()) else durationInt.toString()
-                        val dayWord = getLocalizedDayText(context = androidx.compose.ui.platform.LocalContext.current, count = durationInt, language = currentLanguage)
-
+                        val translatedLeaveType =
+                            translateLeaveType(record.leave_type, currentLanguage)
+                        val durationInt = record.duration_hours
+                        val hourWord = getLocalizedHourText(
+                            count = durationInt,
+                            language = currentLanguage
+                        )
 
                         Column {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Box(
                                     modifier = Modifier
@@ -234,17 +276,54 @@ fun DoubleStateDialog(
                                 )
                             }
                             Text(
-                                "$translatedLeaveType: $daysText $dayWord",
+                                "$translatedLeaveType: $hourWord",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(start = 20.dp),
+                            )
+                            Text(
+                                text = "${stringResource(R.string.from)} ${
+                                    if (currentLanguage == "ar") {
+                                        convertToArabicDigits(
+                                            formatDecimalHourToTime(
+                                                record.request_hour_from?.toDoubleOrNull(),
+                                                currentLanguage
+                                            )
+                                        )
+                                    } else {
+                                        formatDecimalHourToTime(
+                                            record.request_hour_from?.toDoubleOrNull(),
+                                            currentLanguage
+                                        )
+                                    }
+                                } ${stringResource(R.string.to)} ${
+                                    if (currentLanguage == "ar") {
+                                        convertToArabicDigits(
+                                            formatDecimalHourToTime(
+                                                record.request_hour_to?.toDoubleOrNull(),
+                                                currentLanguage
+                                            )
+                                        )
+                                    } else {
+                                        formatDecimalHourToTime(
+                                            record.request_hour_to?.toDoubleOrNull(),
+                                            currentLanguage
+                                        )
+                                    }
+                                }",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Normal,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(start = 20.dp),
                             )
                             Spacer(modifier = Modifier.height(12.dp))
+
                         }
 
                         if (showDeleteConfirmation) {
-                            val draftRecord = leaveRecords.find { it.state == "draft" || it.state == "confirm" }
+                            val draftRecord =
+                                hourlyRecords.find { it.state == "draft" || it.state == "confirm" }
                             if (draftRecord != null) {
                                 DeleteConfirmationDialog(
                                     onDismiss = { showDeleteConfirmation = false },
@@ -254,8 +333,8 @@ fun DoubleStateDialog(
                                                 employee_token = token,
                                                 action = "unlink_draft_annual_leaves",
                                                 leave_type_id = 6,
-                                                request_date_from = draftRecord.start_date,
-                                                request_date_to = draftRecord.end_date,
+                                                request_date_from = draftRecord.leave_day,
+                                                request_date_to = draftRecord.leave_day,
                                                 leave_id = draftRecord.leave_id
                                             )
 
@@ -296,41 +375,42 @@ fun DoubleStateDialog(
                                 hourlyRecords = hourlyRecords
                             )
                         }
-
                     }
-                    if (allRefused) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add",
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clickable {
-                                        showNewVacationDialog = true
 
-                                    },
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text(
-                                text = stringResource(R.string.create_another_one),
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.clickable {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add",
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clickable {
                                     showNewVacationDialog = true
+                                },
+                            tint = if (allRefused) MaterialTheme.colorScheme.error
+                            else if (hasConfirmOrDraft) MaterialTheme.colorScheme.tertiary
+                            else MaterialTheme.colorScheme.secondary,
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = stringResource(R.string.create_another_one),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = if (allRefused) MaterialTheme.colorScheme.error
+                                   else if (hasConfirmOrDraft) MaterialTheme.colorScheme.tertiary
+                                   else MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.clickable {
+                                showNewVacationDialog = true
 
-                                }
-                            )
-                        }
+                            }
+                        )
                     }
                 }
             }
-        }
+        },
     )
 }

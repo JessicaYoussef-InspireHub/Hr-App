@@ -26,9 +26,15 @@ data class TimeOffRequestForRequestEmployee(
     val leave_id: Int? = null,
     val employee_token: String,
     val action: String,
-    val date_from: String? = null,
-    val date_to: String? = null,
-    val leave_type: Int? = null,
+    val leave_type_id: Int? = null,
+    val request_date_from: String? = null,
+    val request_date_to: String? = null,
+    val request_date_from_period: String? = null,
+    val request_unit_half: Boolean? = null,
+    val request_hour_from: String? = null,
+    val request_hour_to: String? = null,
+    val request_unit_hours: Boolean? = null
+
 )
 
 @Serializable
@@ -40,14 +46,15 @@ data class RequestTimeOffResponse(
 
 @Serializable
 data class ResultData(
-    val status: String?,
-    val leave_id: Int?,
-    val message: String?,
+    val status: String? = null,
+    val leave_id: Int? = null,
+    val message: String? = null,
     val leave_type: String? = null,
     val duration: Duration? = null,
     val allocation: Allocation? = null,
     val error_code: String? = null
 )
+
 
 @Serializable
 data class Duration(
@@ -121,7 +128,7 @@ private val httpClient = HttpClient {
 
 suspend fun fetchEmployeeLeaveTypes(token: String): LeaveTypeResponse? {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/request_time_off") {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(
                 LeaveTypeRequest(
@@ -147,7 +154,7 @@ suspend fun fetchEmployeeLeaveTypes(token: String): LeaveTypeResponse? {
 @RequiresApi(Build.VERSION_CODES.O)
 suspend fun fetchAndPrintHolidays(token: String): HolidaysResult {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/request_time_off") {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(
                 TimeOffRequestForRequestEmployee(
@@ -222,7 +229,7 @@ suspend fun sendApiForRequestTimeOff(
     return try {
         println("Sending SendApiForRequestTimeOff request...")
 
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/request_time_off") {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(timeOffRequestForRequestEmployee)
         }

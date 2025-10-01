@@ -12,16 +12,23 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
+import com.example.myapplicationnewtest.BottomBar
 import com.example.myapplicationnewtest.SharedPrefManager
 import com.example.myapplicationnewtest.check_in_out.components.CheckInOutButton
 import com.example.myapplicationnewtest.check_in_out.components.CheckOutDialog
@@ -65,8 +72,11 @@ fun CheckInOutScreen(
     val rawDate = lastCheckOut?.substringBefore(" ") ?: ""
     val parts = rawDate.split("-") // [2025, 08, 18]
 
+    var isLoading by remember { mutableStateOf(true) }
+
+
     fun String.replaceDigitsWithArabic(): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
+        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
         return this.map { char ->
             if (char.isDigit()) arabicDigits[char.digitToInt()] else char
         }.joinToString("")
@@ -106,8 +116,6 @@ fun CheckInOutScreen(
     } ?: "--:--"
 
 
-
-
     val workedHours by viewModel.workedHours.collectAsState()
     val totalMinutes = ((workedHours ?: 0.0) * 60).toInt()
     val hours = totalMinutes / 60
@@ -130,7 +138,8 @@ fun CheckInOutScreen(
                     0L -> context.getString(R.string.today)
                     1L -> context.getString(R.string.yesterday)
                     else -> {
-                        val currentLocale = if (Locale.getDefault().language == "ar") Locale("ar") else Locale.ENGLISH
+                        val currentLocale =
+                            if (Locale.getDefault().language == "ar") Locale("ar") else Locale.ENGLISH
                         val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", currentLocale)
                         val formattedDate = checkOutDateLocal.format(formatter)
 
@@ -156,17 +165,25 @@ fun CheckInOutScreen(
 
     LaunchedEffect(true) {
         viewModel.getAttendanceStatus(token)
+
+        snapshotFlow {
+            listOf(attendanceStatus, lastCheckIn, workedHours, isWithinDistance)
+        }.collect { values ->
+            val (status, checkIn, worked, distanceReady) = values
+            if (status != null && checkIn != null && worked != null && distanceReady != null) {
+//            if (status != null && distanceReady != null) {
+                kotlinx.coroutines.delay(500)
+                isLoading = false
+            }
+        }
     }
 
-//    LaunchedEffect(locationPermissionState.status.isGranted) {
-//        if (locationPermissionState.status.isGranted) {
-//            viewModel.checkLocationAndDistance(latitude, longitude, allowedDistance)
-//        } else {
-//            locationPermissionState.launchPermissionRequest()
-//        }
-//    }
+
     LaunchedEffect(locationPermissionState.status.isGranted) {
-        Log.d("disable", "LaunchedEffect triggered | Permission granted: ${locationPermissionState.status.isGranted}")
+        Log.d(
+            "disable",
+            "LaunchedEffect triggered | Permission granted: ${locationPermissionState.status.isGranted}"
+        )
         if (locationPermissionState.status.isGranted) {
             Log.d("disable", "Calling checkLocationAndDistance()...")
             viewModel.checkLocationAndDistance(latitude, longitude, allowedDistance)
@@ -180,73 +197,110 @@ fun CheckInOutScreen(
     }
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            if (attendanceStatus == "checked_in")
-                stringResource(R.string.you_are_checked_in)
-            else stringResource(R.string.you_are_checked_out),
-            color = MaterialTheme.colorScheme.tertiary,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.headlineLarge,
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        Text(
-            if (attendanceStatus == "checked_in") {
-
-                stringResource(R.string.checked_in_message , checkInTime)
-            } else {
-                stringResource(R.string.checked_out_message, checkOutLabel, checkOutTime, hours, minutes)
-            },
-            color = MaterialTheme.colorScheme.tertiary,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Medium,
-        )
-        Log.d("disable", "isWithinDistance from state: $isWithinDistance")
-
-        CheckInOutButton(
-            attendanceStatus = attendanceStatus,
-            isWithinDistance = isWithinDistance,
-            onClick = {
-                Log.d("disable", "Button enabled state: $isWithinDistance | attendanceStatus: $attendanceStatus")
-
-                val nextAction =
-                    if (attendanceStatus == "checked_in") "check_out" else "check_in"
-
-                if (nextAction == "check_out") {
-                    isDialogLoading = true
-
-                    viewModel.sendAttendance(token, "status") { newStatus ->
-                        isDialogLoading = false
-                        if (newStatus != null) {
-                            println("h✅ New status from API: $newStatus")
-                        }
-                    }
-
-                    showErrorDialog = true
-                } else {
-                    viewModel.sendAttendance(token, nextAction) { newStatus ->
-                        if (newStatus != null) {
-                            println("✅ New status from API: $newStatus")
-                        }
-                    }
-                }
+        Scaffold(
+            bottomBar = {
+                BottomBar(navController = navController)
             }
-        )
+        ) { innerPadding ->
 
-        Button(
-            onClick = {
-                navController.navigate("SettingsScreen")
-            }) {
-            Text("Go To Settings Screen")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.onPrimary)
+                    .padding(innerPadding)
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally,
+
+            ) {
+                Text(
+                    if (attendanceStatus == "checked_in")
+                        stringResource(R.string.you_are_checked_in)
+                    else stringResource(R.string.you_are_checked_out),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineLarge,
+                )
+                Text(
+                    if (attendanceStatus == "checked_in") {
+
+                        stringResource(R.string.checked_in_message, checkInTime)
+                    } else {
+                        stringResource(
+                            R.string.checked_out_message,
+                            checkOutLabel,
+                            checkOutTime,
+                            hours,
+                            minutes
+                        )
+                    },
+                    color = MaterialTheme.colorScheme.tertiary,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                )
+                Log.d("disable", "isWithinDistance from state: $isWithinDistance")
+
+                CheckInOutButton(
+                    attendanceStatus = attendanceStatus,
+                    isWithinDistance = (isWithinDistance == true),
+                    onClick = {
+                        Log.d(
+                            "disable",
+                            "Button enabled state: $isWithinDistance | attendanceStatus: $attendanceStatus"
+                        )
+
+                        val nextAction =
+                            if (attendanceStatus == "checked_in") "check_out" else "check_in"
+
+                        if (nextAction == "check_out") {
+                            isDialogLoading = true
+
+                            viewModel.sendAttendance(token, "status") { newStatus ->
+                                isDialogLoading = false
+                                if (newStatus != null) {
+                                    println("h✅ New status from API: $newStatus")
+                                }
+                            }
+
+                            showErrorDialog = true
+                        } else {
+                            viewModel.sendAttendance(token, nextAction) { newStatus ->
+                                if (newStatus != null) {
+                                    println("✅ New status from API: $newStatus")
+                                }
+                            }
+                        }
+                    }
+                )
+
+                //            Button(
+                //                onClick = {
+                //                    navController.navigate("SettingsScreen")
+                //                }) {
+                //                Text("Go To Settings Screen")
+                //            }
+            }
+        }
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.onPrimary),
+            contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
         }
     }
+
+
 
 
     if (showErrorDialog) {
@@ -285,13 +339,13 @@ fun CheckInOutScreen(
     //        Text("Your Current Latitude: $currentLat")
     //        Text("Your Current Longitude: $currentLng")
 
-            Button(
-                onClick = {
-
-                    navController.navigate("TimeOffScreen")
-                }) {
-                Text("Go To TimeOffScreen Screen")
-            }
+//    Button(
+//        onClick = {
+//
+//            navController.navigate("TimeOffScreen")
+//        }) {
+//        Text("Go To TimeOffScreen Screen")
+//    }
 }
 
 
