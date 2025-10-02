@@ -73,7 +73,7 @@ fun ErrorPermissionDialog(
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
-                    stringResource(R.string.cancel),
+                    stringResource(R.string.ok),
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold

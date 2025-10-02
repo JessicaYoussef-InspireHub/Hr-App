@@ -19,6 +19,7 @@ import com.example.myapplicationnewtest.scan_qr_code.data.ScanQrCodeViewModel
 import com.example.myapplicationnewtest.scan_qr_code.presentation.ScanQrCodeScreen
 import com.example.myapplicationnewtest.settings.presentation.SettingsScreen
 import com.example.myapplicationnewtest.sign_in.presentation.SignInScreen
+import com.example.myapplicationnewtest.splash.presentation.SplashScreen
 import com.example.myapplicationnewtest.time_off.presentation.TimeOffScreen
 
 
@@ -33,16 +34,24 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
     val token = sharedPrefManager.getToken()
     val apiKey = sharedPrefManager.getApiKey()
     val companyId = sharedPrefManager.getCompanyId()
-    val startDestination = when {
+
+    val nextDestination = when {
         fingerprintSuccess -> "FingerPrintScreen"
         !token.isNullOrEmpty() && !savedPin.isNullOrEmpty() -> "EnterPinScreen"
         protectionSkipped -> "CheckInOutScreen"
-//        !token.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey"
+//      !token.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey"
         !token.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6"
         else -> "ScanQrCodeScreen"
     }
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = navController, startDestination = "SplashScreen") {
+        composable("SplashScreen") {
+            SplashScreen(
+                navController = navController,
+                nextDestination = nextDestination
+            )
+        }
+
         composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
 
         composable("TimeOffScreen") {

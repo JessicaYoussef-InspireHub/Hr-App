@@ -69,12 +69,14 @@ fun DoublePermissionDialog(
     validatedDates: Map<LocalDate, String>? = null,
     onDateSelectedChange: ((Set<LocalDate>) -> Unit)? = null,
     startDate: LocalDate? = null,
-
-    ) {
+    ){
 
     val formattedDate = clickedDate?.format(
         DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
     ) ?: ""
+
+    var recordToDelete by remember { mutableStateOf<HourlyTimeOffRecord?>(null) }
+
 
     fun translateLeaveType(typeKey: String, language: String): String {
         return when (language) {
@@ -153,11 +155,9 @@ fun DoublePermissionDialog(
 
     val allRefused = records.all { it.state == "refuse" }
     val hasConfirmOrDraft = records.any { it.state == "confirm" || it.state == "draft" }
-    val hasValidate = records.any { it.state == "validate" }
+    val hasValidate = records.any { it .state == "validate" }
     val hasOtherThanConfirm = records.any { it.state != "confirm" }
     val approveWithOtherThanConfirm = hasValidate && hasOtherThanConfirm && !hasConfirmOrDraft
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
-
     var showNewVacationDialog by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -178,18 +178,6 @@ fun DoublePermissionDialog(
                     }
                 }
 
-                hasConfirmOrDraft -> {
-                    Button(
-                        onClick = { showDeleteConfirmation = true },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(text = stringResource(R.string.remove_pending))
-                    }
-                }
 
                 approveWithOtherThanConfirm -> {
                     Button(
@@ -317,42 +305,59 @@ fun DoublePermissionDialog(
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(start = 20.dp),
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            if (record.state == "draft" || record.state == "confirm") {
+                                Row (
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ){
+                                    Button(
+                                        onClick = {
+                                            recordToDelete = record
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.tertiary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        modifier = Modifier.padding(start = 20.dp)
+                                    ) {
+                                        Text(text = stringResource(R.string.remove_pending))
+                                    }
+                                }
+                            }
 
+                            Spacer(modifier = Modifier.height(12.dp))
                         }
 
-                        if (showDeleteConfirmation) {
-                            val draftRecord =
-                                hourlyRecords.find { it.state == "draft" || it.state == "confirm" }
-                            if (draftRecord != null) {
-                                DeleteConfirmationDialog(
-                                    onDismiss = { showDeleteConfirmation = false },
-                                    onConfirmDelete = {
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            val request = TimeOffRequestForRequestEmployee(
-                                                employee_token = token,
-                                                action = "unlink_draft_annual_leaves",
-                                                leave_type_id = 6,
-                                                request_date_from = draftRecord.leave_day,
-                                                request_date_to = draftRecord.leave_day,
-                                                leave_id = draftRecord.leave_id
-                                            )
+                        if (recordToDelete != null) {
+                            DeleteConfirmationDialog(
+                                onDismiss = { recordToDelete = null },
+                                onConfirmDelete = {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        val request = TimeOffRequestForRequestEmployee(
+                                            employee_token = token,
+                                            action = "unlink_draft_annual_leaves",
+                                            leave_type_id = 6,
+                                            request_date_from = recordToDelete!!.leave_day,
+                                            request_date_to = recordToDelete!!.leave_day,
+                                            leave_id = recordToDelete!!.leave_id
+                                        )
 
-                                            Log.d("REQUEST_BODY", request.toString())
+                                        Log.d("REQUEST_BODY", request.toString())
+                                        val response = sendApiForRequestTimeOff(request)
+                                        Log.d("API_RESPONSE", response.toString())
 
-                                            val response = sendApiForRequestTimeOff(request)
-                                            Log.d("API_RESPONSE", response.toString())
-
-                                            withContext(Dispatchers.Main) {
-                                                showDeleteConfirmation = false
-                                                onDismiss()
-                                                onRefreshRequest()
-                                            }
+                                        withContext(Dispatchers.Main) {
+                                            recordToDelete = null
+                                            onDismiss()
+                                            onRefreshRequest()
                                         }
                                     }
-                                )
-                            }
+                                }
+                            )
                         }
+
 
                         if (showNewVacationDialog) {
                             DateInfoDialog(

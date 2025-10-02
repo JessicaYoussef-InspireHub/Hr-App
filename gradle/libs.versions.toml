@@ -5,8 +5,11 @@ agp = "8.7.2"
 appcompat = "1.7.1"
 biometric = "1.2.0-alpha05"
 compose = "2.7.0"
+composeVersion = "1.0.0-beta08"
 core = "3.5.3"
+coreSplashscreen = "1.0.1"
 coreVersion = "3.5.2"
+glide = "5.0.5"
 kotlin = "2.0.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -32,12 +35,15 @@ androidx-activity-compose-v180 = { module = "androidx.activity:activity-compose"
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 compose = { module = "com.kizitonwose.calendar:compose", version.ref = "compose" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
 core-v352 = { module = "com.google.zxing:core", version.ref = "coreVersion" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glide-compose = { module = "com.github.bumptech.glide:compose", version.ref = "composeVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
