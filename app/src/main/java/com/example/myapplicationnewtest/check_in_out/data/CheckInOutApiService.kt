@@ -46,7 +46,7 @@ suspend fun sendAttendanceAction(
     latitude: String,
     longitude: String ): AttendanceStatusResult? {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_attendance") {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/employee_attendance") {
             contentType(ContentType.Application.Json)
             setBody(
                 mapOf(
@@ -78,7 +78,7 @@ suspend fun sendAttendanceAction(
 
 suspend fun fetchAttendanceStatus(token: String): AttendanceStatusResult? {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_attendance") {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/employee_attendance") {
             contentType(ContentType.Application.Json)
             setBody(
                 mapOf(

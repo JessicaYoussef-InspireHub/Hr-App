@@ -215,7 +215,7 @@ fun CheckInOutScreen(
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally,
 
-            ) {
+                ) {
                 Text(
                     if (attendanceStatus == "checked_in")
                         stringResource(R.string.you_are_checked_in)
@@ -287,16 +287,16 @@ fun CheckInOutScreen(
         }
 
         if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onPrimary),
-            contentAlignment = Alignment.Center
-            ) {
-                androidx.compose.material3.CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .background(MaterialTheme.colorScheme.onPrimary),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                androidx.compose.material3.CircularProgressIndicator(
+//                    color = MaterialTheme.colorScheme.tertiary
+//                )
+//            }
         }
     }
 
@@ -347,7 +347,3 @@ fun CheckInOutScreen(
 //        Text("Go To TimeOffScreen Screen")
 //    }
 }
-
-
-
-

@@ -96,7 +96,7 @@ suspend fun getLeaveDuration(
         "Request Body: $request"
     )
 
-    val response = client.post("https://ahmedelzupeir-androidapp21.odoo.com/api/leave/duration") {
+    val response = client.post("https://ahmedelzupeir-androidapp2.odoo.com/api/leave/duration") {
         contentType(ContentType.Application.Json)
         setBody(request)
     }

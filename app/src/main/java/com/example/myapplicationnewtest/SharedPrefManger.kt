@@ -60,23 +60,23 @@ class SharedPrefManager(context: Context) {
 
     fun getApiKey(): String? = prefs.getString("apiKey", null)
 
-//    fun saveLatitude(lat: Double) {
-//        prefs.edit().putString("latitude", lat.toString()).apply()
-//    }
-
     fun saveLatitude(lat: Double) {
-        prefs.edit().putString("latitude", "27.190936").apply()
+        prefs.edit().putString("latitude", lat.toString()).apply()
     }
+
+//    fun saveLatitude(lat: Double) {
+//        prefs.edit().putString("latitude", "27.190936").apply()
+//    }
 
     fun getLatitude(): Double = prefs.getString("latitude", "0.0")?.toDoubleOrNull() ?: 0.0
 
-//    fun saveLongitude(lng: Double) {
-//        prefs.edit().putString("longitude", lng.toString()).apply()
-//    }
-
     fun saveLongitude(lng: Double) {
-        prefs.edit().putString("longitude", "31.187951").apply()
+        prefs.edit().putString("longitude", lng.toString()).apply()
     }
+
+//    fun saveLongitude(lng: Double) {
+//        prefs.edit().putString("longitude", "31.187951").apply()
+//    }
 
     fun getLongitude(): Double = prefs.getString("longitude", "0.0")?.toDoubleOrNull() ?: 0.0
 

@@ -27,6 +27,7 @@ composeBom = "2024.04.01"
 materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.0"
 playServicesLocation = "21.3.0"
+workRuntimeKtx = "2.10.5"
 zxingAndroidEmbedded = "4.3.0"
 
 [libraries]
@@ -39,6 +40,7 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 compose = { module = "com.kizitonwose.calendar:compose", version.ref = "compose" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
 core-v352 = { module = "com.google.zxing:core", version.ref = "coreVersion" }
