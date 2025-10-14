@@ -1,5 +1,6 @@
 package com.example.myapplicationnewtest.check_in_out.presentation
 
+import android.Manifest
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
@@ -12,10 +13,12 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,9 +27,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.myapplicationnewtest.BottomBar
 import com.example.myapplicationnewtest.SharedPrefManager
@@ -43,6 +48,9 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.system.exitProcess
 import com.example.myapplicationnewtest.R
+import kotlinx.coroutines.delay
+import java.time.*
+import kotlin.text.format
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -51,7 +59,7 @@ import com.example.myapplicationnewtest.R
 @Composable
 fun CheckInOutScreen(
     navController: NavController,
-    viewModel: CheckInOutViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: CheckInOutViewModel = viewModel()
 
 ) {
     val context = LocalContext.current
@@ -82,38 +90,83 @@ fun CheckInOutScreen(
         }.joinToString("")
     }
 
-    val checkInTime = lastCheckIn?.substringAfter(" ")?.let { timeString ->
-        try {
-            val time = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"))
+
+    fun formatUtcToLocal(dateTimeString: String): String {
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val utcDateTime = LocalDateTime.parse(dateTimeString, formatter)
+            val utcZoned = ZonedDateTime.of(utcDateTime, ZoneOffset.UTC)
+            val localZoned = utcZoned.withZoneSameInstant(ZoneId.systemDefault())
+            val localTime = localZoned.toLocalTime()
+
             val currentLocale = Locale.getDefault()
-            val formattedTime = time.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
+            val formattedTime = localTime.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
 
             if (currentLocale.language == "ar") {
-                formattedTime.replaceDigitsWithArabic()
+                val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
+                formattedTime.map { c ->
+                    if (c.isDigit()) arabicDigits[c.digitToInt()] else c
+                }.joinToString("")
             } else {
                 formattedTime
             }
         } catch (e: Exception) {
             "--:--"
         }
-    } ?: "--:--"
+    }
+
+    val checkInTime = lastCheckIn?.let { formatUtcToLocal(it) } ?: "--:--"
+    val checkOutTime = lastCheckOut?.let { formatUtcToLocal(it) } ?: "--:--"
 
 
-    val checkOutTime = lastCheckOut?.substringAfter(" ")?.let { timeString ->
-        try {
-            val time = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm:ss"))
-            val currentLocale = Locale.getDefault()
-            val formattedTime = time.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
 
-            if (currentLocale.language == "ar") {
-                formattedTime.replaceDigitsWithArabic()
-            } else {
-                formattedTime
-            }
-        } catch (e: Exception) {
-            "--:--"
-        }
-    } ?: "--:--"
+
+
+//    val checkInTime = lastCheckIn?.let { dateTimeString ->
+//        try {
+//            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+//            val utcDateTime = LocalDateTime.parse(dateTimeString, formatter)
+//            val utcZoned = ZonedDateTime.of(utcDateTime, ZoneOffset.UTC)
+//
+//            val localZoned = utcZoned.withZoneSameInstant(ZoneId.systemDefault())
+//            val localTime = localZoned.toLocalTime()
+//
+//            val currentLocale = Locale.getDefault()
+//            val formattedTime = localTime.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
+//
+//            if (currentLocale.language == "ar") {
+//                formattedTime.replaceDigitsWithArabic()
+//            } else {
+//                formattedTime
+//            }
+//        } catch (e: Exception) {
+//            "--:--"
+//        }
+//    } ?: "--:--"
+
+
+
+//    val checkOutTime = lastCheckOut?.let { dateTimeString ->
+//        try {
+//            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+//            val utcDateTime = LocalDateTime.parse(dateTimeString, formatter)
+//            val utcZoned = ZonedDateTime.of(utcDateTime, ZoneOffset.UTC)
+//            val localZoned = utcZoned.withZoneSameInstant(ZoneId.systemDefault())
+//            val localTime = localZoned.toLocalTime()
+//
+//            val currentLocale = Locale.getDefault()
+//            val formattedTime = localTime.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
+//
+//            if (currentLocale.language == "ar") {
+//                formattedTime.replaceDigitsWithArabic()
+//            } else {
+//                formattedTime
+//            }
+//        } catch (e: Exception) {
+//            "--:--"
+//        }
+//    } ?: "--:--"
+
 
 
     val workedHours by viewModel.workedHours.collectAsState()
@@ -160,7 +213,7 @@ fun CheckInOutScreen(
 
 
     val locationPermissionState =
-        rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val attendanceStatus by viewModel.attendanceStatus.collectAsState()
 
     LaunchedEffect(true) {
@@ -172,7 +225,7 @@ fun CheckInOutScreen(
             val (status, checkIn, worked, distanceReady) = values
             if (status != null && checkIn != null && worked != null && distanceReady != null) {
 //            if (status != null && distanceReady != null) {
-                kotlinx.coroutines.delay(500)
+                delay(500)
                 isLoading = false
             }
         }
@@ -208,14 +261,13 @@ fun CheckInOutScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onPrimary)
+                    .background(MaterialTheme.colorScheme.onSecondary)
                     .padding(innerPadding)
                     .padding(24.dp)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally,
-
-                ) {
+                ){
                 Text(
                     if (attendanceStatus == "checked_in")
                         stringResource(R.string.you_are_checked_in)
@@ -225,9 +277,12 @@ fun CheckInOutScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
                 )
+                Image(
+                    painter = painterResource(id = R.drawable.check_in_out),
+                    contentDescription = attendanceStatus
+                )
                 Text(
                     if (attendanceStatus == "checked_in") {
-
                         stringResource(R.string.checked_in_message, checkInTime)
                     } else {
                         stringResource(
@@ -238,7 +293,7 @@ fun CheckInOutScreen(
                             minutes
                         )
                     },
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Medium,
                 )
@@ -332,7 +387,7 @@ fun CheckInOutScreen(
     //            Text("Last Check Out: $it")
     //        }
     //        Text("Status: $attendanceStatus")
-    //        Text(token)
+//            Text(token , fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.tertiary)
     //        Text(latitude.toString())
     //        Text(longitude.toString())
     //        Text(allowedDistance.toString())

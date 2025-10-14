@@ -16,11 +16,12 @@ class AttendanceWorker(
         val action = inputData.getString("action") ?: return Result.failure()
         val lat = inputData.getString("lat") ?: "0.0"
         val lng = inputData.getString("lng") ?: "0.0"
+        val actionTime = inputData.getString("action_time")
 
         Log.d("AttendanceWorker", "📦 Input data → token=$token, action=$action, lat=$lat, lng=$lng")
 
         return try {
-            val result = sendAttendanceAction(token, action, lat, lng)
+            val result = sendAttendanceAction(token, action, lat, lng , actionTime)
             if (result != null) {
                 Log.d("AttendanceWorker", "✅ Worker send success: $result")
                 Result.success()

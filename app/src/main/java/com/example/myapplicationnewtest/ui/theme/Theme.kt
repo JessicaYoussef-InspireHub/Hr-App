@@ -19,10 +19,15 @@ val LocalDarkMode = staticCompositionLocalOf { mutableStateOf(false) }
 
 
 private val DarkColorScheme = darkColorScheme(
-    secondary = Validate_color,
     tertiary = Main_color,
-    onPrimary = dark_background_color,
+    onBackground = White,
     onSecondary = Black,
+
+
+
+
+    secondary = Validate_color,
+    onPrimary = dark_background_color,
     onTertiary = Close_color,
     onPrimaryContainer = Delete_color,
     onSecondaryContainer = Discard_color,

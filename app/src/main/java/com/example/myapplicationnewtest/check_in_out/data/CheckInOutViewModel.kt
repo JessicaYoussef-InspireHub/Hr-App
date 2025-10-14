@@ -15,10 +15,10 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-
+import java.util.TimeZone
 
 
 class CheckInOutViewModel(application: Application) : AndroidViewModel(application) {
@@ -129,30 +129,48 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
         val cache = AttendanceCache(context)
 
-        //🔹 Update screen immediately
-        if (action == "check_in") {
-            _attendanceStatus.value = "checked_in"
-            val now = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
-                Date()
-            )
-            _lastCheckIn.value = now
-            cache.saveStatus("checked_in", now, _lastCheckOut.value)
-        } else if (action == "check_out") {
-            _attendanceStatus.value = "checked_out"
-            val now = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                .format(Date())
-            _lastCheckOut.value = now
-            cache.saveStatus("checked_out", _lastCheckIn.value, now)
-        }
+        val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        utcFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+
+
 
         viewModelScope.launch {
+            val serverTime = fetchServerTime(token)
+
+            val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+            utcFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+// ✅ خذ السيرفر تايم إن وجد، أو أنشئ الوقت المحلي بصيغة صحيحة تمامًا
+            val finalActionTime = serverTime?.trim()
+                ?.replace("T", " ")
+                ?.replace("Z", "")
+                ?.substringBefore("+") // ⛔️ يشيل أي timezone إضافي زي +00:00
+                ?: utcFormat.format(Date())
+
+            Log.d("Attendance", "📅 Final Action Time to send: $finalActionTime")
+            println("📅 Final Action Time to send (print): $finalActionTime")
+
+
+            //🔹 Update screen immediately
+            if (action == "check_in") {
+                _attendanceStatus.value = "checked_in"
+                _lastCheckIn.value = finalActionTime
+                cache.saveStatus("checked_in", finalActionTime, _lastCheckOut.value)
+            } else if (action == "check_out") {
+                _attendanceStatus.value = "checked_out"
+                _lastCheckOut.value = finalActionTime
+                cache.saveStatus("checked_out", _lastCheckIn.value, finalActionTime)
+            }
+
             if (NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()) {
                 // Direct sending
                 val result = sendAttendanceAction(
                     token,
                     action,
                     _currentLat.value.toString(),
-                    _currentLng.value.toString()
+                    _currentLng.value.toString(),
+                    finalActionTime
                 )
                 if (result != null) {
                     // 🔹Update official values from the server
@@ -173,65 +191,26 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                     onComplete(result.attendance_status)
                 } else {
                     //Send failed, we keep local values
-                    enqueueWorkManager(token, action)
+                    enqueueWorkManager(token, action, finalActionTime)
                     onComplete("queued")
                 }
             } else {
                 // Offline → WorkManager
-                enqueueWorkManager(token, action)
+                enqueueWorkManager(token, action , finalActionTime)
                 onComplete("queued")
             }
         }
     }
 
-
-//    fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
-//        viewModelScope.launch {
-//            if (NetworkUtils.isNetworkAvailable(context)) {
-//                if (NetworkUtils.hasRealInternet()) {
-//                    Log.d("Attendance", "📶 Online mode detected → sending directly")
-//                    // 🔥Direct sending
-//                    val result = sendAttendanceAction(
-//                        token,
-//                        action,
-//                        _currentLat.value.toString(),
-//                        _currentLng.value.toString()
-//                    )
-//                    if (result != null) {
-//                        Log.d("Attendance", "✅ Direct send success: $result")
-//                        _message.value = result.message
-//                        _attendanceStatus.value = result.attendance_status ?: "unknown"
-//                        _lastCheckIn.value = result.last_check_in
-//                        _lastCheckOut.value = result.last_check_out
-//                        _workedHours.value = result.worked_hours
-//
-//                        getAttendanceStatus(token)
-//                        onComplete(result.attendance_status)
-//                    } else {
-//                        Log.e("Attendance", "❌ Direct send failed")
-//                        _message.value = "❌ Failed to update attendance"
-//                        onComplete(null)
-//                    }
-//                } else {
-//                    Log.w("Attendance", "⚠️ Connected to a network but no actual internet → Use WorkManager")
-//                    enqueueWorkManager(token, action)
-//                    onComplete("queued")
-//                }
-//            } else {
-//                Log.w("Attendance", "📴 No network at all → Use WorkManager")
-//                enqueueWorkManager(token, action)
-//                onComplete("queued")
-//            }
-//        }
-//    }
-
     // ✨ I separated the WorkManager part into a special function so that the code would be cleaner.
-    private fun enqueueWorkManager(token: String, action: String) {
+    private fun enqueueWorkManager(token: String, action: String , actionTime: String) {
+
         val data = workDataOf(
             "token" to token,
             "action" to action,
             "lat" to _currentLat.value.toString(),
-            "lng" to _currentLng.value.toString()
+            "lng" to _currentLng.value.toString(),
+            "action_time" to actionTime
         )
 
         val request = OneTimeWorkRequestBuilder<AttendanceWorker>()
@@ -335,8 +314,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
         if (checkIn != null && checkOut != null) {
             try {
-                val formatter =
-                    java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
                 val checkInDate = formatter.parse(checkIn)
                 val checkOutDate = formatter.parse(checkOut)
 

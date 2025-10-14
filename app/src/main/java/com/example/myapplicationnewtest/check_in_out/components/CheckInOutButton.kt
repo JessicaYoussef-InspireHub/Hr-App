@@ -22,6 +22,7 @@ fun CheckInOutButton(
     isWithinDistance: Boolean,
     onClick: () -> Unit
 ) {
+
     Button(
         enabled = isWithinDistance,
         onClick = onClick,

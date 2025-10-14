@@ -12,6 +12,11 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import io.ktor.http.contentType
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlinx.serialization.json.jsonObject
+
+
 
 
 @Serializable
@@ -40,12 +45,48 @@ val httpClient = HttpClient {
     }
 }
 
+suspend fun fetchServerTime(token: String): String? {
+    return try {
+        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/employee_attendance") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                mapOf(
+                    "params" to mapOf(
+                        "employee_token" to token,
+                        "action" to "server_time"
+                    )
+                )
+            )
+        }
+
+        val bodyText = response.bodyAsText()
+        println("🕒 Server Time Response: $bodyText")
+
+        val json = Json.parseToJsonElement(bodyText).jsonObject
+        val result = json["result"]?.jsonObject
+        val serverTime = result?.get("server_time")?.toString()?.replace("\"", "")
+
+        println("✅ Extracted server_time: $serverTime")
+
+        serverTime
+    } catch (e: Exception) {
+        println("🔴 Error fetching server time: ${e.message}")
+        null
+    }
+}
+
+
 suspend fun sendAttendanceAction(
     token: String,
     action: String,
     latitude: String,
-    longitude: String ): AttendanceStatusResult? {
+    longitude: String,
+    actionTime: String? = null): AttendanceStatusResult? {
     return try {
+        val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        utcFormat.timeZone = TimeZone.getTimeZone("UTC")
+        val currentTime = actionTime ?: utcFormat.format(Date()) 
+
         val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/employee_attendance") {
             contentType(ContentType.Application.Json)
             setBody(
@@ -54,7 +95,8 @@ suspend fun sendAttendanceAction(
                         "employee_token" to token,
                         "action" to action,
                         "lat" to latitude,
-                        "lng" to longitude
+                        "lng" to longitude,
+                        "action_time" to currentTime
                     )
                 )
             )
