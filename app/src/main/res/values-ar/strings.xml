@@ -136,6 +136,7 @@
     <string name="to">إلي:</string>
     <string name="hour">ساعة</string>
     <string name="hours">ساعات</string>
+    <string name="time_change">تم اكتشاف تغيير في إعدادات التاريخ أو الوقت في جهازك. يرجى تفعيل "التاريخ والوقت التلقائي" و"المنطقة الزمنية التلقائية".</string>
 
 
 </resources>

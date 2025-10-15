@@ -22,9 +22,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -48,6 +50,7 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.system.exitProcess
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.check_in_out.components.TimeChangedDialog
 import kotlinx.coroutines.delay
 import java.time.*
 import kotlin.text.format
@@ -81,6 +84,7 @@ fun CheckInOutScreen(
     val parts = rawDate.split("-") // [2025, 08, 18]
 
     var isLoading by remember { mutableStateOf(true) }
+    val showDialog by viewModel.showTimeChangedDialog.collectAsState()
 
 
     fun String.replaceDigitsWithArabic(): String {
@@ -354,6 +358,13 @@ fun CheckInOutScreen(
 //            }
         }
     }
+
+
+    TimeChangedDialog(
+        showDialog = showDialog,
+        onDismiss = { viewModel.dismissTimeChangedDialog() }
+    )
+
 
 
 

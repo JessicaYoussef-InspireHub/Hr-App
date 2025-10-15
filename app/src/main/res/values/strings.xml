@@ -138,4 +138,5 @@ Protection Method</string>
     <string name="to">To:</string>
     <string name="hour">hour</string>
     <string name="hours">hours</string>
+    <string name="time_change">A change in your device\'s date or time settings has been detected. Please enable automatic date, time, and time zone.</string>
 </resources>

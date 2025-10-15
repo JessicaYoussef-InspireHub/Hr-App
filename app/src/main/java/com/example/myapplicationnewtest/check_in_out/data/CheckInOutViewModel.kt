@@ -53,6 +53,10 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
     private val cache = AttendanceCache(context)
 
+    private val _showTimeChangedDialog = MutableStateFlow(false)
+    val showTimeChangedDialog: StateFlow<Boolean> = _showTimeChangedDialog
+
+
     init {
         //// 🔹 Load local values immediately upon opening the app
 
@@ -61,6 +65,11 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         _lastCheckIn.value = checkIn
         _lastCheckOut.value = checkOut
     }
+
+    fun dismissTimeChangedDialog() {
+        _showTimeChangedDialog.value = false
+    }
+
 
     @SuppressLint("MissingPermission")
     fun checkLocationAndDistance(targetLat: Double, targetLng: Double, allowedDistance: Double) {
@@ -125,15 +134,11 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-
     fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
         val cache = AttendanceCache(context)
 
         val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
         utcFormat.timeZone = TimeZone.getTimeZone("UTC")
-
-
-
 
         viewModelScope.launch {
             val serverTime = fetchServerTime(token)
@@ -141,18 +146,26 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
             utcFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-// ✅ خذ السيرفر تايم إن وجد، أو أنشئ الوقت المحلي بصيغة صحيحة تمامًا
             val finalActionTime = serverTime?.trim()
                 ?.replace("T", " ")
                 ?.replace("Z", "")
-                ?.substringBefore("+") // ⛔️ يشيل أي timezone إضافي زي +00:00
+                ?.substringBefore("+")
                 ?: utcFormat.format(Date())
 
             Log.d("Attendance", "📅 Final Action Time to send: $finalActionTime")
-            println("📅 Final Action Time to send (print): $finalActionTime")
 
+            val isOnline = NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()
+            val isTimeAuto = isDeviceTimeAndTimeZoneAutomatic(context)
 
-            //🔹 Update screen immediately
+            // ✳️ الشرط الجديد: لو أوفلاين و الوقت مش أوتوماتيكي → أوقف كل حاجة
+            if (!isOnline && !isTimeAuto) {
+                _showTimeChangedDialog.value = true
+                Log.d("Attendance", "⚠️ الجهاز أوفلاين و الوقت متغير يدويًا - تم إيقاف الإجراء")
+                onComplete("time_changed")
+                return@launch
+            }
+
+            // 🔹 Update screen immediately (بعد التأكد من الشروط)
             if (action == "check_in") {
                 _attendanceStatus.value = "checked_in"
                 _lastCheckIn.value = finalActionTime
@@ -163,8 +176,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 cache.saveStatus("checked_out", _lastCheckIn.value, finalActionTime)
             }
 
-            if (NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()) {
-                // Direct sending
+            if (isOnline) {
+                // 🔸 Online → Send directly
                 val result = sendAttendanceAction(
                     token,
                     action,
@@ -172,16 +185,14 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                     _currentLng.value.toString(),
                     finalActionTime
                 )
-                if (result != null) {
-                    // 🔹Update official values from the server
 
+                if (result != null) {
                     _message.value = result.message
                     _attendanceStatus.value = result.attendance_status ?: _attendanceStatus.value
                     _lastCheckIn.value = result.last_check_in ?: _lastCheckIn.value
                     _lastCheckOut.value = result.last_check_out ?: _lastCheckOut.value
                     _workedHours.value = result.worked_hours
 
-                    // Update Cache with official values
                     cache.saveStatus(
                         _attendanceStatus.value,
                         _lastCheckIn.value,
@@ -190,17 +201,98 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                     onComplete(result.attendance_status)
                 } else {
-                    //Send failed, we keep local values
                     enqueueWorkManager(token, action, finalActionTime)
                     onComplete("queued")
                 }
             } else {
-                // Offline → WorkManager
-                enqueueWorkManager(token, action , finalActionTime)
+                // 🔸 Offline (بس الوقت سليم)
+                enqueueWorkManager(token, action, finalActionTime)
                 onComplete("queued")
             }
         }
     }
+
+
+//    fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
+//        val cache = AttendanceCache(context)
+//
+//        val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+//        utcFormat.timeZone = TimeZone.getTimeZone("UTC")
+//
+//        viewModelScope.launch {
+//            val serverTime = fetchServerTime(token)
+//
+//            val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+//            utcFormat.timeZone = TimeZone.getTimeZone("UTC")
+//
+//            val finalActionTime = serverTime?.trim()
+//                ?.replace("T", " ")
+//                ?.replace("Z", "")
+//                ?.substringBefore("+") // ⛔️ يشيل أي timezone إضافي زي +00:00
+//                ?: utcFormat.format(Date())
+//
+//            Log.d("Attendance", "📅 Final Action Time to send: $finalActionTime")
+//            println("📅 Final Action Time to send (print): $finalActionTime")
+//
+//
+//            //🔹 Update screen immediately
+//            if (action == "check_in") {
+//                _attendanceStatus.value = "checked_in"
+//                _lastCheckIn.value = finalActionTime
+//                cache.saveStatus("checked_in", finalActionTime, _lastCheckOut.value)
+//            } else if (action == "check_out") {
+//                _attendanceStatus.value = "checked_out"
+//                _lastCheckOut.value = finalActionTime
+//                cache.saveStatus("checked_out", _lastCheckIn.value, finalActionTime)
+//            }
+//
+//            if (NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()) {
+//                // Direct sending
+//                val result = sendAttendanceAction(
+//                    token,
+//                    action,
+//                    _currentLat.value.toString(),
+//                    _currentLng.value.toString(),
+//                    finalActionTime
+//                )
+//
+//
+//                if (result != null) {
+//                    // 🔹Update official values from the server
+//
+//                    _message.value = result.message
+//                    _attendanceStatus.value = result.attendance_status ?: _attendanceStatus.value
+//                    _lastCheckIn.value = result.last_check_in ?: _lastCheckIn.value
+//                    _lastCheckOut.value = result.last_check_out ?: _lastCheckOut.value
+//                    _workedHours.value = result.worked_hours
+//
+//                    // Update Cache with official values
+//                    cache.saveStatus(
+//                        _attendanceStatus.value,
+//                        _lastCheckIn.value,
+//                        _lastCheckOut.value
+//                    )
+//
+//                    onComplete(result.attendance_status)
+//                } else {
+//                    //Send failed, we keep local values
+//                    enqueueWorkManager(token, action, finalActionTime)
+//                    onComplete("queued")
+//                }
+//            } else {
+//                if (!isDeviceTimeAndTimeZoneAutomatic(context)) {
+//                    // المستخدم غيّر الوقت يدويًا → أظهر الـDialog فقط ولا تعمل أي أكشن
+//                    _showTimeChangedDialog.value = true
+//                    Log.d("Attendance", "⚠️ الوقت أو التايم زون متغير يدويًا - تم إيقاف الإجراء")
+//                    onComplete("time_changed")
+//                    return@launch // ⛔️ أوقف كل حاجة هنا
+//                }
+//                // Offline → WorkManager
+//                enqueueWorkManager(token, action , finalActionTime)
+//                onComplete("queued")
+//            }
+//        }
+//    }
 
     // ✨ I separated the WorkManager part into a special function so that the code would be cleaner.
     private fun enqueueWorkManager(token: String, action: String , actionTime: String) {
@@ -227,67 +319,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         Log.d("Attendance", "⏳ WorkManager job enqueued with data: $data")
         _message.value = "⏳ Attendance queued. Will send when network is back."
     }
-
-
-//    fun sendAttendance(
-//        token: String,
-//        action: String,
-//        onComplete: (String?) -> Unit = {}) {
-//
-//        val data = androidx.work.workDataOf(
-//            "token" to token,
-//            "action" to action,
-//            "lat" to _currentLat.value.toString(),
-//            "lng" to _currentLng.value.toString()
-//        )
-//
-//        val request = androidx.work.OneTimeWorkRequestBuilder<AttendanceWorker>()
-//            .setInputData(data)
-//            .setConstraints(
-//                androidx.work.Constraints.Builder()
-//                    .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
-//                    .build()
-//            )
-//            .build()
-//
-//        androidx.work.WorkManager.getInstance(context)
-//            .enqueue(request)
-//
-//        _message.value = "⏳ Attendance request queued. Will be sent when network is available."
-//
-//        getAttendanceStatus(token)
-//
-//        onComplete("queued")
-//
-//    }
-
-
-//    fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
-//        viewModelScope.launch {
-//            val result = sendAttendanceAction(
-//                token,
-//                action,
-//                _currentLat.value.toString(),
-//                _currentLng.value.toString())
-//            if (result != null) {
-//                _message.value = result.message
-//                _attendanceStatus.value = result.attendance_status ?: "unknown"
-//
-//                // 🔥 Update last check in/out too
-//                _lastCheckIn.value = result.last_check_in
-//                _lastCheckOut.value = result.last_check_out
-//                _workedHours.value = result.worked_hours
-//
-//
-//                getAttendanceStatus(token)
-//
-//                onComplete(result.attendance_status)
-//            } else {
-//                _message.value = "❌ Failed to update attendance"
-//                onComplete(null)
-//            }
-//        }
-//    }
 
 
     val attendanceStatus: StateFlow<String> = _attendanceStatus
