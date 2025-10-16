@@ -70,6 +70,16 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         _showTimeChangedDialog.value = false
     }
 
+    suspend fun isOffline(): Boolean {
+        val noNetwork = !NetworkUtils.isNetworkAvailable(context)
+        val noRealInternet = !NetworkUtils.hasRealInternet()
+        return noNetwork || noRealInternet
+    }
+
+
+
+
+
 
     @SuppressLint("MissingPermission")
     fun checkLocationAndDistance(targetLat: Double, targetLng: Double, allowedDistance: Double) {

@@ -138,5 +138,7 @@ Protection Method</string>
     <string name="to">To:</string>
     <string name="hour">hour</string>
     <string name="hours">hours</string>
+    <string name="you_are_offline">You are offline</string>
+    <string name="do_you_want_to_continue_offline_your_attendance_will_be_saved_and_sent_later_automatically">Do you want to continue offline? Your attendance will be saved and sent later automatically.</string>
     <string name="time_change">A change in your device\'s date or time settings has been detected. Please enable automatic date, time, and time zone.</string>
 </resources>

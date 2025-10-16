@@ -136,6 +136,8 @@
     <string name="to">إلي:</string>
     <string name="hour">ساعة</string>
     <string name="hours">ساعات</string>
+    <string name="you_are_offline">أنت غير متصل بالإنترنت</string>
+    <string name="do_you_want_to_continue_offline_your_attendance_will_be_saved_and_sent_later_automatically">هل ترغب في الاستمرار دون اتصال بالإنترنت؟ سيتم حفظ حضورك وإرساله لاحقًا تلقائيًا.</string>
     <string name="time_change">تم اكتشاف تغيير في إعدادات التاريخ أو الوقت في جهازك. يرجى تفعيل "التاريخ والوقت التلقائي" و"المنطقة الزمنية التلقائية".</string>
 
 
