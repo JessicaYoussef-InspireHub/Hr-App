@@ -9,6 +9,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -16,17 +20,12 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -44,21 +43,47 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.system.exitProcess
 import com.example.myapplicationnewtest.R
-import com.example.myapplicationnewtest.check_in_out.components.OfflineDialog
 import com.example.myapplicationnewtest.check_in_out.components.TimeChangedDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.remember
+import com.example.myapplicationnewtest.check_in_out.components.InternetRequiredDialog
+import com.example.myapplicationnewtest.check_in_out.components.OfflineCheckOutDialog
+import com.example.myapplicationnewtest.check_in_out.components.OfflineSnackBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.InetSocketAddress
+import java.net.Socket
 
+var timeChangeReceiver: BroadcastReceiver? = null
+
+private fun checkInternetConnection(context: Context): Boolean {
+    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = cm.activeNetwork ?: return false
+    val capabilities = cm.getNetworkCapabilities(network) ?: return false
+    val hasNetwork = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+            || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+            || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+    if (!hasNetwork) return false
+
+    return try {
+        Socket().use { socket ->
+            socket.connect(InetSocketAddress("8.8.8.8", 53), 1500)
+            true
+        }
+    } catch (e: Exception) {
+        false
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("MissingPermission")
@@ -71,7 +96,6 @@ fun CheckInOutScreen(
 ) {
     val context = LocalContext.current
     val prefManager = remember { SharedPrefManager(context) }
-
     val token = prefManager.getToken() ?: ""
     val latitude = prefManager.getLatitude()
     val longitude = prefManager.getLongitude()
@@ -79,18 +103,25 @@ fun CheckInOutScreen(
     val currentLat by viewModel.currentLat.collectAsState()
     val currentLng by viewModel.currentLng.collectAsState()
     val isWithinDistance by viewModel.isWithinDistance.collectAsState()
-    val message by viewModel.message.collectAsState()
     var isDialogLoading by remember { mutableStateOf(false) }
-
     val lastCheckIn by viewModel.lastCheckIn.collectAsState()
     val lastCheckOut by viewModel.lastCheckOut.collectAsState()
     val rawDate = lastCheckOut?.substringBefore(" ") ?: ""
     val parts = rawDate.split("-") // [2025, 08, 18]
-
-    var isLoading by remember { mutableStateOf(true) }
+    var showOfflineCheckOutDialog by remember { mutableStateOf(false) }
     val showDialog by viewModel.showTimeChangedDialog.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-
+    var offlineMessage by remember { mutableStateOf("") }
+    var showInternetRequiredDialog by remember { mutableStateOf(false) }
+    var isOffline by remember { mutableStateOf(false) }
+    var isButtonLoading by remember { mutableStateOf(false) }
+    val workedHours by viewModel.workedHours.collectAsState()
+    val totalMinutes = ((workedHours ?: 0.0) * 60).toInt()
+    val hours = totalMinutes / 60
+    val minutes = totalMinutes % 60
+    var showErrorDialog by remember { mutableStateOf(false) }
+    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val attendanceStatus by viewModel.attendanceStatus.collectAsState()
 
     fun String.replaceDigitsWithArabic(): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
@@ -99,16 +130,13 @@ fun CheckInOutScreen(
         }.joinToString("")
     }
 
-
-
     @Composable
     fun Modifier.noClickable(): Modifier = this.clickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = null
     ) {
-    // no click effect
+        // no click effect
     }
-
 
     fun formatUtcToLocal(dateTimeString: String): String {
         return try {
@@ -119,10 +147,11 @@ fun CheckInOutScreen(
             val localTime = localZoned.toLocalTime()
 
             val currentLocale = Locale.getDefault()
-            val formattedTime = localTime.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
+            val formattedTime =
+                localTime.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
 
             if (currentLocale.language == "ar") {
-                val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
+                val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
                 formattedTime.map { c ->
                     if (c.isDigit()) arabicDigits[c.digitToInt()] else c
                 }.joinToString("")
@@ -136,16 +165,6 @@ fun CheckInOutScreen(
 
     val checkInTime = lastCheckIn?.let { formatUtcToLocal(it) } ?: "--:--"
     val checkOutTime = lastCheckOut?.let { formatUtcToLocal(it) } ?: "--:--"
-    var showOfflineDialog by remember { mutableStateOf(false) }
-    var pendingAction by remember { mutableStateOf<String?>(null) }
-    var isButtonLoading by remember { mutableStateOf(false) }
-
-    val workedHours by viewModel.workedHours.collectAsState()
-    val totalMinutes = ((workedHours ?: 0.0) * 60).toInt()
-    val hours = totalMinutes / 60
-    val minutes = totalMinutes % 60
-
-    var showErrorDialog by remember { mutableStateOf(false) }
 
     val checkOutLabel = remember(parts) {
         if (parts.size == 3) {
@@ -182,10 +201,14 @@ fun CheckInOutScreen(
         }
     }
 
-
-    val locationPermissionState =
-        rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-    val attendanceStatus by viewModel.attendanceStatus.collectAsState()
+    LaunchedEffect(Unit) {
+        while (true) {
+            val connected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
+            isOffline = !connected
+            Log.d("NetworkStatus", if (isOffline) "📴 Offline" else "🌐 Online")
+            delay(3000)
+        }
+    }
 
     LaunchedEffect(true) {
         viewModel.getAttendanceStatus(token)
@@ -195,13 +218,10 @@ fun CheckInOutScreen(
         }.collect { values ->
             val (status, checkIn, worked, distanceReady) = values
             if (status != null && checkIn != null && worked != null && distanceReady != null) {
-//            if (status != null && distanceReady != null) {
                 delay(500)
-                isLoading = false
             }
         }
     }
-
 
     LaunchedEffect(locationPermissionState.status.isGranted) {
         Log.d(
@@ -220,16 +240,15 @@ fun CheckInOutScreen(
         exitProcess(0)
     }
 
-
-    Box(modifier = Modifier.fillMaxSize()) {
-
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Scaffold(
             bottomBar = {
                 BottomBar(navController = navController)
             }
         )
         { innerPadding ->
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -239,7 +258,7 @@ fun CheckInOutScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                ){
+            ) {
                 Text(
                     if (attendanceStatus == "checked_in")
                         stringResource(R.string.you_are_checked_in)
@@ -249,166 +268,172 @@ fun CheckInOutScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
                 )
+
                 Image(
                     painter = painterResource(id = R.drawable.check_in_out),
                     contentDescription = attendanceStatus
                 )
-                Text(
-                    if (attendanceStatus == "checked_in") {
-                        stringResource(R.string.checked_in_message, checkInTime)
-                    } else {
-                        stringResource(
-                            R.string.checked_out_message,
-                            checkOutLabel,
-                            checkOutTime,
-                            hours,
-                            minutes
-                        )
-                    },
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                )
+
+                if (isOffline) {
+                    Text(
+                        text = stringResource(R.string.you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Medium,
+                    )
+                } else {
+                    Text(
+                        if (attendanceStatus == "checked_in") {
+                            stringResource(R.string.checked_in_message, checkInTime)
+                        } else {
+                            stringResource(
+                                R.string.checked_out_message,
+                                checkOutLabel,
+                                checkOutTime,
+                                hours,
+                                minutes
+                            )
+                        },
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
                 Log.d("disable", "isWithinDistance from state: $isWithinDistance")
 
                 CheckInOutButton(
                     attendanceStatus = attendanceStatus,
                     isWithinDistance = (isWithinDistance == true),
                     onClick = {
-                        Log.d(
-                            "disable",
-                            "Button enabled state: $isWithinDistance | attendanceStatus: $attendanceStatus"
-                        )
-
-                        val nextAction =
-                            if (attendanceStatus == "checked_in") "check_out" else "check_in"
-                        coroutineScope.launch {
+                        if (!isButtonLoading) {
                             isButtonLoading = true
-                            val offline = viewModel.isOffline()
+                            coroutineScope.launch {
+                                val sharedPrefManager = SharedPrefManager(context)
+                                val token = sharedPrefManager.getToken()
+                                val offline = viewModel.isOffline()
+                                val wasOfflineDuringChange =
+                                    sharedPrefManager.wasOfflineDuringTimeChange()
+                                val diffMinutes = sharedPrefManager.getTimeDifference()
+                                Log.d(
+                                    "CheckInOut",
+                                    "🌐 Online status: ${if (offline) "Offline" else "Online"}"
+                                )
+                                Log.d("CheckInOut", "🕒 Saved time difference: $diffMinutes")
+                                Log.d(
+                                    "CheckInOut",
+                                    "⚡ Change time while offline: $wasOfflineDuringChange"
+                                )
 
-                            if (offline) {
-                                showOfflineDialog = true
-                                pendingAction = nextAction
-                                isButtonLoading = false
-                            } else {
-                                if (nextAction == "check_out") {
-                                    isDialogLoading = true
+                                val nextAction =
+                                    if (attendanceStatus == "checked_in") "check_out" else "check_in"
+
+                                // 🔹 Case 1: User changed the time while offline → Forbidden to execute
+                                if (isOffline && wasOfflineDuringChange) {
+                                    showInternetRequiredDialog = true
                                     isButtonLoading = false
-                                    viewModel.sendAttendance(token, "status") { newStatus ->
-                                        isDialogLoading = false
-                                        if (newStatus != null) {
-                                            println("✅ New status from API: $newStatus")
+                                    return@launch
+                                }
+
+                                // 🔹 Case 2: The user is offline (but the time has not changed)
+                                if (isOffline) {
+                                    val currentLanguage = Locale.getDefault().language
+                                    val message =
+                                        if (currentLanguage == "ar") {
+                                            "انت غير متصل بالانترنت! تم حفظ العملية، سيتم إرسالها عند توفر الإنترنت"
+                                        } else {
+                                            "You are offline! The operation has been saved and will be sent when the internet is available."
+                                        }
+                                    offlineMessage = message
+
+                                    if (nextAction == "check_out") {
+                                        showOfflineCheckOutDialog = true
+                                    } else {
+                                        viewModel.sendAttendance(token!!, nextAction) { newStatus ->
+                                            isButtonLoading = false
+                                            Log.d("CheckInOut", "📤 Offline Check-In saved in WorkManager: $newStatus"                                            )
                                         }
                                     }
-                                    showErrorDialog = true
-                                } else {
-                                    viewModel.sendAttendance(token, nextAction) { newStatus ->
-                                        isButtonLoading = false
-                                        if (newStatus != null) {
-                                            println("✅ New status from API: $newStatus")
+                                    return@launch
+                                }
+
+
+                                // 🔹 Case 3: User is online → Calculate the time difference with the server
+                                viewModel.getTimeDifferenceWithServer(token!!) { diff ->
+                                    sharedPrefManager.saveTimeDifference(diff)
+                                    sharedPrefManager.setWasOfflineDuringTimeChange(false)
+                                    Log.d("CheckInOut", "🕒 New time difference with server: $diff min")
+
+                                    // 🔹 After checking the time, we start implementing the procedure.
+                                    if (nextAction == "check_out") {
+                                        isDialogLoading = true
+                                        viewModel.sendAttendance(token, "status") { newStatus ->
+                                            isDialogLoading = false
+                                            isButtonLoading = false
+                                            if (newStatus != null) {
+                                                println("✅ Check Out sent successfully: $newStatus")
+                                                showErrorDialog = true
+                                            }
+                                        }
+                                    } else {
+                                        viewModel.sendAttendance(token, nextAction) { newStatus ->
+                                            isButtonLoading = false
+                                            if (newStatus != null) {
+                                                println("✅ $nextAction executed successfully: $newStatus")                                            }
                                         }
                                     }
                                 }
                             }
                         }
-
-//                        if (nextAction == "check_out") {
-//                            isDialogLoading = true
-//
-//                            viewModel.sendAttendance(token, "status") { newStatus ->
-//                                isDialogLoading = false
-//                                if (newStatus != null) {
-//                                    println("h✅ New status from API: $newStatus")
-//                                }
-//                            }
-//
-//                            showErrorDialog = true
-//                        }
-//                        else {
-//                            coroutineScope.launch {
-//                                val offline = viewModel.isOffline()
-//                                if (offline) {
-//                                    showOfflineDialog = true
-//                                    pendingAction = nextAction
-//                                }
-//                            else {
-//                            viewModel.sendAttendance(token, nextAction) { newStatus ->
-//                                if (newStatus != null) {
-//                                    println("✅ New status from API: $newStatus")
-//                                }}
-//                            }}
-//                        }
                     }
                 )
-
-                //            Button(
-                //                onClick = {
-                //                    navController.navigate("SettingsScreen")
-                //                }) {
-                //                Text("Go To Settings Screen")
-                //            }
             }
+        }
+
+
+        if (showOfflineCheckOutDialog) {
+            OfflineCheckOutDialog(
+                onDismiss = { showOfflineCheckOutDialog = false },
+                onConfirm = {
+                    showOfflineCheckOutDialog = false
+                    viewModel.sendAttendance(token, "check_out") { newStatus ->
+                        isButtonLoading = false
+                        Log.d("CheckInOut", "📤 Offline Check-Out operation saved in WorkManager: $newStatus"                        )
+                    }
+                }
+            )
         }
 
         if (isButtonLoading) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
-                   .noClickable(),
+                    .noClickable(),
                 contentAlignment = Alignment.Center
             ) {
-                androidx.compose.material3.CircularProgressIndicator(
+                CircularProgressIndicator(
                     color = MaterialTheme.colorScheme.tertiary
                 )
             }
         }
 
+        if (showInternetRequiredDialog) {
+            InternetRequiredDialog(
+                onDismiss = { showInternetRequiredDialog = false }
+            )
+        }
 
-        if (isLoading) {
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .background(MaterialTheme.colorScheme.onPrimary),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                androidx.compose.material3.CircularProgressIndicator(
-//                    color = MaterialTheme.colorScheme.tertiary
-//                )
-//            }
+        if (offlineMessage.isNotEmpty()) {
+            OfflineSnackBar(
+                message = offlineMessage,
+                onDismiss = { offlineMessage = "" }
+            )
         }
     }
-
-    OfflineDialog(
-        showDialog = showOfflineDialog && pendingAction != null,
-        onDismiss = {
-            showOfflineDialog = false
-            pendingAction = null
-        },
-        onConfirm = {
-            showOfflineDialog = false
-            isButtonLoading = true
-            viewModel.sendAttendance(token, pendingAction!!) { newStatus ->
-                isButtonLoading = false
-                if (newStatus != null) {
-                    println("✅ Offline action queued with status: $newStatus")
-                }
-            }
-            pendingAction = null
-        }
-    )
-
-
-
 
     TimeChangedDialog(
         showDialog = showDialog,
         onDismiss = { viewModel.dismissTimeChangedDialog() }
     )
-
-
-
-
 
     if (showErrorDialog) {
         CheckOutDialog(

@@ -177,7 +177,7 @@ fun DailyAndHourlyDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onSecondary,
+                        tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.clickable { onDismiss() }
                     )
                 }

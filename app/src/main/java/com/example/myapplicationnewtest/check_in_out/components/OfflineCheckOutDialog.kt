@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,23 +24,19 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
 
 @Composable
-fun CheckOutDialog(
-    hours: Int,
-    minutes: Int,
-    isLoading: Boolean,
-    onConfirm: () -> Unit,
-    onCancel: () -> Unit
-){
+fun OfflineCheckOutDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
     AlertDialog(
         containerColor = MaterialTheme.colorScheme.onPrimary,
-        onDismissRequest = { onCancel() },
+        onDismissRequest = onDismiss,
         title = {
             Column (
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -51,7 +46,7 @@ fun CheckOutDialog(
                         contentDescription = "Close",
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier
-                            .clickable { onCancel() }
+                            .clickable { onDismiss() }
                     )
                 }
                 Text(
@@ -62,20 +57,12 @@ fun CheckOutDialog(
             }
         },
         text = {
-            if (isLoading) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                   CircularProgressIndicator()
-                }
-            } else {
-            Text(
-                stringResource(R.string.check_out_confirmation, hours, minutes),
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,)
-        }},
+                Text(
+                    stringResource(R.string.are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available),
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,)
+            },
         confirmButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
@@ -97,7 +84,7 @@ fun CheckOutDialog(
                     contentColor = MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(10.dp),
-                onClick = { onCancel() }
+                onClick = { onDismiss() }
             ) {
                 Text(stringResource(R.string.cancel),
                     fontSize = 15.sp,
@@ -106,3 +93,4 @@ fun CheckOutDialog(
         }
     )
 }
+

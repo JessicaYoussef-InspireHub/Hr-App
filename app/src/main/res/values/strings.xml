@@ -141,4 +141,9 @@ Protection Method</string>
     <string name="you_are_offline">You are offline</string>
     <string name="do_you_want_to_continue_offline_your_attendance_will_be_saved_and_sent_later_automatically">Do you want to continue offline? Your attendance will be saved and sent later automatically.</string>
     <string name="time_change">A change in your device\'s date or time settings has been detected. Please enable automatic date, time, and time zone.</string>
+    <string name="are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available">Are you sure you want to check out now?\nThe operation will be saved and sent when the internet is available.</string>
+    <string name="check_not_allowed">Check Not Allowed</string>
+    <string name="you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online">You have changed the time while offline.\nYou cannot perform a Check operation until you are back online.</string>
+    <string name="you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available">You are currently offline.\nYour action will be saved and sent once the internet is available.</string>
+
 </resources>

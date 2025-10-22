@@ -11,6 +11,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.example.myapplicationnewtest.SharedPrefManager
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,39 +28,28 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     private val context = application.applicationContext
 
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-
     private val _workedHours = MutableStateFlow<Double?>(null)
-    val workedHours: StateFlow<Double?> = _workedHours
-
-    private val _lastCheckIn = MutableStateFlow<String?>(null)
-    val lastCheckIn: StateFlow<String?> = _lastCheckIn
-
-    private val _lastCheckOut = MutableStateFlow<String?>(null)
-    val lastCheckOut: StateFlow<String?> = _lastCheckOut
-
     private val _currentLat = MutableStateFlow(0.0)
-    val currentLat: StateFlow<Double> = _currentLat
-
+    private val _lastCheckIn = MutableStateFlow<String?>(null)
+    private val _lastCheckOut = MutableStateFlow<String?>(null)
     private val _currentLng = MutableStateFlow(0.0)
-    val currentLng: StateFlow<Double> = _currentLng
-
-    private val _isWithinDistance = MutableStateFlow<Boolean?>(null)
-    val isWithinDistance: StateFlow<Boolean?> = _isWithinDistance
-
     private val _message = MutableStateFlow("")
-    val message: StateFlow<String> = _message
-
+    private val _isWithinDistance = MutableStateFlow<Boolean?>(null)
     private val _attendanceStatus = MutableStateFlow("Loading...")
-
     private val cache = AttendanceCache(context)
-
     private val _showTimeChangedDialog = MutableStateFlow(false)
+    val lastCheckOut: StateFlow<String?> = _lastCheckOut
+    val lastCheckIn: StateFlow<String?> = _lastCheckIn
+    val workedHours: StateFlow<Double?> = _workedHours
+    val currentLat: StateFlow<Double> = _currentLat
+    val currentLng: StateFlow<Double> = _currentLng
+    val isWithinDistance: StateFlow<Boolean?> = _isWithinDistance
+    val message: StateFlow<String> = _message
     val showTimeChangedDialog: StateFlow<Boolean> = _showTimeChangedDialog
-
+    val attendanceStatus: StateFlow<String> = _attendanceStatus
 
     init {
-        //// 🔹 Load local values immediately upon opening the app
-
+        // 🔹 Load local values immediately upon opening the app
         val (status, checkIn, checkOut) = cache.getStatus()
         _attendanceStatus.value = status
         _lastCheckIn.value = checkIn
@@ -76,17 +66,46 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         return noNetwork || noRealInternet
     }
 
+    fun getTimeDifferenceWithServer(token: String, onResult: (Long) -> Unit) {
+        viewModelScope.launch {
+            try {
+                Log.d("TimeCheck", "🚀 Start calculating the time difference with the server...")
+                val serverTimeString = fetchServerTime(token)
+                Log.d("TimeCheck", "🕒 Time coming from server (raw): $serverTimeString")
+                if (serverTimeString != null) {
 
+                // ✅ Modify the date format according to the time coming from the server                    val serverFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                    val serverFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                    serverFormat.timeZone = TimeZone.getTimeZone("UTC")
+                    val serverDate = serverFormat.parse(serverTimeString)
+                    val deviceDate = Date()
 
+                    Log.d("TimeCheck", "📅 Server time (after conversion): $serverDate")
+                    Log.d("TimeCheck", "📱 Current device time: $deviceDate")
 
-
+                    if (serverDate != null) {
+                        val diffMillis = serverDate.time - deviceDate.time
+                        val diffMinutes = diffMillis / (1000 * 60)
+                        Log.d("TimeCheck", "✅ Time difference between device and server: $diffMinutes")
+                        onResult(diffMinutes)
+                    } else {
+                        Log.e("TimeCheck", "❌ Failed to convert server time to Date")
+                        onResult(-1)
+                    }
+                } else {
+                    Log.e("TimeCheck", "❌ fetchServerTime(token) returned null")
+                    onResult(-1)
+                }
+            } catch (e: Exception) {
+                Log.e("TimeCheck", "❌ An exception occurred while calculating the time difference: ${e.message}", e)
+                onResult(-1)
+            }
+        }
+    }
 
     @SuppressLint("MissingPermission")
     fun checkLocationAndDistance(targetLat: Double, targetLng: Double, allowedDistance: Double) {
-        Log.d(
-            "disable",
-            "checkLocationAndDistance called with targetLat=$targetLat, targetLng=$targetLng, allowedDistance=$allowedDistance"
-        )
+        Log.d("disable", "checkLocationAndDistance called with targetLat=$targetLat, targetLng=$targetLng, allowedDistance=$allowedDistance")
 
         fusedLocationClient.getCurrentLocation(
             com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
@@ -104,7 +123,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                     "✅ Target Location: $targetLat, $targetLng | Allowed Distance: $allowedDistance"
                 )
 
-
 //                _currentLat.value = location.latitude
 //                _currentLng.value = location.longitude
 
@@ -121,7 +139,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 val results = FloatArray(1)
                 Location.distanceBetween(
                     _currentLat.value, _currentLng.value, // my current location
-
                     targetLat, targetLng, // my company location (Step)
                     results
                 )
@@ -165,17 +182,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             Log.d("Attendance", "📅 Final Action Time to send: $finalActionTime")
 
             val isOnline = NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()
-            val isTimeAuto = isDeviceTimeAndTimeZoneAutomatic(context)
 
-            // ✳️ الشرط الجديد: لو أوفلاين و الوقت مش أوتوماتيكي → أوقف كل حاجة
-            if (!isOnline && !isTimeAuto) {
-                _showTimeChangedDialog.value = true
-                Log.d("Attendance", "⚠️ الجهاز أوفلاين و الوقت متغير يدويًا - تم إيقاف الإجراء")
-                onComplete("time_changed")
-                return@launch
-            }
-
-            // 🔹 Update screen immediately (بعد التأكد من الشروط)
+            // 🔹 Update screen immediately (after verifying the conditions)
             if (action == "check_in") {
                 _attendanceStatus.value = "checked_in"
                 _lastCheckIn.value = finalActionTime
@@ -215,104 +223,25 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                     onComplete("queued")
                 }
             } else {
-                // 🔸 Offline (بس الوقت سليم)
+                // 🔸 Offline (but the time is right)
                 enqueueWorkManager(token, action, finalActionTime)
                 onComplete("queued")
             }
         }
     }
 
-
-//    fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
-//        val cache = AttendanceCache(context)
-//
-//        val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-//        utcFormat.timeZone = TimeZone.getTimeZone("UTC")
-//
-//        viewModelScope.launch {
-//            val serverTime = fetchServerTime(token)
-//
-//            val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-//            utcFormat.timeZone = TimeZone.getTimeZone("UTC")
-//
-//            val finalActionTime = serverTime?.trim()
-//                ?.replace("T", " ")
-//                ?.replace("Z", "")
-//                ?.substringBefore("+") // ⛔️ يشيل أي timezone إضافي زي +00:00
-//                ?: utcFormat.format(Date())
-//
-//            Log.d("Attendance", "📅 Final Action Time to send: $finalActionTime")
-//            println("📅 Final Action Time to send (print): $finalActionTime")
-//
-//
-//            //🔹 Update screen immediately
-//            if (action == "check_in") {
-//                _attendanceStatus.value = "checked_in"
-//                _lastCheckIn.value = finalActionTime
-//                cache.saveStatus("checked_in", finalActionTime, _lastCheckOut.value)
-//            } else if (action == "check_out") {
-//                _attendanceStatus.value = "checked_out"
-//                _lastCheckOut.value = finalActionTime
-//                cache.saveStatus("checked_out", _lastCheckIn.value, finalActionTime)
-//            }
-//
-//            if (NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()) {
-//                // Direct sending
-//                val result = sendAttendanceAction(
-//                    token,
-//                    action,
-//                    _currentLat.value.toString(),
-//                    _currentLng.value.toString(),
-//                    finalActionTime
-//                )
-//
-//
-//                if (result != null) {
-//                    // 🔹Update official values from the server
-//
-//                    _message.value = result.message
-//                    _attendanceStatus.value = result.attendance_status ?: _attendanceStatus.value
-//                    _lastCheckIn.value = result.last_check_in ?: _lastCheckIn.value
-//                    _lastCheckOut.value = result.last_check_out ?: _lastCheckOut.value
-//                    _workedHours.value = result.worked_hours
-//
-//                    // Update Cache with official values
-//                    cache.saveStatus(
-//                        _attendanceStatus.value,
-//                        _lastCheckIn.value,
-//                        _lastCheckOut.value
-//                    )
-//
-//                    onComplete(result.attendance_status)
-//                } else {
-//                    //Send failed, we keep local values
-//                    enqueueWorkManager(token, action, finalActionTime)
-//                    onComplete("queued")
-//                }
-//            } else {
-//                if (!isDeviceTimeAndTimeZoneAutomatic(context)) {
-//                    // المستخدم غيّر الوقت يدويًا → أظهر الـDialog فقط ولا تعمل أي أكشن
-//                    _showTimeChangedDialog.value = true
-//                    Log.d("Attendance", "⚠️ الوقت أو التايم زون متغير يدويًا - تم إيقاف الإجراء")
-//                    onComplete("time_changed")
-//                    return@launch // ⛔️ أوقف كل حاجة هنا
-//                }
-//                // Offline → WorkManager
-//                enqueueWorkManager(token, action , finalActionTime)
-//                onComplete("queued")
-//            }
-//        }
-//    }
-
     // ✨ I separated the WorkManager part into a special function so that the code would be cleaner.
     private fun enqueueWorkManager(token: String, action: String , actionTime: String) {
+        val sharedPrefManager = SharedPrefManager(context)
+        val diffMinutes = sharedPrefManager.getTimeDifference()
 
         val data = workDataOf(
             "token" to token,
             "action" to action,
             "lat" to _currentLat.value.toString(),
             "lng" to _currentLng.value.toString(),
-            "action_time" to actionTime
+            "action_time" to actionTime,
+            "diff_minutes" to diffMinutes.toString()
         )
 
         val request = OneTimeWorkRequestBuilder<AttendanceWorker>()
@@ -320,18 +249,13 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .build()
+                    .build()).build()
 
         WorkManager.getInstance(context).enqueue(request)
 
         Log.d("Attendance", "⏳ WorkManager job enqueued with data: $data")
         _message.value = "⏳ Attendance queued. Will send when network is back."
     }
-
-
-    val attendanceStatus: StateFlow<String> = _attendanceStatus
 
     fun getAttendanceStatus(token: String) {
         viewModelScope.launch {
@@ -341,24 +265,19 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 _lastCheckIn.value = result.last_check_in
                 _lastCheckOut.value = result.last_check_out
                 _workedHours.value = result.worked_hours
-
                 calculateWorkedHours()
-
             }
         }
     }
 
-
     fun calculateWorkedHours() {
         val checkIn = _lastCheckIn.value
         val checkOut = _lastCheckOut.value
-
         if (checkIn != null && checkOut != null) {
             try {
                 val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
                 val checkInDate = formatter.parse(checkIn)
                 val checkOutDate = formatter.parse(checkOut)
-
                 if (checkInDate != null && checkOutDate != null) {
                     val diffMillis = checkOutDate.time - checkInDate.time
                     val diffHours = diffMillis / (1000.0 * 60.0 * 60.0)
@@ -369,7 +288,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
     }
-
 }
 
 

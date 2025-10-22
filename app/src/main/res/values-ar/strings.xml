@@ -139,6 +139,10 @@
     <string name="you_are_offline">أنت غير متصل بالإنترنت</string>
     <string name="do_you_want_to_continue_offline_your_attendance_will_be_saved_and_sent_later_automatically">هل ترغب في الاستمرار دون اتصال بالإنترنت؟ سيتم حفظ حضورك وإرساله لاحقًا تلقائيًا.</string>
     <string name="time_change">تم اكتشاف تغيير في إعدادات التاريخ أو الوقت في جهازك. يرجى تفعيل "التاريخ والوقت التلقائي" و"المنطقة الزمنية التلقائية".</string>
+    <string name="are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available">هل انت متاكد في تسجيل الخروج الآن؟\n سيتم حفظ العملية وإرسالها عند توفر الإنترنت.</string>
+    <string name="check_not_allowed">غير مسموح بالتحقق</string>
+    <string name="you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online">لقد قمت بتغيير الوقت أثناء عدم الاتصال بالإنترنت.\nلا يمكنك إجراء عملية التحقق حتى تعود إلى الاتصال بالإنترنت.</string>
+    <string name="you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available">أنت غير متصل بالإنترنت حاليًا، سيتم حفظ العملية وإرسالها عند توفر الاتصال.</string>
 
 
 </resources>
