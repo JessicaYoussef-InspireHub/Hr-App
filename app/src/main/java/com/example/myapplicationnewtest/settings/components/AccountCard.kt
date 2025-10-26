@@ -45,21 +45,22 @@ fun AccountCard(
         Text(
             stringResource(R.string.account),
             color = MaterialTheme.colorScheme.tertiary,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Normal
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Card (
             modifier = Modifier
                 .fillMaxWidth()
                 .border(
                     BorderStroke(
                         2.dp,
-                        MaterialTheme.colorScheme.onSecondaryContainer),
+                        MaterialTheme.colorScheme.inverseOnSurface
+                    ),
                     shape = RoundedCornerShape(8.dp)
                 ),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = MaterialTheme.colorScheme.onSecondary
             )
         ){
             Column {

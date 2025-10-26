@@ -39,7 +39,7 @@ fun ScanQrCodeScreen(
     navController: NavController
 ) {
 
-    var str = "BNJgRRKVLXYFZVTvArEwFmIxjbMbddXbOZX5eKENRAIAe8RcwIUYQqWrSQj/9DDLpX1OBj46EBJzJNQMjWWtYOuFcAoaMRqtn6mAN/Da/x1aQ4GLkAxguZZhbXwN4OS/"
+    var str = "voev4Jd6hmDBb4cvsAFEfrE+UX6SQa7BmhuZuotjz6PUvqmODNWU/8zDAZsY6xGiq+2Ed1QX0osvp5926CnIqkuYmZxEyTusnv9Gq/BWzQYtoO7sWvNfSjhkwWQqf4YG"
 //    val str = remember { mutableStateOf("") }
     val middleware = Middleware.initialize(str)
 
@@ -71,7 +71,7 @@ fun ScanQrCodeScreen(
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onPrimary)
+            .background(MaterialTheme.colorScheme.onSecondary)
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -80,7 +80,7 @@ fun ScanQrCodeScreen(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ),
             shape = RoundedCornerShape(8.dp),
             onClick = {
@@ -120,7 +120,7 @@ fun ScanQrCodeScreen(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ),
             shape = RoundedCornerShape(8.dp),
             onClick = {

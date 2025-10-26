@@ -33,11 +33,25 @@ import com.example.myapplicationnewtest.sign_in.data.SignInViewModel
 import com.example.myapplicationnewtest.sign_in.data.SignInUiState
 import androidx.compose.ui.text.input.ImeAction
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.sign_in.components.InCorrectCompanyId
+import org.json.JSONObject
 import kotlin.system.exitProcess
+
+fun extractErrorMessage(response: String): String {
+    return try {
+        val json = JSONObject(response)
+        json.getJSONObject("result").getString("message")
+    } catch (e: Exception) {
+        "An unexpected error occurred"
+    }
+}
 
 
 @Composable
@@ -55,173 +69,265 @@ fun SignInScreen(
     val protectionSkipped = sharedPrefManager.isProtectionSkipped()
 
     val isFormValid = emailState.value.isNotBlank() && passwordState.value.isNotBlank()
+    val showDialog = remember { mutableStateOf(false) }
+    val dialogMessage = remember { mutableStateOf("") }
 
 
-    val errorMessage = if (uiState is SignInUiState.Error) {
-        stringResource(R.string.email_or_password_is_incorrect)
-    } else {
-        null
-    }
+//    val errorMessage = if (uiState is SignInUiState.Error) {
+//        val msg = (uiState as SignInUiState.Error).message
+//
+//        when {
+//            msg.contains("No company found", ignoreCase = true) -> {
+//                stringResource(R.string.company_id_or_api_key_is_incorrect)
+//            }
+//            msg.contains("Employee not found", ignoreCase = true) -> {
+//                stringResource(R.string.email_or_password_is_incorrect)
+//            }
+//            else -> {
+//                "An unexpected error occurred"
+//            }
+//        }
+//    } else {
+//        null
+//    }
+
+    val errorMessage: String? = if (uiState is SignInUiState.Error) {
+        val msg = (uiState as SignInUiState.Error).message
+
+        when {
+            msg.contains("No company found", ignoreCase = true) -> {
+                dialogMessage.value = stringResource(R.string.company_id_or_api_key_is_incorrect)
+                showDialog.value = true
+                null
+            }
+
+            msg.contains("Employee not found", ignoreCase = true) -> {
+                stringResource(R.string.email_or_password_is_incorrect)
+            }
+
+            else -> {
+                "Another unexpected error occurred, try again later."
+            }
+        }
+    } else null
+
 
     val token = sharedPrefManager.getToken()
 
     BackHandler(enabled = true) {
         if (token.isNullOrEmpty()) {
-        navController.navigate("ScanQrCodeScreen") {
-            popUpTo("SignInScreen") { inclusive = true }
-        }
-    } else {
+            navController.navigate("ScanQrCodeScreen") {
+                popUpTo("SignInScreen") { inclusive = true }
+            }
+        } else {
             exitProcess(0)
         }
     }
 
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.onPrimary)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-          if (token.isNullOrEmpty()) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .size(40.dp)
-                    .clickable { navController.popBackStack() },
-                tint = MaterialTheme.colorScheme.tertiary
-            )}
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.onSecondary)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                if (token.isNullOrEmpty()) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .size(32.dp)
+                            .clickable { navController.popBackStack() },
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
+            Image(
+                painter = painterResource(id = R.drawable.sign_in),
+                contentDescription = "Sign in",
+                modifier = Modifier.size(130.dp)
+
+            )
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 stringResource(R.string.sign_in_screen),
                 fontSize = 30.sp,
-                modifier = Modifier.align(Alignment.Center),
                 color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.ExtraBold
             )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            "Company ID: $companyId",
-            color = MaterialTheme.colorScheme.tertiary
-        )
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(
-            "API Key: $apiKey",
-            color = MaterialTheme.colorScheme.tertiary
-        )
-        Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(40.dp))
+            //        Text(
+            //            "Company ID: $companyId",
+            //            color = MaterialTheme.colorScheme.tertiary
+            //        )
+            //        Spacer(modifier = Modifier.height(5.dp))
+            //        Text(
+            //            "API Key: $apiKey",
+            //            color = MaterialTheme.colorScheme.tertiary
+            //        )
+            //        Spacer(modifier = Modifier.height(20.dp))
 
-        InputFields(
-            value = emailState.value,
-            onValueChange = { emailState.value = it },
-            label = stringResource(R.string.email) ,
-            imeAction = ImeAction.Next,
-            onImeAction = {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    stringResource(R.string.email),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
             }
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        InputFields(
-            value = passwordState.value,
-            onValueChange = { passwordState.value = it },
-            label = stringResource(R.string.password),
-            imeAction = ImeAction.Done,
-            onImeAction = {
-                if (isFormValid) {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            InputFields(
+                value = emailState.value,
+                onValueChange = { emailState.value = it },
+                label = stringResource(R.string.email),
+                imeAction = ImeAction.Next,
+                onImeAction = {
+                }
+            )
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    stringResource(R.string.password),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            InputFields(
+                value = passwordState.value,
+                onValueChange = { passwordState.value = it },
+                label = stringResource(R.string.password),
+                imeAction = ImeAction.Done,
+                onImeAction = {
+                    if (isFormValid) {
+                        viewModel.signIn(
+                            emailState.value,
+                            passwordState.value,
+                            companyId,
+                            apiKey
+                        )
+                    }
+                }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(top = 4.dp)
+                )
+            }
+
+
+
+            Spacer(modifier = Modifier.weight(1f))
+
+
+            SignInButton(
+                onClick = {
                     viewModel.signIn(
                         emailState.value,
                         passwordState.value,
                         companyId,
                         apiKey
                     )
-                }
-            }
-        )
-
-        if (errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(top = 4.dp)
+                    //
+                    //                val middleware = com.example.myapplicationnewtest.scan_qr_code.data.Middleware.initialize(str)
+                    //                middleware.apiKey
+                    //                 middleware.companyId
+                    //                middleware.baseUrl
+                },
+                enabled = isFormValid
             )
+            if (showDialog.value) {
+                InCorrectCompanyId(
+                    message = dialogMessage.value,
+                    onDismiss = {
+                        showDialog.value = false
+                        viewModel.resetState()
+                    },
+                    navController = navController
+                )
+            }
+
+
+
+            when (uiState) {
+                //            is SignInUiState.Error -> Text("${stringResource(R.string.error)} ${(uiState as SignInUiState.Error).message}")
+                is SignInUiState.Success -> {
+                    Text(stringResource(R.string.login_successful))
+
+                    val response = (uiState as SignInUiState.Success).response
+                    val employeeData = response.result.message.employee_data
+                    val address = response.result.message.company.firstOrNull()?.address
+
+                    val latitude = address?.latitude ?: 0.0
+                    val longitude = address?.longitude ?: 0.0
+                    val allowedDistance = address?.allowed_distance ?: 0.0
+
+                    sharedPrefManager.saveToken(employeeData.employee_token)
+                    sharedPrefManager.saveTokenExpiry(employeeData.token_expiry)
+                    sharedPrefManager.saveCompanyId(companyId)
+                    sharedPrefManager.saveApiKey(apiKey)
+                    sharedPrefManager.saveLatitude(latitude)
+                    sharedPrefManager.saveLongitude(longitude)
+                    sharedPrefManager.saveAllowedDistance(allowedDistance)
+
+
+                    LaunchedEffect(Unit) {
+                        if (protectionSkipped) {
+                            navController.navigate("CheckInOutScreen")
+                        } else {
+                            navController.navigate("ProtectionScreen") {
+                                popUpTo("ScanQrCodeScreen") { inclusive = true }
+                            }
+                        }
+                        viewModel.resetState()
+                    }
+
+                    //                sharedPrefManager.saveToken(token)
+                    //                sharedPrefManager.saveCompanyId(companyId)
+                    //                sharedPrefManager.saveApiKey(apiKey)
+                    //                sharedPrefManager.saveLatitude(latitude)
+                    //                sharedPrefManager.saveLongitude(longitude)
+                    //                sharedPrefManager.saveAllowedDistance(allowedDistance)
+
+                }
+
+                else -> {}
+            }
         }
+
 
         if (uiState is SignInUiState.Loading) {
-            Spacer(modifier = Modifier.height(16.dp))
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.size(32.dp)
-            )
-        }
-
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        SignInButton(
-            onClick = {
-                viewModel.signIn(
-                    emailState.value,
-                    passwordState.value,
-                    companyId,
-                    apiKey
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary,
                 )
-//
-//                val middleware = com.example.myapplicationnewtest.scan_qr_code.data.Middleware.initialize(str)
-//                middleware.apiKey
-//                 middleware.companyId
-//                middleware.baseUrl
-            },
-            enabled = isFormValid
-        )
-
-
-
-        when (uiState) {
-            is SignInUiState.Error -> Text("${stringResource(R.string.error)} ${(uiState as SignInUiState.Error).message}")
-            is SignInUiState.Success -> {
-                Text(stringResource(R.string.login_successful))
-
-                val response = (uiState as SignInUiState.Success).response
-                val employeeData = response.result.message.employee_data
-                val address = response.result.message.company.firstOrNull()?.address
-
-                val latitude = address?.latitude ?: 0.0
-                val longitude = address?.longitude ?: 0.0
-                val allowedDistance = address?.allowed_distance ?: 0.0
-
-                sharedPrefManager.saveToken(employeeData.employee_token)
-                sharedPrefManager.saveTokenExpiry(employeeData.token_expiry)
-                sharedPrefManager.saveCompanyId(companyId)
-                sharedPrefManager.saveApiKey(apiKey)
-                sharedPrefManager.saveLatitude(latitude)
-                sharedPrefManager.saveLongitude(longitude)
-                sharedPrefManager.saveAllowedDistance(allowedDistance)
-
-
-                LaunchedEffect(Unit) {
-                if(protectionSkipped){
-                    navController.navigate("CheckInOutScreen")
-                }else{
-                    navController.navigate("ProtectionScreen") {
-                        popUpTo("ScanQrCodeScreen") { inclusive = true }
-                    }}
-                    viewModel.resetState()
-                }
-
-//                sharedPrefManager.saveToken(token)
-//                sharedPrefManager.saveCompanyId(companyId)
-//                sharedPrefManager.saveApiKey(apiKey)
-//                sharedPrefManager.saveLatitude(latitude)
-//                sharedPrefManager.saveLongitude(longitude)
-//                sharedPrefManager.saveAllowedDistance(allowedDistance)
-
             }
-
-            else -> {}
         }
+
     }
 }

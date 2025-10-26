@@ -1,6 +1,7 @@
 package com.example.myapplicationnewtest.protection.presentation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -33,6 +34,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 
 
@@ -87,51 +89,49 @@ fun EnterPinScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onPrimary)
-            .padding(16.dp),
+            .background(MaterialTheme.colorScheme.onSecondary)
     ) {
         Column(
-            modifier = Modifier.align(Alignment.TopCenter),
+            modifier = Modifier.align(Alignment.TopCenter)
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.onSecondary)
+            .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-//            Text(
-//                titleText,
-//                textAlign = TextAlign.Center,
-//                lineHeight = 30.sp,
-//                fontSize = 30.sp,
-//                color = pinColor,
-//                fontWeight = FontWeight.Bold
-//            )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                verticalAlignment = Alignment.Top,
-
-                ) {
+            if (isChangingMethod)
+             Box(modifier = Modifier.fillMaxWidth()) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier
+                        .align(Alignment.CenterStart)
                         .size(32.dp)
                         .clickable {
                             navController.popBackStack()
                         },
                     tint = pinColor
                 )
-
-                Text(
-                    text = titleText,
-                    fontWeight = FontWeight.Bold,
-                    color = pinColor,
-                    fontSize = 22.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp, end = 32.dp)
-                )
             }
+            else {
+                Spacer(modifier = Modifier.height(25.dp))
+            }
+
+            Image(
+                painter = painterResource(id = R.drawable.pin),
+                contentDescription = "PIN",
+                modifier = Modifier.size(130.dp)
+
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = titleText,
+                fontWeight = FontWeight.Bold,
+                color = pinColor,
+                fontSize = if (isChangingMethod) 20.sp else 30.sp,
+                textAlign = TextAlign.Center,
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 subtitleText,
@@ -139,7 +139,6 @@ fun EnterPinScreen(
                 textAlign = TextAlign.Center,
                 color = pinColor,
                 fontWeight = FontWeight.Normal,
-                modifier = Modifier.padding(horizontal = 40.dp)
             )
         }
 
@@ -151,7 +150,8 @@ fun EnterPinScreen(
             verticalArrangement = Arrangement.Center
         ) {
             CompositionLocalProvider(LocalTextSelectionColors provides customColors , LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Row(
+                Spacer(modifier = Modifier.height(55.dp))
+                Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -162,7 +162,7 @@ fun EnterPinScreen(
                     val borderColor = when {
                         isFocused -> pinColor
                         isFilled -> pinColor
-                        else -> MaterialTheme.colorScheme.onTertiaryContainer
+                        else -> MaterialTheme.colorScheme.onBackground
                     }
 
                         OutlinedTextField(
@@ -213,11 +213,8 @@ fun EnterPinScreen(
                 if (errorText.isNotEmpty()) {
                     Text(
                         text = errorText,
-                        color = MaterialTheme.colorScheme.error,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontSize = 16.sp,
-                        modifier = Modifier
-                            .padding(top = 8.dp, start = 20.dp)
-                            .align(Alignment.Start)
                     )
                 }
             }
@@ -228,14 +225,13 @@ fun EnterPinScreen(
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 16.dp),
+                    .height(56.dp),
                 enabled = viewModel.isPinComplete,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = pinColor,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    disabledContainerColor = pinColor.copy(alpha = 0.4f),
+                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
                 ),
                 shape = RoundedCornerShape(8.dp),
                 onClick = {

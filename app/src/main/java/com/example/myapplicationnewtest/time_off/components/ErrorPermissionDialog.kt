@@ -30,7 +30,7 @@ fun ErrorPermissionDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = onDismiss,
         title = {
             Column {
@@ -60,7 +60,7 @@ fun ErrorPermissionDialog(
                 message,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = MaterialTheme.colorScheme.onBackground,
             )
         },
         confirmButton = {
@@ -68,13 +68,13 @@ fun ErrorPermissionDialog(
                 onClick = { onDismiss() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
                     stringResource(R.string.ok),
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )

@@ -35,14 +35,39 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
     val apiKey = sharedPrefManager.getApiKey()
     val companyId = sharedPrefManager.getCompanyId()
 
+//    val nextDestination = when {
+//        !token.isNullOrEmpty() && fingerprintSuccess -> "FingerPrintScreen"
+//        !token.isNullOrEmpty() && !savedPin.isNullOrEmpty() -> "EnterPinScreen"
+//        protectionSkipped -> "CheckInOutScreen"
+////      !token.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey"
+//        token.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6"
+//        else ->"ScanQrCodeScreen"
+//    }
+
     val nextDestination = when {
-        fingerprintSuccess -> "FingerPrintScreen"
+        // ✅ Has token and fingerprint enabled
+        !token.isNullOrEmpty() && fingerprintSuccess -> "FingerPrintScreen"
+
+        // ✅ Has token and PIN enabled
         !token.isNullOrEmpty() && !savedPin.isNullOrEmpty() -> "EnterPinScreen"
-        protectionSkipped -> "CheckInOutScreen"
-//      !token.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey"
-        !token.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6"
+
+        // ✅ Has token and skipped protection
+        !token.isNullOrEmpty() && protectionSkipped -> "CheckInOutScreen"
+
+        // ✅ Has companyId and apiKey but no token (needs to sign in)
+        token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6"
+
+        // ✅ Has companyId and apiKey and token (needs to protection)
+        !token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "ProtectionScreen"
+
+        // ✅ First time opening the app (everything is empty)
+        token.isNullOrEmpty() && companyId.isNullOrEmpty() && apiKey.isNullOrEmpty() -> "ScanQrCodeScreen"
+
+        // ✅ Fallback for any unexpected case
         else -> "ScanQrCodeScreen"
     }
+
+
 
     NavHost(navController = navController, startDestination = "SplashScreen") {
         composable("SplashScreen") {

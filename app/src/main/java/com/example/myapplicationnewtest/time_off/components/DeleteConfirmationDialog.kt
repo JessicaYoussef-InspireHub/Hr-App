@@ -34,7 +34,7 @@ fun DeleteConfirmationDialog(
     onConfirmDelete: suspend () -> Unit
 ) {
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = { onDismiss() },
         text = {
             Column(
@@ -57,14 +57,14 @@ fun DeleteConfirmationDialog(
                     text = stringResource(R.string.delete_confirmation),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.tertiary,
                     textAlign = TextAlign.Start
                 )
                 Text(
                     stringResource(R.string.are_you_sure_you_want_to_delete_this_request),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Start,
                 )
             }
@@ -77,7 +77,7 @@ fun DeleteConfirmationDialog(
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
                     containerColor = MaterialTheme.colorScheme.tertiary
                 ),
                 shape = RoundedCornerShape(10.dp)
@@ -93,8 +93,8 @@ fun DeleteConfirmationDialog(
             Button(
                 onClick = { onDismiss() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {

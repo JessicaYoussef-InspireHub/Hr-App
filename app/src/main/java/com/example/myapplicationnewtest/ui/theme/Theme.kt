@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.myapplicationnewtest.SharedPrefManager
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color.Companion.LightGray
 
 val LocalDarkMode = staticCompositionLocalOf { mutableStateOf(false) }
 
@@ -22,35 +23,42 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = Main_color,
     onBackground = White,
     onSecondary = Black,
-
-
-
-
-    secondary = Validate_color,
-    onPrimary = dark_background_color,
-    onTertiary = Close_color,
-    onPrimaryContainer = Delete_color,
-    onSecondaryContainer = Discard_color,
-    onTertiaryContainer = Disabled_color,
+    surfaceVariant = weekendAndPublicColor,
+    inverseOnSurface = LightGray,
     surface = Dark_grey,
-    onSurface = Light_green,
-    onSurfaceVariant = Lines_color,
-    error = Red,
+
+
+//    secondary = Validate_color,
+//    onPrimary = dark_background_color,
+//    onTertiary = Close_color,
+//    onPrimaryContainer = Delete_color,
+//    onSecondaryContainer = Discard_color,
+//    onTertiaryContainer = Disabled_color,
+//    surface = Dark_grey,
+//    onSurface = Light_green,
+//    onSurfaceVariant = Lines_color,
+//    error = Red,
 )
 
 private val LightColorScheme = lightColorScheme(
-    secondary = Validate_color,
     tertiary = Main_color,
-    onPrimary = White,
+    onBackground = White,
     onSecondary = Black,
-    onTertiary = Close_color,
-    onPrimaryContainer = Delete_color,
-    onSecondaryContainer = Discard_color,
-    onTertiaryContainer = Disabled_color,
+    surfaceVariant = weekendAndPublicColor,
+    inverseOnSurface = LightGray,
     surface = Dark_grey,
-    onSurface = Light_green,
-    onSurfaceVariant = Lines_color,
-    error = Red,
+//    secondary = Validate_color,
+//    tertiary = Main_color,
+//    onPrimary = White,
+//    onSecondary = Black,
+//    onTertiary = Close_color,
+//    onPrimaryContainer = Delete_color,
+//    onSecondaryContainer = Discard_color,
+//    onTertiaryContainer = Disabled_color,
+//
+//    onSurface = Light_green,
+//    onSurfaceVariant = Lines_color,
+//    error = Red,
 
 
     /* Other default colors to override

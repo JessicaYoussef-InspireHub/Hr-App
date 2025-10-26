@@ -60,7 +60,7 @@ fun Dates(
     ){
         Text(
             text = formattedStart,
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable { onStartDateClick() }
@@ -80,12 +80,12 @@ fun Dates(
                     contentDescription = "",
                     modifier = Modifier
                         .size(20.dp),
-                    tint = MaterialTheme.colorScheme.surface
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
 
                 Text(
                     text = formattedEnd,
-                    color = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable { onEndDateClick() }

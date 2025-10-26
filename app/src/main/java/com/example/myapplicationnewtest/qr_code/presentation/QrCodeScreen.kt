@@ -30,7 +30,7 @@ fun QRCodeScreen(viewModel: QrCodeViewModel = viewModel()) {
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.onPrimary)
+            .background(MaterialTheme.colorScheme.onSecondary)
             .fillMaxSize()
             .padding(horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,7 +41,7 @@ fun QRCodeScreen(viewModel: QrCodeViewModel = viewModel()) {
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ),
             shape = RoundedCornerShape(8.dp)
         ) {

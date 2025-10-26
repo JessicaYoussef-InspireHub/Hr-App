@@ -14,6 +14,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -29,11 +30,11 @@ fun BottomBar(
     Column {
         HorizontalDivider(
             thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant
+            color = MaterialTheme.colorScheme.inverseOnSurface
         )
         NavigationBar(
-            containerColor = MaterialTheme.colorScheme.onPrimary,
-            contentColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.onSecondary,
+            contentColor = MaterialTheme.colorScheme.onBackground,
         ) {
             NavigationBarItem(
                 selected = currentRoute == "CheckInOutScreen",
@@ -49,9 +50,9 @@ fun BottomBar(
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.tertiary,
                     selectedTextColor = MaterialTheme.colorScheme.tertiary,
-                    unselectedIconColor = MaterialTheme.colorScheme.surface,
-                    unselectedTextColor = MaterialTheme.colorScheme.surface,
-                    indicatorColor = androidx.compose.ui.graphics.Color.Transparent
+                    unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                    unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+                    indicatorColor = Color.Transparent
                 )
             )
 
@@ -69,9 +70,9 @@ fun BottomBar(
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.tertiary,
                     selectedTextColor = MaterialTheme.colorScheme.tertiary,
-                    unselectedIconColor = MaterialTheme.colorScheme.surface,
-                    unselectedTextColor = MaterialTheme.colorScheme.surface,
-                    indicatorColor = androidx.compose.ui.graphics.Color.Transparent
+                    unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                    unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+                    indicatorColor = Color.Transparent
                 )
             )
 
@@ -89,9 +90,9 @@ fun BottomBar(
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.tertiary,
                     selectedTextColor = MaterialTheme.colorScheme.tertiary,
-                    unselectedIconColor = MaterialTheme.colorScheme.surface,
-                    unselectedTextColor = MaterialTheme.colorScheme.surface,
-                    indicatorColor = androidx.compose.ui.graphics.Color.Transparent
+                    unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                    unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+                    indicatorColor = Color.Transparent
                 )
             )
         }

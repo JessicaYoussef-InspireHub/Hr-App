@@ -41,7 +41,7 @@ fun SettingsLanguage(
         )
         Text(
             label,
-            color = MaterialTheme.colorScheme.onTertiary,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 15.sp,
             fontWeight = FontWeight.Normal
         )

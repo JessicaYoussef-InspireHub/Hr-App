@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -82,13 +81,6 @@ fun PermissionDialog(
         else -> ""
     }
 
-    val tittleColor = when (record?.state) {
-        "validate" -> MaterialTheme.colorScheme.secondary
-        "draft" -> MaterialTheme.colorScheme.tertiary
-        "confirm" -> MaterialTheme.colorScheme.tertiary
-        "refuse" -> MaterialTheme.colorScheme.error
-        else -> Color.Transparent
-    }
     val startDate = LocalDate.parse(record?.leave_day)
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
@@ -187,7 +179,7 @@ fun PermissionDialog(
     }
 
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
             if (record?.state == "draft" || record?.state == "confirm") {
@@ -197,14 +189,14 @@ fun PermissionDialog(
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     ),
                     shape = RoundedCornerShape(10.dp)
 
                 ) {
                     Text(
                         text = stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onSecondary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -215,8 +207,8 @@ fun PermissionDialog(
                         onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (record?.state == "refuse") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     ),
                     shape = RoundedCornerShape(10.dp)
 
@@ -247,7 +239,7 @@ fun PermissionDialog(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    color = tittleColor
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
         },
@@ -261,7 +253,7 @@ fun PermissionDialog(
                     text = formattedLeaveDay,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -276,14 +268,14 @@ fun PermissionDialog(
                             modifier = Modifier
                                 .width(15.dp)
                                 .height(15.dp)
-                                .background(color = tittleColor, shape = CircleShape)
+                                .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "$translatedLeaveType: $hourLabel ",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = MaterialTheme.colorScheme.onBackground,
                             textAlign = TextAlign.Start,
                         )
                     }
@@ -298,7 +290,7 @@ fun PermissionDialog(
                             modifier = Modifier
                                 .width(15.dp)
                                 .height(15.dp)
-                                .background(color = MaterialTheme.colorScheme.onPrimary, shape = CircleShape)
+                                .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -317,7 +309,7 @@ fun PermissionDialog(
                             }",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = MaterialTheme.colorScheme.onBackground,
                             textAlign = TextAlign.Start,
                         )
                     }
@@ -335,7 +327,7 @@ fun PermissionDialog(
                             modifier = Modifier
                                 .size(20.dp)
                                 .clickable { showNewVacationDialog = true },
-                            tint = tittleColor
+                            tint = MaterialTheme.colorScheme.tertiary
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
@@ -343,7 +335,7 @@ fun PermissionDialog(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            color = tittleColor,
+                            color = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.clickable {
                                 showNewVacationDialog = true
 
@@ -379,7 +371,7 @@ fun PermissionDialog(
                             val request = TimeOffRequestForRequestEmployee(
                                 employee_token = token,
                                 action = "unlink_draft_annual_leaves",
-                                leave_type_id = 12,
+                                leave_type_id = record?.leave_id,
                                 request_date_from = record?.leave_day,
                                 leave_id = record?.leave_id
                             )

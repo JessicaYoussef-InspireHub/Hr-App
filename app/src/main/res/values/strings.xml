@@ -44,7 +44,8 @@ Protection Method</string>
     <string name="logout">Logout</string>
     <string name="sign_in">Sign In</string>
     <string name="email_or_password_is_incorrect">Email or password is incorrect</string>
-    <string name="sign_in_screen">SignIn Screen</string>
+    <string name="company_id_or_api_key_is_incorrect">Company id or api key is incorrect</string>
+    <string name="sign_in_screen">Sign In</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="error">Error:</string>
@@ -103,7 +104,7 @@ Protection Method</string>
     <string name="lucky_you_a_weekend_and_a_public_holiday_together">Lucky you! A weekend and a public holiday together!</string>
     <string name="no_work_today_its_a_public_holiday_enjoy">No work today! It\'s a public holiday – enjoy!</string>
     <string name="time_to_relax_its_a_weekend">Time to relax – it\'s a weekend!</string>
-    <string name="time_off_screen">TimeOff Screen</string>
+    <string name="time_off_screen">Time Off</string>
     <string name="language">Language</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="security">Security</string>
@@ -145,5 +146,6 @@ Protection Method</string>
     <string name="check_not_allowed">Check Not Allowed</string>
     <string name="you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online">You have changed the time while offline.\nYou cannot perform a Check operation until you are back online.</string>
     <string name="you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available">You are currently offline.\nYour action will be saved and sent once the internet is available.</string>
+    <string name="scan_qr_code_again">Scan QR Code Again</string>
 
 </resources>

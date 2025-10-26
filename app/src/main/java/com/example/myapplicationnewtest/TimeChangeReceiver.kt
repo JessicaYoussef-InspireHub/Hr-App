@@ -30,7 +30,6 @@ class TimeChangeReceiver : BroadcastReceiver() {
                 Intent.ACTION_BOOT_COMPLETED -> "🔄 The device was rebooted"
                 else -> "A time change occurred"
             } + if (isOnlineNow) " | 🟢 Online" else " | 🔴 Offline"
-
             Log.i("BroadCast", message)
         }
     }

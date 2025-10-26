@@ -32,7 +32,7 @@ fun MyActualTimeOffText(
             label1 ,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = MaterialTheme.colorScheme.tertiary
         )
         Row(
             verticalAlignment = Alignment.CenterVertically

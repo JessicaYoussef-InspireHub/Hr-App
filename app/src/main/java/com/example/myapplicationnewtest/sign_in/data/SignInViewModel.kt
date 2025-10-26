@@ -43,8 +43,11 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
             } catch (e: Exception) {
                 Log.e("ViewModel", "Sign-in failed", e)
-                _uiState.value = SignInUiState.Error(e.message ?: "Unknown error")
+
+                val message = e.message ?: "Unknown error"
+                _uiState.value = SignInUiState.Error(message)
             }
+
         }
     }
 

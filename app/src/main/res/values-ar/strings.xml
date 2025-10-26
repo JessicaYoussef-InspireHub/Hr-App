@@ -42,6 +42,7 @@
     <string name="logout">تسجيل الخروج</string>
     <string name="sign_in">تسجيل الدخول</string>
     <string name="email_or_password_is_incorrect">البريد الإلكتروني أو كلمة المرور غير صحيحة</string>
+    <string name="company_id_or_api_key_is_incorrect">رقم الشركة أو مفتاح الدخول غير صحيح</string>
     <string name="sign_in_screen">تسجيل الدخول</string>
     <string name="email">بريد إلكتروني</string>
     <string name="password">كلمة المرور</string>
@@ -143,6 +144,7 @@
     <string name="check_not_allowed">غير مسموح بالتحقق</string>
     <string name="you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online">لقد قمت بتغيير الوقت أثناء عدم الاتصال بالإنترنت.\nلا يمكنك إجراء عملية التحقق حتى تعود إلى الاتصال بالإنترنت.</string>
     <string name="you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available">أنت غير متصل بالإنترنت حاليًا، سيتم حفظ العملية وإرسالها عند توفر الاتصال.</string>
+    <string name="scan_qr_code_again">مسح رمز الاستجابة السريعة مرة أخرى</string>
 
 
 </resources>

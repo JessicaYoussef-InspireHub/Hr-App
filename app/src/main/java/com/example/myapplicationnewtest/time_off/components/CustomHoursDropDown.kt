@@ -91,28 +91,28 @@ fun CustomHourDropDown(
             ){
                 Text(
                     text = selectedPermissionHour ?: " ",
-                    color = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 14.sp,
                 )
 
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = "ArrowDropDown",
-                    tint = MaterialTheme.colorScheme.surface,
+                    tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
 
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.onPrimary)
+                modifier = Modifier.background(MaterialTheme.colorScheme.onSecondary)
             ){
                 times.forEach { time ->
                     DropdownMenuItem(
                         text = {
                             Text(
                                time,
-                                color = MaterialTheme.colorScheme.surface,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold
                             )

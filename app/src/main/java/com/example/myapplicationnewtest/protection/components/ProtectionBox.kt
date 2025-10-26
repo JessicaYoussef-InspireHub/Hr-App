@@ -38,7 +38,7 @@ fun ProtectionBox(
         ){
             Icon(
                 imageVector = icon,
-                contentDescription = "Vacation Icon",
+                contentDescription = label,
                 modifier = Modifier
                     .padding(end = 6.dp).size(40.dp),
                 tint = MaterialTheme.colorScheme.tertiary,

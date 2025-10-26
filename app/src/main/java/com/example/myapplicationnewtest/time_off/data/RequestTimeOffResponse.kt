@@ -103,7 +103,8 @@ data class LeaveType(
     val request_unit: String,
     val requires_allocation: String,
     val remaining_balance: Float? = null,
-    val original_balance: Float? = null
+    val original_balance: Float? = null,
+    val color: String? = null
 )
 
 

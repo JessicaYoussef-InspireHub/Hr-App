@@ -28,7 +28,7 @@ fun ErrorDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = {
             onDismiss()
         },
@@ -60,7 +60,7 @@ fun ErrorDialog(
                 "$message \n \n${stringResource(R.string.attempting_to_double_book_your_time_off_wont_magically_make_your_vacation_2x_better)}" ,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = MaterialTheme.colorScheme.onBackground,
             )
         },
 
@@ -69,13 +69,13 @@ fun ErrorDialog(
                 onClick = { onDismiss() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
                     stringResource(R.string.cancel) ,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold)
             }

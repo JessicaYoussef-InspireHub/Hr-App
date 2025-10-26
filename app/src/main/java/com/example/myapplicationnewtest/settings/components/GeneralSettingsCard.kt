@@ -76,22 +76,22 @@ fun GeneralSettingsCard(
         Text(
             stringResource(R.string.general_settings),
             color = MaterialTheme.colorScheme.tertiary,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Normal
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .border(
                     BorderStroke(
                         2.dp,
-                        MaterialTheme.colorScheme.onSecondaryContainer
+                        MaterialTheme.colorScheme.inverseOnSurface
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = MaterialTheme.colorScheme.onSecondary
             )
         ) {
             Column {
@@ -122,7 +122,7 @@ fun GeneralSettingsCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MaterialTheme.colorScheme.surface
                 )
 
                 SettingsItem(
@@ -133,7 +133,7 @@ fun GeneralSettingsCard(
                         Icon(
                             imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                             contentDescription = "expand",
-                            tint = MaterialTheme.colorScheme.tertiary,
+                            tint = MaterialTheme.colorScheme.surface,
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -145,7 +145,7 @@ fun GeneralSettingsCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 35.dp),
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                            color = MaterialTheme.colorScheme.surface
                         )
                         SettingsLanguage(
                             label = stringResource(R.string.arabic),
@@ -161,7 +161,7 @@ fun GeneralSettingsCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 35.dp),
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                            color = MaterialTheme.colorScheme.surface
                         )
 
                         SettingsLanguage(
@@ -181,7 +181,7 @@ fun GeneralSettingsCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MaterialTheme.colorScheme.surface
                 )
 
                 SettingsItem(

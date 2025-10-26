@@ -119,31 +119,38 @@ fun FingerPrintScreen(
     }
     Box(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.onPrimary)
+            .background(MaterialTheme.colorScheme.onSecondary)
             .fillMaxSize()
             .padding(16.dp),
 
         ) {
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        navController.popBackStack()
+                    },
+                tint = MaterialTheme.colorScheme.tertiary
+            )}
+
+
         when {
             errorMessage == null -> {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    verticalAlignment = Alignment.Top
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(vertical = 16.dp),
+//                    verticalAlignment = Alignment.Top
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clickable {
-                                navController.popBackStack()
-                            },
-                        tint = MaterialTheme.colorScheme.tertiary
-                    )
-
                     Text(
                         text = titleText,
                         fontWeight = FontWeight.Bold,
@@ -236,7 +243,7 @@ fun FingerPrintScreen(
             }
 
             else -> {
-                Text(errorMessage, color = MaterialTheme.colorScheme.error)
+                Text(errorMessage, color = MaterialTheme.colorScheme.tertiary)
             }
         }
 

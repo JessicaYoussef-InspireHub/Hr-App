@@ -31,12 +31,12 @@ fun HalfDayCheckbox(
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.tertiary,
-                uncheckedColor = MaterialTheme.colorScheme.surface
+                uncheckedColor = MaterialTheme.colorScheme.onBackground
             )
         )
         Text(
             text = stringResource(R.string.half_day),
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp
         )

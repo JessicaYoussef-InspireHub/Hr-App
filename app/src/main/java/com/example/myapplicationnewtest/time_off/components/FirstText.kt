@@ -12,7 +12,7 @@ fun FirstText(
 ){
     Text(
         text = label,
-        color = MaterialTheme.colorScheme.onSecondary,
+        color = MaterialTheme.colorScheme.onBackground,
         fontSize = 15.sp,
         fontWeight = FontWeight.SemiBold
     )

@@ -50,7 +50,7 @@ fun DurationDays(
     Text(
         text = "$formattedNumber $dayLabel",
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.onBackground,
         fontWeight = FontWeight.SemiBold,
         fontSize = 15.sp
     )

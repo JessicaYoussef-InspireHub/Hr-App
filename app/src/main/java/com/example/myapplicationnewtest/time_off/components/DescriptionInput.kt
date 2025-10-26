@@ -39,12 +39,12 @@ fun DescriptionInput(
             placeholder = {
                 Text(
                     stringResource(R.string.add_a_description),
-                    color = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             TextStyle(
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold)
             },

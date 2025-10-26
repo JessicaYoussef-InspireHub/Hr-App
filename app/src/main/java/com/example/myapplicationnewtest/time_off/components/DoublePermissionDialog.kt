@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -161,7 +160,7 @@ fun DoublePermissionDialog(
     var showNewVacationDialog by remember { mutableStateOf(false) }
 
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = { onDismiss() },
         confirmButton = {
             when {
@@ -169,8 +168,8 @@ fun DoublePermissionDialog(
                     Button(
                         onClick = { onDismiss() },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
                         ),
                         shape = RoundedCornerShape(10.dp)
                     ) {
@@ -183,7 +182,8 @@ fun DoublePermissionDialog(
                     Button(
                         onClick = { onDismiss() },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
                         ),
                         shape = RoundedCornerShape(10.dp)
                     ) {
@@ -213,7 +213,7 @@ fun DoublePermissionDialog(
                     text = formattedDate,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.tertiary,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(15.dp))
@@ -228,13 +228,13 @@ fun DoublePermissionDialog(
                             else -> record.state
                         }
 
-                        val colorCircle = when (record.state) {
-                            "validate" -> MaterialTheme.colorScheme.secondary
-                            "draft" -> MaterialTheme.colorScheme.tertiary
-                            "confirm" -> MaterialTheme.colorScheme.tertiary
-                            "refuse" -> MaterialTheme.colorScheme.error
-                            else -> Color.Transparent
-                        }
+//                        val colorCircle = when (record.state) {
+//                            "validate" -> MaterialTheme.colorScheme.secondary
+//                            "draft" -> MaterialTheme.colorScheme.tertiary
+//                            "confirm" -> MaterialTheme.colorScheme.tertiary
+//                            "refuse" -> MaterialTheme.colorScheme.error
+//                            else -> Color.Transparent
+//                        }
 
                         val translatedLeaveType =
                             translateLeaveType(record.leave_type, currentLanguage)
@@ -253,21 +253,21 @@ fun DoublePermissionDialog(
                                 Box(
                                     modifier = Modifier
                                         .size(15.dp)
-                                        .background(color = colorCircle, shape = CircleShape)
+                                        .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     stateLabel,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                 )
                             }
                             Text(
                                 "$translatedLeaveType: $hourWord",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.padding(start = 20.dp),
                             )
                             Text(
@@ -302,7 +302,7 @@ fun DoublePermissionDialog(
                                 }",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.padding(start = 20.dp),
                             )
                             if (record.state == "draft" || record.state == "confirm") {
@@ -317,7 +317,7 @@ fun DoublePermissionDialog(
                                         },
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.tertiary,
-                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                            contentColor = MaterialTheme.colorScheme.onSecondary
                                         ),
                                         shape = RoundedCornerShape(10.dp),
                                         modifier = Modifier.padding(start = 20.dp)
@@ -338,7 +338,7 @@ fun DoublePermissionDialog(
                                         val request = TimeOffRequestForRequestEmployee(
                                             employee_token = token,
                                             action = "unlink_draft_annual_leaves",
-                                            leave_type_id = 6,
+                                            leave_type_id = recordToDelete!!.leave_id,
                                             request_date_from = recordToDelete!!.leave_day,
                                             request_date_to = recordToDelete!!.leave_day,
                                             leave_id = recordToDelete!!.leave_id
@@ -395,9 +395,10 @@ fun DoublePermissionDialog(
                                 .clickable {
                                     showNewVacationDialog = true
                                 },
-                            tint = if (allRefused) MaterialTheme.colorScheme.error
-                            else if (hasConfirmOrDraft) MaterialTheme.colorScheme.tertiary
-                            else MaterialTheme.colorScheme.secondary,
+                            tint = MaterialTheme.colorScheme.tertiary
+//                            tint = if (allRefused) MaterialTheme.colorScheme.error
+//                            else if (hasConfirmOrDraft) MaterialTheme.colorScheme.tertiary
+//                            else MaterialTheme.colorScheme.secondary,
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
@@ -405,9 +406,10 @@ fun DoublePermissionDialog(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            color = if (allRefused) MaterialTheme.colorScheme.error
-                                   else if (hasConfirmOrDraft) MaterialTheme.colorScheme.tertiary
-                                   else MaterialTheme.colorScheme.secondary,
+                            color = MaterialTheme.colorScheme.tertiary,
+//                            color = if (allRefused) MaterialTheme.colorScheme.error
+//                                   else if (hasConfirmOrDraft) MaterialTheme.colorScheme.tertiary
+//                                   else MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.clickable {
                                 showNewVacationDialog = true
 

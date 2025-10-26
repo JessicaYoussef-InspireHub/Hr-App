@@ -33,7 +33,7 @@ fun CheckOutDialog(
     onCancel: () -> Unit
 ){
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = { onCancel() },
         title = {
             Column (
@@ -74,12 +74,12 @@ fun CheckOutDialog(
                 stringResource(R.string.check_out_confirmation, hours, minutes),
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,)
+                color = MaterialTheme.colorScheme.onBackground,)
         }},
         confirmButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
                     containerColor = MaterialTheme.colorScheme.tertiary
                 ),
                 shape = RoundedCornerShape(10.dp),
@@ -93,8 +93,8 @@ fun CheckOutDialog(
         dismissButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 shape = RoundedCornerShape(10.dp),
                 onClick = { onCancel() }

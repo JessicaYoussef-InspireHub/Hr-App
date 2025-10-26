@@ -26,8 +26,8 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onPrimary)
-    ) {
+            .background(MaterialTheme.colorScheme.onSecondary)
+    ){
         AndroidView(
             factory = { imageViewContext ->
                 ImageView(imageViewContext).apply {

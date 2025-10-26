@@ -1,6 +1,8 @@
 package com.example.myapplicationnewtest.protection.presentation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +31,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
@@ -47,8 +48,10 @@ import com.example.myapplicationnewtest.protection.data.PinCodeViewModel
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 
 
 @Composable
@@ -81,41 +84,44 @@ fun PinCodeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-
-            .padding(16.dp),
-    ) {
+            .background(MaterialTheme.colorScheme.onSecondary),
+        ){
         Column(
-            modifier = Modifier.align(Alignment.TopCenter),
+            modifier = Modifier.align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.onSecondary)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                verticalAlignment = Alignment.Top
-            ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier
+                        .align(Alignment.CenterStart)
                         .size(32.dp)
                         .clickable {
                             navController.popBackStack()
                         },
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-
-                Text(
-                    text = stringResource(R.string.choose_a_pin),
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontSize = 22.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp, end = 32.dp)
+                    tint = pinColor
                 )
             }
+            Image(
+                painter = painterResource(id = R.drawable.pin),
+                contentDescription = "PIN",
+                modifier = Modifier.size(130.dp)
+
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.choose_a_pin),
+                fontWeight = FontWeight.Bold,
+                color = pinColor,
+                fontSize = 30.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 stringResource(R.string.use_4_digits_to_secure_your_account),
@@ -124,6 +130,7 @@ fun PinCodeScreen(
                 fontWeight = FontWeight.Normal,
             )
         }
+
 
 
         Column(
@@ -146,7 +153,7 @@ fun PinCodeScreen(
                     val borderColor = when {
                         isFocused -> pinColor
                         isFilled -> pinColor
-                        else -> MaterialTheme.colorScheme.onTertiaryContainer
+                        else -> MaterialTheme.colorScheme.onBackground
                     }
 
 
@@ -190,14 +197,13 @@ fun PinCodeScreen(
             }
 
             if (viewModel.errorMessage.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = viewModel.errorMessage,
-                        color = MaterialTheme.colorScheme.error,
+                        color = pinColor,
                         fontSize = 16.sp,
-                        modifier = Modifier
-                            .padding(top = 8.dp, start = 20.dp)
-                            .align(Alignment.CenterStart)
+                        modifier = Modifier.align(Alignment.TopStart)
                     )
                 }
             }
@@ -208,14 +214,13 @@ fun PinCodeScreen(
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 16.dp),
+                    .height(56.dp),
                 enabled = viewModel.isPinComplete(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = pinColor,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    disabledContainerColor = pinColor.copy(alpha = 0.4f),
+                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
                 ),
                 shape = RoundedCornerShape(8.dp),
                 onClick = {

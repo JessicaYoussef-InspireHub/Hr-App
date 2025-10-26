@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,10 +46,10 @@ import com.example.myapplicationnewtest.BottomBar
 import com.example.myapplicationnewtest.MyAppBar
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
-import com.example.myapplicationnewtest.time_off.components.ColorsOfAnnualLeave
-import com.example.myapplicationnewtest.time_off.components.ColorsOfPermission
+import com.example.myapplicationnewtest.time_off.components.LeaveTypesLazyRow
 import com.example.myapplicationnewtest.time_off.components.MyCalendarPicker
 import com.example.myapplicationnewtest.time_off.components.MyActualTimeOff
+import com.example.myapplicationnewtest.time_off.components.Shapes
 import com.example.myapplicationnewtest.time_off.data.LeaveType
 import com.example.myapplicationnewtest.time_off.data.fetchAndPrintHolidays
 import com.example.myapplicationnewtest.time_off.data.fetchEmployeeLeaveTypes
@@ -91,6 +92,8 @@ fun TimeOffScreen(
     val leaveTypesState = remember { mutableStateOf<List<LeaveType>>(emptyList()) }
 
     val coroutineScope = rememberCoroutineScope()
+    val leaveTypes = leaveTypesState.value
+    val leaveTypeColors = remember { mutableStateMapOf<String, Color>() }
 
     fun triggerRefresh() {
         shouldRefresh = !shouldRefresh
@@ -104,6 +107,11 @@ fun TimeOffScreen(
             val leaveTypesResponse = fetchEmployeeLeaveTypes(token)
             leaveTypesResponse?.let {
                 leaveTypesState.value = it.result.leave_types
+
+                it.result.leave_types.forEach { leaveType ->
+                    val colorHex = leaveType.color ?: "#808080"
+                    leaveTypeColors[leaveType.name] = Color(android.graphics.Color.parseColor(colorHex))
+                }
             }
 
             val result = fetchAndPrintHolidays(token)
@@ -230,7 +238,7 @@ fun TimeOffScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.onPrimary),
+                .background(MaterialTheme.colorScheme.onSecondary),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
@@ -239,20 +247,20 @@ fun TimeOffScreen(
         }
     } else {
         Scaffold(
-            containerColor = MaterialTheme.colorScheme.onPrimary,
+            containerColor = MaterialTheme.colorScheme.onSecondary,
             topBar = {
                 MyAppBar(
                     label = stringResource(R.string.time_off_screen),
-                    navController = navController
                 )
             },
             bottomBar = {
                 BottomBar(navController = navController)
             }
-        ) { paddingValues ->
+        ){
+            paddingValues ->
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.onPrimary)
+                    .background(MaterialTheme.colorScheme.onSecondary)
                     .padding(paddingValues)
                     .fillMaxWidth()
             ) {
@@ -374,21 +382,21 @@ fun TimeOffScreen(
                     dailyRecords = yearTimeOffData?.records?.daily_records ?: emptyList(),
                     hourlyRecords = timeOffStatusResponse?.records?.hourly_records ?: emptyList(),
                     weekendDayNames = weekendDayNames,
-                    publicHolidayDates = publicHolidayDates
+                    publicHolidayDates = publicHolidayDates,
+                    leaveTypeColors = leaveTypeColors
                 )
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant)
+                        .background(MaterialTheme.colorScheme.inverseOnSurface)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    ColorsOfAnnualLeave()
-                    ColorsOfPermission()
+                    LeaveTypesLazyRow(leaveTypes)
+                    Shapes()
                 }
             }
         }

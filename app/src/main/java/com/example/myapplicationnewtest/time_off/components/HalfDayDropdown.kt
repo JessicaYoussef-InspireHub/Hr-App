@@ -37,14 +37,14 @@ fun HalfDayDropdown(
         Row ( modifier = Modifier.clickable { expanded = true }){
             Text(
                 text = selectedOption,
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "ArrowDropDown",
-                tint = MaterialTheme.colorScheme.surface,
+                tint = MaterialTheme.colorScheme.onBackground,
             )
         }
         DropdownMenu(
@@ -52,7 +52,7 @@ fun HalfDayDropdown(
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .background(
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                 )
         ) {
             options.forEach { option ->
@@ -60,7 +60,7 @@ fun HalfDayDropdown(
                     text = {
                         Text(
                             option ,
-                            color = MaterialTheme.colorScheme.surface,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold) },
                     onClick = {

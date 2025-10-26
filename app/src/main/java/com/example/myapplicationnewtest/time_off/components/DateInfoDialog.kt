@@ -163,7 +163,7 @@ fun DateInfoDialog(
                     employeeToken = token,
                     requestDateFrom = requestDateFrom,
                     requestDateTo = requestDateTo,
-                    leaveTypeId = 7,
+                    leaveTypeId = selectedLeaveType?.id ?: 0,
                     requestUnitHours = true,
                     requestHourFrom = fromHourDouble,
                     requestHourTo = toHourDouble
@@ -244,7 +244,7 @@ fun DateInfoDialog(
     ) {
         Surface(
             shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -271,7 +271,7 @@ fun DateInfoDialog(
                     if (leaveTypeError.isNotEmpty()) {
                         Text(
                             text = leaveTypeError,
-                            color = MaterialTheme.colorScheme.error,
+                            color = MaterialTheme.colorScheme.tertiary,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 50.dp, top = 4.dp)
                         )
@@ -300,12 +300,12 @@ fun DateInfoDialog(
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.onPrimary)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 Column(
                                     Modifier
                                         .fillMaxWidth()
-                                        .background(MaterialTheme.colorScheme.onPrimary)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                 ) {
                                     var tempStartDate by remember { mutableStateOf(selectedStartDate) }
 
@@ -351,7 +351,7 @@ fun DateInfoDialog(
                                                         employeeToken = token,
                                                         requestDateFrom = requestDateFrom,
                                                         requestDateTo = requestDateTo,
-                                                        leaveTypeId = 6
+                                                        leaveTypeId = selectedLeaveType?.id ?: 0,
                                                     )
 
 
@@ -407,12 +407,12 @@ fun DateInfoDialog(
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.onPrimary)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 Column(
                                     Modifier
                                         .fillMaxWidth()
-                                        .background(MaterialTheme.colorScheme.onPrimary)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                 ) {
                                     var tempEndDate by remember { mutableStateOf(selectedEndDate) }
 
@@ -461,7 +461,7 @@ fun DateInfoDialog(
                                                         employeeToken = token,
                                                         requestDateFrom = requestDateFrom,
                                                         requestDateTo = requestDateTo,
-                                                        leaveTypeId = 6
+                                                        leaveTypeId = selectedLeaveType?.id ?: 0,
                                                     )
 
                                                     response.result.data.let {
@@ -567,7 +567,7 @@ fun DateInfoDialog(
                     if (permissionErrorMessage.isNotEmpty()) {
                         Text(
                             text = permissionErrorMessage,
-                            color = MaterialTheme.colorScheme.error,
+                            color = MaterialTheme.colorScheme.tertiary,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 50.dp, top = 4.dp)
                         )
@@ -659,7 +659,7 @@ fun DateInfoDialog(
                                     val request = TimeOffRequestForRequestEmployee(
                                         employee_token = token,
                                         action = "request_annual_leave",
-                                        leave_type_id = 7,
+                                        leave_type_id = selectedLeaveType?.id ?: 0,
                                         request_date_from = startDateStr,
                                         request_date_to = startDateStr,
                                         request_hour_from = fromHourForApi,
@@ -711,7 +711,7 @@ fun DateInfoDialog(
                                     val request = TimeOffRequestForRequestEmployee(
                                         employee_token = token,
                                         action = "request_annual_leave",
-                                        leave_type_id = 6,
+                                        leave_type_id = selectedLeaveType?.id ?: 0,
                                         request_date_from = startDateStr,
                                         request_date_to = startDateStr,
                                         request_date_from_period = period,
@@ -747,7 +747,7 @@ fun DateInfoDialog(
                                 val request = TimeOffRequestForRequestEmployee(
                                     employee_token = token,
                                     action = "request_annual_leave",
-                                    leave_type_id = 6,
+                                    leave_type_id = selectedLeaveType?.id ?: 0,
                                     request_date_from = startDateStr,
                                     request_date_to = endDateStr
                                 )

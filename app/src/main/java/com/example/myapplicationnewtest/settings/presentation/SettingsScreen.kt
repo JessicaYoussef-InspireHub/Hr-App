@@ -37,23 +37,23 @@ fun SettingsScreen(
 
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.onSecondary,
         topBar = {
             MyAppBar(
-            label = stringResource(R.string.settings_screen),
-            navController = navController
-        ) },
+                label = stringResource(R.string.settings_screen),
+            )
+        },
         bottomBar = { BottomBar(navController = navController) }
-    ){ innerPadding ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.onPrimary)
+                .background(MaterialTheme.colorScheme.onSecondary)
                 .padding(innerPadding)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ){
-
+        ) {
             GeneralSettingsCard(
                 navController = navController
             )

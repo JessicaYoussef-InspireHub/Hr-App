@@ -24,12 +24,11 @@ fun DialogActionsRow(
     onDiscard: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false
-
-) {
+){
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.onPrimary),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -37,8 +36,8 @@ fun DialogActionsRow(
             onClick = { onDiscard() },
             enabled = !isLoading,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                contentColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -55,7 +54,7 @@ fun DialogActionsRow(
             onClick = { onConfirm() },
             enabled = !isLoading,
             colors = ButtonDefaults.buttonColors(
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+                contentColor = MaterialTheme.colorScheme.onSecondary,
                 containerColor = MaterialTheme.colorScheme.tertiary
             ),
             shape = RoundedCornerShape(12.dp)

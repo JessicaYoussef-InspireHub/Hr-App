@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -134,7 +133,7 @@ fun DoubleStateDialog(
     val hasDraftOrConfirm = leaveRecords.any { it.state == "draft" || it.state == "confirm" }
 
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
 //            if (!allRefused) {
@@ -147,8 +146,10 @@ fun DoubleStateDialog(
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (hasDraftOrConfirm) MaterialTheme.colorScheme.tertiary else if (allRefused) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary ,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+//                        if (hasDraftOrConfirm) MaterialTheme.colorScheme.tertiary
+//                    else if (allRefused) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary ,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 shape = RoundedCornerShape(10.dp)
 
@@ -183,7 +184,7 @@ fun DoubleStateDialog(
                     text = formattedDate,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.tertiary,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(15.dp))
@@ -199,14 +200,14 @@ fun DoubleStateDialog(
                             else -> record.state
                         }
 
-                        val colorCircle = when (record.state) {
-                            "validate" -> MaterialTheme.colorScheme.secondary
-//                            "confirm" -> MaterialTheme.colorScheme.secondary
-                            "draft" -> MaterialTheme.colorScheme.tertiary
-                            "confirm" -> MaterialTheme.colorScheme.tertiary
-                            "refuse" -> MaterialTheme.colorScheme.error
-                            else -> Color.Transparent
-                        }
+//                        val colorCircle = when (record.state) {
+//                            "validate" -> MaterialTheme.colorScheme.secondary
+////                            "confirm" -> MaterialTheme.colorScheme.secondary
+//                            "draft" -> MaterialTheme.colorScheme.tertiary
+//                            "confirm" -> MaterialTheme.colorScheme.tertiary
+//                            "refuse" -> MaterialTheme.colorScheme.error
+//                            else -> Color.Transparent
+//                        }
 
                         val translatedLeaveType = translateLeaveType(record.leave_type, currentLanguage)
                         val durationInt = record.duration_days.toInt()
@@ -223,21 +224,21 @@ fun DoubleStateDialog(
                                 Box(
                                     modifier = Modifier
                                         .size(15.dp)
-                                        .background(color = colorCircle, shape = CircleShape)
+                                        .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     stateLabel,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                 )
                             }
                             Text(
                                 "$translatedLeaveType: $daysText $dayWord",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.padding(start = 20.dp),
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -253,7 +254,7 @@ fun DoubleStateDialog(
                                             val request = TimeOffRequestForRequestEmployee(
                                                 employee_token = token,
                                                 action = "unlink_draft_annual_leaves",
-                                                leave_type_id = 6,
+                                                leave_type_id = draftRecord.leave_id,
                                                 request_date_from = draftRecord.start_date,
                                                 request_date_to = draftRecord.end_date,
                                                 leave_id = draftRecord.leave_id
@@ -313,7 +314,7 @@ fun DoubleStateDialog(
                                         showNewVacationDialog = true
 
                                     },
-                                tint = MaterialTheme.colorScheme.error
+                                tint = MaterialTheme.colorScheme.tertiary
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
@@ -321,7 +322,7 @@ fun DoubleStateDialog(
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.error,
+                                color = MaterialTheme.colorScheme.tertiary,
                                 modifier = Modifier.clickable {
                                     showNewVacationDialog = true
 

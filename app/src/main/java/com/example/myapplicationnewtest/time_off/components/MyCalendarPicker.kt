@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.time_off.data.fetchEmployeeLeaveTypes
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -58,6 +59,8 @@ fun MyCalendarPicker(
     endDate: LocalDate? = null,
     weekendDayNames: Set<String> = emptySet(),
     publicHolidayDates: Set<LocalDate> = emptySet(),
+    leaveTypeColors: Map<String, Color> = emptyMap()
+
 ) {
     var currentMonth by remember { mutableStateOf(initialMonth) }
     val daysInMonth = currentMonth.lengthOfMonth()
@@ -70,13 +73,9 @@ fun MyCalendarPicker(
     var selectedDateForInfoDialog by remember { mutableStateOf<LocalDate?>(null) }
     var selectedLeaveRecords by remember { mutableStateOf<List<TimeOffRecord>>(emptyList()) }
     val context = LocalContext.current
-    val primaryColor = MaterialTheme.colorScheme.tertiary
-    val onPrimaryColor = MaterialTheme.colorScheme.onPrimaryContainer
-
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
     var dailyAndHourlyRecords by remember { mutableStateOf<Pair<List<TimeOffRecord>, List<HourlyTimeOffRecord>>?>(null) }
-
     var permissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
-
     var doublePermissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
 
     fun String.replaceDigitsWithArabic(): String {
@@ -122,7 +121,7 @@ fun MyCalendarPicker(
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.onPrimary)
+            .background(MaterialTheme.colorScheme.onSecondary)
             .padding(vertical = 16.dp, horizontal = 8.dp)
             .then(if (isDialogMode) Modifier else Modifier.fillMaxWidth())
     ) {
@@ -139,7 +138,7 @@ fun MyCalendarPicker(
                     .clickable {
                         currentMonth = currentMonth.minusMonths(1)
                     },
-                tint = primaryColor
+                tint = tertiaryColor
             )
 
             Text(
@@ -150,7 +149,7 @@ fun MyCalendarPicker(
                 textAlign = TextAlign.Center,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = primaryColor
+                color = tertiaryColor
             )
 
             Icon(
@@ -161,7 +160,7 @@ fun MyCalendarPicker(
                     .clickable {
                         currentMonth = currentMonth.plusMonths(1)
                     },
-                tint = primaryColor
+                tint = tertiaryColor
             )
 
         }
@@ -190,7 +189,7 @@ fun MyCalendarPicker(
                         .padding(vertical = 4.dp),
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
-                    color = primaryColor,
+                    color = tertiaryColor,
                     fontSize = 16.sp
                 )
             }
@@ -202,14 +201,14 @@ fun MyCalendarPicker(
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
             userScrollEnabled = false,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             items(totalCells) { index ->
                 if (index < firstDayOfWeek) {
                     Box(modifier = Modifier.size(40.dp)) // Empty space before the 1st
                 } else {
                     val day = index - firstDayOfWeek + 1
+
 
                     val currentLocale = Locale.getDefault()
                     val dayText = if (currentLocale.language == "ar") {
@@ -228,6 +227,21 @@ fun MyCalendarPicker(
                     } else {
                         false
                     }
+
+                    val firstDailyRecord = dailyRecords.find {
+                        val start = LocalDate.parse(it.start_date)
+                        val end = LocalDate.parse(it.end_date)
+                        !date.isBefore(start) && !date.isAfter(end)
+                    }
+
+                    val firstHourlyRecord = hourlyRecords.find {
+                        val leaveDay = LocalDate.parse(it.leave_day)
+                        date == leaveDay
+                    }
+
+                    val firstState = firstDailyRecord?.state ?: firstHourlyRecord?.state
+                    val firstLeaveType = firstDailyRecord?.leave_type ?: firstHourlyRecord?.leave_type
+
 
                     val isWeekendHoliday = weekendDayNames.map { it.lowercase() }
                         .contains(date.dayOfWeek.name.lowercase())
@@ -253,46 +267,86 @@ fun MyCalendarPicker(
                             .size(if (isDialogMode) 40.dp else 50.dp)
                             .border(
                                 width = if (isDialogMode && inSelectedRange) 2.dp else 0.dp,
-                                color = if (isDialogMode && inSelectedRange) primaryColor else Color.Transparent,
+                                color = if (isDialogMode && inSelectedRange) tertiaryColor else Color.Transparent,
                                 shape = CircleShape
                             )
+//                            .background(
+//                                when {
+//                                    isWeekendHoliday -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    publicHolidayDates.contains(date) -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    isDialogMode && inSelectedRange -> MaterialTheme.colorScheme.onPrimary
+////                                  isRefusedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    isRefused && isDraft -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    isRefusedPermission && isDraftPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    isRefused && isConfirmed -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    isRefusedPermission && isConfirmedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    isRefused && isApproved -> MaterialTheme.colorScheme.onSurface
+//                                    isRefusedPermission && isApprovedPermission-> MaterialTheme.colorScheme.onSurface
+//
+//                                    states.contains("confirm") -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    isConfirmedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+//
+//                                    states.contains("validate") -> MaterialTheme.colorScheme.onSurface
+//                                    isApprovedPermission -> MaterialTheme.colorScheme.onSurface
+//
+//                                    states.contains("draft") -> MaterialTheme.colorScheme.onSecondaryContainer
+//                                    isDraftPermission -> MaterialTheme.colorScheme.onSecondaryContainer
+//
+//                                    states.contains("refuse") -> Color.Transparent
+//                                    isRefusedPermission -> Color.Transparent
+//
+//                                    isToday -> tertiaryColor
+//                                    else -> Color.Transparent
+//                                },
+//                                shape = when {
+//                                    isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
+//
+//                                    else -> CircleShape
+//                                }
+//                            )
+
                             .background(
+//                                when {
+//                                    isWeekendHoliday -> MaterialTheme.colorScheme.surfaceVariant
+//                                    publicHolidayDates.contains(date) -> MaterialTheme.colorScheme.surfaceVariant
+//
+//                                    states.contains("refuse") || states.contains("refuse") ||
+//                                            hourlyStates.contains("refuse") || hourlyStates.contains("refuse") -> Color.Transparent
+//
+//                                    states.contains("draft") || states.contains("confirm") ||
+//                                            hourlyStates.contains("draft") || hourlyStates.contains("confirm") -> Color.Transparent
+//
+//                                    states.isNotEmpty() -> {
+//                                        val leaveType = dailyRecords.find {
+//                                            val start = LocalDate.parse(it.start_date)
+//                                            val end = LocalDate.parse(it.end_date)
+//                                            !date.isBefore(start) && !date.isAfter(end)
+//                                        }?.leave_type
+//                                        leaveTypeColors[leaveType] ?: MaterialTheme.colorScheme.primaryContainer
+//                                    }
+//
+//                                    hourlyStates.isNotEmpty() -> {
+//                                        val leaveType = hourlyRecords.find {
+//                                            val leaveDay = LocalDate.parse(it.leave_day)
+//                                            date == leaveDay
+//                                        }?.leave_type
+//                                        leaveTypeColors[leaveType] ?: MaterialTheme.colorScheme.primaryContainer
+//                                    }
+//
+//                                    isToday -> tertiaryColor
+//                                    else -> Color.Transparent
+//                                },
                                 when {
-                                    isWeekendHoliday -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    publicHolidayDates.contains(date) -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    isDialogMode && inSelectedRange -> MaterialTheme.colorScheme.onPrimary
-//                                    isRefusedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    isRefused && isDraft -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    isRefusedPermission && isDraftPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-
-                                    isRefused && isConfirmed -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    isRefusedPermission && isConfirmedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-
-                                    isRefused && isApproved -> MaterialTheme.colorScheme.onSurface
-                                    isRefusedPermission && isApprovedPermission-> MaterialTheme.colorScheme.onSurface
-
-                                    states.contains("confirm") -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    isConfirmedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-
-                                    states.contains("validate") -> MaterialTheme.colorScheme.onSurface
-                                    isApprovedPermission -> MaterialTheme.colorScheme.onSurface
-
-                                    states.contains("draft") -> MaterialTheme.colorScheme.onSecondaryContainer
-                                    isDraftPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-
-                                    states.contains("refuse") -> Color.Transparent
-                                    isRefusedPermission -> Color.Transparent
-
-                                    isToday -> primaryColor
-                                    else -> Color.Transparent
+                                    firstState == "refuse" -> Color.Transparent
+                                    firstState == "draft" || firstState == "confirm" -> Color.Transparent
+                                    firstState == "validate" -> leaveTypeColors[firstLeaveType] ?:Color.Transparent
+                                    isWeekendHoliday -> MaterialTheme.colorScheme.surfaceVariant
+                                    publicHolidayDates.contains(date) -> MaterialTheme.colorScheme.surfaceVariant
+                                    firstState == null && isToday -> tertiaryColor
+                                    else -> leaveTypeColors[firstLeaveType] ?:Color.Transparent
                                 },
                                 shape = when {
-                                    isRefusedPermission && (isDraft || isConfirmed || isApproved) -> CircleShape
-
-                                    isPermission -> RoundedCornerShape(0.dp)
-
                                     isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
-
                                     else -> CircleShape
                                 }
                             )
@@ -421,43 +475,77 @@ fun MyCalendarPicker(
                         contentAlignment = Alignment.Center
                     )
                     {
-                        if (states.contains("draft") || states.contains("confirm") || isConfirmedPermission || isDraftPermission) {
+                        if (firstState == "draft" || firstState == "confirm") {
+                            val leaveTypeColor = when {
+                                states.isNotEmpty() -> {
+                                    val leaveType = dailyRecords.find {
+                                        val start = LocalDate.parse(it.start_date)
+                                        val end = LocalDate.parse(it.end_date)
+                                        !date.isBefore(start) && !date.isAfter(end)
+                                    }?.leave_type
+                                    leaveTypeColors[leaveType] ?: MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                                }
+
+                                hourlyStates.isNotEmpty() -> {
+                                    val leaveType = hourlyRecords.find {
+                                        val leaveDay = LocalDate.parse(it.leave_day)
+                                        date == leaveDay
+                                    }?.leave_type
+                                    leaveTypeColors[leaveType] ?: MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                                }
+
+                                else -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                            }
+
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
                                     .clip(
                                         when {
-                                            isRefusedPermission && (isDraft || isConfirmed || isApproved) -> CircleShape
-                                            isPermission -> RoundedCornerShape(0.dp)
                                             isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
                                             else -> CircleShape
                                         }
                                     )
-
                             ) {
                                 DiagonalLinesIcon(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-
+                                    modifier = Modifier.fillMaxSize(),
+                                    lineColor = leaveTypeColor.copy(alpha = 0.3f)
                                 )
                             }
-                        }
+                    }
 
                         Text(
                             text = dayText,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
-                            color = if (isToday) MaterialTheme.colorScheme.onPrimary else primaryColor,
+                            color = MaterialTheme.colorScheme.onBackground,
                             textDecoration = if (validatedDates[date] == "refuse") TextDecoration.LineThrough else TextDecoration.None,
                             fontSize = 16.sp
                         )
-                        if (isRefused || hasMultipleStates  || isRefusedPermission) {
+                        if (firstState == "refuse") {
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
                                     .drawBehind {
                                         drawLine(
-                                            color = if(isRefusedPermission) onPrimaryColor else primaryColor,
+                                            color = when {
+                                                isRefusedPermission -> {
+                                                    val leaveType = hourlyRecords.find {
+                                                        val leaveDay = LocalDate.parse(it.leave_day)
+                                                        date == leaveDay
+                                                    }?.leave_type
+                                                    leaveTypeColors[leaveType] ?: Color.Transparent
+                                                }
+                                                isRefused -> {
+                                                    val leaveType = dailyRecords.find {
+                                                        val start = LocalDate.parse(it.start_date)
+                                                        val end = LocalDate.parse(it.end_date)
+                                                        !date.isBefore(start) && !date.isAfter(end)
+                                                    }?.leave_type
+                                                    leaveTypeColors[leaveType] ?: Color.Transparent
+                                                }
+                                                else -> tertiaryColor
+                                            },
                                             start = Offset(0f, size.height / 2),
                                             end = Offset(size.width, size.height / 2),
                                             strokeWidth = 10f
@@ -601,16 +689,11 @@ fun MyCalendarPicker(
     }
 }
 
+
 @Composable
-fun DiagonalLinesIcon(modifier: Modifier = Modifier) {
-
-    val lineColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
-
+fun DiagonalLinesIcon(modifier: Modifier = Modifier, lineColor: Color) {
     Canvas(modifier = modifier) {
         val lineSpacing = 20f
-        val lineColor = lineColor
-
-
         var startX = -size.height
 
         while (startX < size.width) {
@@ -618,7 +701,7 @@ fun DiagonalLinesIcon(modifier: Modifier = Modifier) {
                 color = lineColor,
                 start = Offset(startX, 0f),
                 end = Offset(startX + size.height, size.height),
-                strokeWidth = 4f
+                strokeWidth = 8f
             )
             startX += lineSpacing
         }

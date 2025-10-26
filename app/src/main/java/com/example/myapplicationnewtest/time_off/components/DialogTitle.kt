@@ -39,7 +39,7 @@ fun DialogTitle(
             Text(
                 text = stringResource(R.string.time_off_request),
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 20.sp,
             )
             Icon(
@@ -50,13 +50,13 @@ fun DialogTitle(
                     .clickable {
                         onDiscard()
                     },
-                tint = MaterialTheme.colorScheme.onTertiary
+                tint = MaterialTheme.colorScheme.tertiary
             )
         }
         Spacer(modifier = Modifier.size(10.dp))
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.onSecondaryContainer)
+                .background(MaterialTheme.colorScheme.inverseOnSurface)
         )
     }
 }

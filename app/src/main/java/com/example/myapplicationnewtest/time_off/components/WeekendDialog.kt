@@ -33,7 +33,7 @@ fun WeekendAndPublicHolidayDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(
@@ -42,14 +42,14 @@ fun WeekendAndPublicHolidayDialog(
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 shape = RoundedCornerShape(10.dp)
 
             ) {
                 Text(
                     text = stringResource(R.string.ok),
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )

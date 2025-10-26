@@ -35,7 +35,7 @@ fun ConfirmDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = onDismiss,
         text = {
             Column (
@@ -58,7 +58,7 @@ fun ConfirmDialog(
                     text = message,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.tertiary,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -66,7 +66,7 @@ fun ConfirmDialog(
                     confirmText,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Start,
                 )
             }
@@ -77,30 +77,34 @@ fun ConfirmDialog(
                 horizontalArrangement = Arrangement.End
             ){
                 Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ){
+                    Text(
+                        stringResource(R.string.cancel),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+
+
+                Button(
                     onClick = onConfirm,
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
                         containerColor = MaterialTheme.colorScheme.tertiary
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
                         stringResource(R.string.ok),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ){
-                    Text(
-                        stringResource(R.string.cancel),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )

@@ -25,12 +25,12 @@ fun CustomHours(
             onCheckedChange = onCheckedHoursChange,
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.tertiary,
-                uncheckedColor = MaterialTheme.colorScheme.surface
+                uncheckedColor = MaterialTheme.colorScheme.onBackground
             )
         )
         Text(
             text = stringResource(R.string.custom_hours),
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp
         )

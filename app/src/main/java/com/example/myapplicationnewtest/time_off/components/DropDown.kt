@@ -93,7 +93,7 @@ fun DropDown(
                     else
                         translatedName
                 } ?: stringResource(R.string.select_leave_type),
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f)
@@ -102,7 +102,7 @@ fun DropDown(
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
                 contentDescription = "Dropdown arrow",
-                tint = MaterialTheme.colorScheme.surface
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -111,7 +111,7 @@ fun DropDown(
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .background(
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                 )
         ) {
             leaveTypes
@@ -128,7 +128,7 @@ fun DropDown(
                                 "$translatedName (${if (currentLanguage == "ar") convertToArabicNumbers(remaining.toString()) else remaining} ${stringResource(R.string.remaining_out_of)} ${if (currentLanguage == "ar") convertToArabicNumbers(original.toString()) else original})"
                             else
                                 translatedName,
-                            color = MaterialTheme.colorScheme.surface,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold
                         )

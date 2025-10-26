@@ -28,12 +28,12 @@ fun InternetRequiredDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
                     containerColor = MaterialTheme.colorScheme.tertiary
                 ),
                 shape = RoundedCornerShape(10.dp),
@@ -75,7 +75,7 @@ fun InternetRequiredDialog(
                     stringResource(R.string.you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,)
+                    color = MaterialTheme.colorScheme.onBackground)
             },
     )
 }

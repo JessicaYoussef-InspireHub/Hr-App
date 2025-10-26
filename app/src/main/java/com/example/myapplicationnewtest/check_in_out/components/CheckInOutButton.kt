@@ -37,15 +37,15 @@ fun CheckInOutButton(
         if (attendanceStatus == "checked_in") {
             ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                disabledContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                contentColor = MaterialTheme.colorScheme.onSecondary,
+                disabledContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
             )
         } else {
             ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onPrimary,
+                containerColor = MaterialTheme.colorScheme.onSecondary,
                 contentColor = MaterialTheme.colorScheme.tertiary,
-                disabledContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
             )
         }

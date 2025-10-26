@@ -16,7 +16,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
@@ -119,13 +118,13 @@ fun TimeOffDetailsDialog(
         else -> ""
     }
 
-    val colorCircle = when (record.state) {
-        "validate" -> MaterialTheme.colorScheme.secondary
-        "draft" -> MaterialTheme.colorScheme.tertiary
-        "confirm" -> MaterialTheme.colorScheme.tertiary
-        "refuse" -> MaterialTheme.colorScheme.error
-        else -> Color.Transparent
-    }
+//    val colorCircle = when (record.state) {
+//        "validate" -> MaterialTheme.colorScheme.secondary
+//        "draft" -> MaterialTheme.colorScheme.tertiary
+//        "confirm" -> MaterialTheme.colorScheme.tertiary
+//        "refuse" -> MaterialTheme.colorScheme.error
+//        else -> Color.Transparent
+//    }
 
     fun translateLeaveType(typeKey: String, language: String): String {
         return when (language) {
@@ -167,7 +166,7 @@ fun TimeOffDetailsDialog(
 
 
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = { onDismiss() },
         confirmButton = {
             if (record.state == "draft" || record.state == "confirm") {
@@ -178,14 +177,14 @@ fun TimeOffDetailsDialog(
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     ),
                     shape = RoundedCornerShape(10.dp)
 
                 ) {
                     Text(
                         text = stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onSecondary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -196,8 +195,8 @@ fun TimeOffDetailsDialog(
                         onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     ),
                     shape = RoundedCornerShape(10.dp)
 
@@ -230,7 +229,7 @@ fun TimeOffDetailsDialog(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    color = colorCircle
+                    color = MaterialTheme.colorScheme.tertiary,
                 )
             }
         },
@@ -244,7 +243,7 @@ fun TimeOffDetailsDialog(
                     text = dateText,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -258,14 +257,14 @@ fun TimeOffDetailsDialog(
                         modifier = Modifier
                             .width(15.dp)
                             .height(15.dp)
-                            .background(color = colorCircle, shape = CircleShape)
+                            .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "$translatedLeaveType: $formattedDuration $dayLabel",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Start,
                     )
                 }
@@ -286,7 +285,7 @@ fun TimeOffDetailsDialog(
                                     showNewVacationDialog = true
 
                                 },
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MaterialTheme.colorScheme.tertiary
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
@@ -294,7 +293,7 @@ fun TimeOffDetailsDialog(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.error,
+                            color = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.clickable {
                                 showNewVacationDialog = true
 
@@ -309,7 +308,7 @@ fun TimeOffDetailsDialog(
                             val request = TimeOffRequestForRequestEmployee(
                                 employee_token = token,
                                 action = "unlink_draft_annual_leaves",
-                                leave_type_id = 6,
+                                leave_type_id = record.leave_id,
                                 request_date_from = record.start_date,
                                 request_date_to = record.end_date,
                                 leave_id = record.leave_id

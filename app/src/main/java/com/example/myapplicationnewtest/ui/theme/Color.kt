@@ -13,6 +13,12 @@ val Close_color = Color(0xFFA6A4A4)
 val Validate_color = Color(0xFF4CAF50)
 val Lines_color = Color(0xFFF7F7F7)
 val dark_background_color = Color(0xFF121212)
+
+val weekendAndPublicColor = Color(0xFF1C1C1C)
+
+
+
+
 //val Main_color_dark = Color(0xFF222222)
 //val Disabled_color_dark = Color(0xFF4E4E4E)
 //val Discard_color_dark = Color(0xFF616161)

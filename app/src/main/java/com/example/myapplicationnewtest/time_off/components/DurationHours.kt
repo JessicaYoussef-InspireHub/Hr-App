@@ -45,7 +45,7 @@ fun DurationHours(
     Text(
         text = "$formattedNumber $hourLabel",
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.onBackground,
         fontWeight = FontWeight.SemiBold,
         fontSize = 15.sp
     )

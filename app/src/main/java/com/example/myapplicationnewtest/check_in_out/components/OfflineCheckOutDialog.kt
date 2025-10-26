@@ -29,7 +29,7 @@ fun OfflineCheckOutDialog(
     onConfirm: () -> Unit
 ) {
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         onDismissRequest = onDismiss,
         title = {
             Column (
@@ -61,12 +61,12 @@ fun OfflineCheckOutDialog(
                     stringResource(R.string.are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,)
+                    color = MaterialTheme.colorScheme.onBackground,)
             },
         confirmButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
                     containerColor = MaterialTheme.colorScheme.tertiary
                 ),
                 shape = RoundedCornerShape(10.dp),
@@ -80,8 +80,8 @@ fun OfflineCheckOutDialog(
         dismissButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 shape = RoundedCornerShape(10.dp),
                 onClick = { onDismiss() }

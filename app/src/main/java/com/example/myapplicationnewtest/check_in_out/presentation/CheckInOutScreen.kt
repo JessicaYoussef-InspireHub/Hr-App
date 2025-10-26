@@ -48,7 +48,6 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.system.exitProcess
 import com.example.myapplicationnewtest.R
-import com.example.myapplicationnewtest.check_in_out.components.TimeChangedDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.*
@@ -122,6 +121,7 @@ fun CheckInOutScreen(
     var showErrorDialog by remember { mutableStateOf(false) }
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val attendanceStatus by viewModel.attendanceStatus.collectAsState()
+    var isInitialLoading by remember { mutableStateOf(false) }
 
     fun String.replaceDigitsWithArabic(): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
@@ -201,14 +201,30 @@ fun CheckInOutScreen(
         }
     }
 
+//    LaunchedEffect(Unit) {
+//        while (true) {
+//            val connected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
+//            isOffline = !connected
+//            Log.d("NetworkStatus", if (isOffline) "📴 Offline" else "🌐 Online")
+//            delay(3000)
+//        }
+//    }
+
     LaunchedEffect(Unit) {
+        val connected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
+        isOffline = !connected
+
+        if (connected) {
+            isInitialLoading = true
+        }
+
         while (true) {
-            val connected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
-            isOffline = !connected
-            Log.d("NetworkStatus", if (isOffline) "📴 Offline" else "🌐 Online")
+            val stillConnected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
+            isOffline = !stillConnected
             delay(3000)
         }
     }
+
 
     LaunchedEffect(true) {
         viewModel.getAttendanceStatus(token)
@@ -219,6 +235,7 @@ fun CheckInOutScreen(
             val (status, checkIn, worked, distanceReady) = values
             if (status != null && checkIn != null && worked != null && distanceReady != null) {
                 delay(500)
+                isInitialLoading = false
             }
         }
     }
@@ -416,6 +433,21 @@ fun CheckInOutScreen(
             }
         }
 
+        if ((isButtonLoading || isInitialLoading) && !isOffline) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                    .noClickable(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+        }
+
+
         if (showInternetRequiredDialog) {
             InternetRequiredDialog(
                 onDismiss = { showInternetRequiredDialog = false }
@@ -430,10 +462,10 @@ fun CheckInOutScreen(
         }
     }
 
-    TimeChangedDialog(
-        showDialog = showDialog,
-        onDismiss = { viewModel.dismissTimeChangedDialog() }
-    )
+//    TimeChangedDialog(
+//        showDialog = showDialog,
+//        onDismiss = { viewModel.dismissTimeChangedDialog() }
+//    )
 
     if (showErrorDialog) {
         CheckOutDialog(

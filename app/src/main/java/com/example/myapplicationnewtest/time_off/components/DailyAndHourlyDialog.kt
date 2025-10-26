@@ -30,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -153,17 +152,17 @@ fun DailyAndHourlyDialog(
     val hasConfirm = hourlyRecords.any { it.state == "confirm" } || dailyRecords.any { it.state == "confirm" }
     val hasDraft = hourlyRecords.any { it.state == "draft" } || dailyRecords.any { it.state == "draft" }
 
-    val buttonColor = if ( hasValidate ) {
-        MaterialTheme.colorScheme.secondary
-    } else if (hasDraft || hasConfirm) {
-        MaterialTheme.colorScheme.tertiary
-    } else {
-        MaterialTheme.colorScheme.error
-    }
+//    val buttonColor = if ( hasValidate ) {
+//        MaterialTheme.colorScheme.secondary
+//    } else if (hasDraft || hasConfirm) {
+//        MaterialTheme.colorScheme.tertiary
+//    } else {
+//        MaterialTheme.colorScheme.error
+//    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -185,7 +184,7 @@ fun DailyAndHourlyDialog(
                     text = formattedDate,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.tertiary,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(15.dp))
@@ -201,13 +200,13 @@ fun DailyAndHourlyDialog(
                             else -> record.state
                         }
 
-                        val colorCircle = when (record.state) {
-                            "validate" -> MaterialTheme.colorScheme.secondary
-                            "draft" -> MaterialTheme.colorScheme.tertiary
-                            "confirm" -> MaterialTheme.colorScheme.tertiary
-                            "refuse" -> MaterialTheme.colorScheme.error
-                            else -> Color.Transparent
-                        }
+//                        val colorCircle = when (record.state) {
+//                            "validate" -> MaterialTheme.colorScheme.secondary
+//                            "draft" -> MaterialTheme.colorScheme.tertiary
+//                            "confirm" -> MaterialTheme.colorScheme.tertiary
+//                            "refuse" -> MaterialTheme.colorScheme.error
+//                            else -> Color.Transparent
+//                        }
 
                         val translatedLeaveType =
                             translateLeaveType(record.leave_type, currentLanguage)
@@ -229,21 +228,21 @@ fun DailyAndHourlyDialog(
                                 Box(
                                     modifier = Modifier
                                         .size(15.dp)
-                                        .background(color = colorCircle, shape = CircleShape)
+                                        .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     stateLabel,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                 )
                             }
                             Text(
                                 "$translatedLeaveType: $daysText $dayWord",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.padding(start = 20.dp),
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -260,13 +259,13 @@ fun DailyAndHourlyDialog(
                             else -> record.state
                         }
 
-                        val colorCircle = when (record.state) {
-                            "validate" -> MaterialTheme.colorScheme.secondary
-                            "draft" -> MaterialTheme.colorScheme.tertiary
-                            "confirm" -> MaterialTheme.colorScheme.tertiary
-                            "refuse" -> MaterialTheme.colorScheme.error
-                            else -> Color.Transparent
-                        }
+//                        val colorCircle = when (record.state) {
+//                            "validate" -> MaterialTheme.colorScheme.secondary
+//                            "draft" -> MaterialTheme.colorScheme.tertiary
+//                            "confirm" -> MaterialTheme.colorScheme.tertiary
+//                            "refuse" -> MaterialTheme.colorScheme.error
+//                            else -> Color.Transparent
+//                        }
 
                         val translatedLeaveType =
                             translateLeaveType(record.leave_type, currentLanguage)
@@ -286,21 +285,21 @@ fun DailyAndHourlyDialog(
                        Box(
                            modifier = Modifier
                                .size(15.dp)
-                               .background(color = colorCircle, shape = CircleShape)
+                               .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
                        )
                        Spacer(modifier = Modifier.width(8.dp))
                        Text(
                            stateLabel,
                            fontSize = 17.sp,
                            fontWeight = FontWeight.Normal,
-                           color = MaterialTheme.colorScheme.onPrimaryContainer,
+                           color = MaterialTheme.colorScheme.onBackground,
                        )
                    }
                    Text(
                        "$translatedLeaveType: $hourWord",
                        fontSize = 17.sp,
                        fontWeight = FontWeight.Normal,
-                       color = MaterialTheme.colorScheme.onPrimaryContainer,
+                       color = MaterialTheme.colorScheme.onBackground,
                        modifier = Modifier.padding(start = 20.dp),
                    )
                    Text(
@@ -335,7 +334,7 @@ fun DailyAndHourlyDialog(
                        }",
                        fontSize = 17.sp,
                        fontWeight = FontWeight.Normal,
-                       color = MaterialTheme.colorScheme.onPrimaryContainer,
+                       color = MaterialTheme.colorScheme.onBackground,
                        modifier = Modifier.padding(start = 20.dp),
                    )
                    Spacer(modifier = Modifier.height(12.dp))
@@ -347,8 +346,9 @@ fun DailyAndHourlyDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = buttonColor,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+//                    containerColor = buttonColor,
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 shape = RoundedCornerShape(10.dp)
             ) {

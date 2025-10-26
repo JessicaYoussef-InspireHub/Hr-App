@@ -61,14 +61,13 @@ fun MyActualTimeOff(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .background(MaterialTheme.colorScheme.onPrimary),
+                .background(MaterialTheme.colorScheme.onSecondary),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
 
         ) {
 
             visibleLeaveTypes.forEachIndexed { index, leave ->
-//            if (leave.requires_allocation == "yes") {
                     val balance = if (currentLocale.language == "ar") {
                         (leave.remaining_balance ?: 0f).toString().replaceDigitsWithArabic()
                     } else {
@@ -99,7 +98,7 @@ fun MyActualTimeOff(
                         modifier = Modifier
                             .height(150.dp)
                             .width(1.dp)
-                            .background(MaterialTheme.colorScheme.onSecondaryContainer)
+                            .background(MaterialTheme.colorScheme.inverseOnSurface)
                     )
                 }
             }
@@ -107,7 +106,7 @@ fun MyActualTimeOff(
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.onSecondaryContainer)
+                .background(MaterialTheme.colorScheme.inverseOnSurface)
         )
     }
 }

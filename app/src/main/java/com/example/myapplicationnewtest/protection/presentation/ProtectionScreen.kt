@@ -66,7 +66,7 @@ fun ProtectionScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onPrimary)
+            .background(MaterialTheme.colorScheme.onSecondary)
             .padding(16.dp),
     ) {
         Column(
@@ -79,7 +79,7 @@ fun ProtectionScreen(
                 color = MaterialTheme.colorScheme.tertiary,
                 textAlign = TextAlign.Center,
                 lineHeight = 30.sp,
-                fontSize = 30.sp
+                fontSize = 25.sp
             )
         }
 

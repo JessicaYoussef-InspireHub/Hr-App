@@ -40,10 +40,10 @@ fun InputFields(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            label = {
+            placeholder = {
                 Text(
                     label ,
-                    color = MaterialTheme.colorScheme.tertiary ,
+                    color = MaterialTheme.colorScheme.onBackground ,
                     fontWeight = FontWeight.Normal) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -63,18 +63,15 @@ fun InputFields(
             ),
             colors = TextFieldDefaults.colors(
                 cursorColor = MaterialTheme.colorScheme.tertiary,
-                focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
-                disabledLabelColor = MaterialTheme.colorScheme.onPrimary,
-                focusedLabelColor = MaterialTheme.colorScheme.tertiary,
-                unfocusedContainerColor =MaterialTheme.colorScheme.onPrimary,
-                disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                unfocusedContainerColor =MaterialTheme.colorScheme.surfaceVariant,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 focusedTextColor = MaterialTheme.colorScheme.tertiary,
                 unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
                 disabledTextColor = MaterialTheme.colorScheme.tertiary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.tertiary,
                 unfocusedIndicatorColor = MaterialTheme.colorScheme.tertiary,
                 disabledIndicatorColor = MaterialTheme.colorScheme.tertiary,
-
                 )
         )
     }
