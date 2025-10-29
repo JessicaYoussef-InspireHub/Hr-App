@@ -56,7 +56,7 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
         !token.isNullOrEmpty() && protectionSkipped -> "CheckInOutScreen"
 
         // ✅ Has companyId and apiKey but no token (needs to sign in)
-        token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6/0"
+        token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey/0"
 
         // ✅ Has companyId and apiKey and token (needs to protection)
         !token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "ProtectionScreen/0"

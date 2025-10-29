@@ -195,15 +195,15 @@ fun GeneralSettingsCard(
 //                        sharedPrefManager.setDarkModeEnabled(newMode)
                     },
                     trailingIcon = {
-                        CustomSwitch(
-//                            checked = darkModeState.value,
-                            checked = true,
-                            onCheckedChange = {
-//                                isChecked ->
-//                                darkModeState.value = isChecked
-//                                sharedPrefManager.setDarkModeEnabled(isChecked)
-                            },
-                        )
+//                        CustomSwitch(
+////                            checked = darkModeState.value,
+//                            checked = true,
+//                            onCheckedChange = {
+////                                isChecked ->
+////                                darkModeState.value = isChecked
+////                                sharedPrefManager.setDarkModeEnabled(isChecked)
+//                            },
+//                        )
                     }
                 )
             }

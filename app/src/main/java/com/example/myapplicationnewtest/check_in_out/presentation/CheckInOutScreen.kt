@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -55,7 +56,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.remember
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.myapplicationnewtest.appColors
+import com.example.myapplicationnewtest.check_in_out.components.GpsDialog
 import com.example.myapplicationnewtest.check_in_out.components.InternetRequiredDialog
 import com.example.myapplicationnewtest.check_in_out.components.OfflineCheckOutDialog
 import com.example.myapplicationnewtest.check_in_out.components.OfflineSnackBar
@@ -63,6 +68,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.InetSocketAddress
 import java.net.Socket
+
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -109,12 +115,12 @@ fun CheckInOutScreen(
     val rawDate = lastCheckOut?.substringBefore(" ") ?: ""
     val parts = rawDate.split("-") // [2025, 08, 18]
     var showOfflineCheckOutDialog by remember { mutableStateOf(false) }
-    val showDialog by viewModel.showTimeChangedDialog.collectAsState()
+//    val showDialog by viewModel.showTimeChangedDialog.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var offlineMessage by remember { mutableStateOf("") }
     var showInternetRequiredDialog by remember { mutableStateOf(false) }
     var isOffline by remember { mutableStateOf(false) }
-    var isButtonLoading by remember { mutableStateOf(false) }
+    var isButtonLoading by remember { mutableStateOf(true) }
     val workedHours by viewModel.workedHours.collectAsState()
     val totalMinutes = ((workedHours ?: 0.0) * 60).toInt()
     val hours = totalMinutes / 60
@@ -123,6 +129,10 @@ fun CheckInOutScreen(
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val attendanceStatus by viewModel.attendanceStatus.collectAsState()
     var isInitialLoading by remember { mutableStateOf(false) }
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    var isGpsEnabled by remember { mutableStateOf(false) }
+    var showGpsDialog by remember { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     fun String.replaceDigitsWithArabic(): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
@@ -213,6 +223,56 @@ fun CheckInOutScreen(
 //    }
 
     LaunchedEffect(Unit) {
+        isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        Log.d("GPS_STATUS", "📍 GPS Enabled: $isGpsEnabled")
+
+        if (!isGpsEnabled) {
+            println("❌ GPS is turned OFF")
+            showGpsDialog = true
+        } else {
+            println("✅ GPS is ON")
+        }
+    }
+
+// ✅ Every time the user returns to the application (from settings or any other screen)
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                isGpsEnabled = gpsStatus
+                Log.d("GPS_STATUS", "🔁 GPS status after resume: $gpsStatus")
+
+                if (!gpsStatus) {
+                    println("❌ GPS is still OFF")
+                    showGpsDialog = true
+                } else {
+                    println("✅ GPS is ON now")
+                    showGpsDialog = false
+
+                    // ✅ Re-verify distance and location after GPS is turned on
+                    Log.d("GPS_STATUS", "🔄 Re-checking location and distance...")
+                    viewModel.checkLocationAndDistance(latitude, longitude, allowedDistance)
+
+                    // ✅ Loading will be temporarily enabled after returning
+                    isInitialLoading = true
+                    coroutineScope.launch {
+                       delay(1000)
+                        isInitialLoading = false
+                    }
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+
+
+    LaunchedEffect(Unit) {
         val connected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
         isOffline = !connected
 
@@ -232,12 +292,13 @@ fun CheckInOutScreen(
         viewModel.getAttendanceStatus(token)
 
         snapshotFlow {
-            listOf(attendanceStatus, lastCheckIn, workedHours, isWithinDistance)
+            listOf(attendanceStatus, lastCheckIn, workedHours)
         }.collect { values ->
-            val (status, checkIn, worked, distanceReady) = values
-            if (status != null && checkIn != null && worked != null && distanceReady != null) {
+            val (status, checkIn, worked) = values
+            if (status != null && checkIn != null && worked != null ) {
                 delay(500)
                 isInitialLoading = false
+                isButtonLoading = false
             }
         }
     }
@@ -323,6 +384,7 @@ fun CheckInOutScreen(
                 CheckInOutButton(
                     attendanceStatus = attendanceStatus,
                     isWithinDistance = (isWithinDistance == true),
+                    isLoading = isButtonLoading || isWithinDistance == null,
                     onClick = {
                         if (!isButtonLoading) {
                             isButtonLoading = true
@@ -422,20 +484,21 @@ fun CheckInOutScreen(
             )
         }
 
-        if (isButtonLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize()
-                    .background(colors.onSurfaceColor.copy(alpha = 0.4f))
-                    .noClickable(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = colors.tertiaryColor
-                )
-            }
-        }
+//        if (isButtonLoading) {
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .background(colors.onSurfaceColor.copy(alpha = 0.4f))
+//                    .noClickable(),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                CircularProgressIndicator(
+//                    color = colors.tertiaryColor
+//                )
+//            }
+//        }
 
-        if ((isButtonLoading || isInitialLoading) && !isOffline) {
+        if ( isInitialLoading && !isOffline) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -468,6 +531,22 @@ fun CheckInOutScreen(
 //        showDialog = showDialog,
 //        onDismiss = { viewModel.dismissTimeChangedDialog() }
 //    )
+
+
+
+
+
+
+        GpsDialog(
+            showDialog = showGpsDialog,
+            onDismiss = { showGpsDialog = false },
+            onConfirm = {
+                showGpsDialog = false
+                val intent = android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                context.startActivity(intent)
+            }
+        )
+
 
     if (showErrorDialog) {
         CheckOutDialog(

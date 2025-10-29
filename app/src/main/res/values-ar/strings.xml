@@ -148,5 +148,8 @@
     <string name="scan_qr_code_again">مسح رمز الاستجابة السريعة مرة أخرى</string>
     <string name="confirmed">في انتظار الموافقة</string>
     <string name="valid">تمت الموافقة</string>
+    <string name="enable_now">تشغيل الآن</string>
+    <string name="enable_location">تشغيل الموقع (GPS)</string>
+    <string name="please_enable_gps_so_the_app_can_accurately_detect_your_location">الرجاء تشغيل الـ GPS حتى يتمكن التطبيق من تحديد موقعك بشكل صحيح.</string>
 
 </resources>
