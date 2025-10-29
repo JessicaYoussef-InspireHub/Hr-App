@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -25,7 +24,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,6 +48,15 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.clipPath
+import com.example.myapplicationnewtest.appColors
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -71,6 +78,8 @@ fun PermissionDialog(
 
     val record = records.firstOrNull()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    val colors = appColors()
 
 
     val tittleText = when (record?.state) {
@@ -179,7 +188,7 @@ fun PermissionDialog(
     }
 
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
             if (record?.state == "draft" || record?.state == "confirm") {
@@ -188,15 +197,15 @@ fun PermissionDialog(
                         showDeleteConfirmation = true
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = colors.tertiaryColor,
+                        contentColor = colors.onSecondaryColor
                     ),
                     shape = RoundedCornerShape(10.dp)
 
                 ) {
                     Text(
                         text = stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = colors.onSecondaryColor,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -207,8 +216,8 @@ fun PermissionDialog(
                         onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = colors.tertiaryColor,
+                        contentColor = colors.onSecondaryColor
                     ),
                     shape = RoundedCornerShape(10.dp)
 
@@ -230,7 +239,7 @@ fun PermissionDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier.clickable { onDismiss() }
                     )
                 }
@@ -239,7 +248,7 @@ fun PermissionDialog(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = colors.tertiaryColor
                 )
             }
         },
@@ -253,7 +262,7 @@ fun PermissionDialog(
                     text = formattedLeaveDay,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colors.onBackgroundColor,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -264,18 +273,69 @@ fun PermissionDialog(
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .width(15.dp)
-                                .height(15.dp)
-                                .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
-                        )
+
+                        when (record?.state?.lowercase(Locale.ROOT)) {
+                            "validate" -> {
+                                Box(
+                                    modifier = Modifier
+                                        .size(15.dp)
+                                        .background(
+                                            color = colors.tertiaryColor,
+                                            shape = CircleShape
+                                        )
+                                )
+                            }
+
+                            "refuse" -> {
+                                Box(
+                                    modifier = Modifier
+                                        .size(15.dp)
+                                        .border(1.dp, colors.tertiaryColor, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(15.dp)
+                                            .height(2.dp)
+                                            .background(
+                                                color = colors.tertiaryColor,
+                                                shape = RoundedCornerShape(2.dp)
+                                            )
+                                    )
+                                }
+                            }
+
+                            "confirm", "draft" -> {
+                                Canvas(
+                                    modifier = Modifier
+                                        .size(15.dp)
+                                        .background(colors.transparent, CircleShape)
+                                        .border(1.dp, colors.tertiaryColor, CircleShape)
+                                ) {
+                                    val spacing = 6.dp.toPx()
+                                    clipPath(Path().apply {
+                                        addOval(Rect(0f, 0f, size.width, size.height))
+                                    }) {
+                                        for (i in -size.height.toInt()..size.width.toInt() step spacing.toInt()) {
+                                            drawLine(
+                                                color = colors.tertiaryColor,
+                                                start = Offset(i.toFloat(), 0f),
+                                                end = Offset(i + size.height, size.height),
+                                                strokeWidth = 4f,
+                                                cap = StrokeCap.Round
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "$translatedLeaveType: $hourLabel ",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = colors.onBackgroundColor,
                             textAlign = TextAlign.Start,
                         )
                     }
@@ -286,12 +346,62 @@ fun PermissionDialog(
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ){
-                        Box(
-                            modifier = Modifier
-                                .width(15.dp)
-                                .height(15.dp)
-                                .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
-                        )
+                        when (record?.state?.lowercase(Locale.ROOT)) {
+                            "validate" -> {
+                                Box(
+                                    modifier = Modifier
+                                        .size(15.dp)
+                                        .background(
+                                            color = colors.tertiaryColor,
+                                            shape = CircleShape
+                                        )
+                                )
+                            }
+
+                            "refuse" -> {
+                                Box(
+                                    modifier = Modifier
+                                        .size(15.dp)
+                                        .border(1.dp, colors.tertiaryColor, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(15.dp)
+                                            .height(2.dp)
+                                            .background(
+                                                color = colors.tertiaryColor,
+                                                shape = RoundedCornerShape(2.dp)
+                                            )
+                                    )
+                                }
+                            }
+
+                            "confirm", "draft" -> {
+                                Canvas(
+                                    modifier = Modifier
+                                        .size(15.dp)
+                                        .background(colors.transparent, CircleShape)
+                                        .border(1.dp, colors.tertiaryColor, CircleShape)
+                                ) {
+                                    val spacing = 6.dp.toPx()
+                                    clipPath(Path().apply {
+                                        addOval(Rect(0f, 0f, size.width, size.height))
+                                    }) {
+                                        for (i in -size.height.toInt()..size.width.toInt() step spacing.toInt()) {
+                                            drawLine(
+                                                color = colors.tertiaryColor,
+                                                start = Offset(i.toFloat(), 0f),
+                                                end = Offset(i + size.height, size.height),
+                                                strokeWidth = 4f,
+                                                cap = StrokeCap.Round
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "${stringResource(R.string.from)} ${
@@ -309,7 +419,7 @@ fun PermissionDialog(
                             }",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = colors.onBackgroundColor,
                             textAlign = TextAlign.Start,
                         )
                     }
@@ -327,7 +437,7 @@ fun PermissionDialog(
                             modifier = Modifier
                                 .size(20.dp)
                                 .clickable { showNewVacationDialog = true },
-                            tint = MaterialTheme.colorScheme.tertiary
+                            tint = colors.tertiaryColor
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
@@ -335,7 +445,7 @@ fun PermissionDialog(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.tertiary,
+                            color = colors.tertiaryColor,
                             modifier = Modifier.clickable {
                                 showNewVacationDialog = true
 

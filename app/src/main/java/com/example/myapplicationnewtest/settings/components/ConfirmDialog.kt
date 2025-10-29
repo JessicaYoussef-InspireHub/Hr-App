@@ -15,7 +15,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun ConfirmDialog(
@@ -34,8 +34,10 @@ fun ConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val colors = appColors()
+
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         text = {
             Column (
@@ -50,7 +52,7 @@ fun ConfirmDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier.clickable { onDismiss() }
                     )
                 }
@@ -58,7 +60,7 @@ fun ConfirmDialog(
                     text = message,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -66,7 +68,7 @@ fun ConfirmDialog(
                     confirmText,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colors.onBackgroundColor,
                     textAlign = TextAlign.Start,
                 )
             }
@@ -79,8 +81,8 @@ fun ConfirmDialog(
                 Button(
                     onClick = onDismiss,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.inverseOnSurface,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = colors.inverseOnSurface,
+                        contentColor = colors.onSecondaryColor
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ){
@@ -98,8 +100,8 @@ fun ConfirmDialog(
                 Button(
                     onClick = onConfirm,
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                        containerColor = MaterialTheme.colorScheme.tertiary
+                        contentColor = colors.onSecondaryColor,
+                        containerColor = colors.tertiaryColor
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) {

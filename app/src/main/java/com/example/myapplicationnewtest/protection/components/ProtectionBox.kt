@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun ProtectionBox(
@@ -26,9 +26,11 @@ fun ProtectionBox(
     icon: ImageVector,
     onClick: () -> Unit
 ){
+    val colors = appColors()
+
     Box (
         modifier = Modifier.fillMaxWidth()
-            .border(2.dp, MaterialTheme.colorScheme.tertiary , shape = RoundedCornerShape(8.dp))
+            .border(2.dp, colors.tertiaryColor , shape = RoundedCornerShape(8.dp))
             .clickable { onClick() }
     ){
         Row (
@@ -41,12 +43,12 @@ fun ProtectionBox(
                 contentDescription = label,
                 modifier = Modifier
                     .padding(end = 6.dp).size(40.dp),
-                tint = MaterialTheme.colorScheme.tertiary,
+                tint = colors.tertiaryColor,
 
             )
             Text(
                 label,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = colors.tertiaryColor,
                 fontWeight = FontWeight.Normal,
                 fontSize = 20.sp)
         }

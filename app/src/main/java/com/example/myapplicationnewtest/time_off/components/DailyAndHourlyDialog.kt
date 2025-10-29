@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,14 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,6 +39,14 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.clipPath
+import com.example.myapplicationnewtest.appColors
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -51,9 +58,12 @@ fun DailyAndHourlyDialog(
     onRefreshRequest: () -> Unit,
     clickedDate: LocalDate?
 ) {
+    val colors = appColors()
     val formattedDate = clickedDate?.format(
         DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
     ) ?: ""
+
+
 
     fun translateLeaveType(typeKey: String, language: String): String {
         return when (language) {
@@ -148,21 +158,21 @@ fun DailyAndHourlyDialog(
         }
     }
 
-    val hasValidate = hourlyRecords.any { it.state == "validate" } || dailyRecords.any { it.state == "validate" }
-    val hasConfirm = hourlyRecords.any { it.state == "confirm" } || dailyRecords.any { it.state == "confirm" }
-    val hasDraft = hourlyRecords.any { it.state == "draft" } || dailyRecords.any { it.state == "draft" }
+//    val hasValidate = hourlyRecords.any { it.state == "validate" } || dailyRecords.any { it.state == "validate" }
+//    val hasConfirm = hourlyRecords.any { it.state == "confirm" } || dailyRecords.any { it.state == "confirm" }
+//    val hasDraft = hourlyRecords.any { it.state == "draft" } || dailyRecords.any { it.state == "draft" }
 
 //    val buttonColor = if ( hasValidate ) {
 //        MaterialTheme.colorScheme.secondary
 //    } else if (hasDraft || hasConfirm) {
-//        MaterialTheme.colorScheme.tertiary
+//        colors.tertiaryColor
 //    } else {
 //        MaterialTheme.colorScheme.error
 //    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -176,7 +186,7 @@ fun DailyAndHourlyDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier.clickable { onDismiss() }
                     )
                 }
@@ -184,7 +194,7 @@ fun DailyAndHourlyDialog(
                     text = formattedDate,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(15.dp))
@@ -202,10 +212,10 @@ fun DailyAndHourlyDialog(
 
 //                        val colorCircle = when (record.state) {
 //                            "validate" -> MaterialTheme.colorScheme.secondary
-//                            "draft" -> MaterialTheme.colorScheme.tertiary
-//                            "confirm" -> MaterialTheme.colorScheme.tertiary
+//                            "draft" -> colors.tertiaryColor
+//                            "confirm" -> colors.tertiaryColor
 //                            "refuse" -> MaterialTheme.colorScheme.error
-//                            else -> Color.Transparent
+//                            else -> colors.transparent
 //                        }
 
                         val translatedLeaveType =
@@ -225,24 +235,79 @@ fun DailyAndHourlyDialog(
                                 horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(15.dp)
-                                        .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
-                                )
+//                                Box(
+//                                    modifier = Modifier
+//                                        .size(15.dp)
+//                                        .background(color = colors.tertiaryColor, shape = CircleShape)
+//                                )
+                                when (record.state) {
+                                    "validate" -> {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(15.dp)
+                                                .background(
+                                                    color = colors.tertiaryColor,
+                                                    shape = CircleShape
+                                                )
+                                        )
+                                    }
+
+                                    "refuse" -> {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(15.dp)
+                                                .border(1.dp, colors.tertiaryColor, CircleShape),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(15.dp)
+                                                    .height(2.dp)
+                                                    .background(
+                                                        color = colors.tertiaryColor,
+                                                        shape = RoundedCornerShape(2.dp)
+                                                    )
+                                            )
+                                        }
+                                    }
+                                    "confirm", "draft" -> {
+                                        Canvas(
+                                            modifier = Modifier
+                                                .size(15.dp)
+                                                .background(colors.transparent, CircleShape)
+                                                .border(1.dp, colors.tertiaryColor, CircleShape)
+                                        ) {
+                                            val spacing = 6.dp.toPx()
+                                            clipPath(Path().apply {
+                                                addOval(Rect(0f, 0f, size.width, size.height))
+                                            }) {
+                                                for (i in -size.height.toInt()..size.width.toInt() step spacing.toInt()) {
+                                                    drawLine(
+                                                        color = colors.tertiaryColor,
+                                                        start = Offset(i.toFloat(), 0f),
+                                                        end = Offset(i + size.height, size.height),
+                                                        strokeWidth = 4f,
+                                                        cap = StrokeCap.Round
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     stateLabel,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.onBackground,
+                                    color = colors.onBackgroundColor,
                                 )
                             }
                             Text(
                                 "$translatedLeaveType: $daysText $dayWord",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onBackground,
+                                color = colors.onBackgroundColor,
                                 modifier = Modifier.padding(start = 20.dp),
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -261,10 +326,10 @@ fun DailyAndHourlyDialog(
 
 //                        val colorCircle = when (record.state) {
 //                            "validate" -> MaterialTheme.colorScheme.secondary
-//                            "draft" -> MaterialTheme.colorScheme.tertiary
-//                            "confirm" -> MaterialTheme.colorScheme.tertiary
+//                            "draft" -> colors.tertiaryColor
+//                            "confirm" -> colors.tertiaryColor
 //                            "refuse" -> MaterialTheme.colorScheme.error
-//                            else -> Color.Transparent
+//                            else -> colors.transparent
 //                        }
 
                         val translatedLeaveType =
@@ -282,24 +347,81 @@ fun DailyAndHourlyDialog(
                        horizontalArrangement = Arrangement.Start,
                        verticalAlignment = Alignment.CenterVertically,
                    ){
-                       Box(
-                           modifier = Modifier
-                               .size(15.dp)
-                               .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
-                       )
+//                       Box(
+//                           modifier = Modifier
+//                               .size(15.dp)
+//                               .background(color = colors.tertiaryColor, shape = CircleShape)
+//                       )
+
+                       when (record.state) {
+                           "validate" -> {
+                               Box(
+                                   modifier = Modifier
+                                       .size(15.dp)
+                                       .background(
+                                           color = colors.tertiaryColor,
+                                           shape = CircleShape
+                                       )
+                               )
+                           }
+
+                           "refuse" -> {
+                               Box(
+                                   modifier = Modifier
+                                       .size(15.dp)
+                                       .border(1.dp, colors.tertiaryColor, CircleShape),
+                                   contentAlignment = Alignment.Center
+                               ) {
+                                   Box(
+                                       modifier = Modifier
+                                           .width(15.dp)
+                                           .height(2.dp)
+                                           .background(
+                                               color = colors.tertiaryColor,
+                                               shape = RoundedCornerShape(2.dp)
+                                           )
+                                   )
+                               }
+                           }
+                           "confirm", "draft" -> {
+                               Canvas(
+                                   modifier = Modifier
+                                       .size(15.dp)
+                                       .background(colors.transparent, CircleShape)
+                                       .border(1.dp, colors.tertiaryColor, CircleShape)
+                               ) {
+                                   val spacing = 6.dp.toPx()
+                                   clipPath(Path().apply {
+                                       addOval(Rect(0f, 0f, size.width, size.height))
+                                   }) {
+                                       for (i in -size.height.toInt()..size.width.toInt() step spacing.toInt()) {
+                                           drawLine(
+                                               color = colors.tertiaryColor,
+                                               start = Offset(i.toFloat(), 0f),
+                                               end = Offset(i + size.height, size.height),
+                                               strokeWidth = 4f,
+                                               cap = StrokeCap.Round
+                                           )
+                                       }
+                                   }
+                               }
+                           }
+                       }
+
+
                        Spacer(modifier = Modifier.width(8.dp))
                        Text(
                            stateLabel,
                            fontSize = 17.sp,
                            fontWeight = FontWeight.Normal,
-                           color = MaterialTheme.colorScheme.onBackground,
+                           color = colors.onBackgroundColor,
                        )
                    }
                    Text(
                        "$translatedLeaveType: $hourWord",
                        fontSize = 17.sp,
                        fontWeight = FontWeight.Normal,
-                       color = MaterialTheme.colorScheme.onBackground,
+                       color = colors.onBackgroundColor,
                        modifier = Modifier.padding(start = 20.dp),
                    )
                    Text(
@@ -334,7 +456,7 @@ fun DailyAndHourlyDialog(
                        }",
                        fontSize = 17.sp,
                        fontWeight = FontWeight.Normal,
-                       color = MaterialTheme.colorScheme.onBackground,
+                       color = colors.onBackgroundColor,
                        modifier = Modifier.padding(start = 20.dp),
                    )
                    Spacer(modifier = Modifier.height(12.dp))
@@ -347,8 +469,8 @@ fun DailyAndHourlyDialog(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(
 //                    containerColor = buttonColor,
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = colors.tertiaryColor,
+                    contentColor = colors.onSecondaryColor
                 ),
                 shape = RoundedCornerShape(10.dp)
             ) {

@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.myapplicationnewtest.check_in_out.presentation.CheckInOutScreen
+import com.example.myapplicationnewtest.notifications.presentation.NotificationsScreen
 import com.example.myapplicationnewtest.protection.presentation.ConfirmPinScreen
 import com.example.myapplicationnewtest.protection.presentation.EnterPinScreen
 import com.example.myapplicationnewtest.protection.presentation.FingerPrintScreen
@@ -55,10 +56,10 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
         !token.isNullOrEmpty() && protectionSkipped -> "CheckInOutScreen"
 
         // ✅ Has companyId and apiKey but no token (needs to sign in)
-        token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6"
+        token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6/0"
 
         // ✅ Has companyId and apiKey and token (needs to protection)
-        !token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "ProtectionScreen"
+        !token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "ProtectionScreen/0"
 
         // ✅ First time opening the app (everything is empty)
         token.isNullOrEmpty() && companyId.isNullOrEmpty() && apiKey.isNullOrEmpty() -> "ScanQrCodeScreen"
@@ -87,6 +88,12 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
 
         composable("SettingsScreen") {
             SettingsScreen(
+                navController = navController
+            )
+        }
+
+        composable("NotificationsScreen") {
+            NotificationsScreen(
                 navController = navController
             )
         }
@@ -147,10 +154,13 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
 
 
         composable(
-            route = "ProtectionScreen",
-        ) {
+            route = "ProtectionScreen/{numberToBack}",
+        )  { backStackEntry ->
+            val numberToBack = backStackEntry.arguments?.getString("numberToBack")?.toIntOrNull() ?: 0
+
             ProtectionScreen(
                 navController = navController,
+                numberToBack = numberToBack
             )
         }
 
@@ -161,10 +171,12 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
         }
 
 
-        composable("SignInScreen/{companyId}/{apiKey}") { backStackEntry ->
+        composable("SignInScreen/{companyId}/{apiKey}/{numberToBack}") { backStackEntry ->
             val companyId = backStackEntry.arguments?.getString("companyId") ?: ""
             val apiKey = backStackEntry.arguments?.getString("apiKey") ?: ""
-            SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey)
+            val numberToBack = backStackEntry.arguments?.getString("numberToBack")?.toIntOrNull() ?: 0
+
+            SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey , numberToBack = numberToBack)
         }
     }
 }

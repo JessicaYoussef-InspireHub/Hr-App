@@ -5,7 +5,9 @@ import TimeOffRecord
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,17 +33,22 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.time_off.data.TimeOffRequestForRequestEmployee
 import com.example.myapplicationnewtest.time_off.data.sendApiForRequestTimeOff
 import kotlinx.coroutines.Dispatchers
@@ -79,6 +86,7 @@ fun TimeOffDetailsDialog(
 
     val sameDay = startDate == endDate
     val sameMonth = startDate.month == endDate.month && startDate.year == endDate.year
+    val colors = appColors()
 
 
     fun convertToArabicDigits(input: String): String {
@@ -166,7 +174,7 @@ fun TimeOffDetailsDialog(
 
 
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = { onDismiss() },
         confirmButton = {
             if (record.state == "draft" || record.state == "confirm") {
@@ -176,15 +184,15 @@ fun TimeOffDetailsDialog(
 
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = colors.tertiaryColor,
+                        contentColor = colors.onSecondaryColor
                     ),
                     shape = RoundedCornerShape(10.dp)
 
                 ) {
                     Text(
                         text = stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = colors.onSecondaryColor,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -195,8 +203,8 @@ fun TimeOffDetailsDialog(
                         onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = colors.tertiaryColor,
+                        contentColor = colors.onSecondaryColor
                     ),
                     shape = RoundedCornerShape(10.dp)
 
@@ -219,7 +227,7 @@ fun TimeOffDetailsDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier
                             .clickable { onDismiss() }
                     )
@@ -229,7 +237,7 @@ fun TimeOffDetailsDialog(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                 )
             }
         },
@@ -243,28 +251,83 @@ fun TimeOffDetailsDialog(
                     text = dateText,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colors.onBackgroundColor,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .width(15.dp)
-                            .height(15.dp)
-                            .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
-                    )
+//                    Box(
+//                        modifier = Modifier
+//                            .width(15.dp)
+//                            .height(15.dp)
+//                            .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
+//                    )
+                    when (record.state.lowercase(Locale.ROOT)) {
+                        "validate" -> {
+                            Box(
+                                modifier = Modifier
+                                    .size(15.dp)
+                                    .background(
+                                        color = colors.tertiaryColor,
+                                        shape = CircleShape
+                                    )
+                            )
+                        }
+
+                        "refuse" -> {
+                            Box(
+                                modifier = Modifier
+                                    .size(15.dp)
+                                    .border(1.dp, colors.tertiaryColor, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(15.dp)
+                                        .height(2.dp)
+                                        .background(
+                                            color = colors.tertiaryColor,
+                                            shape = RoundedCornerShape(2.dp)
+                                        )
+                                )
+                            }
+                        }
+
+                        "confirm", "draft" -> {
+                            Canvas(
+                                modifier = Modifier
+                                    .size(15.dp)
+                                    .background(colors.transparent, CircleShape)
+                                    .border(1.dp, colors.tertiaryColor, CircleShape)
+                            ) {
+                                val spacing = 6.dp.toPx()
+                                clipPath(Path().apply {
+                                    addOval(Rect(0f, 0f, size.width, size.height))
+                                }) {
+                                    for (i in -size.height.toInt()..size.width.toInt() step spacing.toInt()) {
+                                        drawLine(
+                                            color = colors.tertiaryColor,
+                                            start = Offset(i.toFloat(), 0f),
+                                            end = Offset(i + size.height, size.height),
+                                            strokeWidth = 4f,
+                                            cap = StrokeCap.Round
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "$translatedLeaveType: $formattedDuration $dayLabel",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = colors.onBackgroundColor,
                         textAlign = TextAlign.Start,
                     )
                 }
@@ -285,7 +348,7 @@ fun TimeOffDetailsDialog(
                                     showNewVacationDialog = true
 
                                 },
-                            tint = MaterialTheme.colorScheme.tertiary
+                            tint = colors.tertiaryColor
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
@@ -293,7 +356,7 @@ fun TimeOffDetailsDialog(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.tertiary,
+                            color = colors.tertiaryColor,
                             modifier = Modifier.clickable {
                                 showNewVacationDialog = true
 

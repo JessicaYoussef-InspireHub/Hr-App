@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.myapplicationnewtest.appColors
 import kotlinx.coroutines.launch
 
 @Composable
@@ -23,6 +24,8 @@ fun OfflineSnackBar(
     message: String,
     onDismiss: () -> Unit
 ) {
+    val colors = appColors()
+
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -46,8 +49,8 @@ fun OfflineSnackBar(
                 .padding(top = 50.dp),
             snackbar = { snackBarData ->
                 Snackbar(
-                    containerColor = MaterialTheme.colorScheme.onSecondary,
-                    contentColor = MaterialTheme.colorScheme.tertiary,
+                    containerColor = colors.onSecondaryColor,
+                    contentColor = colors.tertiaryColor,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
                     Text(

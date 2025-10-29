@@ -17,9 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.biometric.BiometricManager
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,14 +33,16 @@ import com.example.myapplicationnewtest.protection.components.ProtectionBox
 import com.example.myapplicationnewtest.protection.data.ProtectionViewModel
 import kotlin.system.exitProcess
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 
 @Composable
 fun ProtectionScreen(
     navController: NavController,
-    viewModel: ProtectionViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-
+    viewModel: ProtectionViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    numberToBack: Int = 0
 ) {
+    val colors = appColors()
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     var notShowAgainChecked by remember { mutableStateOf(false) }
@@ -66,20 +69,34 @@ fun ProtectionScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
             .padding(16.dp),
     ) {
         Column(
             modifier = Modifier.align(Alignment.TopCenter),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (numberToBack == 1 ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .size(32.dp)
+                            .clickable {
+                                navController.popBackStack()
+                            },
+                        tint = colors.tertiaryColor
+                    )
+                }
+            }
             Text(
                 stringResource(R.string.choose_your_protection_method),
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = colors.tertiaryColor,
                 textAlign = TextAlign.Center,
-                lineHeight = 30.sp,
-                fontSize = 25.sp
+                fontSize = 20.sp
             )
         }
 
@@ -110,7 +127,7 @@ fun ProtectionScreen(
 
             Text(
                 stringResource(R.string.no_protection),
-                 color = MaterialTheme.colorScheme.tertiary,
+                 color = colors.tertiaryColor,
                 fontWeight = FontWeight.Normal,
                 fontSize = 18.sp,
                 modifier = Modifier.clickable {
@@ -131,12 +148,12 @@ fun ProtectionScreen(
                     checked = notShowAgainChecked,
                     onCheckedChange = { notShowAgainChecked = it },
                     colors = CheckboxDefaults.colors(
-                        uncheckedColor = MaterialTheme.colorScheme.tertiary,
-                        checkedColor = MaterialTheme.colorScheme.tertiary)
+                        uncheckedColor = colors.tertiaryColor,
+                        checkedColor = colors.tertiaryColor,)
                 )
                 Text(
                     text = stringResource(R.string.do_not_show_this_again),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     fontSize = 16.sp
                 )
             }

@@ -5,19 +5,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
-
+import com.example.myapplicationnewtest.appColors
 
 
 @Composable
@@ -26,10 +24,12 @@ fun DescriptionInput(
 ) {
     var description by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
+    val colors = appColors()
+
 
     val customTextSelectionColors = TextSelectionColors(
-        handleColor = MaterialTheme.colorScheme.tertiary,
-        backgroundColor = MaterialTheme.colorScheme.tertiary
+        handleColor = colors.tertiaryColor,
+        backgroundColor = colors.tertiaryColor
     )
 
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
@@ -39,12 +39,12 @@ fun DescriptionInput(
             placeholder = {
                 Text(
                     stringResource(R.string.add_a_description),
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colors.onBackgroundColor,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colors.onBackgroundColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold)
             },
@@ -52,15 +52,15 @@ fun DescriptionInput(
                 .verticalScroll(scrollState),
             maxLines = 3,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                cursorColor = MaterialTheme.colorScheme.tertiary,
-                focusedTextColor = MaterialTheme.colorScheme.tertiary,
-                unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
-                focusedIndicatorColor = MaterialTheme.colorScheme.tertiary,
-                unfocusedIndicatorColor = MaterialTheme.colorScheme.tertiary,
-                disabledIndicatorColor = Color.Transparent
+                focusedContainerColor = colors.transparent,
+                unfocusedContainerColor = colors.transparent,
+                disabledContainerColor = colors.transparent,
+                cursorColor =colors.tertiaryColor,
+                focusedTextColor = colors.tertiaryColor,
+                unfocusedTextColor = colors.tertiaryColor,
+                focusedIndicatorColor = colors.tertiaryColor,
+                unfocusedIndicatorColor = colors.tertiaryColor,
+                disabledIndicatorColor = colors.transparent
             )
         )
     }

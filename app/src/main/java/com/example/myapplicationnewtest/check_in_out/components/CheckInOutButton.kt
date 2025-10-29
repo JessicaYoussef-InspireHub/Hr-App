@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun CheckInOutButton(
@@ -22,6 +22,7 @@ fun CheckInOutButton(
     isWithinDistance: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = appColors()
 
     Button(
         enabled = isWithinDistance,
@@ -31,22 +32,22 @@ fun CheckInOutButton(
             .height(60.dp),
         shape = RoundedCornerShape(8.dp),
         border = if (isWithinDistance) {
-            BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary)
+            BorderStroke(2.dp, colors.tertiaryColor)
         } else null,
         colors =
         if (attendanceStatus == "checked_in") {
             ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onSecondary,
-                disabledContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
-                disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
+                containerColor = colors.tertiaryColor,
+                contentColor = colors.onSecondaryColor,
+                disabledContainerColor = colors.tertiaryColor.copy(alpha = 0.5f),
+                disabledContentColor = colors.onSecondaryColor.copy(alpha = 0.5f)
             )
         } else {
             ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onSecondary,
-                contentColor = MaterialTheme.colorScheme.tertiary,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                containerColor = colors.onSecondaryColor,
+                contentColor = colors.tertiaryColor,
+                disabledContainerColor = colors.surfaceVariant,
+                disabledContentColor = colors.tertiaryColor.copy(alpha = 0.5f)
             )
         }
     ) {

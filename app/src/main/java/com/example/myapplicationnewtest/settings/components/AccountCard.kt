@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.settings.data.SettingsViewModel
 
 
@@ -35,7 +35,7 @@ fun AccountCard(
     navController: NavController,
     viewModel: SettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-
+    val colors = appColors()
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     var showDialog by remember { mutableStateOf(false) }
@@ -44,7 +44,7 @@ fun AccountCard(
     Column {
         Text(
             stringResource(R.string.account),
-            color = MaterialTheme.colorScheme.tertiary,
+            color = colors.tertiaryColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -55,12 +55,12 @@ fun AccountCard(
                 .border(
                     BorderStroke(
                         2.dp,
-                        MaterialTheme.colorScheme.inverseOnSurface
+                        colors.inverseOnSurface
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.onSecondary
+                containerColor = colors.onSecondaryColor
             )
         ){
             Column {
@@ -82,7 +82,7 @@ fun AccountCard(
                             val companyId = sharedPrefManager.getCompanyId() ?: ""
                             val apiKey = sharedPrefManager.getApiKey() ?: ""
                             sharedPrefManager.setProtectionSkipped(false)
-                            navController.navigate("SignInScreen/$companyId/$apiKey")
+                            navController.navigate("SignInScreen/$companyId/$apiKey/0")
                         },
                         onDismiss = { showDialog = false }
                     )

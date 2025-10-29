@@ -7,14 +7,12 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -27,14 +25,16 @@ fun BottomBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val colors = appColors()
+
     Column {
         HorizontalDivider(
             thickness = 1.dp,
-            color = MaterialTheme.colorScheme.inverseOnSurface
+            color = colors.inverseOnSurface
         )
         NavigationBar(
-            containerColor = MaterialTheme.colorScheme.onSecondary,
-            contentColor = MaterialTheme.colorScheme.onBackground,
+            containerColor = colors.onSecondaryColor,
+            contentColor = colors.onBackgroundColor,
         ) {
             NavigationBarItem(
                 selected = currentRoute == "CheckInOutScreen",
@@ -48,11 +48,11 @@ fun BottomBar(
                 icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
                 label = { Text(stringResource(R.string.home)) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.tertiary,
-                    selectedTextColor = MaterialTheme.colorScheme.tertiary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                    unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                    indicatorColor = Color.Transparent
+                    selectedIconColor =  colors.tertiaryColor,
+                    selectedTextColor =  colors.tertiaryColor,
+                    unselectedIconColor =  colors.onBackgroundColor,
+                    unselectedTextColor =  colors.onBackgroundColor,
+                    indicatorColor =  colors.transparent
                 )
             )
 
@@ -68,11 +68,11 @@ fun BottomBar(
                 icon = { Icon(Icons.Default.BeachAccess, contentDescription = "Time Off") },
                 label = { Text(stringResource(R.string.time_off)) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.tertiary,
-                    selectedTextColor = MaterialTheme.colorScheme.tertiary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                    unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                    indicatorColor = Color.Transparent
+                    selectedIconColor =  colors.tertiaryColor,
+                    selectedTextColor =  colors.tertiaryColor,
+                    unselectedIconColor =  colors.onBackgroundColor,
+                    unselectedTextColor =  colors.onBackgroundColor,
+                    indicatorColor =  colors.transparent
                 )
             )
 
@@ -88,11 +88,11 @@ fun BottomBar(
                 icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
                 label = { Text(stringResource(R.string.settings)) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.tertiary,
-                    selectedTextColor = MaterialTheme.colorScheme.tertiary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                    unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                    indicatorColor = Color.Transparent
+                    selectedIconColor =  colors.tertiaryColor,
+                    selectedTextColor =  colors.tertiaryColor,
+                    unselectedIconColor =  colors.onBackgroundColor,
+                    unselectedTextColor =  colors.onBackgroundColor,
+                    indicatorColor =  colors.transparent
                 )
             )
         }

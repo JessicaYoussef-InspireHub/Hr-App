@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import androidx.navigation.NavController
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.scan_qr_code.data.Middleware
 import com.example.myapplicationnewtest.scan_qr_code.data.ScanQrCodeViewModel
 import com.example.myapplicationnewtest.sign_in.components.InputFields
@@ -60,27 +60,30 @@ fun ScanQrCodeScreen(
                 lines.getOrNull(1)?.substringAfter("=")?.trim()?.removeSurrounding("\"") ?: ""
 
             // ✅ Go to the SignIn page and send them each one separately
-            navController.navigate("SignInScreen/${companyId}/${apiKey}")
+            navController.navigate("SignInScreen/${companyId}/${apiKey}/1")
         }
     }
 
     BackHandler(enabled = true) {
         exitProcess(0)
     }
+    val colors = appColors()
 
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Button(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
+                containerColor = colors.tertiaryColor,
+                contentColor = colors.onSecondaryColor
             ),
             shape = RoundedCornerShape(8.dp),
             onClick = {
@@ -95,7 +98,7 @@ fun ScanQrCodeScreen(
         Spacer(modifier = Modifier.height(30.dp))
         Text(
             stringResource(R.string.or) ,
-            color = MaterialTheme.colorScheme.tertiary,
+            color = colors.tertiaryColor,
             fontWeight = FontWeight.ExtraBold ,
             fontSize = 30.sp)
         Spacer(modifier = Modifier.height(30.dp))
@@ -111,20 +114,22 @@ fun ScanQrCodeScreen(
 //                middleware.baseUrl
 //               println("test"+middleware.toString())
 //               println("test"+middleware.apiKey)
-               navController.navigate("SignInScreen/${middleware.companyId}/${middleware.apiKey}")
+               navController.navigate("SignInScreen/${middleware.companyId}/${middleware.apiKey}/1")
             }
         )
         Spacer(modifier = Modifier.height(10.dp))
 
         Button(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
+                containerColor = colors.tertiaryColor,
+                contentColor = colors.onSecondaryColor
             ),
             shape = RoundedCornerShape(8.dp),
             onClick = {
-                navController.navigate("SignInScreen/${middleware.companyId}/${middleware.apiKey}")
+                navController.navigate("SignInScreen/${middleware.companyId}/${middleware.apiKey}/1")
             }) {
             Text(stringResource(R.string.done))
         }

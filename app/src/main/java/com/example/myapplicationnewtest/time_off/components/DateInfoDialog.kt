@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.time_off.data.LeaveType
 import com.example.myapplicationnewtest.time_off.data.sendApiForRequestTimeOff
 import com.example.myapplicationnewtest.time_off.data.TimeOffRequestForRequestEmployee
@@ -65,7 +65,7 @@ fun DateInfoDialog(
     dailyRecords: List<TimeOffRecord>,
     hourlyRecords: List<HourlyTimeOffRecord>
 ) {
-
+    val colors = appColors()
     var isHalfDay by remember { mutableStateOf(false) }
     val pleaseChooseTypeText = stringResource(R.string.please_choose_the_time_off_type)
     val errorMessageTemplate = stringResource(R.string.error_message_overlap)
@@ -244,7 +244,7 @@ fun DateInfoDialog(
     ) {
         Surface(
             shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = colors.surfaceVariant,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -271,7 +271,7 @@ fun DateInfoDialog(
                     if (leaveTypeError.isNotEmpty()) {
                         Text(
                             text = leaveTypeError,
-                            color = MaterialTheme.colorScheme.tertiary,
+                            color = colors.tertiaryColor,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 50.dp, top = 4.dp)
                         )
@@ -300,12 +300,12 @@ fun DateInfoDialog(
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .background(colors.surfaceVariant)
                             ) {
                                 Column(
                                     Modifier
                                         .fillMaxWidth()
-                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .background(colors.surfaceVariant)
                                 ) {
                                     var tempStartDate by remember { mutableStateOf(selectedStartDate) }
 
@@ -407,12 +407,12 @@ fun DateInfoDialog(
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .background(colors.surfaceVariant)
                             ) {
                                 Column(
                                     Modifier
                                         .fillMaxWidth()
-                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .background(colors.surfaceVariant)
                                 ) {
                                     var tempEndDate by remember { mutableStateOf(selectedEndDate) }
 
@@ -567,7 +567,7 @@ fun DateInfoDialog(
                     if (permissionErrorMessage.isNotEmpty()) {
                         Text(
                             text = permissionErrorMessage,
-                            color = MaterialTheme.colorScheme.tertiary,
+                            color = colors.tertiaryColor,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 50.dp, top = 4.dp)
                         )

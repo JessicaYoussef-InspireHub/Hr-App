@@ -38,7 +38,7 @@ Protection Method</string>
     <string name="or">OR</string>
     <string name="enter_your_company_information">Enter your Company Information</string>
     <string name="done">Done</string>
-    <string name="settings_screen">Settings Screen</string>
+    <string name="settings_screen">Settings</string>
     <string name="change_company">Change company</string>
     <string name="change_protection_method">Change protection method</string>
     <string name="logout">Logout</string>
@@ -116,7 +116,8 @@ Protection Method</string>
     <string name="you_are_checked_in">You are Checked In</string>
     <string name="you_are_checked_out">You are Checked Out</string>
     <string name="checked_in_message">You have successfully checked in at %1$s\nHave a blessed day</string>
-    <string name="checked_out_message">You have successfully checked out on %1$s at %2$s after %3$d h %4$d m .. Great job</string>
+    <string name="checked_out_message">You have successfully checked out on %1$s at %2$s .. Great job</string>
+<!--    <string name="checked_out_message">You have successfully checked out on %1$s at %2$s after %3$d h %4$d m .. Great job</string>-->
     <string name="attention">Attention</string>
     <string name="check_out_confirmation">You have spent %1$d h %2$d m\n\nAre you sure you want to check out?</string>
     <string name="check_out">Check Out</string>
@@ -147,5 +148,7 @@ Protection Method</string>
     <string name="you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online">You have changed the time while offline.\nYou cannot perform a Check operation until you are back online.</string>
     <string name="you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available">You are currently offline.\nYour action will be saved and sent once the internet is available.</string>
     <string name="scan_qr_code_again">Scan QR Code Again</string>
+    <string name="confirmed">Confirmed</string>
+    <string name="valid">Valid</string>
 
 </resources>

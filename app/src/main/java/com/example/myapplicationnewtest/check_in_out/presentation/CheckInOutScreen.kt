@@ -55,6 +55,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.remember
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.check_in_out.components.InternetRequiredDialog
 import com.example.myapplicationnewtest.check_in_out.components.OfflineCheckOutDialog
 import com.example.myapplicationnewtest.check_in_out.components.OfflineSnackBar
@@ -162,6 +163,7 @@ fun CheckInOutScreen(
             "--:--"
         }
     }
+    val colors = appColors()
 
     val checkInTime = lastCheckIn?.let { formatUtcToLocal(it) } ?: "--:--"
     val checkOutTime = lastCheckOut?.let { formatUtcToLocal(it) } ?: "--:--"
@@ -269,7 +271,7 @@ fun CheckInOutScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onSecondary)
+                    .background(colors.onSecondaryColor)
                     .padding(innerPadding)
                     .padding(24.dp)
                     .verticalScroll(rememberScrollState()),
@@ -280,7 +282,7 @@ fun CheckInOutScreen(
                     if (attendanceStatus == "checked_in")
                         stringResource(R.string.you_are_checked_in)
                     else stringResource(R.string.you_are_checked_out),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
@@ -294,7 +296,7 @@ fun CheckInOutScreen(
                 if (isOffline) {
                     Text(
                         text = stringResource(R.string.you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available),
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = colors.onBackgroundColor,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium,
                     )
@@ -307,11 +309,11 @@ fun CheckInOutScreen(
                                 R.string.checked_out_message,
                                 checkOutLabel,
                                 checkOutTime,
-                                hours,
-                                minutes
+//                                hours,
+//                                minutes
                             )
                         },
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = colors.onBackgroundColor,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium,
                     )
@@ -423,12 +425,12 @@ fun CheckInOutScreen(
         if (isButtonLoading) {
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
+                    .background(colors.onSurfaceColor.copy(alpha = 0.4f))
                     .noClickable(),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = colors.tertiaryColor
                 )
             }
         }
@@ -437,12 +439,12 @@ fun CheckInOutScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                    .background(colors.onSurfaceColor.copy(alpha = 0.4f))
                     .noClickable(),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = colors.tertiaryColor
                 )
             }
         }

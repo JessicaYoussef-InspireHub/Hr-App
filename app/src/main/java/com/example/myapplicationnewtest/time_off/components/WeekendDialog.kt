@@ -14,7 +14,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 
 @Composable
@@ -32,8 +32,10 @@ fun WeekendAndPublicHolidayDialog(
     message: String,
     onDismiss: () -> Unit
 ) {
+    val colors = appColors()
+
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(
@@ -41,15 +43,15 @@ fun WeekendAndPublicHolidayDialog(
                     onDismiss()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = colors.tertiaryColor,
+                    contentColor = colors.onSecondaryColor
                 ),
                 shape = RoundedCornerShape(10.dp)
 
             ) {
                 Text(
                     text = stringResource(R.string.ok),
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = colors.onSecondaryColor,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -70,7 +72,7 @@ fun WeekendAndPublicHolidayDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier
                             .clickable { onDismiss() }
                     )
@@ -80,7 +82,7 @@ fun WeekendAndPublicHolidayDialog(
                     message,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     textAlign = TextAlign.Center
                 )
             }

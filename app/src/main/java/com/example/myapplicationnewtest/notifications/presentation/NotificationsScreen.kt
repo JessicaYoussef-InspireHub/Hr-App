@@ -1,12 +1,9 @@
-package com.example.myapplicationnewtest.settings.presentation
+package com.example.myapplicationnewtest.notifications.presentation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -19,28 +16,20 @@ import com.example.myapplicationnewtest.BottomBar
 import com.example.myapplicationnewtest.MyAppBar
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.appColors
-import com.example.myapplicationnewtest.settings.components.AccountCard
-import com.example.myapplicationnewtest.settings.components.GeneralSettingsCard
-import com.example.myapplicationnewtest.settings.components.SecurityCard
 
 
 @Composable
-fun SettingsScreen(
+fun NotificationsScreen(
     navController: NavController,
 ) {
     val colors = appColors()
-    BackHandler(enabled = true) {
-        navController.navigate("CheckInOutScreen") {
-            popUpTo("SettingsScreen") { inclusive = true }
-        }
-    }
 
 
     Scaffold(
         containerColor = colors.onSecondaryColor,
         topBar = {
             MyAppBar(
-                label = stringResource(R.string.settings_screen),
+                label = stringResource(R.string.notification),
             )
         },
         bottomBar = { BottomBar(navController = navController) }
@@ -54,20 +43,7 @@ fun SettingsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            GeneralSettingsCard(
-                navController = navController
-            )
-            Spacer(modifier = Modifier.height(16.dp))
 
-            SecurityCard(
-                navController = navController
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            AccountCard(
-                navController = navController
-            )
         }
     }
 }

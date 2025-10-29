@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.time_off.data.LeaveType
 
 @Composable
@@ -32,6 +32,12 @@ fun DropDown(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val colors = appColors()
+
+    val defaultType = leaveTypes.find { it.name.equals("Annual Leave", ignoreCase = true) }
+    if (selectedLeaveType == null && defaultType != null) {
+        onLeaveTypeSelected(defaultType)
+    }
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
@@ -93,7 +99,7 @@ fun DropDown(
                     else
                         translatedName
                 } ?: stringResource(R.string.select_leave_type),
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colors.onBackgroundColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f)
@@ -102,7 +108,7 @@ fun DropDown(
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
                 contentDescription = "Dropdown arrow",
-                tint = MaterialTheme.colorScheme.onBackground
+                tint = colors.onBackgroundColor
             )
         }
 
@@ -111,7 +117,7 @@ fun DropDown(
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .background(
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = colors.onSecondaryColor,
                 )
         ) {
             leaveTypes
@@ -128,7 +134,7 @@ fun DropDown(
                                 "$translatedName (${if (currentLanguage == "ar") convertToArabicNumbers(remaining.toString()) else remaining} ${stringResource(R.string.remaining_out_of)} ${if (currentLanguage == "ar") convertToArabicNumbers(original.toString()) else original})"
                             else
                                 translatedName,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = colors.onBackgroundColor,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold
                         )

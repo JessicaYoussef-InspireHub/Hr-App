@@ -1,6 +1,5 @@
 package com.example.myapplicationnewtest.time_off.components
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -8,6 +7,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -20,6 +20,8 @@ fun DurationHours(
     val context = LocalContext.current
     val currentLocale = Locale.getDefault()
     val currentLanguage = currentLocale.language
+    val colors = appColors()
+
 
     fun convertToArabicDigits(input: String): String {
         val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
@@ -45,7 +47,7 @@ fun DurationHours(
     Text(
         text = "$formattedNumber $hourLabel",
         modifier = modifier,
-        color = MaterialTheme.colorScheme.onBackground,
+        color = colors.onBackgroundColor,
         fontWeight = FontWeight.SemiBold,
         fontSize = 15.sp
     )

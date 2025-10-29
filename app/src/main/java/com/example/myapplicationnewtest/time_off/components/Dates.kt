@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplicationnewtest.appColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -35,6 +35,7 @@ fun Dates(
     onHalfDayOptionChange: (String) -> Unit,
     hideEndDate: Boolean = false
 ){
+    val colors = appColors()
     val locale = java.util.Locale.getDefault()
     val formatter = DateTimeFormatter.ofPattern("d-M-yyyy", locale)
 
@@ -60,7 +61,7 @@ fun Dates(
     ){
         Text(
             text = formattedStart,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = colors.onBackgroundColor,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable { onStartDateClick() }
@@ -80,12 +81,12 @@ fun Dates(
                     contentDescription = "",
                     modifier = Modifier
                         .size(20.dp),
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = colors.onBackgroundColor
                 )
 
                 Text(
                     text = formattedEnd,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colors.onBackgroundColor,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable { onEndDateClick() }

@@ -22,10 +22,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 
 @Composable
@@ -33,8 +33,10 @@ fun DeleteConfirmationDialog(
     onDismiss: () -> Unit,
     onConfirmDelete: suspend () -> Unit
 ) {
+    val colors = appColors()
+
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = { onDismiss() },
         text = {
             Column(
@@ -49,7 +51,7 @@ fun DeleteConfirmationDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier.clickable { onDismiss() }
                     )
                 }
@@ -57,14 +59,14 @@ fun DeleteConfirmationDialog(
                     text = stringResource(R.string.delete_confirmation),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     textAlign = TextAlign.Start
                 )
                 Text(
                     stringResource(R.string.are_you_sure_you_want_to_delete_this_request),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colors.onBackgroundColor,
                     textAlign = TextAlign.Start,
                 )
             }
@@ -77,8 +79,8 @@ fun DeleteConfirmationDialog(
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    containerColor = MaterialTheme.colorScheme.tertiary
+                    contentColor = colors.onSecondaryColor,
+                    containerColor = colors.tertiaryColor
                 ),
                 shape = RoundedCornerShape(10.dp)
             ) {
@@ -93,8 +95,8 @@ fun DeleteConfirmationDialog(
             Button(
                 onClick = { onDismiss() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.inverseOnSurface,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = colors.inverseOnSurface,
+                    contentColor = colors.onSecondaryColor
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {

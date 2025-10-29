@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.time_off.data.LeaveType
 import java.util.Locale
 
@@ -53,6 +53,7 @@ fun MyActualTimeOff(
 
     val currentLocale = Locale.getDefault()
     val visibleLeaveTypes = leaveTypes.filter { it.requires_allocation == "yes" }
+    val colors = appColors()
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -61,7 +62,7 @@ fun MyActualTimeOff(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .background(MaterialTheme.colorScheme.onSecondary),
+                .background(colors.onSecondaryColor),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
 
@@ -98,7 +99,7 @@ fun MyActualTimeOff(
                         modifier = Modifier
                             .height(150.dp)
                             .width(1.dp)
-                            .background(MaterialTheme.colorScheme.inverseOnSurface)
+                            .background(colors.inverseOnSurface)
                     )
                 }
             }
@@ -106,7 +107,7 @@ fun MyActualTimeOff(
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.inverseOnSurface)
+                .background(colors.inverseOnSurface)
         )
     }
 }

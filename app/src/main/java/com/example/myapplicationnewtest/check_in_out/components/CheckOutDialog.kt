@@ -13,7 +13,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun CheckOutDialog(
@@ -32,8 +32,10 @@ fun CheckOutDialog(
     onConfirm: () -> Unit,
     onCancel: () -> Unit
 ){
+    val colors = appColors()
+
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = { onCancel() },
         title = {
             Column (
@@ -49,14 +51,14 @@ fun CheckOutDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier
                             .clickable { onCancel() }
                     )
                 }
                 Text(
                     stringResource(R.string.attention) ,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,)
             }
@@ -74,13 +76,13 @@ fun CheckOutDialog(
                 stringResource(R.string.check_out_confirmation, hours, minutes),
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onBackground,)
+                color = colors.onBackgroundColor )
         }},
         confirmButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    containerColor = MaterialTheme.colorScheme.tertiary
+                    contentColor = colors.onSecondaryColor,
+                    containerColor = colors.tertiaryColor
                 ),
                 shape = RoundedCornerShape(10.dp),
                 onClick = { onConfirm() }
@@ -93,8 +95,8 @@ fun CheckOutDialog(
         dismissButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.inverseOnSurface,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = colors.inverseOnSurface,
+                    contentColor = colors.onSecondaryColor
                 ),
                 shape = RoundedCornerShape(10.dp),
                 onClick = { onCancel() }

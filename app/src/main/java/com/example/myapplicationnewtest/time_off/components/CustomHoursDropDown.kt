@@ -12,7 +12,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.appColors
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +33,7 @@ fun CustomHourDropDown(
     selectedPermissionHour: String?,
     onPermissionHourSelected: (String) -> Unit,
 ) {
+    val colors = appColors()
     var expanded by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
@@ -91,28 +92,28 @@ fun CustomHourDropDown(
             ){
                 Text(
                     text = selectedPermissionHour ?: " ",
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = colors.onBackgroundColor,
                     fontSize = 14.sp,
                 )
 
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = "ArrowDropDown",
-                    tint = MaterialTheme.colorScheme.onBackground,
+                    tint = colors.onBackgroundColor,
                 )
             }
 
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.onSecondary)
+                modifier = Modifier.background(colors.onSecondaryColor)
             ){
                 times.forEach { time ->
                     DropdownMenuItem(
                         text = {
                             Text(
                                time,
-                                color = MaterialTheme.colorScheme.onBackground,
+                                color = colors.onBackgroundColor,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold
                             )

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun MyActualTimeOffText(
@@ -23,6 +23,8 @@ fun MyActualTimeOffText(
     label3: String,
     showIcon: Boolean = false
 ) {
+    val colors = appColors()
+
     Column(
         modifier = Modifier.padding( vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -32,7 +34,7 @@ fun MyActualTimeOffText(
             label1 ,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary
+            color = colors.tertiaryColor
         )
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -43,14 +45,14 @@ fun MyActualTimeOffText(
                     contentDescription = "Vacation Icon",
                     modifier = Modifier
                         .padding(end = 6.dp),
-                    tint = MaterialTheme.colorScheme.tertiary
+                    tint = colors.tertiaryColor
                 )
             }
             Text(
                 label2,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.tertiary
+                color = colors.tertiaryColor
             )
 
         }
@@ -58,7 +60,7 @@ fun MyActualTimeOffText(
             label3 ,
             fontSize = 15.sp,
             fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.tertiary)
-
+            color = colors.tertiaryColor
+        )
     }
 }

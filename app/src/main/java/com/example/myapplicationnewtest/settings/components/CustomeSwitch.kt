@@ -11,29 +11,29 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-//import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun CustomSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ){
+    val colors = appColors()
     val backgroundColor by animateColorAsState(
         targetValue = if (checked)
-            MaterialTheme.colorScheme.tertiary
-        else MaterialTheme.colorScheme.tertiary,
+            colors.tertiaryColor
+        else colors.tertiaryColor,
         label = "bgColor"
     )
 
@@ -47,7 +47,7 @@ fun CustomSwitch(
     ){
         Text(
             text = if (checked) stringResource(R.string.switch_on) else stringResource(R.string.switch_off),
-            color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.6f),
+            color = colors.onSecondaryColor.copy(alpha = 0.6f),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -60,7 +60,7 @@ fun CustomSwitch(
                 .align(Alignment.CenterStart)
                 .offset( if (checked) 40.dp else 4.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onSecondary)
+                .background(colors.onSecondaryColor)
         )
     }
 }

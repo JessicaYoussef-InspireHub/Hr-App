@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
@@ -35,23 +36,25 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
+import com.example.myapplicationnewtest.appColors
 
 
 @Composable
 fun EnterPinScreen(
     navController: NavController,
     isChangingMethod: Boolean = false
-) {
+){
+    val colors = appColors()
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val viewModel = remember { EnterPinViewModel(sharedPrefManager) }
     val currentFocusIndex by remember { mutableIntStateOf(0) }
-    val pinColor = MaterialTheme.colorScheme.tertiary
     val focusManager = LocalFocusManager.current
     val customColors = TextSelectionColors(
-        handleColor = pinColor,
-        backgroundColor = pinColor
+        handleColor = colors.tertiaryColor,
+        backgroundColor = colors.tertiaryColor
     )
 
     val focusRequester = remember { FocusRequester() }
@@ -78,7 +81,7 @@ fun EnterPinScreen(
 
     BackHandler(enabled = true) {
         if (isChangingMethod) {
-            navController.navigate("ProtectionScreen") {
+            navController.navigate("ProtectionScreen/1") {
                 popUpTo("EnterPinScreen") { inclusive = true }
             }
         } else {
@@ -89,12 +92,12 @@ fun EnterPinScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
     ) {
         Column(
             modifier = Modifier.align(Alignment.TopCenter)
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
             .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -110,7 +113,7 @@ fun EnterPinScreen(
                         .clickable {
                             navController.popBackStack()
                         },
-                    tint = pinColor
+                    tint = colors.tertiaryColor
                 )
             }
             else {
@@ -128,7 +131,7 @@ fun EnterPinScreen(
             Text(
                 text = titleText,
                 fontWeight = FontWeight.Bold,
-                color = pinColor,
+                color = colors.tertiaryColor,
                 fontSize = if (isChangingMethod) 20.sp else 30.sp,
                 textAlign = TextAlign.Center,
             )
@@ -137,7 +140,7 @@ fun EnterPinScreen(
                 subtitleText,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
-                color = pinColor,
+                color = colors.tertiaryColor,
                 fontWeight = FontWeight.Normal,
             )
         }
@@ -160,47 +163,84 @@ fun EnterPinScreen(
                     val isFocused = i == currentFocusIndex
                     val isFilled = viewModel.pinDigits[i].isNotEmpty()
                     val borderColor = when {
-                        isFocused -> pinColor
-                        isFilled -> pinColor
-                        else -> MaterialTheme.colorScheme.onBackground
+                        isFocused -> colors.tertiaryColor
+                        isFilled -> colors.tertiaryColor
+                        else -> colors.onBackgroundColor
                     }
 
-                        OutlinedTextField(
-                            visualTransformation = PasswordVisualTransformation(),
-                            value = viewModel.pinDigits[i],
-                            onValueChange = {
-                                if (it.isEmpty()) {
-                                    viewModel.clearDigit(i)
-                                    if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
-                                } else {
-                                    viewModel.onPinDigitChanged(i, it)
-                                    if (i < viewModel.pinLength - 1) {
-                                        focusManager.moveFocus(FocusDirection.Next)
-                                    }
+//                        OutlinedTextField(
+//                            visualTransformation = PasswordVisualTransformation(),
+//                            value = viewModel.pinDigits[i],
+//                            onValueChange = {
+//                                if (it.isEmpty()) {
+//                                    viewModel.clearDigit(i)
+//                                    if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
+//                                } else {
+//                                    viewModel.onPinDigitChanged(i, it)
+//                                    if (i < viewModel.pinLength - 1) {
+//                                        focusManager.moveFocus(FocusDirection.Next)
+//                                    }
+//                                }
+//                            },
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .height(80.dp)
+//                                .then(
+//                                    if (i == 0) Modifier.focusRequester(focusRequester) else Modifier
+//                                ),
+//                            singleLine = true,
+//                            textStyle = TextStyle(
+//                                fontSize = 30.sp,
+//                                color = colors.tertiaryColor,
+//                                textAlign = TextAlign.Center,
+//                                textDirection = TextDirection.Ltr
+//                            ),
+//                            colors = OutlinedTextFieldDefaults.colors(
+//                                unfocusedBorderColor = borderColor,
+//                                focusedBorderColor = colors.tertiaryColor,
+//                                cursorColor = colors.tertiaryColor,
+//                                focusedTextColor = colors.tertiaryColor,
+//                                unfocusedTextColor = colors.tertiaryColor
+//                            )
+//                        )
+                    OutlinedTextField(
+                        visualTransformation = PasswordVisualTransformation(),
+                        value = viewModel.pinDigits[i],
+                        onValueChange = {
+                            if (it.isEmpty()) {
+                                viewModel.clearDigit(i)
+                                if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
+                            } else {
+                                viewModel.onPinDigitChanged(i, it)
+                                if (i < viewModel.pinLength - 1) {
+                                    focusManager.moveFocus(FocusDirection.Next)
                                 }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(80.dp)
-                                .then(
-                                    if (i == 0) Modifier.focusRequester(focusRequester) else Modifier
-                                ),
-                            singleLine = true,
-                            textStyle = TextStyle(
-                                fontSize = 30.sp,
-                                color = pinColor,
-                                textAlign = TextAlign.Center,
-                                textDirection = TextDirection.Ltr
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(80.dp)
+                            .then(
+                                if (i == 0) Modifier.focusRequester(focusRequester) else Modifier
                             ),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = borderColor,
-                                focusedBorderColor = pinColor,
-                                cursorColor = pinColor,
-                                focusedTextColor = pinColor,
-                                unfocusedTextColor = pinColor
-                            )
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            fontSize = 30.sp,
+                            color = colors.tertiaryColor,
+                            textAlign = TextAlign.Center,
+                            textDirection = TextDirection.Ltr
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = borderColor,
+                            focusedBorderColor = colors.tertiaryColor,
+                            cursorColor = colors.tertiaryColor,
+                            focusedTextColor = colors.tertiaryColor,
+                            unfocusedTextColor = colors.tertiaryColor
                         )
-                    }
+                    )
+
+                }
                 }
             }
 
@@ -213,7 +253,7 @@ fun EnterPinScreen(
                 if (errorText.isNotEmpty()) {
                     Text(
                         text = errorText,
-                        color = MaterialTheme.colorScheme.tertiary,
+                        color = colors.tertiaryColor,
                         fontSize = 16.sp,
                     )
                 }
@@ -228,10 +268,10 @@ fun EnterPinScreen(
                     .height(56.dp),
                 enabled = viewModel.isPinComplete,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = pinColor,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    disabledContainerColor = pinColor.copy(alpha = 0.4f),
-                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
+                    containerColor = colors.tertiaryColor,
+                    contentColor = colors.onSecondaryColor,
+                    disabledContainerColor = colors.tertiaryColor.copy(alpha = 0.4f),
+                    disabledContentColor = colors.onSecondaryColor.copy(alpha = 0.5f)
                 ),
                 shape = RoundedCornerShape(8.dp),
                 onClick = {
@@ -240,7 +280,7 @@ fun EnterPinScreen(
                             if (isChangingMethod) {
                                 sharedPrefManager.savePin("")
                                 sharedPrefManager.setProtectionSkipped(false)
-                                navController.navigate("ProtectionScreen") {
+                                navController.navigate("ProtectionScreen/1") {
                                     popUpTo("EnterPinScreen") { inclusive = true }
                                 }
                             } else {
@@ -266,7 +306,7 @@ fun EnterPinScreen(
                 TextButton(onClick = {
                     navController.navigate("PinCodeScreen")
                 }) {
-                    Text(stringResource(R.string.forget_your_password), color = pinColor)
+                    Text(stringResource(R.string.forget_your_password), color = colors.tertiaryColor)
                 }
         }
     }

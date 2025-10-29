@@ -36,10 +36,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.sign_in.components.InCorrectCompanyId
 import org.json.JSONObject
 import kotlin.system.exitProcess
@@ -59,8 +59,10 @@ fun SignInScreen(
     navController: NavController,
     companyId: String,
     apiKey: String,
-    viewModel: SignInViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: SignInViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    numberToBack: Int = 0
 ) {
+    val colors = appColors()
     val emailState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
 
@@ -131,13 +133,13 @@ fun SignInScreen(
         Column(
             Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.onSecondary)
+                .background(colors.onSecondaryColor)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         )
         {
             Box(modifier = Modifier.fillMaxWidth()) {
-                if (token.isNullOrEmpty()) {
+                if (numberToBack == 1)
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
@@ -145,9 +147,8 @@ fun SignInScreen(
                             .align(Alignment.CenterStart)
                             .size(32.dp)
                             .clickable { navController.popBackStack() },
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = colors.tertiaryColor
                     )
-                }
             }
             Image(
                 painter = painterResource(id = R.drawable.sign_in),
@@ -159,7 +160,7 @@ fun SignInScreen(
             Text(
                 stringResource(R.string.sign_in_screen),
                 fontSize = 30.sp,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = colors.tertiaryColor,
                 fontWeight = FontWeight.ExtraBold
             )
             Spacer(modifier = Modifier.height(40.dp))
@@ -177,7 +178,7 @@ fun SignInScreen(
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     stringResource(R.string.email),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     modifier = Modifier.align(Alignment.CenterStart)
@@ -199,7 +200,7 @@ fun SignInScreen(
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     stringResource(R.string.password),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     modifier = Modifier.align(Alignment.CenterStart)
@@ -227,7 +228,7 @@ fun SignInScreen(
             if (errorMessage != null) {
                 Text(
                     text = errorMessage,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     fontSize = 18.sp,
                     modifier = Modifier
                         .align(Alignment.Start)
@@ -242,18 +243,20 @@ fun SignInScreen(
 
             SignInButton(
                 onClick = {
-                    viewModel.signIn(
-                        emailState.value,
-                        passwordState.value,
-                        companyId,
-                        apiKey
-                    )
+                    val trimmedEmail = emailState.value.trim()
+                    val trimmedPassword = passwordState.value.trim()
+                    if (trimmedEmail.isNotEmpty() && trimmedPassword.isNotEmpty()) {
+                        viewModel.signIn(
+                            trimmedEmail,
+                            trimmedPassword,
+                            companyId,
+                            apiKey
                     //
                     //                val middleware = com.example.myapplicationnewtest.scan_qr_code.data.Middleware.initialize(str)
                     //                middleware.apiKey
                     //                 middleware.companyId
                     //                middleware.baseUrl
-                },
+                                )}},
                 enabled = isFormValid
             )
             if (showDialog.value) {
@@ -295,7 +298,7 @@ fun SignInScreen(
                         if (protectionSkipped) {
                             navController.navigate("CheckInOutScreen")
                         } else {
-                            navController.navigate("ProtectionScreen") {
+                            navController.navigate("ProtectionScreen/0") {
                                 popUpTo("ScanQrCodeScreen") { inclusive = true }
                             }
                         }
@@ -320,11 +323,11 @@ fun SignInScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)),
+                    .background(colors.onSurfaceColor.copy(alpha = 0.4f)),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                 )
             }
         }

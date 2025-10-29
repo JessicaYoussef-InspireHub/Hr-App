@@ -13,7 +13,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,8 +29,10 @@ fun ErrorPermissionDialog(
     message: String,
     onDismiss: () -> Unit
 ) {
+    val colors = appColors()
+
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         title = {
             Column {
@@ -42,14 +44,14 @@ fun ErrorPermissionDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier
                             .clickable { onDismiss() }
                     )
                 }
                 Text(
                     stringResource(R.string.validation_error),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -60,21 +62,21 @@ fun ErrorPermissionDialog(
                 message,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colors.onBackgroundColor,
             )
         },
         confirmButton = {
             Button(
                 onClick = { onDismiss() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = colors.tertiaryColor,
+                    contentColor = colors.onSecondaryColor
                 ),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
                     stringResource(R.string.ok),
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = colors.onSecondaryColor,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )

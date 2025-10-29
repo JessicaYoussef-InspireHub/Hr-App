@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun HalfDayDropdown(
@@ -32,19 +32,21 @@ fun HalfDayDropdown(
         stringResource(R.string.night)
     )
     var expanded by remember { mutableStateOf(false) }
+    val colors = appColors()
+
 
     Box {
         Row ( modifier = Modifier.clickable { expanded = true }){
             Text(
                 text = selectedOption,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colors.onBackgroundColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "ArrowDropDown",
-                tint = MaterialTheme.colorScheme.onBackground,
+                tint = colors.onBackgroundColor,
             )
         }
         DropdownMenu(
@@ -52,7 +54,7 @@ fun HalfDayDropdown(
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .background(
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = colors.onSecondaryColor,
                 )
         ) {
             options.forEach { option ->
@@ -60,7 +62,7 @@ fun HalfDayDropdown(
                     text = {
                         Text(
                             option ,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = colors.onBackgroundColor,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold) },
                     onClick = {

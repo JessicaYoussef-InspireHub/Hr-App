@@ -31,15 +31,15 @@ import java.util.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.foundation.Canvas
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.time_off.data.fetchEmployeeLeaveTypes
+import kotlin.math.ceil
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -73,10 +73,10 @@ fun MyCalendarPicker(
     var selectedDateForInfoDialog by remember { mutableStateOf<LocalDate?>(null) }
     var selectedLeaveRecords by remember { mutableStateOf<List<TimeOffRecord>>(emptyList()) }
     val context = LocalContext.current
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
     var dailyAndHourlyRecords by remember { mutableStateOf<Pair<List<TimeOffRecord>, List<HourlyTimeOffRecord>>?>(null) }
     var permissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
     var doublePermissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
+    val colors = appColors()
 
     fun String.replaceDigitsWithArabic(): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
@@ -121,7 +121,7 @@ fun MyCalendarPicker(
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
             .padding(vertical = 16.dp, horizontal = 8.dp)
             .then(if (isDialogMode) Modifier else Modifier.fillMaxWidth())
     ) {
@@ -138,7 +138,7 @@ fun MyCalendarPicker(
                     .clickable {
                         currentMonth = currentMonth.minusMonths(1)
                     },
-                tint = tertiaryColor
+                tint = colors.tertiaryColor
             )
 
             Text(
@@ -149,7 +149,7 @@ fun MyCalendarPicker(
                 textAlign = TextAlign.Center,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = tertiaryColor
+                color = colors.tertiaryColor
             )
 
             Icon(
@@ -160,7 +160,7 @@ fun MyCalendarPicker(
                     .clickable {
                         currentMonth = currentMonth.plusMonths(1)
                     },
-                tint = tertiaryColor
+                tint = colors.tertiaryColor
             )
 
         }
@@ -189,7 +189,7 @@ fun MyCalendarPicker(
                         .padding(vertical = 4.dp),
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
-                    color = tertiaryColor,
+                    color = colors.tertiaryColor,
                     fontSize = 16.sp
                 )
             }
@@ -197,11 +197,16 @@ fun MyCalendarPicker(
 
         // Calendar Grid
         val totalCells = firstDayOfWeek + daysInMonth
+        val totalRows = ceil(totalCells / 7.0).toInt()
+        val cellHeight = 60.dp
+        val totalHeight = (totalRows * cellHeight.value).dp
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
             userScrollEnabled = false,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(totalHeight)
         ) {
             items(totalCells) { index ->
                 if (index < firstDayOfWeek) {
@@ -267,7 +272,7 @@ fun MyCalendarPicker(
                             .size(if (isDialogMode) 40.dp else 50.dp)
                             .border(
                                 width = if (isDialogMode && inSelectedRange) 2.dp else 0.dp,
-                                color = if (isDialogMode && inSelectedRange) tertiaryColor else Color.Transparent,
+                                color = if (isDialogMode && inSelectedRange) colors.tertiaryColor else colors.transparent,
                                 shape = CircleShape
                             )
 //                            .background(
@@ -337,13 +342,13 @@ fun MyCalendarPicker(
 //                                    else -> Color.Transparent
 //                                },
                                 when {
-                                    firstState == "refuse" -> Color.Transparent
-                                    firstState == "draft" || firstState == "confirm" -> Color.Transparent
-                                    firstState == "validate" -> leaveTypeColors[firstLeaveType] ?:Color.Transparent
-                                    isWeekendHoliday -> MaterialTheme.colorScheme.surfaceVariant
-                                    publicHolidayDates.contains(date) -> MaterialTheme.colorScheme.surfaceVariant
-                                    firstState == null && isToday -> tertiaryColor
-                                    else -> leaveTypeColors[firstLeaveType] ?:Color.Transparent
+                                    firstState == "refuse" -> colors.transparent
+                                    firstState == "draft" || firstState == "confirm" -> colors.transparent
+                                    firstState == "validate" -> leaveTypeColors[firstLeaveType] ?: colors.transparent
+                                    isWeekendHoliday -> colors.surfaceVariant
+                                    publicHolidayDates.contains(date) -> colors.surfaceVariant
+                                    firstState == null && isToday -> colors.tertiaryColor
+                                    else -> leaveTypeColors[firstLeaveType] ?: colors.transparent
                                 },
                                 shape = when {
                                     isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
@@ -483,7 +488,7 @@ fun MyCalendarPicker(
                                         val end = LocalDate.parse(it.end_date)
                                         !date.isBefore(start) && !date.isAfter(end)
                                     }?.leave_type
-                                    leaveTypeColors[leaveType] ?: MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                                    leaveTypeColors[leaveType] ?: colors.tertiaryColor.copy(alpha = 0.2f)
                                 }
 
                                 hourlyStates.isNotEmpty() -> {
@@ -491,10 +496,10 @@ fun MyCalendarPicker(
                                         val leaveDay = LocalDate.parse(it.leave_day)
                                         date == leaveDay
                                     }?.leave_type
-                                    leaveTypeColors[leaveType] ?: MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                                    leaveTypeColors[leaveType] ?: colors.tertiaryColor.copy(alpha = 0.2f)
                                 }
 
-                                else -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                                else -> colors.tertiaryColor.copy(alpha = 0.2f)
                             }
 
                             Box(
@@ -518,8 +523,7 @@ fun MyCalendarPicker(
                             text = dayText,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            textDecoration = if (validatedDates[date] == "refuse") TextDecoration.LineThrough else TextDecoration.None,
+                            color = colors.onBackgroundColor,
                             fontSize = 16.sp
                         )
                         if (firstState == "refuse") {
@@ -534,7 +538,7 @@ fun MyCalendarPicker(
                                                         val leaveDay = LocalDate.parse(it.leave_day)
                                                         date == leaveDay
                                                     }?.leave_type
-                                                    leaveTypeColors[leaveType] ?: Color.Transparent
+                                                    leaveTypeColors[leaveType] ?: colors.transparent
                                                 }
                                                 isRefused -> {
                                                     val leaveType = dailyRecords.find {
@@ -542,9 +546,9 @@ fun MyCalendarPicker(
                                                         val end = LocalDate.parse(it.end_date)
                                                         !date.isBefore(start) && !date.isAfter(end)
                                                     }?.leave_type
-                                                    leaveTypeColors[leaveType] ?: Color.Transparent
+                                                    leaveTypeColors[leaveType] ?: colors.transparent
                                                 }
-                                                else -> tertiaryColor
+                                                else -> colors.tertiaryColor
                                             },
                                             start = Offset(0f, size.height / 2),
                                             end = Offset(size.width, size.height / 2),

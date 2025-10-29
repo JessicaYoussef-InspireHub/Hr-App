@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +16,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun SettingsLanguage(
@@ -24,6 +24,8 @@ fun SettingsLanguage(
     icon: Painter,
     onClick: () -> Unit
 ) {
+    val colors = appColors()
+
     Row(
         Modifier
             .fillMaxWidth()
@@ -41,7 +43,7 @@ fun SettingsLanguage(
         )
         Text(
             label,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = colors.onBackgroundColor,
             fontSize = 15.sp,
             fontWeight = FontWeight.Normal
         )

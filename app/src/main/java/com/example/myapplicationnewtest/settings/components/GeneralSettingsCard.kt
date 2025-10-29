@@ -21,7 +21,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +41,7 @@ import com.example.myapplicationnewtest.settings.data.SettingsViewModel
 import com.example.myapplicationnewtest.ui.theme.LocalDarkMode
 import java.util.Locale
 import android.content.res.Configuration
+import com.example.myapplicationnewtest.appColors
 
 
 @Composable
@@ -49,7 +49,7 @@ fun GeneralSettingsCard(
     navController: NavController,
     viewModel: SettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-
+    val colors = appColors()
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     var locale by remember { mutableStateOf(Locale(sharedPrefManager.getLanguage())) }
@@ -66,6 +66,8 @@ fun GeneralSettingsCard(
         val resources = context.resources
         val configuration = Configuration(resources.configuration)
         configuration.setLocale(newLocale)
+        configuration.setLayoutDirection(newLocale)
+
         resources.updateConfiguration(configuration, resources.displayMetrics)
 
         val activity = context as Activity
@@ -75,7 +77,7 @@ fun GeneralSettingsCard(
     Column {
         Text(
             stringResource(R.string.general_settings),
-            color = MaterialTheme.colorScheme.tertiary,
+            color = colors.tertiaryColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -86,12 +88,12 @@ fun GeneralSettingsCard(
                 .border(
                     BorderStroke(
                         2.dp,
-                        MaterialTheme.colorScheme.inverseOnSurface
+                        colors.inverseOnSurface
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.onSecondary
+                containerColor = colors.onSecondaryColor
             )
         ) {
             Column {
@@ -122,7 +124,7 @@ fun GeneralSettingsCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    color = MaterialTheme.colorScheme.surface
+                    color = colors.surfaceColor
                 )
 
                 SettingsItem(
@@ -133,7 +135,7 @@ fun GeneralSettingsCard(
                         Icon(
                             imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                             contentDescription = "expand",
-                            tint = MaterialTheme.colorScheme.surface,
+                            tint = colors.surfaceColor,
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -145,7 +147,7 @@ fun GeneralSettingsCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 35.dp),
-                            color = MaterialTheme.colorScheme.surface
+                            color = colors.surfaceColor
                         )
                         SettingsLanguage(
                             label = stringResource(R.string.arabic),
@@ -161,7 +163,7 @@ fun GeneralSettingsCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 35.dp),
-                            color = MaterialTheme.colorScheme.surface
+                            color = colors.surfaceColor
                         )
 
                         SettingsLanguage(
@@ -181,7 +183,7 @@ fun GeneralSettingsCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    color = MaterialTheme.colorScheme.surface
+                    color = colors.surfaceColor
                 )
 
                 SettingsItem(

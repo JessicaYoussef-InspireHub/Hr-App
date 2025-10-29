@@ -14,7 +14,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun InCorrectCompanyId(
@@ -32,8 +32,10 @@ fun InCorrectCompanyId(
     onDismiss: () -> Unit,
     navController: NavController
 ) {
+    val colors = appColors()
+
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
             Box(
@@ -46,14 +48,14 @@ fun InCorrectCompanyId(
                         navController.navigate("ScanQrCodeScreen")
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        containerColor = colors.tertiaryColor,
+                        contentColor = colors.onSecondaryColor
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
                         text =  stringResource(R.string.scan_qr_code_again),
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = colors.onSecondaryColor,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -70,7 +72,7 @@ fun InCorrectCompanyId(
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "Close",
-                    tint = MaterialTheme.colorScheme.tertiary,
+                    tint = colors.tertiaryColor,
                     modifier = Modifier
                         .clickable { onDismiss() }
                 )
@@ -80,7 +82,7 @@ fun InCorrectCompanyId(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = colors.tertiaryColor,
             )
         } },
         text = {
@@ -88,7 +90,7 @@ fun InCorrectCompanyId(
                 message ,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colors.onBackgroundColor,
             )
         }
     )

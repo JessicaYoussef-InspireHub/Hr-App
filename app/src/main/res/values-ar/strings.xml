@@ -114,7 +114,8 @@
     <string name="you_are_checked_in">لقد تم تسجيل وصولك</string>
     <string name="you_are_checked_out">لقد تم تسجيل خروجك</string>
     <string name="checked_in_message">لقد قمت بتسجيل الدخول بنجاح في %1$s\nأتمنى لك يومًا مباركًا</string>
-    <string name="checked_out_message">لقد قمت بتسجيل الخروج بنجاح بتاريخ %1$s في الساعة %2$s بعد %3$d ساعة و %4$d دقيقة .. عمل رائع</string>
+<!--    <string name="checked_out_message">لقد قمت بتسجيل الخروج بنجاح بتاريخ %1$s في الساعة %2$s بعد %3$d ساعة و %4$d دقيقة .. عمل رائع</string>-->
+    <string name="checked_out_message">لقد قمت بتسجيل الخروج بنجاح بتاريخ %1$s في الساعة %2$s .. عمل رائع</string>
     <string name="attention">انتبه</string>
     <string name="check_out_confirmation">لقد قضيت %1$d ساعة و %2$d دقيقة\n\nهل أنت متأكد أنك تريد تسجيل الخروج؟</string>
     <string name="check_out">تسجيل الخروج</string>
@@ -145,6 +146,7 @@
     <string name="you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online">لقد قمت بتغيير الوقت أثناء عدم الاتصال بالإنترنت.\nلا يمكنك إجراء عملية التحقق حتى تعود إلى الاتصال بالإنترنت.</string>
     <string name="you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available">أنت غير متصل بالإنترنت حاليًا، سيتم حفظ العملية وإرسالها عند توفر الاتصال.</string>
     <string name="scan_qr_code_again">مسح رمز الاستجابة السريعة مرة أخرى</string>
-
+    <string name="confirmed">في انتظار الموافقة</string>
+    <string name="valid">تمت الموافقة</string>
 
 </resources>

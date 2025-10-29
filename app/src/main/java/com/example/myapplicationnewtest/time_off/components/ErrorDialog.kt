@@ -12,7 +12,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,14 +20,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun ErrorDialog(
     message: String,
     onDismiss: () -> Unit
 ) {
+    val colors = appColors()
+
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = {
             onDismiss()
         },
@@ -42,14 +44,14 @@ fun ErrorDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier
                             .clickable { onDismiss() }
                     )
                 }
                 Text(
                     stringResource(R.string.validation_error),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -60,7 +62,7 @@ fun ErrorDialog(
                 "$message \n \n${stringResource(R.string.attempting_to_double_book_your_time_off_wont_magically_make_your_vacation_2x_better)}" ,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colors.onBackgroundColor,
             )
         },
 
@@ -68,14 +70,14 @@ fun ErrorDialog(
             Button(
                 onClick = { onDismiss() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = colors.tertiaryColor,
+                    contentColor = colors.onSecondaryColor
                 ),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
                     stringResource(R.string.cancel) ,
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = colors.onSecondaryColor,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold)
             }

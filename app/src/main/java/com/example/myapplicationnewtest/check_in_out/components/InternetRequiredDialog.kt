@@ -12,7 +12,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,19 +21,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun InternetRequiredDialog(
     onDismiss: () -> Unit
 ) {
+    val colors = appColors()
+
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    containerColor = MaterialTheme.colorScheme.tertiary
+                    contentColor = colors.onSecondaryColor,
+                    containerColor = colors.tertiaryColor
                 ),
                 shape = RoundedCornerShape(10.dp),
                 onClick = { onDismiss() }
@@ -58,14 +60,14 @@ fun InternetRequiredDialog(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = colors.tertiaryColor,
                         modifier = Modifier
                             .clickable { onDismiss() }
                     )
                 }
                 Text(
                     stringResource(R.string.check_not_allowed) ,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,)
             }
@@ -75,7 +77,7 @@ fun InternetRequiredDialog(
                     stringResource(R.string.you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onBackground)
+                    color = colors.onBackgroundColor)
             },
     )
 }

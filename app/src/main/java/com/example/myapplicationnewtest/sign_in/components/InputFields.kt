@@ -5,7 +5,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -16,6 +15,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.font.FontWeight
+import com.example.myapplicationnewtest.appColors
 
 
 @Composable
@@ -26,13 +26,14 @@ fun InputFields(
     imeAction: ImeAction = ImeAction.Next,
     onImeAction: () -> Unit = {}
 ) {
-
+    val colors = appColors()
     val customTextSelectionColors = TextSelectionColors(
-        handleColor = MaterialTheme.colorScheme.tertiary,
-        backgroundColor = MaterialTheme.colorScheme.tertiary
+        handleColor = colors.tertiaryColor,
+        backgroundColor = colors.tertiaryColor
     )
 
     val focusManager = LocalFocusManager.current
+
 
 
 
@@ -43,7 +44,7 @@ fun InputFields(
             placeholder = {
                 Text(
                     label ,
-                    color = MaterialTheme.colorScheme.onBackground ,
+                    color = colors.onBackgroundColor ,
                     fontWeight = FontWeight.Normal) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -62,16 +63,16 @@ fun InputFields(
                 }
             ),
             colors = TextFieldDefaults.colors(
-                cursorColor = MaterialTheme.colorScheme.tertiary,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                unfocusedContainerColor =MaterialTheme.colorScheme.surfaceVariant,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedTextColor = MaterialTheme.colorScheme.tertiary,
-                unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
-                disabledTextColor = MaterialTheme.colorScheme.tertiary,
-                focusedIndicatorColor = MaterialTheme.colorScheme.tertiary,
-                unfocusedIndicatorColor = MaterialTheme.colorScheme.tertiary,
-                disabledIndicatorColor = MaterialTheme.colorScheme.tertiary,
+                cursorColor = colors.tertiaryColor,
+                focusedContainerColor = colors.surfaceVariant,
+                unfocusedContainerColor =colors.surfaceVariant,
+                disabledContainerColor = colors.surfaceVariant,
+                focusedTextColor = colors.tertiaryColor,
+                unfocusedTextColor = colors.tertiaryColor,
+                disabledTextColor = colors.tertiaryColor,
+                focusedIndicatorColor = colors.tertiaryColor,
+                unfocusedIndicatorColor = colors.tertiaryColor,
+                disabledIndicatorColor = colors.tertiaryColor,
                 )
         )
     }

@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,13 +29,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.appColors
 
 
 @Composable
 fun SecurityCard(
     navController: NavController,
 ) {
-
+    val colors = appColors()
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val protectionMethod = sharedPrefManager.getProtectionMethod()
@@ -46,7 +46,7 @@ fun SecurityCard(
     Column {
         Text(
             stringResource(R.string.security),
-            color = MaterialTheme.colorScheme.tertiary,
+            color = colors.tertiaryColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -57,12 +57,12 @@ fun SecurityCard(
                 .border(
                     BorderStroke(
                         2.dp,
-                        MaterialTheme.colorScheme.inverseOnSurface
+                        colors.inverseOnSurface
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.onSecondary
+                containerColor = colors.onSecondaryColor
             )
         ) {
             Column {
@@ -83,8 +83,8 @@ fun SecurityCard(
                             when (protectionMethod) {
                                 1 -> navController.navigate("FingerPrintScreen?changeMethod=true")
                                 2 -> navController.navigate("EnterPinScreen?changeMethod=true")
-                                3 -> navController.navigate("ProtectionScreen")
-                                else -> navController.navigate("ProtectionScreen")
+                                3 -> navController.navigate("ProtectionScreen/1")
+                                else -> navController.navigate("ProtectionScreen/1")
                             }
                         },
                         onDismiss = { showDialog = false }
@@ -95,13 +95,15 @@ fun SecurityCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    color = MaterialTheme.colorScheme.surface
+                    color = colors.surfaceColor
                 )
 
                 SettingsItem(
                     stringResource(R.string.notification),
                     icon = Icons.Default.Notifications,
-                    onClick = {}
+                    onClick = {
+                        navController.navigate("NotificationsScreen")
+                    }
                 )
             }
         }

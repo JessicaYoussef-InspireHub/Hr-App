@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,11 +22,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplicationnewtest.R
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun DialogTitle(
     onDiscard: () -> Unit
 ) {
+    val colors = appColors()
+
     Column {
         Row(
             Modifier.fillMaxWidth()
@@ -39,7 +41,7 @@ fun DialogTitle(
             Text(
                 text = stringResource(R.string.time_off_request),
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = colors.tertiaryColor,
                 fontSize = 20.sp,
             )
             Icon(
@@ -50,13 +52,13 @@ fun DialogTitle(
                     .clickable {
                         onDiscard()
                     },
-                tint = MaterialTheme.colorScheme.tertiary
+                tint = colors.tertiaryColor
             )
         }
         Spacer(modifier = Modifier.size(10.dp))
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.inverseOnSurface)
+                .background(colors.inverseOnSurface)
         )
     }
 }

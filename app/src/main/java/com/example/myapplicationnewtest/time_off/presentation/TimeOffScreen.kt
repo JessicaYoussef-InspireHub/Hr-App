@@ -24,7 +24,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,6 +45,7 @@ import com.example.myapplicationnewtest.BottomBar
 import com.example.myapplicationnewtest.MyAppBar
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.time_off.components.LeaveTypesLazyRow
 import com.example.myapplicationnewtest.time_off.components.MyCalendarPicker
 import com.example.myapplicationnewtest.time_off.components.MyActualTimeOff
@@ -94,6 +94,8 @@ fun TimeOffScreen(
     val coroutineScope = rememberCoroutineScope()
     val leaveTypes = leaveTypesState.value
     val leaveTypeColors = remember { mutableStateMapOf<String, Color>() }
+
+    val colors = appColors()
 
     fun triggerRefresh() {
         shouldRefresh = !shouldRefresh
@@ -238,16 +240,16 @@ fun TimeOffScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.onSecondary),
+                .background(colors.onSecondaryColor),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.tertiary
+                color = colors.tertiaryColor
             )
         }
     } else {
         Scaffold(
-            containerColor = MaterialTheme.colorScheme.onSecondary,
+            containerColor = colors.onSecondaryColor,
             topBar = {
                 MyAppBar(
                     label = stringResource(R.string.time_off_screen),
@@ -260,9 +262,10 @@ fun TimeOffScreen(
             paddingValues ->
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.onSecondary)
+                    .background(colors.onSecondaryColor)
                     .padding(paddingValues)
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
             ) {
 //                LeaveTypesList(leaveTypes = leaveTypesState.value)
 //                if (holidayText.isNotEmpty()) {
@@ -388,7 +391,7 @@ fun TimeOffScreen(
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.inverseOnSurface)
+                        .background(colors.inverseOnSurface)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Column(

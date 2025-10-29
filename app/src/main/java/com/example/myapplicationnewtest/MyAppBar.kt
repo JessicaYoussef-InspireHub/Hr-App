@@ -2,7 +2,6 @@ package com.example.myapplicationnewtest
 
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -12,10 +11,12 @@ import androidx.compose.runtime.Composable
 fun MyAppBar(
     label: String,
 ) {
+    val colors = appColors()
+
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            titleContentColor = MaterialTheme.colorScheme.onSecondary,
+            containerColor = colors.tertiaryColor,
+            titleContentColor = colors.onSecondaryColor,
         ),
         title = { Text(text = label) }
     )

@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
@@ -38,7 +40,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun ConfirmPinScreen(
@@ -46,15 +51,15 @@ fun ConfirmPinScreen(
     pin: String,
     viewModel: ConfirmPinViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    val colors = appColors()
     val pinDigits = viewModel.pinDigits
     val pinLength = viewModel.pinLength
     val focusManager = LocalFocusManager.current
     val currentFocusIndex by remember { mutableIntStateOf(0) }
-    val pinColor = MaterialTheme.colorScheme.tertiary
     val context = LocalContext.current
     val customColors = TextSelectionColors(
-        handleColor = pinColor,
-        backgroundColor = pinColor
+        handleColor = colors.tertiaryColor,
+        backgroundColor = colors.tertiaryColor
     )
 
     val focusRequester = remember { FocusRequester() }
@@ -73,12 +78,12 @@ fun ConfirmPinScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
     ) {
         Column(
             modifier = Modifier.align(Alignment.TopCenter)
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
             .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -92,7 +97,7 @@ fun ConfirmPinScreen(
                         .clickable {
                             navController.popBackStack()
                         },
-                    tint = pinColor
+                    tint = colors.tertiaryColor
                 )
             }
             Image(
@@ -106,7 +111,7 @@ fun ConfirmPinScreen(
             Text(
                 text = stringResource(R.string.confirm_your_pin),
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = colors.tertiaryColor,
                 fontSize = 30.sp,
                 textAlign = TextAlign.Center,
             )
@@ -114,7 +119,7 @@ fun ConfirmPinScreen(
             Text(
                 stringResource(R.string.re_enter_your_4_digit_pin),
                 fontSize = 20.sp,
-                color = pinColor,
+                color = colors.tertiaryColor,
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Center,
             )
@@ -137,43 +142,87 @@ fun ConfirmPinScreen(
                     val isFocused = i == currentFocusIndex
                     val isFilled = pinDigits[i].isNotEmpty()
                     val borderColor = when {
-                        isFocused -> pinColor
-                        isFilled -> pinColor
-                        else -> MaterialTheme.colorScheme.onBackground
+                        isFocused -> colors.tertiaryColor
+                        isFilled -> colors.tertiaryColor
+                        else -> colors.onBackgroundColor
                     }
-                     OutlinedTextField(
-                            visualTransformation = PasswordVisualTransformation(),
-                            value = pinDigits[i],
-                            onValueChange = {
-                                if (it.isEmpty()) {
-                                    viewModel.clearDigit(i)
-                                    if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
-                                } else if (it.length == 1 && it.all { c -> c.isDigit() }) {
-                                    viewModel.updateDigit(i, it)
-                                    if (i < pinLength - 1) focusManager.moveFocus(FocusDirection.Next)
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(80.dp)
-                                .then(
-                                    if (i == 0) Modifier.focusRequester(focusRequester) else Modifier
-                                ),
-                            singleLine = true,
-                            textStyle = TextStyle(
-                                fontSize = 30.sp,
-                                color = pinColor,
-                                textAlign = TextAlign.Center,
-                                textDirection = TextDirection.Ltr
+//                     OutlinedTextField(
+//                            visualTransformation = PasswordVisualTransformation(),
+//                            value = pinDigits[i],
+//                            onValueChange = {
+//                                if (it.isEmpty()) {
+//                                    viewModel.clearDigit(i)
+//                                    if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
+//                                } else if (it.length == 1 && it.all { c -> c.isDigit() }) {
+//                                    viewModel.updateDigit(i, it)
+//                                    if (i < pinLength - 1) focusManager.moveFocus(FocusDirection.Next)
+//                                }
+//                            },
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .height(80.dp)
+//                                .then(
+//                                    if (i == 0) Modifier.focusRequester(focusRequester) else Modifier
+//                                ),
+//                            singleLine = true,
+//                            textStyle = TextStyle(
+//                                fontSize = 30.sp,
+//                                color = colors.tertiaryColor,
+//                                textAlign = TextAlign.Center,
+//                                textDirection = TextDirection.Ltr
+//                            ),
+//                            colors = OutlinedTextFieldDefaults.colors(
+//                                unfocusedBorderColor = borderColor,
+//                                focusedBorderColor = colors.tertiaryColor,
+//                                cursorColor = colors.tertiaryColor,
+//                                focusedTextColor = colors.tertiaryColor,
+//                                unfocusedTextColor = colors.tertiaryColor
+//                            )
+//                        )
+
+                    val imeAction = if (i == pinLength - 1) ImeAction.Done else ImeAction.Next
+
+                    OutlinedTextField(
+                        visualTransformation = PasswordVisualTransformation(),
+                        value = pinDigits[i],
+                        onValueChange = {
+                            if (it.isEmpty()) {
+                                viewModel.clearDigit(i)
+                                if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
+                            } else if (it.length == 1 && it.all { c -> c.isDigit() }) {
+                                viewModel.updateDigit(i, it)
+                                if (i < pinLength - 1) focusManager.moveFocus(FocusDirection.Next)
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(80.dp)
+                            .then(
+                                if (i == 0) Modifier.focusRequester(focusRequester) else Modifier
                             ),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = borderColor,
-                                focusedBorderColor = pinColor,
-                                cursorColor = pinColor,
-                                focusedTextColor = pinColor,
-                                unfocusedTextColor = pinColor
-                            )
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            fontSize = 30.sp,
+                            color = colors.tertiaryColor,
+                            textAlign = TextAlign.Center,
+                            textDirection = TextDirection.Ltr
+                        ),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = imeAction
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusManager.moveFocus(FocusDirection.Next) },
+                            onDone = { focusManager.clearFocus() }
+                        ),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = borderColor,
+                            focusedBorderColor = colors.tertiaryColor,
+                            cursorColor = colors.tertiaryColor,
+                            focusedTextColor = colors.tertiaryColor,
+                            unfocusedTextColor = colors.tertiaryColor
                         )
+                    )
                     }
                 }
             }
@@ -189,7 +238,7 @@ fun ConfirmPinScreen(
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = errorText,
-                            color = pinColor,
+                            color = colors.tertiaryColor,
                             fontSize = 16.sp,
                             modifier = Modifier.align(Alignment.TopStart)
                         )
@@ -204,10 +253,10 @@ fun ConfirmPinScreen(
                     .height(56.dp),
                 enabled = viewModel.getPin().length == viewModel.pinLength,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = pinColor,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    disabledContainerColor = pinColor.copy(alpha = 0.4f),
-                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
+                    containerColor = colors.tertiaryColor,
+                    contentColor = colors.onSecondaryColor,
+                    disabledContainerColor = colors.tertiaryColor.copy(alpha = 0.4f),
+                    disabledContentColor = colors.onSecondaryColor.copy(alpha = 0.5f)
                 ),
                 shape = RoundedCornerShape(8.dp),
                 onClick = {

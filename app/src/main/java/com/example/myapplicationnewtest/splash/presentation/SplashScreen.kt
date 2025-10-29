@@ -10,23 +10,24 @@ import androidx.navigation.NavController
 import com.bumptech.glide.Glide
 import com.example.myapplicationnewtest.R
 import androidx.compose.foundation.background
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.target.ImageViewTarget
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat
+import com.example.myapplicationnewtest.appColors
 
 @Composable
 fun SplashScreen(
     navController: NavController,
     nextDestination: String,
 ) {
+    val colors = appColors()
     val context = LocalContext.current
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
     ){
         AndroidView(
             factory = { imageViewContext ->

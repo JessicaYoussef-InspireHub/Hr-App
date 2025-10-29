@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +30,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
+import com.example.myapplicationnewtest.appColors
 import com.example.myapplicationnewtest.protection.data.FingerprintViewModel
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -44,6 +44,7 @@ fun FingerPrintScreen(
     isChangingMethod: Boolean = false,
     viewModel: FingerprintViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    val colors = appColors()
     val titleText = if (isChangingMethod)
         stringResource(R.string.confirm_fingerprint_to_change_protection)
     else
@@ -57,13 +58,31 @@ fun FingerPrintScreen(
     val prefManager = remember { SharedPrefManager(context) }
 
 
+    LaunchedEffect(Unit) {
+        if (activity != null) {
+            startBiometricAuth(
+                activity = activity,
+                executor = executor,
+                context = context,
+                onResult = { success ->
+                    println("🎯 Authentication result: $success")
+                    viewModel.onAuthenticationResult(success)
+                    if (success) {
+                        SharedPrefManager(context).setFingerprintAuthSuccess(true)
+                    }
+                }
+            )
+        }
+    }
+
+
     LaunchedEffect(authSuccess) {
         if (authSuccess) {
             prefManager.saveProtectionMethod(1)
             val destination = if (isChangingMethod) {
                 prefManager.setProtectionSkipped(false)
                 prefManager.setFingerprintAuthSuccess(false)
-                "ProtectionScreen"
+                "ProtectionScreen/0"
             } else {
                 "CheckInOutScreen"
             }
@@ -110,7 +129,7 @@ fun FingerPrintScreen(
 
     BackHandler(enabled = true) {
         if (isChangingMethod) {
-            navController.navigate("ProtectionScreen") {
+            navController.navigate("ProtectionScreen/0") {
                 popUpTo("FingerPrintScreen") { inclusive = true }
             }
         } else {
@@ -119,52 +138,49 @@ fun FingerPrintScreen(
     }
     Box(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.onSecondary)
+            .background(colors.onSecondaryColor)
             .fillMaxSize()
-            .padding(16.dp),
+
 
         ) {
 
-        Row(
-            modifier = Modifier
+        Column (
+            modifier = Modifier.align(Alignment.TopCenter)
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                .background(colors.onSecondaryColor)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            Row(
                 modifier = Modifier
-                    .size(32.dp)
-                    .clickable {
-                        navController.popBackStack()
-                    },
-                tint = MaterialTheme.colorScheme.tertiary
-            )}
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable {
+                            navController.popBackStack()
+                        },
+                    tint = colors.tertiaryColor
+                )
+            }
+            if( errorMessage == null){
+            Text(
+                text = titleText,
+                fontWeight = FontWeight.Bold,
+                color = colors.tertiaryColor,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+            )
+        }}
 
 
         when {
             errorMessage == null -> {
-                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(vertical = 16.dp),
-//                    verticalAlignment = Alignment.Top
-                ) {
-                    Text(
-                        text = titleText,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp, end = 32.dp)
-                    )
-                }
-
-
-
 
                 Column(
                     modifier = Modifier.align(Alignment.Center),
@@ -196,7 +212,7 @@ fun FingerPrintScreen(
                                     )
                                 }
                             },
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = colors.tertiaryColor
                     )
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -205,7 +221,7 @@ fun FingerPrintScreen(
                     Text(
                         authStatusText,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.tertiary,
+                        color = colors.tertiaryColor,
                         fontSize = 20.sp
                     )
                 }
@@ -217,7 +233,7 @@ fun FingerPrintScreen(
                 Text(
                     errorMessage,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,
                     lineHeight = 30.sp,
                     fontSize = 20.sp,
@@ -243,7 +259,7 @@ fun FingerPrintScreen(
             }
 
             else -> {
-                Text(errorMessage, color = MaterialTheme.colorScheme.tertiary)
+                Text(errorMessage, color = colors.tertiaryColor)
             }
         }
 
