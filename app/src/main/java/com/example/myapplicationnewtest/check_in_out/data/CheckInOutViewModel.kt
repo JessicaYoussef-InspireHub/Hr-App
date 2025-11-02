@@ -249,7 +249,10 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()).build()
+                    .build()
+            )
+            .addTag("attendance_tag")
+            .build()
 
         WorkManager.getInstance(context).enqueue(request)
 

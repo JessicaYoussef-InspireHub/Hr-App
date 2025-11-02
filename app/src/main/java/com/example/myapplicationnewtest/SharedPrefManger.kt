@@ -6,6 +6,14 @@ import java.util.Locale
 import androidx.core.content.edit
 
 class SharedPrefManager(context: Context) {
+    fun saveServerExitTime(time: String) {
+        prefs.edit { putString("server_exit_time", time) }
+    }
+
+    fun getServerExitTime(): String? {
+        return prefs.getString("server_exit_time", null)
+    }
+
     private val prefs: SharedPreferences =
         context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 

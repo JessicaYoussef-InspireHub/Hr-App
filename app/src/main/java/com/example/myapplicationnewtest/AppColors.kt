@@ -14,6 +14,7 @@ data class AppColors(
     val surfaceVariant: Color,
     val onSurfaceColor : Color,
     val surfaceColor : Color,
+    val error : Color
 )
 
 @Composable
@@ -27,5 +28,6 @@ fun appColors(): AppColors {
         surfaceVariant = MaterialTheme.colorScheme.surfaceVariant,
         onSurfaceColor = MaterialTheme.colorScheme.onSurface,
         surfaceColor = MaterialTheme.colorScheme.surface,
+        error = MaterialTheme.colorScheme.error
     )
 }

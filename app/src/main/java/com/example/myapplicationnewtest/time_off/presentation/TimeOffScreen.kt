@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,16 +40,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplicationnewtest.BottomBar
 import com.example.myapplicationnewtest.MyAppBar
 import com.example.myapplicationnewtest.R
 import com.example.myapplicationnewtest.SharedPrefManager
 import com.example.myapplicationnewtest.appColors
+import com.example.myapplicationnewtest.check_in_out.data.NetworkUtils
 import com.example.myapplicationnewtest.time_off.components.LeaveTypesLazyRow
 import com.example.myapplicationnewtest.time_off.components.MyCalendarPicker
 import com.example.myapplicationnewtest.time_off.components.MyActualTimeOff
+import com.example.myapplicationnewtest.time_off.components.RetryButton
 import com.example.myapplicationnewtest.time_off.components.Shapes
 import com.example.myapplicationnewtest.time_off.data.LeaveType
 import com.example.myapplicationnewtest.time_off.data.fetchAndPrintHolidays
@@ -94,6 +99,7 @@ fun TimeOffScreen(
     val coroutineScope = rememberCoroutineScope()
     val leaveTypes = leaveTypesState.value
     val leaveTypeColors = remember { mutableStateMapOf<String, Color>() }
+    val isOffline = remember { mutableStateOf(false) }
 
     val colors = appColors()
 
@@ -104,8 +110,13 @@ fun TimeOffScreen(
 
     LaunchedEffect(shouldRefresh) {
         isLoading.value = true
-
+        isOffline.value = false
         try {
+            if (!NetworkUtils.isNetworkAvailable(context) || !NetworkUtils.hasRealInternet()) {
+                isOffline.value = true
+                return@LaunchedEffect
+            }
+
             val leaveTypesResponse = fetchEmployeeLeaveTypes(token)
             leaveTypesResponse?.let {
                 leaveTypesState.value = it.result.leave_types
@@ -236,18 +247,7 @@ fun TimeOffScreen(
     }
 
 
-    if (isLoading.value) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colors.onSecondaryColor),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = colors.tertiaryColor
-            )
-        }
-    } else {
+
         Scaffold(
             containerColor = colors.onSecondaryColor,
             topBar = {
@@ -260,6 +260,40 @@ fun TimeOffScreen(
             }
         ){
             paddingValues ->
+            if (isOffline.value) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(colors.onSecondaryColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(R.string.you_are_offline),
+                            color = colors.tertiaryColor,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 25.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        RetryButton {
+                            triggerRefresh()
+                        }
+                    }
+                }
+            } else if (isLoading.value) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(colors.onSecondaryColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = colors.tertiaryColor
+                    )
+                }
+            } else {
             Column(
                 modifier = Modifier
                     .background(colors.onSecondaryColor)

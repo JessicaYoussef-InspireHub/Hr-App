@@ -150,6 +150,7 @@ Protection Method</string>
     <string name="scan_qr_code_again">Scan QR Code Again</string>
     <string name="confirmed">Confirmed</string>
     <string name="valid">Valid</string>
+    <string name="retry">Retry</string>
     <string name="enable_now">Enable Now</string>
     <string name="enable_location">Enable Location (GPS)</string>
     <string name="please_enable_gps_so_the_app_can_accurately_detect_your_location">Please enable GPS so the app can accurately detect your location.</string>

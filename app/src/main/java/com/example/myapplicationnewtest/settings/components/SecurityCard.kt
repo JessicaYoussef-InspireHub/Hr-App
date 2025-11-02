@@ -91,20 +91,20 @@ fun SecurityCard(
                     )
                 }
 
-//                HorizontalDivider(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(horizontal = 20.dp),
-//                    color = colors.surfaceColor
-//                )
-//
-//                SettingsItem(
-//                    stringResource(R.string.notification),
-//                    icon = Icons.Default.Notifications,
-//                    onClick = {
-//                        navController.navigate("NotificationsScreen")
-//                    }
-//                )
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    color = colors.surfaceColor
+                )
+
+                SettingsItem(
+                    stringResource(R.string.notification),
+                    icon = Icons.Default.Notifications,
+                    onClick = {
+                        navController.navigate("NotificationsScreen")
+                    }
+                )
             }
         }
     }

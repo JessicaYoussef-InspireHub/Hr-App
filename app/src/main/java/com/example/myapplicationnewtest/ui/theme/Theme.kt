@@ -26,7 +26,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = weekendAndPublicColor,
     inverseOnSurface = LightGray,
     surface = Dark_grey,
-
+    error = Red,
 
 //    secondary = Validate_color,
 //    onPrimary = dark_background_color,
@@ -47,6 +47,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = weekendAndPublicColor,
     inverseOnSurface = LightGray,
     surface = Dark_grey,
+    error = Red,
 //    secondary = Validate_color,
 //    tertiary = Main_color,
 //    onPrimary = White,
@@ -58,7 +59,7 @@ private val LightColorScheme = lightColorScheme(
 //
 //    onSurface = Light_green,
 //    onSurfaceVariant = Lines_color,
-//    error = Red,
+//
 
 
     /* Other default colors to override

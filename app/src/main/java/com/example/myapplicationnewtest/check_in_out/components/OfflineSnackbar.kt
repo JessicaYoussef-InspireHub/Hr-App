@@ -18,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplicationnewtest.appColors
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 
 @Composable
 fun OfflineSnackBar(
@@ -51,7 +54,13 @@ fun OfflineSnackBar(
                 Snackbar(
                     containerColor = colors.onSecondaryColor,
                     contentColor = colors.tertiaryColor,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .border(
+                            width = 2.dp,
+                            color = colors.tertiaryColor,
+                            shape = RoundedCornerShape(8.dp)
+                        ),
                 ) {
                     Text(
                         text = snackBarData.visuals.message,

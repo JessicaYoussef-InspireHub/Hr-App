@@ -383,12 +383,24 @@ fun CheckInOutScreen(
 
                 CheckInOutButton(
                     attendanceStatus = attendanceStatus,
+//                    isWithinDistance = isWithinDistance == true,
+//                    isLoading = isButtonLoading,
                     isWithinDistance = (isWithinDistance == true),
                     isLoading = isButtonLoading || isWithinDistance == null,
                     onClick = {
                         if (!isButtonLoading) {
-                            isButtonLoading = true
                             coroutineScope.launch {
+                                val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                                val gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+                                if (!gpsEnabled) {
+                                    Log.d("GPS_STATUS", "❌ GPS is OFF when button clicked")
+                                    showGpsDialog = true
+                                    return@launch
+                                }
+
+                                isButtonLoading = true
+
                                 val sharedPrefManager = SharedPrefManager(context)
                                 val token = sharedPrefManager.getToken()
                                 val offline = viewModel.isOffline()
@@ -498,7 +510,7 @@ fun CheckInOutScreen(
 //            }
 //        }
 
-        if ( isInitialLoading && !isOffline) {
+        if (isInitialLoading && !isOffline) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
