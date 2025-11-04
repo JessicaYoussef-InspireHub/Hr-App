@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.myapplicationnewtest"
+    namespace = "net.inspirehub.hr"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.myapplicationnewtest"
+        applicationId = "net.inspirehub.hr"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -52,29 +52,29 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation (libs.androidx.activity.compose.v180)
-    implementation (libs.androidx.lifecycle.viewmodel.compose)
+    implementation (libs.androidx.lifecycle.viewmodel.compose)//done
     implementation (libs.core)
     implementation(libs.zxing.android.embedded)
     implementation(libs.core.v352)
 
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation) //done
+    implementation(libs.ktor.ktor.serialization.kotlinx.json) //done
+    implementation(libs.ktor.client.okhttp)//done
     implementation(libs.ktor.client.serialization)
     implementation(libs.ktor.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.logging)
 
     implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.compose) //done
 
-    implementation (libs.play.services.location)
-    implementation (libs.accompanist.permissions)
+    implementation (libs.play.services.location)//done
+    implementation (libs.accompanist.permissions)//done
 
-    implementation (libs.androidx.material.icons.extended)
+    implementation (libs.androidx.material.icons.extended)//done
 
     implementation (libs.androidx.biometric)
-    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.appcompat) //done
 
     implementation(libs.compose)
 
@@ -86,11 +86,11 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.glide)
+    implementation(libs.glide)//done
     implementation(libs.glide.compose)
 
-    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.core.splashscreen)//done
 
-    implementation (libs.androidx.work.runtime.ktx)
+    implementation (libs.androidx.work.runtime.ktx) //done
 
 }
