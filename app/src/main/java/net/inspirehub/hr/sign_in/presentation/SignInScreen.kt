@@ -323,7 +323,7 @@ fun SignInScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(colors.onSurfaceColor.copy(alpha = 0.4f)),
+                    .background(colors.surfaceColor.copy(alpha = 0.4f)),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(

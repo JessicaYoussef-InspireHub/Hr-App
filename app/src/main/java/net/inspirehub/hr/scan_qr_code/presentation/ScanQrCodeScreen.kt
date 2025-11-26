@@ -43,7 +43,7 @@ fun ScanQrCodeScreen(
     navController: NavController
 ) {
 
-    var str = "voev4Jd6hmDBb4cvsAFEfrE+UX6SQa7BmhuZuotjz6PUvqmODNWU/8zDAZsY6xGiq+2Ed1QX0osvp5926CnIqkuYmZxEyTusnv9Gq/BWzQYtoO7sWvNfSjhkwWQqf4YG"
+    var str = "voev4Jd6hmDBb4cvsAFEfrE+UX6SQa7BmhuZuotjz6PUvqmODNWU/8zDAZsY6xGiq+2Ed1QX0osvp5926CnIqkuYmZxEyTusnv9Gq/BWzQaHxgnwwcTc7roFU+L63lEF"
 //    val str = remember { mutableStateOf("") }
     val middleware = Middleware.initialize(str)
 

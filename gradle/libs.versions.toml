@@ -1,7 +1,7 @@
 [versions]
 accompanistPermissions = "0.32.0"
 activityComposeVersion = "1.8.0"
-agp = "8.7.2"
+agp = "8.7.3"
 appcompat = "1.7.1"
 biometric = "1.2.0-alpha05"
 compose = "2.7.0"
@@ -9,6 +9,10 @@ composeVersion = "1.0.0-beta08"
 core = "3.5.3"
 coreSplashscreen = "1.0.1"
 coreVersion = "3.5.2"
+firebaseBom = "34.5.0"
+firebaseBomVersion = "32.1.1"
+firebaseFirestoreKtx = "25.1.4"
+firebaseMessaging = "25.0.1"
 glide = "5.0.5"
 kotlin = "2.0.0"
 coreKtx = "1.16.0"
@@ -27,8 +31,10 @@ composeBom = "2024.04.01"
 materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.0"
 playServicesLocation = "21.3.0"
+roomKtx = "2.8.3"
 workRuntimeKtx = "2.10.5"
 zxingAndroidEmbedded = "4.3.0"
+firebaseMessagingKtx = "25.0.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -40,12 +46,22 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomKtx" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomKtx" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 compose = { module = "com.kizitonwose.calendar:compose", version.ref = "compose" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
 core-v352 = { module = "com.google.zxing:core", version.ref = "coreVersion" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-bom-v3211 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glide-compose = { module = "com.github.bumptech.glide:compose", version.ref = "composeVersion" }
+google-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -67,6 +83,7 @@ ktor-client-serialization = { module = "io.ktor:ktor-client-serialization", vers
 ktor-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJsonVersion" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
+com-google-firebase-firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

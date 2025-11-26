@@ -81,6 +81,18 @@ fun DoubleStateDialog(
 
     val currentLanguage = Locale.getDefault().language
 
+    fun translateState(state: String, language: String): String {
+        return when (language) {
+            "ar" -> when (state.lowercase(Locale.ROOT)) {
+                "draft" -> "قيد الموافقة"
+                "validate" -> "تمت الموافقة النهائية"
+                "confirm" -> "قيد الموافقة"
+                "refuse" -> "مرفوض"
+                else -> state
+            }
+            else -> state
+        }
+    }
 
     val locale = if (currentLanguage == "ar") Locale("ar") else Locale.ENGLISH
 
@@ -108,13 +120,7 @@ fun DoubleStateDialog(
                 "permissions" -> "أذونات"
                 else -> typeKey
             }
-            else -> when (typeKey.lowercase(Locale.ROOT)) {
-                "annual leave" -> "Annual Leave"
-                "sick time off" -> "Sick Time Off"
-                "unpaid" -> "Unpaid"
-                "permissions" -> "Permissions"
-                else -> typeKey
-            }
+            else -> typeKey
         }
     }
 
@@ -198,23 +204,6 @@ fun DoubleStateDialog(
                 Column {
                     leaveRecords.forEach { record ->
 
-                        val stateLabel = when (record.state) {
-                            "draft" -> stringResource(R.string.pending_approval)
-                            "validate" -> stringResource(R.string.final_approved)
-//                            "confirm" -> stringResource(R.string.manager_approved)
-                            "confirm" -> stringResource(R.string.pending_approval)
-                            "refuse" -> stringResource(R.string.rejected)
-                            else -> record.state
-                        }
-
-//                        val colorCircle = when (record.state) {
-//                            "validate" -> MaterialTheme.colorScheme.secondary
-////                            "confirm" -> MaterialTheme.colorScheme.secondary
-//                            "draft" -> MaterialTheme.colorScheme.tertiary
-//                            "confirm" -> MaterialTheme.colorScheme.tertiary
-//                            "refuse" -> MaterialTheme.colorScheme.error
-//                            else -> Color.Transparent
-//                        }
 
                         val translatedLeaveType = translateLeaveType(record.leave_type, currentLanguage)
                         val durationInt = record.duration_days.toInt()
@@ -228,11 +217,6 @@ fun DoubleStateDialog(
                                 horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-//                                Box(
-//                                    modifier = Modifier
-//                                        .size(15.dp)
-//                                        .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
-//                                )
                                 when (record.state.lowercase(Locale.ROOT)) {
                                     "validate" -> {
                                         Box(
@@ -291,7 +275,7 @@ fun DoubleStateDialog(
 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    stateLabel,
+                                    translateState(record.state, currentLanguage),
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = colors.onBackgroundColor,

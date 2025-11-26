@@ -4,17 +4,19 @@ package net.inspirehub.hr
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import net.inspirehub.hr.ui.theme.Lunch_card
 
 data class AppColors(
     val tertiaryColor: Color,
-    val onSecondaryColor: Color,
-    val inverseOnSurface: Color,
     val onBackgroundColor: Color,
-    val transparent: Color,
+    val onSecondaryColor: Color,
     val surfaceVariant: Color,
-    val onSurfaceColor : Color,
+    val inverseOnSurface: Color,
     val surfaceColor : Color,
-    val error : Color
+    val error : Color,
+    val transparent: Color,
+    val surfaceContainerHigh : Color,
+
 )
 
 @Composable
@@ -26,8 +28,8 @@ fun appColors(): AppColors {
         onBackgroundColor = MaterialTheme.colorScheme.onBackground,
         transparent = Color.Transparent,
         surfaceVariant = MaterialTheme.colorScheme.surfaceVariant,
-        onSurfaceColor = MaterialTheme.colorScheme.onSurface,
         surfaceColor = MaterialTheme.colorScheme.surface,
-        error = MaterialTheme.colorScheme.error
+        error = MaterialTheme.colorScheme.error,
+        surfaceContainerHigh = MaterialTheme.colorScheme.surfaceContainerHigh,
     )
 }

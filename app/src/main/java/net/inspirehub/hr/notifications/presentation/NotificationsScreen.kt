@@ -1,85 +1,200 @@
 package net.inspirehub.hr.notifications.presentation
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
-import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.check_in_out.data.fetchServerTime
-import net.inspirehub.hr.notifications.components.NotificationsCards
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.launch
+import net.inspirehub.hr.notifications.components.NoNotifications
+import net.inspirehub.hr.notifications.components.NotificationItem
+import net.inspirehub.hr.notifications.data.NotificationDatabase
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import androidx.core.content.edit
 
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun NotificationsScreen(
-    navController: NavController,
+    navController: NavController
 ) {
-    val colors = appColors()
     val context = LocalContext.current
-    val sharedPrefManager = SharedPrefManager(context)
-    val token = sharedPrefManager.getToken()
+    val colors = appColors()
+    val isLoading = remember { mutableStateOf(true) }
 
-    val exitTime = sharedPrefManager.getServerExitTime()
-    Log.d("StoredTime", "🕒 Stored exit time from Notifications: $exitTime")
+    DisposableEffect(Unit) {
+        onDispose {
+            val prefs = context.getSharedPreferences("notif_prefs", Context.MODE_PRIVATE)
+            prefs.edit { putLong("last_open_time", System.currentTimeMillis()) }
+        }
+    }
+
+
+
+
+    // Using Flow to collect notifications interactively
+    val notificationsFlow = remember {
+        NotificationDatabase.getDatabase(context).notificationDao().getAllNotifications()
+    }
+    val notifications by notificationsFlow.collectAsState(initial = emptyList())
+    val sortedNotifications = notifications.sortedByDescending { it.timestamp }
+    val groupedNotifications = sortedNotifications.groupBy { formatTimestamp(it.timestamp).first }
+
+    // Broadcast Receiver to receive new notifications
+    DisposableEffect(Unit) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val title = intent?.getStringExtra("title")
+                val message = intent?.getStringExtra("message")
+                Log.d("NotificationsScreen", "📩 new notification: $title - $message")
+                // No need to manually update notifications because Flow will update automatically
+            }
+        }
+
+        val filter = IntentFilter("net.inspirehub.hr.NEW_NOTIFICATION")
+        val lbm = LocalBroadcastManager.getInstance(context)
+        lbm.registerReceiver(receiver, filter)
+
+        onDispose {
+            lbm.unregisterReceiver(receiver)
+        }
+    }
+
+    LaunchedEffect(notifications) {
+        kotlinx.coroutines.delay(2000)
+        // First time data was received from the flow -> Stop loading
+        isLoading.value = false
+    }
+
 
     Scaffold(
         containerColor = colors.onSecondaryColor,
         topBar = {
             MyAppBar(
                 label = stringResource(R.string.notification),
+                backIcon = true
             )
         },
         bottomBar = { BottomBar(navController = navController) }
+
     ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.onSecondary)
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
 
-        DisposableEffect(Unit) {
-            onDispose {
-                Log.d("ServerTime", "🧩 onDispose triggered!")
+            when {
+                isLoading.value -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            color = colors.tertiaryColor
+                        )
+                    }
+                }
 
-                kotlinx.coroutines.GlobalScope.launch {
-                    token?.let {
-                        val serverTime = fetchServerTime(it)
-                        if (serverTime != null) {
-                            Log.d("ServerTime", "🕒 Server time on exit: $serverTime")
-                            sharedPrefManager.saveServerExitTime(serverTime)
-                            Log.d("ServerTime", "✅ Saved to SharedPrefs: $serverTime")
-                        } else {
-                            Log.d("ServerTime", "❌ Failed to fetch server time")
+                sortedNotifications.isEmpty() -> {
+                    NoNotifications()
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        groupedNotifications.forEach { (date, list) ->
+                            item {
+                                Text(
+                                    text = formatDateHeader(date),
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                            }
+                            items(list) { notification ->
+                                NotificationItem(notification = notification)
+                            }
                         }
-                    } ?: Log.d("ServerTime", "❌ Token is null, cannot fetch server time")
+                    }
                 }
             }
         }
+    }
+}
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(colors.onSecondaryColor)
-                .padding(innerPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
-        ) {
-            item {
-                NotificationsCards(exitTime = exitTime)
-            }
-        }
+private fun formatTimestamp(timestamp: Long): Pair<String, String> {
+    return try {
+        val date = java.util.Date(timestamp)
+
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+        val dateStr = dateFormat.format(date)
+        val timeStr = timeFormat.format(date)
+
+        Pair(dateStr, timeStr)
+
+    } catch (e: Exception) {
+        Pair("${e}Unknown date", "")
+    }
+}
+
+private fun formatDateHeader(dateStr: String): String {
+    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val date = sdf.parse(dateStr) ?: return dateStr
+
+    val todayCal = Calendar.getInstance()
+    val yesterdayCal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
+
+    val dateCal = Calendar.getInstance().apply { time = date }
+
+    return when {
+        dateCal.get(Calendar.YEAR) == todayCal.get(Calendar.YEAR) &&
+                dateCal.get(Calendar.DAY_OF_YEAR) == todayCal.get(Calendar.DAY_OF_YEAR) -> "Today"
+
+        dateCal.get(Calendar.YEAR) == yesterdayCal.get(Calendar.YEAR) &&
+                dateCal.get(Calendar.DAY_OF_YEAR) == yesterdayCal.get(Calendar.DAY_OF_YEAR) -> "Yesterday"
+
+        else -> dateStr
     }
 }

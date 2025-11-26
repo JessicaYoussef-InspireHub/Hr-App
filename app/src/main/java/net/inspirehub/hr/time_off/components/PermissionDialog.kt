@@ -81,14 +81,19 @@ fun PermissionDialog(
 
     val colors = appColors()
 
-
-    val tittleText = when (record?.state) {
-        "validate" -> stringResource(R.string.final_approved)
-        "confirm" -> stringResource(R.string.pending_approval)
-        "draft" -> stringResource(R.string.pending_approval)
-        "refuse" -> stringResource(R.string.refused)
-        else -> ""
+    fun translateState(state: String, language: String): String {
+        return when (language) {
+            "ar" -> when (state.lowercase(Locale.ROOT)) {
+                "draft" -> "قيد الموافقة"
+                "validate" -> "تمت الموافقة النهائية"
+                "confirm" -> "قيد الموافقة"
+                "refuse" -> "مرفوض"
+                else -> state
+            }
+            else -> state
+        }
     }
+
 
     val startDate = LocalDate.parse(record?.leave_day)
     val context = LocalContext.current
@@ -114,13 +119,7 @@ fun PermissionDialog(
                 else -> typeKey
             }
 
-            else -> when (typeKey?.lowercase(Locale.ROOT)) {
-                "annual leave" -> "Annual Leave"
-                "sick time off" -> "Sick Time Off"
-                "unpaid" -> "Unpaid"
-                "permission" -> "Permission"
-                else -> typeKey
-            }
+            else -> typeKey
         }
     }
 
@@ -244,7 +243,7 @@ fun PermissionDialog(
                     )
                 }
                 Text(
-                    text = tittleText,
+                    text = translateState(record?.state ?: "", currentLanguage),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -503,4 +502,3 @@ fun PermissionDialog(
         },
     )
 }
-

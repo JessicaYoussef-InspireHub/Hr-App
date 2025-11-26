@@ -7,6 +7,8 @@ val Main_color = Color(0xFFb7f73e)
 val Disabled_color = Color(0xFFCCC1C9)
 val Discard_color = Color(0xFFD3D3D3)
 val Dark_grey = Color(0xFF5E5D5D)
+val Lunch_card = Color(0xFF2D2C2C)
+
 val Light_green = Color(0xFFC8E6C9)
 val Delete_color = Color(0xFF3F3F4D)
 val Close_color = Color(0xFFA6A4A4)

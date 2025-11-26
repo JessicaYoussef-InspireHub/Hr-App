@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import net.inspirehub.hr.SharedPrefManager
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.graphics.Color.Companion.LightGray
 
 val LocalDarkMode = staticCompositionLocalOf { mutableStateOf(false) }
@@ -25,6 +26,8 @@ private val DarkColorScheme = darkColorScheme(
     inverseOnSurface = LightGray,
     surface = Dark_grey,
     error = Red,
+    onSurface = Gray,
+    surfaceContainerHigh = Lunch_card
 
 //    secondary = Validate_color,
 //    onPrimary = dark_background_color,
@@ -46,6 +49,9 @@ private val LightColorScheme = lightColorScheme(
     inverseOnSurface = LightGray,
     surface = Dark_grey,
     error = Red,
+    onSurface = Gray,
+    surfaceContainerHigh = Lunch_card
+
 //    secondary = Validate_color,
 //    tertiary = Main_color,
 //    onPrimary = White,

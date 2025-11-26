@@ -63,6 +63,18 @@ fun DailyAndHourlyDialog(
         DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
     ) ?: ""
 
+    fun translateState(state: String, language: String): String {
+        return when (language) {
+            "ar" -> when (state.lowercase(Locale.ROOT)) {
+                "draft" -> "قيد الموافقة"
+                "validate" -> "تمت الموافقة النهائية"
+                "confirm" -> "قيد الموافقة"
+                "refuse" -> "مرفوض"
+                else -> state
+            }
+            else -> state
+        }
+    }
 
 
     fun translateLeaveType(typeKey: String, language: String): String {
@@ -75,13 +87,7 @@ fun DailyAndHourlyDialog(
                 else -> typeKey
             }
 
-            else -> when (typeKey.lowercase(Locale.ROOT)) {
-                "annual leave" -> "Annual Leave"
-                "sick time off" -> "Sick Time Off"
-                "unpaid" -> "Unpaid"
-                "permissions" -> "Permissions"
-                else -> typeKey
-            }
+            else ->  typeKey
         }
     }
 
@@ -202,22 +208,6 @@ fun DailyAndHourlyDialog(
                 Column {
                     dailyRecords.forEach { record ->
 
-                        val stateLabel = when (record.state) {
-                            "draft" -> stringResource(R.string.pending_approval)
-                            "validate" -> stringResource(R.string.final_approved)
-                            "confirm" -> stringResource(R.string.pending_approval)
-                            "refuse" -> stringResource(R.string.rejected)
-                            else -> record.state
-                        }
-
-//                        val colorCircle = when (record.state) {
-//                            "validate" -> MaterialTheme.colorScheme.secondary
-//                            "draft" -> colors.tertiaryColor
-//                            "confirm" -> colors.tertiaryColor
-//                            "refuse" -> MaterialTheme.colorScheme.error
-//                            else -> colors.transparent
-//                        }
-
                         val translatedLeaveType =
                             translateLeaveType(record.leave_type, currentLanguage)
                         val durationInt = record.duration_days.toInt()
@@ -235,11 +225,6 @@ fun DailyAndHourlyDialog(
                                 horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-//                                Box(
-//                                    modifier = Modifier
-//                                        .size(15.dp)
-//                                        .background(color = colors.tertiaryColor, shape = CircleShape)
-//                                )
                                 when (record.state) {
                                     "validate" -> {
                                         Box(
@@ -297,7 +282,7 @@ fun DailyAndHourlyDialog(
 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    stateLabel,
+                                    translateState(record.state, currentLanguage),
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = colors.onBackgroundColor,
@@ -316,21 +301,7 @@ fun DailyAndHourlyDialog(
                 }
            Column {
                     hourlyRecords.forEach { record ->
-                        val stateLabel = when (record.state) {
-                            "draft" -> stringResource(R.string.pending_approval)
-                            "validate" -> stringResource(R.string.final_approved)
-                            "confirm" -> stringResource(R.string.pending_approval)
-                            "refuse" -> stringResource(R.string.rejected)
-                            else -> record.state
-                        }
 
-//                        val colorCircle = when (record.state) {
-//                            "validate" -> MaterialTheme.colorScheme.secondary
-//                            "draft" -> colors.tertiaryColor
-//                            "confirm" -> colors.tertiaryColor
-//                            "refuse" -> MaterialTheme.colorScheme.error
-//                            else -> colors.transparent
-//                        }
 
                         val translatedLeaveType =
                             translateLeaveType(record.leave_type, currentLanguage)
@@ -347,11 +318,6 @@ fun DailyAndHourlyDialog(
                        horizontalArrangement = Arrangement.Start,
                        verticalAlignment = Alignment.CenterVertically,
                    ){
-//                       Box(
-//                           modifier = Modifier
-//                               .size(15.dp)
-//                               .background(color = colors.tertiaryColor, shape = CircleShape)
-//                       )
 
                        when (record.state) {
                            "validate" -> {
@@ -411,7 +377,7 @@ fun DailyAndHourlyDialog(
 
                        Spacer(modifier = Modifier.width(8.dp))
                        Text(
-                           stateLabel,
+                           record.state,
                            fontSize = 17.sp,
                            fontWeight = FontWeight.Normal,
                            color = colors.onBackgroundColor,

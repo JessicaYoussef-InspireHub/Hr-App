@@ -118,21 +118,21 @@ fun TimeOffDetailsDialog(
     }
 
 
-    val buttonText = when (record.state) {
-        "validate" -> stringResource(R.string.final_approved)
-        "confirm" -> stringResource(R.string.pending_approval)
-        "draft" -> stringResource(R.string.pending_approval)
-        "refuse" -> stringResource(R.string.refused)
-        else -> ""
+
+    fun translateState(state: String, language: String): String {
+        return when (language) {
+            "ar" -> when (state.lowercase(Locale.ROOT)) {
+                "draft" -> "قيد الموافقة"
+                "validate" -> "تمت الموافقة النهائية"
+                "confirm" -> "قيد الموافقة"
+                "refuse" -> "مرفوض"
+                else -> state
+            }
+            else -> state
+        }
     }
 
-//    val colorCircle = when (record.state) {
-//        "validate" -> MaterialTheme.colorScheme.secondary
-//        "draft" -> MaterialTheme.colorScheme.tertiary
-//        "confirm" -> MaterialTheme.colorScheme.tertiary
-//        "refuse" -> MaterialTheme.colorScheme.error
-//        else -> Color.Transparent
-//    }
+
 
     fun translateLeaveType(typeKey: String, language: String): String {
         return when (language) {
@@ -143,13 +143,7 @@ fun TimeOffDetailsDialog(
                 "permissions" -> "أذونات"
                 else -> typeKey
             }
-            else -> when (typeKey.lowercase(Locale.ROOT)) {
-                "annual leave" -> "Annual Leave"
-                "sick time off" -> "Sick Time Off"
-                "unpaid" -> "Unpaid"
-                "permissions" -> "Permissions"
-                else -> typeKey
-            }
+            else -> typeKey
         }
     }
 
@@ -233,7 +227,7 @@ fun TimeOffDetailsDialog(
                     )
                 }
                 Text(
-                    text = buttonText,
+                    text = translateState(record.state, currentLanguage),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -260,12 +254,6 @@ fun TimeOffDetailsDialog(
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-//                    Box(
-//                        modifier = Modifier
-//                            .width(15.dp)
-//                            .height(15.dp)
-//                            .background(color = MaterialTheme.colorScheme.tertiary, shape = CircleShape)
-//                    )
                     when (record.state.lowercase(Locale.ROOT)) {
                         "validate" -> {
                             Box(

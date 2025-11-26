@@ -26,7 +26,7 @@ fun CustomHours(
             checked = isCheckedHours,
             onCheckedChange = onCheckedHoursChange,
             colors = CheckboxDefaults.colors(
-                checkedColor = colors.tertiaryColor,
+                checkedColor = colors.onSecondaryColor,
                 uncheckedColor = colors.onBackgroundColor
             )
         )

@@ -90,7 +90,6 @@ fun SecurityCard(
                         onDismiss = { showDialog = false }
                     )
                 }
-
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()

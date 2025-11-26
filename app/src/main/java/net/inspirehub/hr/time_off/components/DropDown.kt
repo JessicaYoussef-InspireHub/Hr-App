@@ -62,14 +62,8 @@ fun DropDown(
                 "Overtime" -> "عمل إضافي"
                 else -> typeKey
             }
-            else -> when (typeKey) {
-                "annual leave" -> "Annual Leave"
-                "Sick Time Off" -> "Sick Time Off"
-                "Unpaid" -> "Unpaid"
-                "Customer Meeting" -> "Customer Meeting"
-                "Overtime" -> "Overtime"
-                else -> typeKey
-            }
+            else -> typeKey
+
         }
     }
 

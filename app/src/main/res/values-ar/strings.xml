@@ -50,9 +50,6 @@
     <string name="login_successful">تم تسجيل الدخول بنجاح!</string>
     <string name="discard">إلغاء</string>
     <string name="save">حفظ</string>
-    <string name="to_approve">في انتظار الموافقة</string>
-<!--    <string name="first_approved">تمت الموافقة عليه أولاً</string>-->
-    <string name="approved">تمت الموافقة</string>
     <string name="refused">تم الرفض</string>
     <string name="morning">صباحي</string>
     <string name="dates">تواريخ:</string>
@@ -71,10 +68,6 @@
     <string name="cancel">إلغاء</string>
     <string name="add_a_description">أضف وصفًا</string>
     <string name="time_off_request">طلب أجازة</string>
-    <string name="final_approved">تمت الموافقة النهائية</string>
-    <string name="manager_approved">تمت الموافقة من المدير</string>
-    <string name="pending_approval">في انتظار الموافقة</string>
-    <string name="rejected">تم الرفض</string>
     <string name="delete">حذف</string>
     <string name="ok">موافق</string>
     <string name="days">أيام</string>
@@ -152,5 +145,18 @@
     <string name="enable_now">تشغيل الآن</string>
     <string name="enable_location">تشغيل الموقع (GPS)</string>
     <string name="please_enable_gps_so_the_app_can_accurately_detect_your_location">الرجاء تشغيل الـ GPS حتى يتمكن التطبيق من تحديد موقعك بشكل صحيح.</string>
+    <string name="lunch">الغذاء</string>
+    <string name="search_your_meal">ابحث عن وجبتك...</string>
+    <string name="your_account_is">حسابك</string>
+    <string name="the_last_time_to_order_is">آخر وقت للطلب هو</string>
+    <string name="add_to_cart">أضف +%1$s ج.م</string>
+    <string name="categories">فئات</string>
+    <string name="price_label">%1$s ج.م</string>
+    <string name="note_to_restaurant">ملاحظة للمطعم</string>
+    <string name="vendors">البائعين</string>
+    <string name="outside_company_range">أنت خارج نطاق الشركة</string>
+    <string name="my_order_is_here">طلبي هنا</string>
+    <string name="you_have_items_in_your_list">لديك 3 عناصر في قائمتك</string>
+    <string name="no_notifications_yet">لا توجد إخطارات حتى الآن</string>
 
 </resources>

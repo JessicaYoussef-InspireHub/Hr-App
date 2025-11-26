@@ -117,9 +117,15 @@ fun TimeOffScreen(
                 leaveTypesState.value = it.result.leave_types
 
                 it.result.leave_types.forEach { leaveType ->
-                    val colorHex = leaveType.color ?: "#808080"
-                    leaveTypeColors[leaveType.name] = Color(android.graphics.Color.parseColor(colorHex))
+                    val colorHex = if (leaveType.color.isNullOrBlank()) "#00000000" else leaveType.color // اللون الشفاف في هيئة hex
+                    val safeColor = try {
+                        android.graphics.Color.parseColor(colorHex)
+                    } catch (e: IllegalArgumentException) {
+                        android.graphics.Color.TRANSPARENT // fallback آمن
+                    }
+                    leaveTypeColors[leaveType.name] = Color(safeColor)
                 }
+
             }
 
             val result = fetchAndPrintHolidays(token)

@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 import java.time.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
@@ -381,6 +382,18 @@ fun CheckInOutScreen(
                 }
                 Log.d("disable", "isWithinDistance from state: $isWithinDistance")
 
+                if (isWithinDistance == false) {
+                    Text(
+                        text = stringResource(R.string.outside_company_range),
+                        color = colors.tertiaryColor,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
+
                 CheckInOutButton(
                     attendanceStatus = attendanceStatus,
 //                    isWithinDistance = isWithinDistance == true,
@@ -514,7 +527,7 @@ fun CheckInOutScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(colors.onSurfaceColor.copy(alpha = 0.4f))
+                    .background(colors.surfaceColor.copy(alpha = 0.4f))
                     .noClickable(),
                 contentAlignment = Alignment.Center
             ) {

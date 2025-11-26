@@ -108,12 +108,12 @@ fun NotificationsCards(
                     val isNew = lastExitDate == null || (itemDateTime != null && itemDateTime.after(lastExitDate))
 
 
-                    NotificationsItem(
-                        item.status,
-                        item.message,
-                        item.time,
-                        showNew = isNew
-                    )
+//                    NotificationsItem(
+//                        item.status,
+//                        item.message,
+//                        item.time,
+//                        showNew = isNew
+//                    )
                     Spacer(Modifier.height(8.dp))
                     if (index != groupedByDate.size - 1) {
                         HorizontalDivider(

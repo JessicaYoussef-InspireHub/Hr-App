@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -21,7 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @Composable
 fun BottomBar(
     navController: NavController,
-) {
+){
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -35,7 +36,7 @@ fun BottomBar(
         NavigationBar(
             containerColor = colors.onSecondaryColor,
             contentColor = colors.onBackgroundColor,
-        ) {
+        ){
             NavigationBarItem(
                 selected = currentRoute == "CheckInOutScreen",
                 onClick = {
@@ -73,6 +74,26 @@ fun BottomBar(
                     unselectedIconColor =  colors.onBackgroundColor,
                     unselectedTextColor =  colors.onBackgroundColor,
                     indicatorColor =  colors.transparent
+                )
+            )
+
+            NavigationBarItem(
+                selected = currentRoute == "LunchScreen",
+                onClick = {
+                    if (currentRoute != "LunchScreen") {
+                        navController.navigate("LunchScreen") {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                icon = { Icon(Icons.Default.LunchDining, contentDescription = "Lunch") },
+                label = { Text(stringResource(R.string.lunch)) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = colors.tertiaryColor,
+                    selectedTextColor = colors.tertiaryColor,
+                    unselectedIconColor = colors.onBackgroundColor,
+                    unselectedTextColor = colors.onBackgroundColor,
+                    indicatorColor = colors.transparent
                 )
             )
 

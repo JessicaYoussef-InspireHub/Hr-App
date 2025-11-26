@@ -120,7 +120,7 @@ fun MyCalendarPicker(
 
     Column(
         modifier = Modifier
-            .background(colors.onSecondaryColor)
+            .background(if (isDialogMode) colors.surfaceVariant else colors.onSecondaryColor)
             .padding(vertical = 16.dp, horizontal = 8.dp)
             .then(if (isDialogMode) Modifier else Modifier.fillMaxWidth())
     ) {

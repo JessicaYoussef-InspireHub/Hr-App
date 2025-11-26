@@ -37,7 +37,7 @@ object SignInApiService {
         )
 
         return try {
-            val response: HttpResponse = net.inspirehub.hr.check_in_out.data.httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/employee/renew_token") {
+            val response: HttpResponse = net.inspirehub.hr.check_in_out.data.httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee/renew_token") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(payload)
@@ -73,7 +73,7 @@ object SignInApiService {
         )
 
         return try {
-            val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp2.odoo.com/api/validate_company") {
+            val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/validate_company") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(payload)
