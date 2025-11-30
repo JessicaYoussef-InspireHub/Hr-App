@@ -41,6 +41,9 @@ fun SecurityCard(
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val protectionMethod = sharedPrefManager.getProtectionMethod()
     var showDialog by remember { mutableStateOf(false) }
+    var isNotificationEnabled by remember {
+        mutableStateOf(sharedPrefManager.isNotificationsEnabled())
+    }
 
 
     Column {
@@ -102,6 +105,15 @@ fun SecurityCard(
                     icon = Icons.Default.Notifications,
                     onClick = {
                         navController.navigate("NotificationsScreen")
+                    },
+                    trailingIcon = {
+                        CustomSwitch(
+                            checked = isNotificationEnabled,
+                            onCheckedChange = { newValue ->
+                                isNotificationEnabled = newValue
+                                sharedPrefManager.setNotificationsEnabled(newValue)
+                            }
+                        )
                     }
                 )
             }

@@ -226,6 +226,7 @@ fun CheckInOutScreen(
     LaunchedEffect(Unit) {
         isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         Log.d("GPS_STATUS", "📍 GPS Enabled: $isGpsEnabled")
+        Log.d("token", token)
 
         if (!isGpsEnabled) {
             println("❌ GPS is turned OFF")

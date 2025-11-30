@@ -14,7 +14,7 @@ interface NotificationDao {
     @Query("SELECT * FROM notifications ORDER BY timestamp DESC")
     fun getAllNotifications(): Flow<List<NotificationEntity>>
 
-    // أضف هذه الدالة للحصول على القائمة مباشرة
+    // Add this function to get the list directly
     @Query("SELECT * FROM notifications ORDER BY timestamp DESC")
     suspend fun getAllNotificationsList(): List<NotificationEntity>
 

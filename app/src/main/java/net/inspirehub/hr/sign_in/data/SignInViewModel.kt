@@ -73,16 +73,15 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
                 if (now.isAfter(expiryDate)) {
                     val renewResponse = SignInApiService.renewToken(apiKey, companyId, currentToken)
-                    Log.d("TOKEN", "New token: ${renewResponse.new_employee_token}")
+                    Log.d("TOKEN", "New token: ${renewResponse.result.new_token}")
 
                     val sharedPref = SharedPrefManager(getApplication())
-                    sharedPref.saveToken(renewResponse.new_employee_token)
-                    sharedPref.saveTokenExpiry(renewResponse.token_expiry)
+                    sharedPref.saveToken(renewResponse.result.new_token)
+                    sharedPref.saveTokenExpiry(renewResponse.result.expiry_date)
                 }
             } catch (e: Exception) {
                 Log.e("TOKEN", "Failed to renew token", e)
             }
         }
     }
-
 }

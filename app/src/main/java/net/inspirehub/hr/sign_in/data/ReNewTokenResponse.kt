@@ -12,9 +12,21 @@ data class RenewTokenRequest(
 )
 
 @Serializable
-data class RenewTokenResponse(
+data class RenewTokenResult(
     val status: String,
-    val new_employee_token: String,
-    val token_expiry: String
+    val message: String,
+    val employee_id: Int,
+    val email: String,
+    val employee_name: String,
+    val new_token: String,
+    val creation_date: String,
+    val expiry_date: String
 )
 
+
+@Serializable
+data class RenewTokenResponse(
+    val jsonrpc: String,
+    val id: String? = null,
+    val result: RenewTokenResult
+)

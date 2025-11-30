@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -64,143 +63,142 @@ fun NotificationItem(notification: NotificationEntity) {
             containerColor = colors.surfaceContainerHigh
         ),
     ){
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-        {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.Bottom
-                )
-                {
-                    if (notification.title == "Leave Request Approved") {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = notification.title,
-                            modifier = Modifier.size(30.dp),
-                            tint = colors.tertiaryColor
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Cancel,
-                            contentDescription = notification.title,
-                            modifier = Modifier.size(30.dp),
-                            tint = colors.error
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = notification.title,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.onBackgroundColor
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = timeStr,
-                        fontSize = 14.sp,
-                        color = colors.onBackgroundColor.copy(alpha = 0.6f)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    if (isNew) {
-                    Icon(
-                        imageVector = Icons.Default.Circle,
-                        contentDescription = "New",
-                        modifier = Modifier.size(12.dp),
-                        tint = colors.tertiaryColor
-                    )}
-                }
-            }
-
-
-            Text(
-                text = notification.message,
-                fontSize = 16.sp,
-                color = colors.onBackgroundColor.copy(alpha = 0.8f),
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
-
-//        Row (
-//            modifier = Modifier.fillMaxWidth()
-//                .padding(16.dp),
-////                .padding(top = 16.dp),
-//            horizontalArrangement = Arrangement.Start,
-//            verticalAlignment = Alignment.CenterVertically
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp)
 //        )
 //        {
-//            if (notification.title == "Leave Request Approved") {
-//                Icon(
-//                    imageVector = Icons.Default.CheckCircle,
-//                    contentDescription = notification.title,
-//                    modifier = Modifier.size(30.dp),
-//                    tint = colors.tertiaryColor
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                verticalAlignment = Alignment.Bottom
+//            ) {
+//                Row(
+//                    modifier = Modifier
+//                        .padding(vertical = 8.dp),
+//                    horizontalArrangement = Arrangement.Start,
+//                    verticalAlignment = Alignment.Bottom
 //                )
-//            } else {
-//                Icon(
-//                    imageVector = Icons.Default.Cancel,
-//                    contentDescription = notification.title,
-//                    modifier = Modifier.size(30.dp),
-//                    tint = colors.error
-//                )
-//            }
-//            Spacer(modifier = Modifier.width(8.dp))
-//            Column {
-//                Row (
-//                    modifier = Modifier.fillMaxWidth(),
-//                    verticalAlignment = Alignment.Bottom,
-//                    horizontalArrangement = Arrangement.SpaceBetween
-//                ){
+//                {
+//                    if (notification.title == "Leave Request Approved") {
+//                        Icon(
+//                            imageVector = Icons.Default.CheckCircle,
+//                            contentDescription = notification.title,
+//                            modifier = Modifier.size(30.dp),
+//                            tint = colors.tertiaryColor
+//                        )
+//                    } else {
+//                        Icon(
+//                            imageVector = Icons.Default.Cancel,
+//                            contentDescription = notification.title,
+//                            modifier = Modifier.size(30.dp),
+//                            tint = colors.error
+//                        )
+//                    }
+//                    Spacer(modifier = Modifier.width(8.dp))
+//
 //                    Text(
 //                        text = notification.title,
 //                        fontSize = 16.sp,
 //                        fontWeight = FontWeight.Bold,
 //                        color = colors.onBackgroundColor
 //                    )
-//                    Row (
-//                        modifier = Modifier.fillMaxWidth(),
-//                        horizontalArrangement = Arrangement.End,
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ){
-//                        Text(
-//                            text = timeStr,
-//                            fontSize = 14.sp,
-//                            color = colors.onBackgroundColor.copy(alpha = 0.6f)
-//                        )
-//                        Spacer(modifier = Modifier.width(4.dp))
-//                        Icon(
-//                            imageVector = Icons.Default.Circle,
-//                            contentDescription = "New",
-//                            modifier = Modifier.size(12.dp),
-//                            tint = colors.tertiaryColor
-//                        )
-//                    }
 //                }
-//                Text(
-//                    text = notification.message,
-//                    fontSize = 16.sp,
-//                    color = colors.onBackgroundColor.copy(alpha = 0.8f),
-//                    modifier = Modifier.padding(top = 0.dp)
-//                )
+//
+//                Row(
+//                    modifier = Modifier
+//                        .padding(vertical = 8.dp),
+//                    horizontalArrangement = Arrangement.Start,
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Text(
+//                        text = timeStr,
+//                        fontSize = 14.sp,
+//                        color = colors.onBackgroundColor.copy(alpha = 0.6f)
+//                    )
+//                    Spacer(modifier = Modifier.width(4.dp))
+//                    if (isNew) {
+//                    Icon(
+//                        imageVector = Icons.Default.Circle,
+//                        contentDescription = "New",
+//                        modifier = Modifier.size(12.dp),
+//                        tint = colors.tertiaryColor
+//                    )}
+//                }
 //            }
+//
+//
+//            Text(
+//                text = notification.message,
+//                fontSize = 16.sp,
+//                color = colors.onBackgroundColor.copy(alpha = 0.8f),
+//                modifier = Modifier.padding(top = 4.dp)
+//            )
 //        }
+
+        Row (
+            modifier = Modifier.fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Start,
+        )
+        {
+            if (notification.title == "Leave Request Approved") {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = notification.title,
+                    modifier = Modifier.size(30.dp),
+                    tint = colors.tertiaryColor
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Cancel,
+                    contentDescription = notification.title,
+                    modifier = Modifier.size(30.dp),
+                    tint = colors.error
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Column {
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ){
+                    Text(
+                        text = notification.title,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onBackgroundColor
+                    )
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(
+                            text = timeStr,
+                            fontSize = 14.sp,
+                            color = colors.onBackgroundColor.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        if (isNew) {
+                            Icon(
+                            imageVector = Icons.Default.Circle,
+                            contentDescription = "New",
+                            modifier = Modifier.size(12.dp),
+                            tint = colors.tertiaryColor
+                        )}
+                    }
+                }
+                Text(
+                    text = notification.message,
+                    fontSize = 16.sp,
+                    color = colors.onBackgroundColor.copy(alpha = 0.8f),
+                    modifier = Modifier.padding(top = 0.dp)
+                )
+            }
+        }
 
 
     }

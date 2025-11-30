@@ -5,19 +5,15 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.MainActivity
 import net.inspirehub.hr.R
@@ -44,7 +40,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             timestamp = System.currentTimeMillis()
         )
 
-        // استخدام Coroutines بشكل صحيح
+        // Using Coroutines correctly
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 db.notificationDao().insert(notification)
@@ -55,75 +51,36 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-//    fun saveNotificationToRoom(title: String, message: String) {
-//        val db = NotificationDatabase.getDatabase(applicationContext)
-//        val notification = NotificationEntity(
-//            title = title,
-//            message = message,
-//            timestamp = System.currentTimeMillis() // تأكد من أن كل إشعار له timestamp فريد
-//        )
-//
-//        println("💾testjj Attempting to save notification: $title | $message | ${notification.timestamp}")
-//
-//        kotlinx.coroutines.GlobalScope.launch {
-//            try {
-//                db.notificationDao().insert(notification)
-//                println("✅testjj Notification saved in Room: $title | $message | ${notification.timestamp}")
-//            } catch (e: Exception) {
-//                println("❌testjj Failed to save notification: $e")
-//            }
-//        }
-//    }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        // استخراج البيانات من data payload بدلاً من notification
-        val title = remoteMessage.data["title"] ?: remoteMessage.notification?.title ?: "إشعار جديد"
-        val message = remoteMessage.data["body"] ?: remoteMessage.notification?.body ?: "لديك إشعار جديد"
+        //  Extract data from data payload instead of notification
+        val title = remoteMessage.data["title"] ?: remoteMessage.notification?.title ?: "New notification"
+        val message = remoteMessage.data["body"] ?: remoteMessage.notification?.body ?: "You have a new notification"
 
-        // حفظ فوري في Room
+        // Save in Room
         saveNotificationToRoom(title, message)
 
-        // عرض الإشعار
+        // View notification
         sendNotification(title, message)
 
-        // إرسال برودكاست
+        //  sendBroadcast
         sendBroadcast(title, message)
     }
 
-
-//    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-//        super.onMessageRe ceived(remoteMessage)
-//
-//        val title = remoteMessage.notification?.title
-//            ?: remoteMessage.data["title"]
-//            ?: "إشعار جديد"
-//
-//        val message = remoteMessage.notification?.body
-//            ?: remoteMessage.data["body"]
-//            ?: "لديك إشعار جديد"
-//
-//        // 1️⃣ عرض الإشعار في Status Bar
-//        sendNotification(title, message)
-////
-////        saveNotificationToFirestore(title, message)
-//        saveNotificationToRoom(title, message)
-//        sendBroadcast(title, message)
-//
-//    }
 
     private fun sendNotification(title: String?, message: String?) {
         val channelId = "default_channel"
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-        // إنشاء قناة إشعارات للأندرويد 8+
+        // Create a notification channel for Android 8+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "Default Channel", NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(channel)
         }
 
-       // Intent يفتح صفحة الإجازة عند الضغط
+       // Intent opens the vacation page when clicked
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("navigateTo", "NotificationsScreen")
@@ -150,9 +107,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 //        notificationManager.notify(0, notification)
     }
 
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        // هنا ممكن تبعتي التوكن للسيرفر
-    }
+//    override fun onNewToken(token: String) {
+//        super.onNewToken(token)
+//        //Here you can send the token to the server
+//    }
 }
 

@@ -4,7 +4,6 @@ package net.inspirehub.hr
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import net.inspirehub.hr.ui.theme.Lunch_card
 
 data class AppColors(
     val tertiaryColor: Color,

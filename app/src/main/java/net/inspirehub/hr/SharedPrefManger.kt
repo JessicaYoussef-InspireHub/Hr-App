@@ -14,6 +14,15 @@ class SharedPrefManager(context: Context) {
         return prefs.getString("server_exit_time", null)
     }
 
+    fun setNotificationsEnabled(enabled: Boolean) {
+        prefs.edit { putBoolean("notifications_enabled", enabled) }
+    }
+
+    fun isNotificationsEnabled(): Boolean {
+        return prefs.getBoolean("notifications_enabled", true) // default is ON
+    }
+
+
     private val prefs: SharedPreferences =
         context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
