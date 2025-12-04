@@ -29,6 +29,7 @@ import net.inspirehub.hr.ui.theme.LocalDarkMode
 import net.inspirehub.hr.ui.theme.HrTheme
 import java.util.Locale
 import com.google.firebase.messaging.FirebaseMessaging
+import net.inspirehub.hr.scan_qr_code.data.AppConfig
 
 
 class MainActivity : AppCompatActivity() {
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         val lang = sharedPref.getLanguage()
         val locale = Locale(lang)
         Locale.setDefault(locale)
+        AppConfig.init(this)
 
         val config = resources.configuration
         config.setLocale(locale)

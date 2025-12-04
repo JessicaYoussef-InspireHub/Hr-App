@@ -2,7 +2,6 @@ package net.inspirehub.hr.time_off.components
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -14,7 +13,6 @@ import java.util.Locale
 @Composable
 fun DurationDays(
     days: Int,
-    modifier: Modifier = Modifier
 ){
     val context = LocalContext.current
     val currentLocale = Locale.getDefault()
@@ -51,7 +49,6 @@ fun DurationDays(
 
     Text(
         text = "$formattedNumber $dayLabel",
-        modifier = modifier,
         color = colors.onBackgroundColor,
         fontWeight = FontWeight.SemiBold,
         fontSize = 15.sp

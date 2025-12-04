@@ -39,6 +39,7 @@ data class EmployeeData(
     val name: String,
     val email: String,
     val department: String,
+    val company_id: Int,
     val job_title: String,
     val is_active: Boolean,
     val employee_token: String,
@@ -53,6 +54,7 @@ data class Company(
 
 @Serializable
 data class Address(
+    val id: Int? = null,
     val street: String,
     val city: String,
     val zip: String,
@@ -65,10 +67,18 @@ data class Address(
 @Serializable
 data class SignInResult(
     val status: String,
-    val message: MessageContent,
-    val company_name: String,
-    val license_expiry_date: String,
-    val company_url: String
+    val message: MessageContent? = null,   // nullable
+    val company_name: String? = null,
+    val license_expiry_date: String? = null,
+    val company_url: String? = null
 )
+
+@Serializable
+data class ErrorResult(
+    val status: String,
+    val message: String,
+    val error_code: String? = null
+)
+
 
 

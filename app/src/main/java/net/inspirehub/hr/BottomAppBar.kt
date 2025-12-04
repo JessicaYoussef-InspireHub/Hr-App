@@ -76,26 +76,26 @@ fun BottomBar(
                     indicatorColor =  colors.transparent
                 )
             )
-
-            NavigationBarItem(
-                selected = currentRoute == "LunchScreen",
-                onClick = {
-                    if (currentRoute != "LunchScreen") {
-                        navController.navigate("LunchScreen") {
-                            launchSingleTop = true
-                        }
-                    }
-                },
-                icon = { Icon(Icons.Default.LunchDining, contentDescription = "Lunch") },
-                label = { Text(stringResource(R.string.lunch)) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = colors.tertiaryColor,
-                    selectedTextColor = colors.tertiaryColor,
-                    unselectedIconColor = colors.onBackgroundColor,
-                    unselectedTextColor = colors.onBackgroundColor,
-                    indicatorColor = colors.transparent
-                )
-            )
+//
+//            NavigationBarItem(
+//                selected = currentRoute == "LunchScreen",
+//                onClick = {
+//                    if (currentRoute != "LunchScreen") {
+//                        navController.navigate("LunchScreen") {
+//                            launchSingleTop = true
+//                        }
+//                    }
+//                },
+//                icon = { Icon(Icons.Default.LunchDining, contentDescription = "Lunch") },
+//                label = { Text(stringResource(R.string.lunch)) },
+//                colors = NavigationBarItemDefaults.colors(
+//                    selectedIconColor = colors.tertiaryColor,
+//                    selectedTextColor = colors.tertiaryColor,
+//                    unselectedIconColor = colors.onBackgroundColor,
+//                    unselectedTextColor = colors.onBackgroundColor,
+//                    indicatorColor = colors.transparent
+//                )
+//            )
 
             NavigationBarItem(
                 selected = currentRoute == "SettingsScreen",

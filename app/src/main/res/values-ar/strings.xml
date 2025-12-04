@@ -54,7 +54,7 @@
     <string name="morning">صباحي</string>
     <string name="dates">تواريخ:</string>
     <string name="duration">المدة:</string>
-    <string name="description">الوصف</string>
+    <string name="description">الوصف:</string>
     <string name="please_choose_the_time_off_type">الرجاء اختيار نوع الأجازة</string>
     <string name="error_message_overlap">
    لقد قمت بالفعل بحجز إجازة تتداخل مع هذه الفترة: من %1$s إلى %2$s - في انتظار الموافقة.

@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.biometric.BiometricManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -51,8 +53,8 @@ fun ProtectionScreen(
         BiometricManager.Authenticators.BIOMETRIC_STRONG
     )
 
-    val isFingerprintHardwareAvailable = biometricStatus != BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE
-
+    val isFingerprintHardwareAvailable =
+        biometricStatus != BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE
 
 
     // Listen to navigation instructions
@@ -70,13 +72,15 @@ fun ProtectionScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.onSecondaryColor)
-            .padding(16.dp),
+            .padding(16.dp)
+        .verticalScroll(rememberScrollState())
+
     ) {
         Column(
             modifier = Modifier.align(Alignment.TopCenter),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (numberToBack == 1 ) {
+            if (numberToBack == 1) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -127,7 +131,7 @@ fun ProtectionScreen(
 
             Text(
                 stringResource(R.string.no_protection),
-                 color = colors.tertiaryColor,
+                color = colors.tertiaryColor,
                 fontWeight = FontWeight.Normal,
                 fontSize = 18.sp,
                 modifier = Modifier.clickable {
@@ -148,8 +152,10 @@ fun ProtectionScreen(
                     checked = notShowAgainChecked,
                     onCheckedChange = { notShowAgainChecked = it },
                     colors = CheckboxDefaults.colors(
+                        checkmarkColor = colors.onSecondaryColor,
                         uncheckedColor = colors.tertiaryColor,
-                        checkedColor = colors.tertiaryColor,)
+                        checkedColor = colors.tertiaryColor,
+                    )
                 )
                 Text(
                     text = stringResource(R.string.do_not_show_this_again),

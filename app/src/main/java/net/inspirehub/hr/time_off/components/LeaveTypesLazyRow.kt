@@ -47,7 +47,7 @@ fun LeaveTypesLazyRow(
             val color = try {
                 Color(colorHex.toColorInt())
             } catch (e: Exception) {
-                Color.White
+                colors.tertiaryColor
             }
 
             val translatedName = translateLeaveTypeName(leaveType.name, language)

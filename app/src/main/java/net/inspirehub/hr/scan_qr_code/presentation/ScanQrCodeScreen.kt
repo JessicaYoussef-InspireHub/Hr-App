@@ -12,12 +12,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,7 +40,10 @@ import com.journeyapps.barcodescanner.ScanOptions
 import androidx.navigation.NavController
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.scan_qr_code.components.ErrorCompanyInformationDialog
+import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import net.inspirehub.hr.scan_qr_code.data.Middleware
+import net.inspirehub.hr.scan_qr_code.data.PortraitCaptureActivity
 import net.inspirehub.hr.scan_qr_code.data.ScanQrCodeViewModel
 import net.inspirehub.hr.sign_in.components.InputFields
 import kotlin.system.exitProcess
@@ -43,9 +54,12 @@ fun ScanQrCodeScreen(
     navController: NavController
 ) {
 
-    var str = "voev4Jd6hmDBb4cvsAFEfrE+UX6SQa7BmhuZuotjz6PUvqmODNWU/8zDAZsY6xGiq+2Ed1QX0osvp5926CnIqkuYmZxEyTusnv9Gq/BWzQaHxgnwwcTc7roFU+L63lEF"
-//    val str = remember { mutableStateOf("") }
-    val middleware = Middleware.initialize(str)
+    var str by remember { mutableStateOf("") }
+    var middleware by remember { mutableStateOf<Middleware?>(null) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+
 
     val context = LocalContext.current
 
@@ -57,14 +71,18 @@ fun ScanQrCodeScreen(
         if (result.contents != null) {
             viewModel.updateScannedText(result.contents)
 
-            val lines = result.contents.lines()
-            val companyId =
-                lines.getOrNull(0)?.substringAfter("=")?.trim()?.removeSurrounding("\"") ?: ""
-            val apiKey =
-                lines.getOrNull(1)?.substringAfter("=")?.trim()?.removeSurrounding("\"") ?: ""
 
-            // ✅ Go to the SignIn page and send them each one separately
-            navController.navigate("SignInScreen/${companyId}/${apiKey}/1")
+            try {
+                val middleware = Middleware.initialize(result.contents)
+                AppConfig.setBaseUrl(
+                    middleware.baseUrl.replace("http://", "https://"),
+                    context
+                )
+
+                navController.navigate("SignInScreen/${middleware.companyId}/${middleware.apiKey}/1")
+            } catch (e: Exception) {
+                println("ERROR: ${e.message}")
+            }
         }
     }
 
@@ -77,29 +95,12 @@ fun ScanQrCodeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.onSecondaryColor)
-            .padding(horizontal = 16.dp),
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-//        Button(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(56.dp),
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = colors.tertiaryColor,
-//                contentColor = colors.onSecondaryColor
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            onClick = {
-//                scanLauncher.launch(ScanOptions().apply {
-//                    setPrompt(context.getString(R.string.scan_a_qr_code))
-//                    setBeepEnabled(true)
-//                    setOrientationLocked(false)
-//                })
-//            }) {
-//            Text(stringResource(R.string.scan_a_qr_code))
-//        }
-        Spacer(modifier = Modifier.height(35.dp))
 
         Image(
             painter = painterResource(R.drawable.scan_qr_code),
@@ -115,7 +116,8 @@ fun ScanQrCodeScreen(
                     scanLauncher.launch(ScanOptions().apply {
                         setPrompt(context.getString(R.string.scan_a_qr_code))
                         setBeepEnabled(true)
-                        setOrientationLocked(false)
+                        setOrientationLocked(true)
+                        setCaptureActivity(PortraitCaptureActivity::class.java)
                     })
                 }
         )
@@ -140,12 +142,23 @@ fun ScanQrCodeScreen(
             label = stringResource(R.string.enter_your_company_information),
             imeAction = ImeAction.Done,
             onImeAction = {
-//                middleware.apiKey
-//                middleware.companyId
-//                middleware.baseUrl
-//               println("test"+middleware.toString())
-//               println("test"+middleware.apiKey)
-               navController.navigate("SignInScreen/${middleware.companyId}/${middleware.apiKey}/1")
+                if (str.isBlank()) {
+                    println("ERROR: Empty input")
+                }
+                try {
+                    middleware = Middleware.initialize(str)
+
+                    println("Full decryption result: $middleware")
+                    println("Company ID: ${middleware!!.companyId}")
+                    println("API Key: ${middleware!!.apiKey}")
+                    println("Base URL: ${middleware!!.baseUrl}")
+
+                    navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}/1")
+                } catch (e: Exception) {
+                    errorMessage = e.message ?: "Unknown decryption error."
+                    showErrorDialog = true
+                    println("ERROR: ${e.message}")
+                }
             }
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -160,12 +173,34 @@ fun ScanQrCodeScreen(
             ),
             shape = RoundedCornerShape(8.dp),
             onClick = {
-                navController.navigate("SignInScreen/${middleware.companyId}/${middleware.apiKey}/1")
-            }) {
+                try {
+                    middleware = Middleware.initialize(str)
+                    println("Full decryption result: $middleware")
+                    println("Company ID: ${middleware!!.companyId}")
+                    println("API Key: ${middleware!!.apiKey}")
+                    println("Base URL: ${middleware!!.baseUrl}")
+//                    AppConfig.baseUrl = middleware!!.baseUrl
+
+//                    AppConfig.baseUrl = middleware!!.baseUrl.replace("http://", "https://")
+
+                    AppConfig.setBaseUrl(
+                        middleware!!.baseUrl.replace("http://", "https://"),
+                        context
+                    )
+
+                    navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}/1")
+                } catch (e: Exception) {
+                    errorMessage = e.message ?: "Invalid company information"
+                    showErrorDialog = true
+                    println("ERROR: ${e.message}")
+                }
+            }
+
+        ) {
             Text(stringResource(R.string.done))
         }
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.navigationBarsPadding().height(20.dp))
 
 
 
@@ -178,7 +213,7 @@ fun ScanQrCodeScreen(
 //            ),
 //            shape = RoundedCornerShape(8.dp),
 //            onClick = {
-////                navController.navigate("CheckInOutScreen/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbXBsb3llZV9pZCI6NSwiZW1haWwiOiJ0ZXN0IiwiZXhwIjoxNzUxOTY4MjY5fQ.pSRGRJhFqcIIT7I0pPw51PYI58xeNQBiJiFmFmqo8cs/27.191249/31.188578/100.0")
+////                navController.navigate("CheckInOutScreen")
 //                navController.navigate("CheckInOutScreen")
 //            }) {
 //            Text("Go To CheckIn Screen")
@@ -208,7 +243,7 @@ fun ScanQrCodeScreen(
 //            shape = RoundedCornerShape(8.dp),
 //            onClick = {
 //
-////                navController.navigate("ProtectionScreen/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbXBsb3llZV9pZCI6NSwiZW1haWwiOiJ0ZXN0IiwiZXhwIjoxNzUxOTY4MjY5fQ.pSRGRJhFqcIIT7I0pPw51PYI58xeNQBiJiFmFmqo8cs/27.191249/31.188578/100.0")
+////                navController.navigate("ProtectionScreen")
 //                navController.navigate("ProtectionScreen")
 //            }) {
 //            Text("Go To Protection Screen")
@@ -230,6 +265,12 @@ fun ScanQrCodeScreen(
 //            Text("Go To Settings Screen")
 //        }
 
+        if (showErrorDialog) {
+            ErrorCompanyInformationDialog(
+                message = errorMessage,
+                onDismiss = { showErrorDialog = false }
+            )
+        }
 
     }
 }

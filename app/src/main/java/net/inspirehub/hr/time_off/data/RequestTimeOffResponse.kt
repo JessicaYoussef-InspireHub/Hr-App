@@ -18,6 +18,7 @@ import io.ktor.http.contentType
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import java.time.LocalDate
 
 
@@ -129,7 +130,7 @@ private val httpClient = HttpClient {
 
 suspend fun fetchEmployeeLeaveTypes(token: String): LeaveTypeResponse? {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/request_time_off") {
+        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(
                 LeaveTypeRequest(
@@ -155,7 +156,7 @@ suspend fun fetchEmployeeLeaveTypes(token: String): LeaveTypeResponse? {
 @RequiresApi(Build.VERSION_CODES.O)
 suspend fun fetchAndPrintHolidays(token: String): HolidaysResult {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/request_time_off") {
+        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(
                 TimeOffRequestForRequestEmployee(
@@ -230,7 +231,7 @@ suspend fun sendApiForRequestTimeOff(
     return try {
         println("Sending SendApiForRequestTimeOff request...")
 
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/request_time_off") {
+        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(timeOffRequestForRequestEmployee)
         }

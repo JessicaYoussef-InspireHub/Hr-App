@@ -36,22 +36,23 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.sign_in.components.InCorrectCompanyIdDialog
-import org.json.JSONObject
 import kotlin.system.exitProcess
 
-fun extractErrorMessage(response: String): String {
-    return try {
-        val json = JSONObject(response)
-        json.getJSONObject("result").getString("message")
-    } catch (e: Exception) {
-        "An unexpected error occurred"
-    }
-}
+//fun extractErrorMessage(response: String): String {
+//    return try {
+//        val json = JSONObject(response)
+//        json.getJSONObject("result").getString("message")
+//    } catch (e: Exception) {
+//        "An unexpected error occurred"
+//    }
+//}
 
 
 @Composable
@@ -73,25 +74,6 @@ fun SignInScreen(
     val isFormValid = emailState.value.isNotBlank() && passwordState.value.isNotBlank()
     val showDialog = remember { mutableStateOf(false) }
     val dialogMessage = remember { mutableStateOf("") }
-
-
-//    val errorMessage = if (uiState is SignInUiState.Error) {
-//        val msg = (uiState as SignInUiState.Error).message
-//
-//        when {
-//            msg.contains("No company found", ignoreCase = true) -> {
-//                stringResource(R.string.company_id_or_api_key_is_incorrect)
-//            }
-//            msg.contains("Employee not found", ignoreCase = true) -> {
-//                stringResource(R.string.email_or_password_is_incorrect)
-//            }
-//            else -> {
-//                "An unexpected error occurred"
-//            }
-//        }
-//    } else {
-//        null
-//    }
 
     val errorMessage: String? = if (uiState is SignInUiState.Error) {
         val msg = (uiState as SignInUiState.Error).message
@@ -127,8 +109,9 @@ fun SignInScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
+//            .verticalScroll(rememberScrollState())
+
     ) {
         Column(
             Modifier
@@ -164,16 +147,6 @@ fun SignInScreen(
                 fontWeight = FontWeight.ExtraBold
             )
             Spacer(modifier = Modifier.height(40.dp))
-            //        Text(
-            //            "Company ID: $companyId",
-            //            color = MaterialTheme.colorScheme.tertiary
-            //        )
-            //        Spacer(modifier = Modifier.height(5.dp))
-            //        Text(
-            //            "API Key: $apiKey",
-            //            color = MaterialTheme.colorScheme.tertiary
-            //        )
-            //        Spacer(modifier = Modifier.height(20.dp))
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -222,8 +195,13 @@ fun SignInScreen(
                             apiKey
                         )
                     }
-                }
+                },
+                isPassword = true
             )
+
+
+
+
             Spacer(modifier = Modifier.height(8.dp))
             if (errorMessage != null) {
                 Text(
@@ -251,11 +229,6 @@ fun SignInScreen(
                             trimmedPassword,
                             companyId,
                             apiKey
-                    //
-                    //                val middleware = net.inspirehub.hr.scan_qr_code.data.Middleware.initialize(str)
-                    //                middleware.apiKey
-                    //                 middleware.companyId
-                    //                middleware.baseUrl
                                 )}},
                 enabled = isFormValid
             )
@@ -277,21 +250,21 @@ fun SignInScreen(
                 is SignInUiState.Success -> {
                     Text(stringResource(R.string.login_successful))
 
-                    val response = (uiState as SignInUiState.Success).response
-                    val employeeData = response.result.message.employee_data
-                    val address = response.result.message.company.firstOrNull()?.address
-
-                    val latitude = address?.latitude ?: 0.0
-                    val longitude = address?.longitude ?: 0.0
-                    val allowedDistance = address?.allowed_distance ?: 0.0
-
-                    sharedPrefManager.saveToken(employeeData.employee_token)
-                    sharedPrefManager.saveTokenExpiry(employeeData.token_expiry)
-                    sharedPrefManager.saveCompanyId(companyId)
-                    sharedPrefManager.saveApiKey(apiKey)
-                    sharedPrefManager.saveLatitude(latitude)
-                    sharedPrefManager.saveLongitude(longitude)
-                    sharedPrefManager.saveAllowedDistance(allowedDistance)
+//                    val response = (uiState as SignInUiState.Success).response
+//                    val employeeData = response.result.message?.employee_data
+//                    val address = response.result.message?.company?.firstOrNull()?.address
+//
+//                    val latitude = address?.latitude ?: 0.0
+//                    val longitude = address?.longitude ?: 0.0
+//                    val allowedDistance = address?.allowed_distance ?: 0.0
+//
+//                    sharedPrefManager.saveToken(employeeData?.employee_token ?: "unknown")
+//                    sharedPrefManager.saveTokenExpiry(employeeData?.token_expiry ?: "unknown")
+//                    sharedPrefManager.saveCompanyId(companyId)
+//                    sharedPrefManager.saveApiKey(apiKey)
+//                    sharedPrefManager.saveLatitude(latitude)
+//                    sharedPrefManager.saveLongitude(longitude)
+//                    sharedPrefManager.saveAllowedDistance(allowedDistance)
 
 
                     LaunchedEffect(Unit) {
@@ -304,16 +277,7 @@ fun SignInScreen(
                         }
                         viewModel.resetState()
                     }
-
-                    //                sharedPrefManager.saveToken(token)
-                    //                sharedPrefManager.saveCompanyId(companyId)
-                    //                sharedPrefManager.saveApiKey(apiKey)
-                    //                sharedPrefManager.saveLatitude(latitude)
-                    //                sharedPrefManager.saveLongitude(longitude)
-                    //                sharedPrefManager.saveAllowedDistance(allowedDistance)
-
                 }
-
                 else -> {}
             }
         }

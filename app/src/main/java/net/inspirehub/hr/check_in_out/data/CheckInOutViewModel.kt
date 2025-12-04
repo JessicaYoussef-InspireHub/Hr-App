@@ -264,7 +264,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             val result = fetchAttendanceStatus(token)
             if (result != null) {
-                _attendanceStatus.value = result.attendance_status ?: "unknown"
+                _attendanceStatus.value = result.attendance_status ?: "checked_out"
                 _lastCheckIn.value = result.last_check_in
                 _lastCheckOut.value = result.last_check_out
                 _workedHours.value = result.worked_hours

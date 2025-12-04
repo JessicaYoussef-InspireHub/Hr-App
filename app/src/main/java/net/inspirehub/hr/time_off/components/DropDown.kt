@@ -29,7 +29,6 @@ fun DropDown(
     leaveTypes: List<LeaveType>,
     selectedLeaveType: LeaveType?,
     onLeaveTypeSelected: (LeaveType) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
     val colors = appColors()
@@ -72,7 +71,7 @@ fun DropDown(
 
     Column {
         Row (
-            modifier = modifier.clickable { expanded = true }
+            modifier = Modifier.clickable { expanded = true }
         ){
             Text(
                 text = selectedLeaveType?.let {
@@ -115,7 +114,7 @@ fun DropDown(
                 )
         ) {
             leaveTypes
-                .filter { it.remaining_balance != null && it.remaining_balance > 0 }
+                .filter { it.remaining_balance == null || it.remaining_balance > 0 }
                 .forEach { item ->
                     val translatedName = translateLeaveType(item.name, currentLanguage)
                     val remaining = item.remaining_balance ?: 0

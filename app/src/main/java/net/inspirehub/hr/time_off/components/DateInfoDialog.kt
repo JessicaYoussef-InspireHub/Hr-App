@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -257,17 +258,22 @@ fun DateInfoDialog(
                         .fillMaxWidth()
                         .padding(vertical = 15.dp, horizontal = 20.dp),
                 ) {
-                    FirstText(stringResource(R.string.time_off_type))
-                    DropDown(
-                        leaveTypes = leaveTypes,
-                        selectedLeaveType = selectedLeaveType,
-                        onLeaveTypeSelected = {
-                            selectedLeaveType = it
-                            leaveTypeError = ""
-                        },
-                        modifier = Modifier
-                            .padding(start = 50.dp)
-                    )
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        FirstText(stringResource(R.string.time_off_type))
+                        Spacer(modifier = Modifier.width(10.dp))
+                        DropDown(
+                            leaveTypes = leaveTypes,
+                            selectedLeaveType = selectedLeaveType,
+                            onLeaveTypeSelected = {
+                                selectedLeaveType = it
+                                leaveTypeError = ""
+                            },
+                        )
+                    }
+
                     if (leaveTypeError.isNotEmpty()) {
                         Text(
                             text = leaveTypeError,
@@ -280,18 +286,24 @@ fun DateInfoDialog(
 
 
                     Spacer(modifier = Modifier.height(15.dp))
-                    FirstText(stringResource(R.string.dates))
-                    Dates(
-                        startDate = selectedStartDate,
-                        lastDate = selectedEndDate,
-                        onStartDateClick = { showStartCalendar = true },
-                        onEndDateClick = { showEndCalendar = true },
-                        modifier = Modifier.padding(start = 50.dp),
-                        isHalfDay = isHalfDay,
-                        halfDayOption = halfDayOption,
-                        onHalfDayOptionChange = { halfDayOption = it },
-                        hideEndDate = permissionChecked
-                    )
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        FirstText(stringResource(R.string.dates))
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Dates(
+                            startDate = selectedStartDate,
+                            lastDate = selectedEndDate,
+                            onStartDateClick = { showStartCalendar = true },
+                            onEndDateClick = { showEndCalendar = true },
+                            isHalfDay = isHalfDay,
+                            halfDayOption = halfDayOption,
+                            onHalfDayOptionChange = { halfDayOption = it },
+                            hideEndDate = permissionChecked
+                        )
+                    }
+
 
                     if (showStartCalendar) {
                         Dialog(
@@ -400,7 +412,6 @@ fun DateInfoDialog(
                             }
                         }
                     }
-
                     if (showEndCalendar) {
                         Dialog(onDismissRequest = { showEndCalendar = false }) {
                             Surface(
@@ -576,11 +587,14 @@ fun DateInfoDialog(
                     when {
                         permissionChecked -> {
                             Spacer(modifier = Modifier.height(15.dp))
-                            FirstText(stringResource(R.string.duration))
-                            DurationHours(
-                                hours = leaveHours,
-                                modifier = Modifier.padding(start = 50.dp)
-                            )
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ){
+                                FirstText(stringResource(R.string.duration))
+                                Spacer(Modifier.width(10.dp))
+                                DurationHours(hours = leaveHours)
+                            }
                         }
 
                         isHalfDay && !selectedLeaveType?.name.equals(
@@ -594,11 +608,14 @@ fun DateInfoDialog(
                             ignoreCase = true
                         ) -> {
                             Spacer(modifier = Modifier.height(15.dp))
-                            FirstText(stringResource(R.string.duration))
-                            DurationHours(
-                                hours = 4.0,
-                                modifier = Modifier.padding(start = 50.dp)
-                            )
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ){
+                                FirstText(stringResource(R.string.duration))
+                                Spacer(Modifier.width(10.dp))
+                                DurationHours(hours = 4.0)
+                            }
                         }
 
                         !isHalfDay && selectedLeaveType?.name.equals(
@@ -606,34 +623,40 @@ fun DateInfoDialog(
                             ignoreCase = true
                         ) -> {
                             Spacer(modifier = Modifier.height(15.dp))
-                            FirstText(stringResource(R.string.duration))
-                            DurationDays(
-                                days = 1,
-                                modifier = Modifier.padding(start = 50.dp)
-                            )
-                            DurationHours(
-                                hours = 8.0,
-                                modifier = Modifier.padding(start = 50.dp)
-                            )
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ){
+                                FirstText(stringResource(R.string.duration))
+                                DurationDays(days = 1)
+                                DurationHours(hours = 8.0)
+                            }
                         }
 
                         else -> {
                             Spacer(modifier = Modifier.height(15.dp))
-                            FirstText(stringResource(R.string.duration))
-                            DurationDays(
-                                days = leaveDays.toInt(),
-                                modifier = Modifier.padding(start = 50.dp)
-                            )
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ){
+                                FirstText(stringResource(R.string.duration))
+                                Spacer(Modifier.width(10.dp))
+                                DurationDays(days = leaveDays.toInt())
+                            }
                         }
                     }
 
 
                     Spacer(modifier = Modifier.height(15.dp))
-                    FirstText(stringResource(R.string.description))
-                    DescriptionInput(
-                        modifier = Modifier
-                            .padding(start = 50.dp)
-                    )
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        FirstText(stringResource(R.string.description))
+                        DescriptionInput()
+                    }
+
                     Spacer(modifier = Modifier.height(30.dp))
 
                     DialogActionsRow(

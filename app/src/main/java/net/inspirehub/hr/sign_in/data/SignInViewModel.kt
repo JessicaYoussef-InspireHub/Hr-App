@@ -5,10 +5,13 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.messaging.FirebaseMessaging
 import net.inspirehub.hr.SharedPrefManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -31,25 +34,142 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
             _uiState.value = SignInUiState.Loading
             try {
                 val response = SignInApiService.signIn(email, password, companyId, apiKey)
+
+                if (response.result.status == "error") {
+                    // لو في خطأ، نحوله لحالة Error
+                    val errorMsg = if (response.result.message is JsonElement) {
+                        response.result.message.jsonPrimitive.content
+                    } else {
+                        response.result.message.toString()
+                    }
+                    _uiState.value = SignInUiState.Error(errorMsg)
+                    return@launch
+                }
+
+                // Success
+                val employeeData = response.result.message?.employee_data
+                val employeeCompanyId = employeeData?.company_id ?: 0
+
+                val companyAddress = response.result.message?.company
+                    ?.firstOrNull { it.address.id == employeeCompanyId }
+                    ?.address
+
+                saveEmployeeData(
+                    token = employeeData?.employee_token ?: "",
+                    tokenExpiry = employeeData?.token_expiry ?: "",
+                    employeeCompanyId = employeeData?.company_id ?: 0,
+                    companyId = companyId,
+                    apiKey = apiKey,
+                    latitude = companyAddress?.latitude ?: 0.0,
+                    longitude = companyAddress?.longitude ?: 0.0,
+                    allowedDistance = companyAddress?.allowed_distance ?: 0.0
+                )
+
                 _uiState.value = SignInUiState.Success(response)
 
-                val employeeData = response.result.message.employee_data
+                // إرسال FCM token
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val fcmToken = task.result
+                        viewModelScope.launch {
+                            SignInApiService.sendDeviceToken(
+                                employeeData?.employee_token ?: "unknown",
+                                fcmToken
+                            )
+                        }
+                    } else {
+                        Log.e("FCM", "Failed to get FCM token")
+                    }
+                }
+
                 checkAndRenewToken(
-                    currentToken = employeeData.employee_token,
-                    expiry = employeeData.token_expiry,
+                    currentToken = employeeData?.employee_token ?: "unknown",
+                    expiry = employeeData?.token_expiry ?: "unknown",
                     apiKey = apiKey,
                     companyId = companyId
                 )
 
             } catch (e: Exception) {
                 Log.e("ViewModel", "Sign-in failed", e)
-
-                val message = e.message ?: "Unknown error"
-                _uiState.value = SignInUiState.Error(message)
+                _uiState.value = SignInUiState.Error(e.message ?: "Unknown error")
             }
-
         }
     }
+
+
+    private fun saveEmployeeData(
+        token: String,
+        tokenExpiry: String,
+        companyId: String,
+        employeeCompanyId: Int,
+        apiKey: String,
+        latitude: Double,
+        longitude: Double,
+        allowedDistance: Double
+    ) {
+        val sharedPref = SharedPrefManager(getApplication())
+
+        sharedPref.saveToken(token)
+        sharedPref.saveTokenExpiry(tokenExpiry)
+        sharedPref.saveCompanyId(companyId)
+        sharedPref.saveEmployeeCompanyId(employeeCompanyId)
+        sharedPref.saveApiKey(apiKey)
+        sharedPref.saveLatitude(latitude)
+        sharedPref.saveLongitude(longitude)
+        sharedPref.saveAllowedDistance(allowedDistance)
+    }
+
+
+//    fun signIn(email: String, password: String, companyId: String, apiKey: String) {
+//        viewModelScope.launch {
+//
+//            val response = SignInApiService.signIn(email, password, companyId, apiKey)
+//
+//
+//            if (response.result.status != "error") {
+//                Log.d("STATUS", "done jessica done")
+//
+//                // Send the dynamic device tokenي
+//                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+//                    if (task.isSuccessful) {
+//                        val fcmToken = task.result
+//                        viewModelScope.launch {
+//                            SignInApiService.sendDeviceToken(
+//                                response.result.message.employee_data.employee_token,
+//                                fcmToken
+//                            )
+//                        }
+//                        Log.d("FCM", "FCM Token: $fcmToken")
+//                    } else {
+//                        Log.e("FCM", "Failed to get FCM token")
+//                    }
+//                }
+//            }
+//
+//
+//
+//            _uiState.value = SignInUiState.Loading
+//            try {
+//                val response = SignInApiService.signIn(email, password, companyId, apiKey)
+//                _uiState.value = SignInUiState.Success(response)
+//
+//                val employeeData = response.result.message.employee_data
+//                checkAndRenewToken(
+//                    currentToken = employeeData.employee_token,
+//                    expiry = employeeData.token_expiry,
+//                    apiKey = apiKey,
+//                    companyId = companyId
+//                )
+//
+//            } catch (e: Exception) {
+//                Log.e("ViewModel", "Sign-in failed", e)
+//
+//                val message = e.message ?: "Unknown error"
+//                _uiState.value = SignInUiState.Error(message)
+//            }
+//
+//        }
+//    }
 
     fun resetState() {
         _uiState.value = SignInUiState.Idle

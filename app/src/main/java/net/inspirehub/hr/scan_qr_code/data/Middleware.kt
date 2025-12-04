@@ -1,5 +1,8 @@
 package net.inspirehub.hr.scan_qr_code.data
 
+
+
+
 class Middleware private constructor(encryptedInput: String) {
 
     val companyId: String
@@ -28,7 +31,6 @@ class Middleware private constructor(encryptedInput: String) {
 
     companion object {
         private const val DATA_DELIMITER = "|§|"
-
         private var instance: Middleware? = null
         fun initialize(encryptedInput: String): Middleware {
             return instance ?: synchronized(this) {

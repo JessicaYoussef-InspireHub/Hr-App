@@ -6,6 +6,28 @@ import java.util.Locale
 import androidx.core.content.edit
 
 class SharedPrefManager(context: Context) {
+
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+
+
+
+    fun saveEmployeeCompanyId(companyId: Int) {
+        prefs.edit { putInt("company_id", companyId) }
+    }
+
+    fun getEmployeeCompanyId(): Int {
+        return prefs.getInt("company_id", -1)
+    }
+
+    fun saveBaseUrl(url: String) {
+        prefs.edit { putString("base_url", url) }
+    }
+
+    fun getBaseUrl(): String? {
+        return prefs.getString("base_url", null)
+    }
+
     fun saveServerExitTime(time: String) {
         prefs.edit { putString("server_exit_time", time) }
     }
@@ -21,10 +43,6 @@ class SharedPrefManager(context: Context) {
     fun isNotificationsEnabled(): Boolean {
         return prefs.getBoolean("notifications_enabled", true) // default is ON
     }
-
-
-    private val prefs: SharedPreferences =
-        context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
     fun setDarkModeEnabled(enabled: Boolean) {
         prefs.edit { putBoolean("dark_mode", enabled) }

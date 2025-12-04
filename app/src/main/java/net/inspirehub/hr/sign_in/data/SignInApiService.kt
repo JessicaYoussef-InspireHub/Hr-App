@@ -10,6 +10,11 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
+import net.inspirehub.hr.scan_qr_code.data.AppConfig
+
 
 object SignInApiService {
 
@@ -19,10 +24,32 @@ object SignInApiService {
             json(Json {
                 prettyPrint = true
                 isLenient = true
+                ignoreUnknownKeys = true
             })
         }
         followRedirects = true
     }
+
+    suspend fun sendDeviceToken(employeeToken: String, mobileToken: String) {
+        val payload = mapOf(
+            "employee_token" to employeeToken,
+            "mobile_token" to mobileToken
+        )
+
+        try {
+            val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/mobile_token") {
+                contentType(ContentType.Application.Json)
+                setBody(payload)
+            }
+
+            val responseBody: String = response.body()
+            Log.d("DEVICE_TOKEN", "Response: $responseBody")
+        } catch (e: Exception) {
+            Log.e("DEVICE_TOKEN", "Failed to send device token: ${e.message}")
+        }
+    }
+
+
 
 
     suspend fun renewToken(
@@ -37,7 +64,7 @@ object SignInApiService {
         )
 
         return try {
-            val response: HttpResponse = net.inspirehub.hr.check_in_out.data.httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee/renew_token") {
+            val response: HttpResponse = net.inspirehub.hr.check_in_out.data.httpClient.post(AppConfig.baseUrl + "/api/employee/renew_token") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(payload)
@@ -46,7 +73,12 @@ object SignInApiService {
             val responseBody: String = response.body()
             Log.d("HTTP", "Raw RenewToken Response: $responseBody")
 
-            Json.decodeFromString(responseBody)
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }.decodeFromString(responseBody)
+
+//            Json.decodeFromString(responseBody)
         } catch (e: Exception) {
             Log.e("API_ERROR", "Exception in renewToken: ${e.message}", e)
             throw e
@@ -59,21 +91,17 @@ object SignInApiService {
         companyId: String,
         apiKey: String
     ): SignInResponseWrapper {
-        val payload =
-//            SignInResponse(
-//            jsonrpc = "2.0",
-//            method = "call",
-//            params =
-            SignInRequest(
-                email = email,
-                password = password,
-                company_id = companyId,
-                api_key = apiKey
-//            )
+        val payload = SignInRequest(
+            email = email,
+            password = password,
+            company_id = companyId,
+            api_key = apiKey
         )
 
         return try {
-            val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/validate_company") {
+            val response: HttpResponse = httpClient.post(
+                AppConfig.baseUrl + "/api/validate_company"
+            ){
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(payload)
@@ -82,18 +110,81 @@ object SignInApiService {
             val responseBody: String = response.body()
             Log.d("HTTP", "Raw Response: $responseBody")
 
-            val parsed = Json.decodeFromString<SignInResponseWrapper>(responseBody)
+            // Parse JSON manually للتحقق من status قبل Serialization
+            val jsonElement = Json.parseToJsonElement(responseBody).jsonObject
+            val resultElement = jsonElement["result"]!!.jsonObject
+            val status = resultElement["status"]!!.jsonPrimitive.content
 
-            if (parsed.result.status == "error") {
-                Log.d("STATUS", "Sign-in error")
+            return if (status == "error") {
+                val message = resultElement["message"]!!.jsonPrimitive.content
+                // نرجع كـ SignInResponseWrapper جزئي مع رسالة الخطأ
+                SignInResponseWrapper(
+                    jsonrpc = jsonElement["jsonrpc"]!!.jsonPrimitive.content,
+                    id = jsonElement["id"]?.jsonPrimitive?.content,
+                    result = SignInResult(
+                        status = "error",
+                        message = Json.decodeFromJsonElement(resultElement) // message ممكن نعمله JsonElement
+                    )
+                )
             } else {
-                Log.d("STATUS", "Sign-in success")
+                // لو success ممكن نعمل decode كامل
+//                Json.decodeFromString<SignInResponseWrapper>(responseBody)
+                Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                }.decodeFromString<SignInResponseWrapper>(responseBody)
+
             }
 
-            parsed
         } catch (e: Exception) {
             Log.e("API_ERROR", "Exception: ${e.message}", e)
             throw e
         }
     }
+
+
+//    suspend fun signIn(
+//        email: String,
+//        password: String,
+//        companyId: String,
+//        apiKey: String
+//    ): SignInResponseWrapper {
+//        val payload =
+////            SignInResponse(
+////            jsonrpc = "2.0",
+////            method = "call",
+////            params =
+//            SignInRequest(
+//                email = email,
+//                password = password,
+//                company_id = companyId,
+//                api_key = apiKey
+////            )
+//        )
+//
+//        return try {
+//            val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/validate_company") {
+//                contentType(ContentType.Application.Json)
+//                accept(ContentType.Application.Json)
+//                setBody(payload)
+//            }
+//
+//            val responseBody: String = response.body()
+//            Log.d("HTTP", "Raw Response: $responseBody")
+//
+//            val parsed = Json.decodeFromString<SignInResponseWrapper>(responseBody)
+//
+//            if (parsed.result.status == "error") {
+//                Log.d("STATUS", "Sign-in error")
+//            } else {
+//                Log.d("STATUS", "Sign-in success")
+//
+//            }
+//
+//            parsed
+//        } catch (e: Exception) {
+//            Log.e("API_ERROR", "Exception: ${e.message}", e)
+//            throw e
+//        }
+//    }
 }

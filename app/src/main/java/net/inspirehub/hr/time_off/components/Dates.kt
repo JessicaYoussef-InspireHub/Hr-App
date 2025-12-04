@@ -29,7 +29,6 @@ fun Dates(
     lastDate: LocalDate,
     onStartDateClick: () -> Unit,
     onEndDateClick: () -> Unit,
-    modifier: Modifier = Modifier,
     isHalfDay: Boolean,
     halfDayOption: String,
     onHalfDayOptionChange: (String) -> Unit,
@@ -55,7 +54,7 @@ fun Dates(
     }
 
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ){

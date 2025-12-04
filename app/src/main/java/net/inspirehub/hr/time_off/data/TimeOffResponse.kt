@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
 import io.ktor.http.contentType
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import net.inspirehub.hr.scan_qr_code.data.AppConfig
 
 
 //RemainingLeavesResponse
@@ -146,7 +147,7 @@ suspend fun SendApiForTimeOff(
     return try {
         println("Sending TimeOff request...")
 
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_time_off") {
+        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/employee_time_off") {
             contentType(ContentType.Application.Json)
             setBody(timeOffRequest)
         }

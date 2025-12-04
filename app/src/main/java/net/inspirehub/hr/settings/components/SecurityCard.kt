@@ -99,23 +99,23 @@ fun SecurityCard(
                         .padding(horizontal = 20.dp),
                     color = colors.surfaceColor
                 )
-
-                SettingsItem(
-                    stringResource(R.string.notification),
-                    icon = Icons.Default.Notifications,
-                    onClick = {
-                        navController.navigate("NotificationsScreen")
-                    },
-                    trailingIcon = {
-                        CustomSwitch(
-                            checked = isNotificationEnabled,
-                            onCheckedChange = { newValue ->
-                                isNotificationEnabled = newValue
-                                sharedPrefManager.setNotificationsEnabled(newValue)
-                            }
-                        )
-                    }
-                )
+//
+//                SettingsItem(
+//                    stringResource(R.string.notification),
+//                    icon = Icons.Default.Notifications,
+//                    onClick = {
+//                        navController.navigate("NotificationsScreen")
+//                    },
+//                    trailingIcon = {
+//                        CustomSwitch(
+//                            checked = isNotificationEnabled,
+//                            onCheckedChange = { newValue ->
+//                                isNotificationEnabled = newValue
+//                                sharedPrefManager.setNotificationsEnabled(newValue)
+//                            }
+//                        )
+//                    }
+//                )
             }
         }
     }

@@ -11,6 +11,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import net.inspirehub.hr.scan_qr_code.data.AppConfig
 
 @Serializable
 data class LeaveDurationRequest(
@@ -96,7 +97,7 @@ suspend fun getLeaveDuration(
         "Request Body: $request"
     )
 
-    val response = client.post("https://ahmedelzupeir-androidapp21.odoo.com/api/leave/duration") {
+    val response = client.post(AppConfig.baseUrl + "/api/leave/duration") {
         contentType(ContentType.Application.Json)
         setBody(request)
     }

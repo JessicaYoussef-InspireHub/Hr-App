@@ -20,7 +20,6 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun DescriptionInput(
-    modifier: Modifier = Modifier
 ) {
     var description by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
@@ -43,13 +42,8 @@ fun DescriptionInput(
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 )
-            TextStyle(
-                color = colors.onBackgroundColor,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold)
             },
-            modifier = modifier.fillMaxWidth()
-                .verticalScroll(scrollState),
+            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState),
             maxLines = 3,
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = colors.transparent,
@@ -61,7 +55,14 @@ fun DescriptionInput(
                 focusedIndicatorColor = colors.tertiaryColor,
                 unfocusedIndicatorColor = colors.tertiaryColor,
                 disabledIndicatorColor = colors.transparent
-            )
+            ),
+            textStyle = TextStyle(
+                color = colors.tertiaryColor,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = 20.sp
+            ),
+            singleLine = false
         )
     }
 }

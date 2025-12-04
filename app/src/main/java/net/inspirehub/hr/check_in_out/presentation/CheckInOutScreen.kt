@@ -214,14 +214,6 @@ fun CheckInOutScreen(
         }
     }
 
-//    LaunchedEffect(Unit) {
-//        while (true) {
-//            val connected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
-//            isOffline = !connected
-//            Log.d("NetworkStatus", if (isOffline) "📴 Offline" else "🌐 Online")
-//            delay(3000)
-//        }
-//    }
 
     LaunchedEffect(Unit) {
         isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -274,6 +266,8 @@ fun CheckInOutScreen(
 
 
 
+
+
     LaunchedEffect(Unit) {
         val connected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
         isOffline = !connected
@@ -289,21 +283,38 @@ fun CheckInOutScreen(
         }
     }
 
+    LaunchedEffect(attendanceStatus, lastCheckIn, workedHours) {
+        // أول مرة يسجل دخول ومفيش بيانات جاية من السيرفر
+        if (attendanceStatus == null && lastCheckIn == null && workedHours == null) {
+            isInitialLoading = false
+            isButtonLoading = false
+            return@LaunchedEffect
+        }
 
-    LaunchedEffect(true) {
-        viewModel.getAttendanceStatus(token)
-
-        snapshotFlow {
-            listOf(attendanceStatus, lastCheckIn, workedHours)
-        }.collect { values ->
-            val (status, checkIn, worked) = values
-            if (status != null && checkIn != null && worked != null ) {
-                delay(500)
-                isInitialLoading = false
-                isButtonLoading = false
-            }
+        // لما السيرفر يرجّع attendanceStatus فقط → كفاية لفك اللودنج
+        if (attendanceStatus != null) {
+            delay(300)
+            isInitialLoading = false
+            isButtonLoading = false
         }
     }
+
+
+
+//    LaunchedEffect(true) {
+//        viewModel.getAttendanceStatus(token)
+//
+//        snapshotFlow {
+//            listOf(attendanceStatus, lastCheckIn, workedHours)
+//        }.collect { values ->
+//            val (status, checkIn, worked) = values
+//            if (status != null && checkIn != null && worked != null ) {
+//                delay(500)
+//                isInitialLoading = false
+//                isButtonLoading = false
+//            }
+//        }
+//    }
 
     LaunchedEffect(locationPermissionState.status.isGranted) {
         Log.d(

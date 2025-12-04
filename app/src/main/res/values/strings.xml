@@ -56,7 +56,7 @@ Protection Method</string>
     <string name="morning">Morning</string>
     <string name="dates">Dates:</string>
     <string name="duration">Duration:</string>
-    <string name="description">Description</string>
+    <string name="description">Description:</string>
     <string name="please_choose_the_time_off_type">Please choose the time off type</string>
     <string name="error_message_overlap">
     You\'ve already booked time off which overlaps with this period: from %1$s to %2$s - To Approve.

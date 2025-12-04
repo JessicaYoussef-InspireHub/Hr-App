@@ -15,6 +15,7 @@ import io.ktor.http.contentType
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.serialization.json.jsonObject
+import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -50,7 +51,7 @@ val httpClient = HttpClient {
 
 suspend fun fetchServerTime(token: String): String? {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_attendance") {
+        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
             contentType(ContentType.Application.Json)
             setBody(
                 mapOf(
@@ -124,7 +125,7 @@ fun sendOfflineAttendanceAction(token: String, logs: List<Map<String, Any>>) {
         val body = payload.toString().toRequestBody(mediaType)
 
         val request = Request.Builder()
-            .url("https://ahmedelzupeir-androidapp21.odoo.com/api/offline_attendance")
+            .url(AppConfig.baseUrl + "/api/offline_attendance")
             .post(body)
             .addHeader("Content-Type", "application/json")
             .build()
@@ -189,7 +190,7 @@ fun sendOfflineAttendanceAction(token: String, logs: List<Map<String, Any>>) {
 //        val body = payload.toString().toRequestBody(mediaType)
 //
 //        val request = Request.Builder()
-//            .url("https://ahmedelzupeir-androidapp21.odoo.com/api/offline_attendance")
+//            .url(AppConfig.baseUrl + "/api/offline_attendance")
 //            .post(body)
 //            .addHeader("Content-Type", "application/json")
 //            .build()
@@ -221,7 +222,7 @@ suspend fun sendAttendanceAction(
         utcFormat.timeZone = TimeZone.getTimeZone("UTC")
         val currentTime = actionTime ?: utcFormat.format(Date()) 
 
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_attendance") {
+        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
             contentType(ContentType.Application.Json)
             setBody(
                 mapOf(
@@ -254,7 +255,7 @@ suspend fun sendAttendanceAction(
 
 suspend fun fetchAttendanceStatus(token: String): AttendanceStatusResult? {
     return try {
-        val response: HttpResponse = httpClient.post("https://ahmedelzupeir-androidapp21.odoo.com/api/employee_attendance") {
+        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
             contentType(ContentType.Application.Json)
             setBody(
                 mapOf(
