@@ -9,7 +9,6 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -68,25 +68,27 @@ fun ProtectionScreen(
         exitProcess(0)
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.onSecondaryColor)
-            .padding(16.dp)
-        .verticalScroll(rememberScrollState())
-
-    ) {
         Column(
-            modifier = Modifier.align(Alignment.TopCenter),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .background(colors.onSecondaryColor)
+                .padding(WindowInsets.navigationBars.asPaddingValues())
+                .padding(WindowInsets.statusBars.asPaddingValues()),
             horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (numberToBack == 1) {
-                Box(modifier = Modifier.fillMaxWidth()) {
+        )
+        {
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ){
+                if (numberToBack == 1) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         modifier = Modifier
-                            .align(Alignment.CenterStart)
                             .size(32.dp)
                             .clickable {
                                 navController.popBackStack()
@@ -94,21 +96,29 @@ fun ProtectionScreen(
                         tint = colors.tertiaryColor
                     )
                 }
+                Spacer(modifier = Modifier.weight(0.3f))
+                Text(
+                    stringResource(R.string.choose_your_protection_method),
+                    fontWeight = FontWeight.Bold,
+                    color = colors.tertiaryColor,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp
+                )
+                Spacer(modifier = Modifier.weight(1f))
+
             }
-            Text(
-                stringResource(R.string.choose_your_protection_method),
-                fontWeight = FontWeight.Bold,
-                color = colors.tertiaryColor,
-                textAlign = TextAlign.Center,
-                fontSize = 20.sp
-            )
-        }
+
+            Spacer(modifier = Modifier.weight(1f))
+
 
         Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        {
             if (isFingerprintHardwareAvailable) {
                 ProtectionBox(
                     label = stringResource(R.string.use_fingerprint),
@@ -147,7 +157,8 @@ fun ProtectionScreen(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(top = 16.dp)
-            ) {
+            )
+            {
                 Checkbox(
                     checked = notShowAgainChecked,
                     onCheckedChange = { notShowAgainChecked = it },
@@ -164,5 +175,8 @@ fun ProtectionScreen(
                 )
             }
         }
-    }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+        }
 }

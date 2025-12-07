@@ -91,17 +91,20 @@ fun EnterPinScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.onSecondaryColor)
-            .verticalScroll(rememberScrollState())
-    ) {
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(colors.onSecondaryColor)
+//            .verticalScroll(rememberScrollState())
+//    ) {
         Column(
-            modifier = Modifier.align(Alignment.TopCenter)
-            .fillMaxWidth()
-            .background(colors.onSecondaryColor)
-            .padding(16.dp),
+            modifier = Modifier
+            .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .background(colors.onSecondaryColor)
+                .padding(horizontal = 16.dp)
+                .padding(WindowInsets.navigationBars.asPaddingValues())
+                .padding(WindowInsets.statusBars.asPaddingValues()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -146,19 +149,21 @@ fun EnterPinScreen(
                 color = colors.tertiaryColor,
                 fontWeight = FontWeight.Normal,
             )
-        }
+            Spacer(modifier = Modifier.weight(0.5f))
+
 
         Column(
             modifier = Modifier
-                .padding(horizontal = 30.dp)
-                .align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .padding(horizontal = 15.dp , vertical = 10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CompositionLocalProvider(LocalTextSelectionColors provides customColors , LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Spacer(modifier = Modifier.height(55.dp))
                 Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 5.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 for (i in 0 until viewModel.pinLength) {
@@ -171,41 +176,6 @@ fun EnterPinScreen(
                         else -> colors.onBackgroundColor
                     }
 
-//                        OutlinedTextField(
-//                            visualTransformation = PasswordVisualTransformation(),
-//                            value = viewModel.pinDigits[i],
-//                            onValueChange = {
-//                                if (it.isEmpty()) {
-//                                    viewModel.clearDigit(i)
-//                                    if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
-//                                } else {
-//                                    viewModel.onPinDigitChanged(i, it)
-//                                    if (i < viewModel.pinLength - 1) {
-//                                        focusManager.moveFocus(FocusDirection.Next)
-//                                    }
-//                                }
-//                            },
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .height(80.dp)
-//                                .then(
-//                                    if (i == 0) Modifier.focusRequester(focusRequester) else Modifier
-//                                ),
-//                            singleLine = true,
-//                            textStyle = TextStyle(
-//                                fontSize = 30.sp,
-//                                color = colors.tertiaryColor,
-//                                textAlign = TextAlign.Center,
-//                                textDirection = TextDirection.Ltr
-//                            ),
-//                            colors = OutlinedTextFieldDefaults.colors(
-//                                unfocusedBorderColor = borderColor,
-//                                focusedBorderColor = colors.tertiaryColor,
-//                                cursorColor = colors.tertiaryColor,
-//                                focusedTextColor = colors.tertiaryColor,
-//                                unfocusedTextColor = colors.tertiaryColor
-//                            )
-//                        )
                     OutlinedTextField(
                         visualTransformation = PasswordVisualTransformation(),
                         value = viewModel.pinDigits[i],
@@ -262,7 +232,6 @@ fun EnterPinScreen(
                 }
             }
 
-
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
@@ -302,8 +271,6 @@ fun EnterPinScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
 
             if (!isChangingMethod)
                 TextButton(onClick = {
@@ -312,5 +279,7 @@ fun EnterPinScreen(
                     Text(stringResource(R.string.forget_your_password), color = colors.tertiaryColor)
                 }
         }
-    }
+            Spacer(modifier = Modifier.weight(1f))
+
+        }
 }

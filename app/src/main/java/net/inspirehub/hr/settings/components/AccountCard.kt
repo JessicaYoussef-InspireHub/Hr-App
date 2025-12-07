@@ -82,7 +82,7 @@ fun AccountCard(
                             val companyId = sharedPrefManager.getCompanyId() ?: ""
                             val apiKey = sharedPrefManager.getApiKey() ?: ""
                             sharedPrefManager.setProtectionSkipped(false)
-                            navController.navigate("SignInScreen/$companyId/$apiKey/0")
+                            navController.navigate("SignInScreen/$companyId/$apiKey")
                         },
                         onDismiss = { showDialog = false }
                     )

@@ -9,11 +9,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -86,166 +90,123 @@ fun PinCodeScreen(
             popUpTo("PinCodeScreen") { inclusive = true }
         }
     }
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .background(colors.onSecondaryColor)
-        .verticalScroll(rememberScrollState())
-
-    ){
-        Column(
-            modifier = Modifier.align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .background(colors.onSecondaryColor)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .size(32.dp)
-                        .clickable {
-                            navController.popBackStack()
-                        },
-                    tint = colors.tertiaryColor
-                )
-            }
-            Image(
-                painter = painterResource(id = R.drawable.pin),
-                contentDescription = "PIN",
-                modifier = Modifier.size(130.dp)
-
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = stringResource(R.string.choose_a_pin),
-                fontWeight = FontWeight.Bold,
-                color = colors.tertiaryColor,
-                fontSize = 30.sp,
-                textAlign = TextAlign.Center,
+            .padding(horizontal = 16.dp)
+            .padding(WindowInsets.navigationBars.asPaddingValues())
+            .padding(WindowInsets.statusBars.asPaddingValues()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
                 modifier = Modifier
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.use_4_digits_to_secure_your_account),
-                fontSize = 20.sp,
-                color = colors.tertiaryColor,
-                fontWeight = FontWeight.Normal,
+                    .align(Alignment.CenterStart)
+                    .size(32.dp)
+                    .clickable {
+                        navController.popBackStack()
+                    },
+                tint = colors.tertiaryColor
             )
         }
+        Image(
+            painter = painterResource(id = R.drawable.pin),
+            contentDescription = "PIN",
+            modifier = Modifier.size(130.dp)
+
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = stringResource(R.string.choose_a_pin),
+            fontWeight = FontWeight.Bold,
+            color = colors.tertiaryColor,
+            fontSize = 30.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.use_4_digits_to_secure_your_account),
+            fontSize = 20.sp,
+            color = colors.tertiaryColor,
+            fontWeight = FontWeight.Normal,
+        )
+        Spacer(modifier = Modifier.weight(0.5f))
+
         Column(
             modifier = Modifier
-                .padding(horizontal = 30.dp)
-                .align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .padding(horizontal = 15.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CompositionLocalProvider(LocalTextSelectionColors provides customColors , LocalLayoutDirection provides LayoutDirection.Ltr) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            CompositionLocalProvider(
+                LocalTextSelectionColors provides customColors,
+                LocalLayoutDirection provides LayoutDirection.Ltr
             ) {
-                for (i in 0 until pinLength) {
 
-                    val isFocused = i == currentFocusIndex
-                    val isFilled = pinDigits[i].isNotEmpty()
-                    val borderColor = when {
-                        isFocused -> colors.tertiaryColor
-                        isFilled -> colors.tertiaryColor
-                        else -> colors.onBackgroundColor
-                    }
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    for (i in 0 until pinLength) {
 
+                        val isFocused = i == currentFocusIndex
+                        val isFilled = pinDigits[i].isNotEmpty()
+                        val borderColor = when {
+                            isFocused -> colors.tertiaryColor
+                            isFilled -> colors.tertiaryColor
+                            else -> colors.onBackgroundColor
+                        }
 
-//                        OutlinedTextField(
-//                            visualTransformation = PasswordVisualTransformation(),
-//                            value = pinDigits[i],
-//                            onValueChange = {
-//                                if (it.isEmpty()) {
-//                                    viewModel.clearDigit(i)
-//                                    if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
-//                                } else if (it.length == 1 && it.all { c -> c.isDigit() }) {
-//                                    viewModel.updateDigit(i, it)
-//                                    if (i < pinLength - 1) focusManager.moveFocus(FocusDirection.Next)
-//                                }
-//                            },
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .height(80.dp)
-//                                .then(
-//                                    if (i == 0) Modifier.focusRequester(focusRequester) else Modifier
-//                                ),
-//                            singleLine = true,
-//                            textStyle = TextStyle(
-//                                fontSize = 30.sp,
-//                                color = colors.tertiaryColor,
-//                                textAlign = TextAlign.Center,
-//                                textDirection = TextDirection.Ltr
-//                            ),
-//                            keyboardOptions = KeyboardOptions(
-//                                keyboardType = KeyboardType.Number, // <<--- هنا يخلي الكيبورد رقمي
-//                                imeAction = imeAction
-//                            ),
-//                            keyboardActions = KeyboardActions(
-//                                onNext = { focusManager.moveFocus(FocusDirection.Next) },
-//                                onDone = { focusManager.clearFocus() }
-//                            ),
-//                            colors = OutlinedTextFieldDefaults.colors(
-//                                unfocusedBorderColor = borderColor,
-//                                focusedBorderColor = colors.tertiaryColor,
-//                                cursorColor = colors.tertiaryColor,
-//                                focusedTextColor = colors.tertiaryColor,
-//                                unfocusedTextColor = colors.tertiaryColor,
-//                                focusedLabelColor = colors.tertiaryColor,
-//                                unfocusedLabelColor = colors.tertiaryColor
-//                            )
-//                        )
-                    val imeAction = if (i == pinLength - 1) ImeAction.Done else ImeAction.Next
+                        val imeAction = if (i == pinLength - 1) ImeAction.Done else ImeAction.Next
 
-                    OutlinedTextField(
-                        visualTransformation = PasswordVisualTransformation(),
-                        value = pinDigits[i],
-                        onValueChange = {
-                            if (it.isEmpty()) {
-                                viewModel.clearDigit(i)
-                                if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
-                            } else if (it.length == 1 && it.all { c -> c.isDigit() }) {
-                                viewModel.updateDigit(i, it)
-                                if (i < pinLength - 1) focusManager.moveFocus(FocusDirection.Next)
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(80.dp)
-                            .then(if (i == 0) Modifier.focusRequester(focusRequester) else Modifier),
-                        singleLine = true,
-                        textStyle = TextStyle(
-                            fontSize = 30.sp,
-                            color = colors.tertiaryColor,
-                            textAlign = TextAlign.Center,
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number, // <<--- هنا يخلي الكيبورد رقمي
-                            imeAction = imeAction
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Next) },
-                            onDone = { focusManager.clearFocus() }
-                        ),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = borderColor,
-                            focusedBorderColor = colors.tertiaryColor,
-                            cursorColor = colors.tertiaryColor,
-                            focusedTextColor = colors.tertiaryColor,
-                            unfocusedTextColor = colors.tertiaryColor,
-                            focusedLabelColor = colors.tertiaryColor,
-                            unfocusedLabelColor = colors.tertiaryColor
+                        OutlinedTextField(
+                            visualTransformation = PasswordVisualTransformation(),
+                            value = pinDigits[i],
+                            onValueChange = {
+                                if (it.isEmpty()) {
+                                    viewModel.clearDigit(i)
+                                    if (i > 0) focusManager.moveFocus(FocusDirection.Previous)
+                                } else if (it.length == 1 && it.all { c -> c.isDigit() }) {
+                                    viewModel.updateDigit(i, it)
+                                    if (i < pinLength - 1) focusManager.moveFocus(FocusDirection.Next)
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(80.dp)
+                                .then(if (i == 0) Modifier.focusRequester(focusRequester) else Modifier),
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                fontSize = 30.sp,
+                                color = colors.tertiaryColor,
+                                textAlign = TextAlign.Center,
+                            ),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = imeAction
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onNext = { focusManager.moveFocus(FocusDirection.Next) },
+                                onDone = { focusManager.clearFocus() }
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = borderColor,
+                                focusedBorderColor = colors.tertiaryColor,
+                                cursorColor = colors.tertiaryColor,
+                                focusedTextColor = colors.tertiaryColor,
+                                unfocusedTextColor = colors.tertiaryColor,
+                                focusedLabelColor = colors.tertiaryColor,
+                                unfocusedLabelColor = colors.tertiaryColor
+                            )
                         )
-                    )
                     }
                 }
             }
@@ -289,5 +250,9 @@ fun PinCodeScreen(
                 )
             }
         }
+
+
+        Spacer(modifier = Modifier.weight(1f))
+
     }
 }

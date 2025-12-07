@@ -73,6 +73,7 @@ fun TimeOffDetailsDialog(
     dailyRecords: List<TimeOffRecord>,
     hourlyRecords: List<HourlyTimeOffRecord>,
     clickedDate: LocalDate? = null,
+    leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
 ) {
 
     val startDate = LocalDate.parse(record.start_date)
@@ -396,7 +397,8 @@ fun TimeOffDetailsDialog(
                         weekendDayNames = weekendDayNames,
                         publicHolidayDates = publicHolidayDates,
                         dailyRecords = dailyRecords,
-                        hourlyRecords = hourlyRecords
+                        hourlyRecords = hourlyRecords,
+                        leaveTypeColors = leaveTypeColors,
                     )
                 }
             }

@@ -64,7 +64,8 @@ fun DateInfoDialog(
     weekendDayNames: Set<String>,
     publicHolidayDates: Set<LocalDate>,
     dailyRecords: List<TimeOffRecord>,
-    hourlyRecords: List<HourlyTimeOffRecord>
+    hourlyRecords: List<HourlyTimeOffRecord>,
+    leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
 ) {
     val colors = appColors()
     var isHalfDay by remember { mutableStateOf(false) }
@@ -340,7 +341,9 @@ fun DateInfoDialog(
                                         publicHolidayDates = publicHolidayDates,
                                         dailyRecords = dailyRecords,
                                         hourlyRecords = hourlyRecords,
-                                        )
+                                        leaveTypeColors = leaveTypeColors
+
+                                    )
                                     DialogActionsRow(
                                         onConfirm = {
                                             Log.d("CALENDAR", "save")
@@ -446,6 +449,7 @@ fun DateInfoDialog(
                                         publicHolidayDates = publicHolidayDates,
                                         dailyRecords = dailyRecords,
                                         hourlyRecords = hourlyRecords,
+                                        leaveTypeColors = leaveTypeColors
 
 
                                         )

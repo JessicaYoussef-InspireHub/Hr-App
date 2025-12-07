@@ -55,7 +55,10 @@ fun LeaveTypesLazyRow(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.width(140.dp).padding(vertical = 4.dp)
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .wrapContentWidth()
+//                  modifier =  Modifier.width(140.dp).padding(vertical = 4.dp)
             ){
                 Box(
                     modifier = Modifier
@@ -67,7 +70,7 @@ fun LeaveTypesLazyRow(
 
                 Text(
                     text = translatedName,
-                    color = colors.onBackgroundColor
+                    color = colors.onBackgroundColor,
                 )
             }
         }

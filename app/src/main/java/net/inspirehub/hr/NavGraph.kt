@@ -58,7 +58,7 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
         !token.isNullOrEmpty() && protectionSkipped -> "CheckInOutScreen"
 
         // ✅ Has companyId and apiKey but no token (needs to sign in)
-        token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey/0"
+        token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey"
 
         // ✅ Has companyId and apiKey and token (needs to protection)
         !token.isNullOrEmpty() && !companyId.isNullOrEmpty() && !apiKey.isNullOrEmpty() -> "ProtectionScreen/0"
@@ -183,12 +183,12 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
         }
 
 
-        composable("SignInScreen/{companyId}/{apiKey}/{numberToBack}") { backStackEntry ->
+        composable("SignInScreen/{companyId}/{apiKey}") { backStackEntry ->
             val companyId = backStackEntry.arguments?.getString("companyId") ?: ""
             val apiKey = backStackEntry.arguments?.getString("apiKey") ?: ""
             val numberToBack = backStackEntry.arguments?.getString("numberToBack")?.toIntOrNull() ?: 0
 
-            SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey , numberToBack = numberToBack)
+            SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey )
         }
     }
 }

@@ -1,4 +1,4 @@
-package net.inspirehub.hr.scan_qr_code.components
+package net.inspirehub.hr.check_in_out.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +24,7 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
-fun ErrorCompanyInformationDialog(
+fun CheckInOutErrorDialog(
     message: String,
     onDismiss: () -> Unit
 ) {
@@ -34,7 +34,7 @@ fun ErrorCompanyInformationDialog(
         containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         title = {
-            Column (
+            Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -42,7 +42,7 @@ fun ErrorCompanyInformationDialog(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
-                ) {
+                ){
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
@@ -52,20 +52,21 @@ fun ErrorCompanyInformationDialog(
                     )
                 }
                 Text(
-                    stringResource(R.string.error_dialog) ,
+                    stringResource(R.string.error_dialog),
                     color = colors.tertiaryColor,
                     fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold,)
+                     fontWeight = FontWeight.Bold,
+                )
             }
         },
-
         text = {
-                Text(
-                    message,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = colors.onBackgroundColor )
-            },
+            Text(
+                message,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Normal,
+                color = colors.onBackgroundColor
+            )
+        },
         confirmButton = {
             Button(
                 colors = ButtonDefaults.buttonColors(
@@ -73,14 +74,14 @@ fun ErrorCompanyInformationDialog(
                     containerColor = colors.tertiaryColor
                 ),
                 shape = RoundedCornerShape(10.dp),
-                onClick = { onDismiss() }
-            ) {
+                onClick = onDismiss
+            ){
                 Text(
                     stringResource(R.string.ok),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
-        },
+        }
     )
 }

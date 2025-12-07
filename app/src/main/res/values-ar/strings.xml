@@ -47,6 +47,7 @@
     <string name="email">بريد إلكتروني</string>
     <string name="password">كلمة المرور</string>
     <string name="error">خطأ:</string>
+    <string name="error_dialog">خطأ</string>
     <string name="login_successful">تم تسجيل الدخول بنجاح!</string>
     <string name="discard">إلغاء</string>
     <string name="save">حفظ</string>

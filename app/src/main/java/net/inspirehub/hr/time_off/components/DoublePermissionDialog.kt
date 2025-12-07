@@ -75,6 +75,7 @@ fun DoublePermissionDialog(
     validatedDates: Map<LocalDate, String>? = null,
     onDateSelectedChange: ((Set<LocalDate>) -> Unit)? = null,
     startDate: LocalDate? = null,
+    leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
     ){
 
     val formattedDate = clickedDate?.format(
@@ -428,7 +429,8 @@ fun DoublePermissionDialog(
                                 weekendDayNames = weekendDayNames,
                                 publicHolidayDates = publicHolidayDates,
                                 dailyRecords = dailyRecords,
-                                hourlyRecords = hourlyRecords
+                                hourlyRecords = hourlyRecords,
+                                leaveTypeColors = leaveTypeColors,
                             )
                         }
                     }

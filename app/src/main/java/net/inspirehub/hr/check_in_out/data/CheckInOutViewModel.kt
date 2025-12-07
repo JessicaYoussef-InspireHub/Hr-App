@@ -183,16 +183,16 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
             val isOnline = NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()
 
-            // 🔹 Update screen immediately (after verifying the conditions)
-            if (action == "check_in") {
-                _attendanceStatus.value = "checked_in"
-                _lastCheckIn.value = finalActionTime
-                cache.saveStatus("checked_in", finalActionTime, _lastCheckOut.value)
-            } else if (action == "check_out") {
-                _attendanceStatus.value = "checked_out"
-                _lastCheckOut.value = finalActionTime
-                cache.saveStatus("checked_out", _lastCheckIn.value, finalActionTime)
-            }
+//            // 🔹 Update screen immediately (after verifying the conditions)
+//            if (action == "check_in") {
+//                _attendanceStatus.value = "checked_in"
+//                _lastCheckIn.value = finalActionTime
+//                cache.saveStatus("checked_in", finalActionTime, _lastCheckOut.value)
+//            } else if (action == "check_out") {
+//                _attendanceStatus.value = "checked_out"
+//                _lastCheckOut.value = finalActionTime
+//                cache.saveStatus("checked_out", _lastCheckIn.value, finalActionTime)
+//            }
 
             if (isOnline) {
                 // 🔸 Online → Send directly

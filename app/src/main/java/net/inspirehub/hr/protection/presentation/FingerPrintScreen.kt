@@ -138,55 +138,57 @@ fun FingerPrintScreen(
             exitProcess(0)
         }
     }
-    Box(
-        modifier = Modifier
-            .background(colors.onSecondaryColor)
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-
-
-        ) {
+//    Box(
+//        modifier = Modifier
+//            .background(colors.onSecondaryColor)
+//            .fillMaxSize()
+//            .verticalScroll(rememberScrollState())
+//        ){
 
         Column (
-            modifier = Modifier.align(Alignment.TopCenter)
-                .fillMaxWidth()
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .background(colors.onSecondaryColor)
-                .padding(16.dp),
+                .padding(horizontal = 5.dp)
+                .padding(WindowInsets.navigationBars.asPaddingValues())
+                .padding(WindowInsets.statusBars.asPaddingValues()),
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        )
+        {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                verticalAlignment = Alignment.Top
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier
                         .size(32.dp)
-                        .clickable {
-                            navController.popBackStack()
-                        },
+                        .clickable { navController.popBackStack() },
                     tint = colors.tertiaryColor
                 )
-            }
+                Spacer(modifier = Modifier.weight(0.3f))
             if( errorMessage == null){
-            Text(
-                text = titleText,
-                fontWeight = FontWeight.Bold,
-                color = colors.tertiaryColor,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-            )
-        }}
+                Text(
+                    text = titleText,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.tertiaryColor,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }}
 
+         Spacer(modifier = Modifier.weight(0.5f))
 
-        when {
+         when {
             errorMessage == null -> {
-
                 Column(
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
@@ -218,9 +220,6 @@ fun FingerPrintScreen(
                         tint = colors.tertiaryColor
                     )
                     Spacer(modifier = Modifier.height(24.dp))
-
-
-
                     Text(
                         authStatusText,
                         fontWeight = FontWeight.SemiBold,
@@ -228,20 +227,17 @@ fun FingerPrintScreen(
                         fontSize = 20.sp
                     )
                 }
-
-
             }
 
             biometricStatus == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
                 Text(
-                    errorMessage,
+                    text = errorMessage ?: "",
                     fontWeight = FontWeight.Normal,
                     color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,
                     lineHeight = 30.sp,
                     fontSize = 20.sp,
                     modifier = Modifier
-                        .align(Alignment.Center)
                         .clickable {
                             try {
                                 context.startActivity(
@@ -260,13 +256,17 @@ fun FingerPrintScreen(
                         }
                 )
             }
-
             else -> {
-                Text(errorMessage, color = colors.tertiaryColor)
+                Text(
+                    text = errorMessage ?: "",
+                    color = colors.tertiaryColor)
             }
-        }
 
-    }
+         }
+            Spacer(modifier = Modifier.weight(1f))
+
+
+        }
 }
 
 fun startBiometricAuth(

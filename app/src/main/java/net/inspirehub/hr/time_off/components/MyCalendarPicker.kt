@@ -572,6 +572,7 @@ fun MyCalendarPicker(
                 publicHolidayDates = publicHolidayDates,
                 clickedDate = showDialogForDate,
                 startDate = startDate,
+                leaveTypeColors = leaveTypeColors
             )
         }
 
@@ -601,6 +602,8 @@ fun MyCalendarPicker(
                 weekendDayNames = weekendDayNames,
                 publicHolidayDates = publicHolidayDates,
                 clickedDate = showDialogForDate,
+                leaveTypeColors = leaveTypeColors
+
             )
         }
 
@@ -632,7 +635,9 @@ fun MyCalendarPicker(
                     showDialogForDate = null
                     selectedLeaveRecords = emptyList()
 
-                }
+                },
+                leaveTypeColors = leaveTypeColors
+
             )
         }
 
@@ -651,6 +656,7 @@ fun MyCalendarPicker(
                 weekendDayNames = weekendDayNames,
                 publicHolidayDates = publicHolidayDates,
                 clickedDate = showDialogForDate,
+                leaveTypeColors = leaveTypeColors,
             )
         }
 
@@ -685,7 +691,8 @@ fun MyCalendarPicker(
                 weekendDayNames = weekendDayNames,
                 publicHolidayDates = publicHolidayDates,
                 dailyRecords = dailyRecords,
-                hourlyRecords = hourlyRecords
+                hourlyRecords = hourlyRecords,
+                leaveTypeColors = leaveTypeColors,
             )
         }
     }

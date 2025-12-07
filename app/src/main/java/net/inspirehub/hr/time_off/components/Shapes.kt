@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -34,15 +35,16 @@ fun Shapes() {
     val colors = appColors()
 
     LazyRow(
+        modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 15.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(35.dp)
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         items(statusList) { text ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .width(140.dp)
                     .padding(vertical = 4.dp)
+                    .wrapContentWidth()
             ) {
                 when (text) {
                     "Refused" -> {

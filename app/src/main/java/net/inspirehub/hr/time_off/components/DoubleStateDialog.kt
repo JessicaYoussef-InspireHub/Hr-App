@@ -75,7 +75,8 @@ fun DoubleStateDialog(
     weekendDayNames: Set<String> = emptySet(),
     publicHolidayDates: Set<LocalDate> = emptySet(),
     dailyRecords: List<TimeOffRecord> = emptyList(),
-    hourlyRecords: List<HourlyTimeOffRecord> = emptyList()
+    hourlyRecords: List<HourlyTimeOffRecord> = emptyList(),
+    leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
@@ -341,7 +342,8 @@ fun DoubleStateDialog(
                                 weekendDayNames = weekendDayNames,
                                 publicHolidayDates = publicHolidayDates,
                                 dailyRecords = dailyRecords,
-                                hourlyRecords = hourlyRecords
+                                hourlyRecords = hourlyRecords,
+                                leaveTypeColors = leaveTypeColors,
                             )
                         }
 

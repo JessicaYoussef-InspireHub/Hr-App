@@ -73,7 +73,7 @@ fun PermissionDialog(
     token: String,
     dailyRecords: List<TimeOffRecord>,
     hourlyRecords: List<HourlyTimeOffRecord>,
-
+    leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
     ) {
 
     val record = records.firstOrNull()
@@ -470,7 +470,8 @@ fun PermissionDialog(
                         weekendDayNames = weekendDayNames,
                         publicHolidayDates = publicHolidayDates,
                         dailyRecords = dailyRecords,
-                        hourlyRecords = hourlyRecords
+                        hourlyRecords = hourlyRecords,
+                        leaveTypeColors = leaveTypeColors,
                     )
                 }
                 if (showDeleteConfirmation) {

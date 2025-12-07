@@ -54,7 +54,12 @@ import kotlinx.coroutines.launch
 import java.time.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
@@ -67,6 +72,7 @@ import net.inspirehub.hr.check_in_out.components.OfflineCheckOutDialog
 import net.inspirehub.hr.check_in_out.components.OfflineSnackBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.inspirehub.hr.check_in_out.components.CheckInOutErrorDialog
 import java.net.InetSocketAddress
 import java.net.Socket
 
@@ -135,6 +141,10 @@ fun CheckInOutScreen(
     var showGpsDialog by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    var showErrorMessageDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    var isErrorDialogLoading by remember { mutableStateOf(false) }
+
     fun String.replaceDigitsWithArabic(): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
         return this.map { char ->
@@ -174,6 +184,7 @@ fun CheckInOutScreen(
             "--:--"
         }
     }
+
     val colors = appColors()
 
     val checkInTime = lastCheckIn?.let { formatUtcToLocal(it) } ?: "--:--"
@@ -250,7 +261,7 @@ fun CheckInOutScreen(
                     // ✅ Loading will be temporarily enabled after returning
                     isInitialLoading = true
                     coroutineScope.launch {
-                       delay(1000)
+                        delay(1000)
                         isInitialLoading = false
                     }
                 }
@@ -284,14 +295,14 @@ fun CheckInOutScreen(
     }
 
     LaunchedEffect(attendanceStatus, lastCheckIn, workedHours) {
-        // أول مرة يسجل دخول ومفيش بيانات جاية من السيرفر
+        // First time logging in and no data coming from the server
         if (attendanceStatus == null && lastCheckIn == null && workedHours == null) {
             isInitialLoading = false
             isButtonLoading = false
             return@LaunchedEffect
         }
 
-        // لما السيرفر يرجّع attendanceStatus فقط → كفاية لفك اللودنج
+        // When the server returns AttendStatus only → Dough to unblock the loading
         if (attendanceStatus != null) {
             delay(300)
             isInitialLoading = false
@@ -299,22 +310,6 @@ fun CheckInOutScreen(
         }
     }
 
-
-
-//    LaunchedEffect(true) {
-//        viewModel.getAttendanceStatus(token)
-//
-//        snapshotFlow {
-//            listOf(attendanceStatus, lastCheckIn, workedHours)
-//        }.collect { values ->
-//            val (status, checkIn, worked) = values
-//            if (status != null && checkIn != null && worked != null ) {
-//                delay(500)
-//                isInitialLoading = false
-//                isButtonLoading = false
-//            }
-//        }
-//    }
 
     LaunchedEffect(locationPermissionState.status.isGranted) {
         Log.d(
@@ -347,7 +342,9 @@ fun CheckInOutScreen(
                     .fillMaxSize()
                     .background(colors.onSecondaryColor)
                     .padding(innerPadding)
-                    .padding(24.dp)
+                    .padding(horizontal = 24.dp)
+                    .padding(WindowInsets.navigationBars.asPaddingValues())
+                    .padding(WindowInsets.statusBars.asPaddingValues())
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -406,104 +403,148 @@ fun CheckInOutScreen(
                     )
                 }
 
-                CheckInOutButton(
-                    attendanceStatus = attendanceStatus,
-//                    isWithinDistance = isWithinDistance == true,
-//                    isLoading = isButtonLoading,
-                    isWithinDistance = (isWithinDistance == true),
-                    isLoading = isButtonLoading || isWithinDistance == null,
-                    onClick = {
-                        if (!isButtonLoading) {
-                            coroutineScope.launch {
-                                val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                                val gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
-                                if (!gpsEnabled) {
-                                    Log.d("GPS_STATUS", "❌ GPS is OFF when button clicked")
-                                    showGpsDialog = true
-                                    return@launch
-                                }
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
 
-                                isButtonLoading = true
+                    CheckInOutButton(
+                        attendanceStatus = attendanceStatus,
+                        isWithinDistance = (isWithinDistance == true),
+//                        isWithinDistance = true,
+                        isLoading = isButtonLoading || isWithinDistance == null,
+                        onClick = {
+                            if (!isButtonLoading) {
+                                coroutineScope.launch {
+                                    val locationManager =
+                                        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                                    val gpsEnabled =
+                                        locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
-                                val sharedPrefManager = SharedPrefManager(context)
-                                val token = sharedPrefManager.getToken()
-                                val offline = viewModel.isOffline()
-                                val wasOfflineDuringChange =
-                                    sharedPrefManager.wasOfflineDuringTimeChange()
-                                val diffMinutes = sharedPrefManager.getTimeDifference()
-                                Log.d(
-                                    "CheckInOut",
-                                    "🌐 Online status: ${if (offline) "Offline" else "Online"}"
-                                )
-                                Log.d("CheckInOut", "🕒 Saved time difference: $diffMinutes")
-                                Log.d(
-                                    "CheckInOut",
-                                    "⚡ Change time while offline: $wasOfflineDuringChange"
-                                )
-
-                                val nextAction =
-                                    if (attendanceStatus == "checked_in") "check_out" else "check_in"
-
-                                // 🔹 Case 1: User changed the time while offline → Forbidden to execute
-                                if (isOffline && wasOfflineDuringChange) {
-                                    showInternetRequiredDialog = true
-                                    isButtonLoading = false
-                                    return@launch
-                                }
-
-                                // 🔹 Case 2: The user is offline (but the time has not changed)
-                                if (isOffline) {
-                                    val currentLanguage = Locale.getDefault().language
-                                    val message =
-                                        if (currentLanguage == "ar") {
-                                            "انت غير متصل بالانترنت! تم حفظ العملية، سيتم إرسالها عند توفر الإنترنت"
-                                        } else {
-                                            "You are offline! The operation has been saved and will be sent when the internet is available."
-                                        }
-                                    offlineMessage = message
-
-                                    if (nextAction == "check_out") {
-                                        showOfflineCheckOutDialog = true
-                                    } else {
-                                        viewModel.sendAttendance(token!!, nextAction) { newStatus ->
-                                            isButtonLoading = false
-                                            Log.d("CheckInOut", "📤 Offline Check-In saved in WorkManager: $newStatus"                                            )
-                                        }
+                                    if (!gpsEnabled) {
+                                        Log.d("GPS_STATUS", "❌ GPS is OFF when button clicked")
+                                        showGpsDialog = true
+                                        return@launch
                                     }
-                                    return@launch
-                                }
 
+                                    isButtonLoading = true
+                                    isErrorDialogLoading = true
 
-                                // 🔹 Case 3: User is online → Calculate the time difference with the server
-                                viewModel.getTimeDifferenceWithServer(token!!) { diff ->
-                                    sharedPrefManager.saveTimeDifference(diff)
-                                    sharedPrefManager.setWasOfflineDuringTimeChange(false)
-                                    Log.d("CheckInOut", "🕒 New time difference with server: $diff min")
+                                    val sharedPrefManager = SharedPrefManager(context)
+                                    val token = sharedPrefManager.getToken()
+                                    val offline = viewModel.isOffline()
+                                    val wasOfflineDuringChange =
+                                        sharedPrefManager.wasOfflineDuringTimeChange()
+                                    val diffMinutes = sharedPrefManager.getTimeDifference()
+                                    Log.d(
+                                        "CheckInOut",
+                                        "🌐 Online status: ${if (offline) "Offline" else "Online"}"
+                                    )
+                                    Log.d("CheckInOut", "🕒 Saved time difference: $diffMinutes")
+                                    Log.d(
+                                        "CheckInOut",
+                                        "⚡ Change time while offline: $wasOfflineDuringChange"
+                                    )
 
-                                    // 🔹 After checking the time, we start implementing the procedure.
-                                    if (nextAction == "check_out") {
-                                        isDialogLoading = true
-                                        viewModel.sendAttendance(token, "status") { newStatus ->
-                                            isDialogLoading = false
-                                            isButtonLoading = false
-                                            if (newStatus != null) {
-                                                println("✅ Check Out sent successfully: $newStatus")
-                                                showErrorDialog = true
+                                    val nextAction =
+                                        if (attendanceStatus == "checked_in") "check_out" else "check_in"
+
+                                    // 🔹 Case 1: User changed the time while offline → Forbidden to execute
+                                    if (isOffline && wasOfflineDuringChange) {
+                                        showInternetRequiredDialog = true
+                                        isButtonLoading = false
+                                        return@launch
+                                    }
+
+                                    // 🔹 Case 2: The user is offline (but the time has not changed)
+                                    if (isOffline) {
+                                        val currentLanguage = Locale.getDefault().language
+                                        val message =
+                                            if (currentLanguage == "ar") {
+                                                "انت غير متصل بالانترنت! تم حفظ العملية، سيتم إرسالها عند توفر الإنترنت"
+                                            } else {
+                                                "You are offline! The operation has been saved and will be sent when the internet is available."
+                                            }
+                                        offlineMessage = message
+
+                                        if (nextAction == "check_out") {
+                                            showOfflineCheckOutDialog = true
+                                        } else {
+                                            viewModel.sendAttendance(
+                                                token!!,
+                                                nextAction
+                                            ) { newStatus ->
+                                                isButtonLoading = false
+                                                Log.d(
+                                                    "CheckInOut",
+                                                    "📤 Offline Check-In saved in WorkManager: $newStatus"
+                                                )
                                             }
                                         }
-                                    } else {
-                                        viewModel.sendAttendance(token, nextAction) { newStatus ->
-                                            isButtonLoading = false
-                                            if (newStatus != null) {
-                                                println("✅ $nextAction executed successfully: $newStatus")                                            }
+                                        return@launch
+                                    }
+
+
+                                    // 🔹 Case 3: User is online → Calculate the time difference with the server
+                                    viewModel.getTimeDifferenceWithServer(token!!) { diff ->
+                                        sharedPrefManager.saveTimeDifference(diff)
+                                        sharedPrefManager.setWasOfflineDuringTimeChange(false)
+                                        Log.d(
+                                            "CheckInOut",
+                                            "🕒 New time difference with server: $diff min"
+                                        )
+
+                                        // 🔹 After checking the time, we start implementing the procedure.
+                                        if (nextAction == "check_out") {
+                                            isDialogLoading = true
+                                            viewModel.sendAttendance(token, "status") { newStatus ->
+                                                isDialogLoading = false
+                                                isButtonLoading = false
+                                                if (newStatus != null) {
+                                                    println("✅ Check Out sent successfully: $newStatus")
+                                                    showErrorDialog = true
+                                                }
+                                            }
+                                        } else {
+                                            //                                        viewModel.sendAttendance(token, nextAction) { newStatus ->
+                                            //                                            isButtonLoading = false
+                                            //                                            if (newStatus != null) {
+                                            //                                                println("✅ $nextAction executed successfully: $newStatus")                                            }
+                                            //                                        }
+                                            viewModel.sendAttendance(
+                                                token,
+                                                nextAction
+                                            ) { newStatus ->
+                                                isButtonLoading = false
+                                                isErrorDialogLoading = false
+                                                if (newStatus == null) {
+                                                    errorMessage = viewModel.message.value
+                                                    showErrorMessageDialog = true
+                                                }
+                                            }
+
                                         }
                                     }
                                 }
                             }
                         }
+                    )
+
+                    if (isErrorDialogLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(colors.transparent)
+                                .noClickable(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = colors.tertiaryColor
+                            )
+                        }
                     }
-                )
+                }
             }
         }
 
@@ -515,7 +556,10 @@ fun CheckInOutScreen(
                     showOfflineCheckOutDialog = false
                     viewModel.sendAttendance(token, "check_out") { newStatus ->
                         isButtonLoading = false
-                        Log.d("CheckInOut", "📤 Offline Check-Out operation saved in WorkManager: $newStatus"                        )
+                        Log.d(
+                            "CheckInOut",
+                            "📤 Offline Check-Out operation saved in WorkManager: $newStatus"
+                        )
                     }
                 }
             )
@@ -564,25 +608,28 @@ fun CheckInOutScreen(
         }
     }
 
-//    TimeChangedDialog(
-//        showDialog = showDialog,
-//        onDismiss = { viewModel.dismissTimeChangedDialog() }
-//    )
+
+    GpsDialog(
+        showDialog = showGpsDialog,
+        onDismiss = { showGpsDialog = false },
+        onConfirm = {
+            showGpsDialog = false
+            val intent =
+                android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            context.startActivity(intent)
+        }
+    )
 
 
 
-
-
-
-        GpsDialog(
-            showDialog = showGpsDialog,
-            onDismiss = { showGpsDialog = false },
-            onConfirm = {
-                showGpsDialog = false
-                val intent = android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                context.startActivity(intent)
-            }
+    if (showErrorMessageDialog) {
+        CheckInOutErrorDialog(
+            message = errorMessage,
+            onDismiss = { showErrorMessageDialog = false }
         )
+    }
+
+
 
 
     if (showErrorDialog) {
@@ -601,31 +648,4 @@ fun CheckInOutScreen(
             onCancel = { showErrorDialog = false }
         )
     }
-
-
-    //        Spacer(modifier = Modifier.height(50.dp))
-    //        if (message.isNotEmpty()) {
-    //            Text(text = message)
-    //        }
-    //        lastCheckIn?.let {
-    //            Text("Last Check In: $it")
-    //        }
-    //        lastCheckOut?.let {
-    //            Text("Last Check Out: $it")
-    //        }
-    //        Text("Status: $attendanceStatus")
-//            Text(token , fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.tertiary)
-    //        Text(latitude.toString())
-    //        Text(longitude.toString())
-    //        Text(allowedDistance.toString())
-    //        Text("Your Current Latitude: $currentLat")
-    //        Text("Your Current Longitude: $currentLng")
-
-//    Button(
-//        onClick = {
-//
-//            navController.navigate("TimeOffScreen")
-//        }) {
-//        Text("Go To TimeOffScreen Screen")
-//    }
 }
