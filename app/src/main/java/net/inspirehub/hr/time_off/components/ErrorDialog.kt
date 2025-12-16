@@ -59,7 +59,8 @@ fun ErrorDialog(
         },
         text = {
             Text(
-                "$message \n \n${stringResource(R.string.attempting_to_double_book_your_time_off_wont_magically_make_your_vacation_2x_better)}" ,
+                "$message \n " ,
+//                        "\n${stringResource(R.string.attempting_to_double_book_your_time_off_wont_magically_make_your_vacation_2x_better)}" ,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
                 color = colors.onBackgroundColor,

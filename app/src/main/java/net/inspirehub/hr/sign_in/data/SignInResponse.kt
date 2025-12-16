@@ -3,18 +3,18 @@ package net.inspirehub.hr.sign_in.data
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class EmployeeDataWrapper(
+    val success: Boolean,
+    val employee_data: EmployeeData
+)
+
+
+@Serializable
 data class SignInRequest(
     val email: String,
     val password: String,
     val company_id: String,
     val api_key: String
-)
-
-@Serializable
-data class SignInResponse(
-    val jsonrpc: String,
-    val method: String,
-    val params: SignInRequest
 )
 
 @Serializable
@@ -29,9 +29,10 @@ data class SignInResponseWrapper(
 data class MessageContent(
     val status: String,
     val message: String,
-    val employee_data: EmployeeData,
+    val employee_data: EmployeeDataWrapper,
     val company: List<Company>
 )
+
 
 @Serializable
 data class EmployeeData(
@@ -39,7 +40,8 @@ data class EmployeeData(
     val name: String,
     val email: String,
     val department: String,
-    val company_id: Int,
+    val allowed_locations_ids: List<Int> = emptyList(),
+
     val job_title: String,
     val is_active: Boolean,
     val employee_token: String,

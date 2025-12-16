@@ -96,7 +96,7 @@ fun ProtectionScreen(
                         tint = colors.tertiaryColor
                     )
                 }
-                Spacer(modifier = Modifier.weight(0.3f))
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
                     stringResource(R.string.choose_your_protection_method),
                     fontWeight = FontWeight.Bold,

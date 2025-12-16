@@ -69,11 +69,8 @@ fun InputFields(
 
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = imeAction,
-                keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text
+                keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Email
             ),
-//            keyboardOptions = KeyboardOptions.Default.copy(
-//                imeAction = imeAction
-//            ),
             keyboardActions = KeyboardActions(
                 onNext = {
                     focusManager.moveFocus(FocusDirection.Down)
@@ -118,4 +115,3 @@ fun InputFields(
         )
     }
 }
-

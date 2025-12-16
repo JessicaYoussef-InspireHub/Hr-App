@@ -1,4 +1,5 @@
 
+import android.content.Context
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -14,7 +15,9 @@ import kotlinx.serialization.json.Json
 import io.ktor.http.contentType
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
+import net.inspirehub.hr.sign_in.data.SignInApiService
 
 
 //RemainingLeavesResponse
@@ -142,7 +145,9 @@ private val httpClient = HttpClient {
 
 
 suspend fun SendApiForTimeOff(
-    timeOffRequest: TimeOffRequest
+    context: Context,
+    timeOffRequest: TimeOffRequest,
+    retry: Boolean = true
 ): Any? {
     return try {
         println("Sending TimeOff request...")
@@ -159,10 +164,44 @@ suspend fun SendApiForTimeOff(
         val resultObj = jsonElement.jsonObject["result"]?.jsonObject
 
         if (resultObj?.get("status")?.jsonPrimitive?.content == "error") {
-            val error = Json.decodeFromString<JsonRpcResponse<ErrorResponse>>(rawResponse)
-            println("⚠️ API Error: ${error.result.message} (code=${error.result.error_code})")
-            return error.result
-        }
+
+                val errorCode = resultObj["error_code"]?.jsonPrimitive?.content
+
+                if (errorCode == "INVALID_TOKEN" && retry) {
+
+                    println("🔄 Token expired, renewing…")
+
+                    val sharedPref = SharedPrefManager(context)
+                    val apiKey = sharedPref.getApiKey()
+                    val companyId = sharedPref.getCompanyId()
+
+                    val oldToken = timeOffRequest.employee_token
+
+                    val newTokenResponse = SignInApiService.renewToken(
+                        apiKey = apiKey.orEmpty(),
+                        companyId = companyId.orEmpty(),
+                        employeeToken = oldToken
+                    )
+
+                    val newToken = newTokenResponse.result.new_token
+
+                    println("✅ New token generated: $newToken")
+
+                    sharedPref.saveToken(newToken)
+
+                    // إعادة إرسال نفس الطلب بتوكن جديد
+                    val updatedRequest = timeOffRequest.copy(employee_token = newToken)
+                    return SendApiForTimeOff(context , updatedRequest, retry = false)
+                }
+
+                val error = Json.decodeFromString<JsonRpcResponse<ErrorResponse>>(rawResponse)
+                println("⚠️ API Error: ${error.result.message} (code=${error.result.error_code})")
+
+                return error.result
+            }
+
+
+
 
         when (timeOffRequest.action) {
             "this_month_time_off" -> {

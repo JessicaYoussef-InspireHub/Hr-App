@@ -141,7 +141,7 @@ suspend fun fetchEmployeeLeaveTypes(token: String): LeaveTypeResponse? {
         }
 
         val bodyText = response.bodyAsText()
-        println("✅ Response: $bodyText")
+        println("✅ Response get_employee_leave_type : $bodyText")
 
         Json.decodeFromString<LeaveTypeResponse>(bodyText)
     } catch (e: Exception) {

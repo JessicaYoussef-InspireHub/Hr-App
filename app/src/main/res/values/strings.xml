@@ -161,5 +161,6 @@ Protection Method</string>
     <string name="my_order_is_here">My order is here</string>
     <string name="you_have_items_in_your_list">You have 3 items in your list</string>
     <string name="no_notifications_yet">No notifications yet</string>
+    <string name="not_allowed_location_warning">not_allowed_location_warning</string>
 
 </resources>

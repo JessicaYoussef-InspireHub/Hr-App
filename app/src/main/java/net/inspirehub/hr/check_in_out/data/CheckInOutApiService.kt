@@ -12,6 +12,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import io.ktor.http.contentType
+import kotlinx.serialization.SerialName
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.serialization.json.jsonObject
@@ -28,15 +29,43 @@ data class AttendanceStatusResponseWrapper(
     val result: AttendanceStatusResult
 )
 
+data class CompanyLocation(
+    val id: Int,
+    val name: String,
+    val lat: Double,
+    val lng: Double
+)
+
 @Serializable
 data class AttendanceStatusResult(
     val status: String,
     val message: String,
     val attendance_status: String? = null,
     val worked_hours: Double? = null,
-    val last_check_in: String? = null,
-    val last_check_out: String? = null
+
+    @SerialName("check_in_time")
+    val checkInTime: String? = null,
+
+    @SerialName("last_check_in")
+    val lastCheckIn: String? = null,
+
+    @SerialName("check_out_time")
+    val checkOutTime: String? = null,
+
+    @SerialName("last_check_out")
+    val lastCheckOut: String? = null
 )
+
+
+//@Serializable
+//data class AttendanceStatusResult(
+//    val status: String,
+//    val message: String,
+//    val attendance_status: String? = null,
+//    val worked_hours: Double? = null,
+//    val last_check_in: String? = null,
+//    val last_check_out: String? = null
+//)
 
 
 val httpClient = HttpClient {
@@ -51,17 +80,18 @@ val httpClient = HttpClient {
 
 suspend fun fetchServerTime(token: String): String? {
     return try {
-        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
-            contentType(ContentType.Application.Json)
-            setBody(
-                mapOf(
-                    "params" to mapOf(
-                        "employee_token" to token,
-                        "action" to "server_time"
+        val response: HttpResponse =
+            httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    mapOf(
+                        "params" to mapOf(
+                            "employee_token" to token,
+                            "action" to "server_time"
+                        )
                     )
                 )
-            )
-        }
+            }
 
         val bodyText = response.bodyAsText()
         println("🕒 Server Time Response: $bodyText")
@@ -216,26 +246,28 @@ suspend fun sendAttendanceAction(
     action: String,
     latitude: String,
     longitude: String,
-    actionTime: String? = null): AttendanceStatusResult? {
+    actionTime: String? = null
+): AttendanceStatusResult? {
     return try {
         val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
         utcFormat.timeZone = TimeZone.getTimeZone("UTC")
-        val currentTime = actionTime ?: utcFormat.format(Date()) 
+        val currentTime = actionTime ?: utcFormat.format(Date())
 
-        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
-            contentType(ContentType.Application.Json)
-            setBody(
-                mapOf(
-                    "params" to mapOf(
-                        "employee_token" to token,
-                        "action" to action,
-                        "lat" to latitude,
-                        "lng" to longitude,
-                        "action_time" to currentTime
+        val response: HttpResponse =
+            httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    mapOf(
+                        "params" to mapOf(
+                            "employee_token" to token,
+                            "action" to action,
+                            "lat" to latitude,
+                            "lng" to longitude,
+                            "action_time" to currentTime
+                        )
                     )
                 )
-            )
-        }
+            }
 
         println("Status: ${response.status}")
         println("Headers: ${response.headers}")
@@ -252,20 +284,20 @@ suspend fun sendAttendanceAction(
 }
 
 
-
 suspend fun fetchAttendanceStatus(token: String): AttendanceStatusResult? {
     return try {
-        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
-            contentType(ContentType.Application.Json)
-            setBody(
-                mapOf(
-                    "params" to mapOf(
-                        "employee_token" to token,
-                        "action" to "status"
+        val response: HttpResponse =
+            httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    mapOf(
+                        "params" to mapOf(
+                            "employee_token" to token,
+                            "action" to "status"
+                        )
                     )
                 )
-            )
-        }
+            }
 
         println("Status: ${response.status}")
         println("Headers: ${response.headers}")
@@ -273,7 +305,17 @@ suspend fun fetchAttendanceStatus(token: String): AttendanceStatusResult? {
 
         val responseBody = response.body<AttendanceStatusResponseWrapper>()
         println("⚪ Server response (status): $responseBody")
-        responseBody.result
+
+        val result = responseBody.result
+
+        // ❌ لو السيرفر رجع Error → نوقف هنا
+        if (result.status.equals("Error", ignoreCase = true)) {
+            println("❌ Server Error: ${result.message}")
+            return null
+        }
+
+        // ✅ نجاح
+        result
 
     } catch (e: Exception) {
         println("🔴 Exception fetching status: ${e.message}")

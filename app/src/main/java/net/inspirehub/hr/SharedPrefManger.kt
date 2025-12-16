@@ -4,21 +4,57 @@ import android.content.Context
 import android.content.SharedPreferences
 import java.util.Locale
 import androidx.core.content.edit
+import net.inspirehub.hr.check_in_out.data.CompanyLocation
+import net.inspirehub.hr.sign_in.data.Company
 
 class SharedPrefManager(context: Context) {
 
     private val prefs: SharedPreferences =
         context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
-
-
-    fun saveEmployeeCompanyId(companyId: Int) {
-        prefs.edit { putInt("company_id", companyId) }
+    fun saveAllowedLocationsIds(ids: List<Int>) {
+        val idsString = ids.joinToString(separator = ",")
+        prefs.edit { putString("allowed_locations_ids", idsString) }
     }
 
-    fun getEmployeeCompanyId(): Int {
-        return prefs.getInt("company_id", -1)
+    fun getAllowedLocationsIds(): List<Int> {
+        val idsString = prefs.getString("allowed_locations_ids", "") ?: ""
+        return if (idsString.isEmpty()) emptyList()
+        else idsString.split(",").mapNotNull { it.toIntOrNull() }
     }
+
+    fun saveCompaniesLatLng(companies: List<Company>) {
+        // addressId|name|lat,lng
+        val listString = companies.joinToString(";") {
+            "${it.address.id}|${it.name}|${it.address.latitude},${it.address.longitude}"
+        }
+        prefs.edit { putString("companies_lat_lng", listString) }
+    }
+
+
+    fun getCompaniesLatLng(): List<CompanyLocation> {
+        val listString = prefs.getString("companies_lat_lng", "") ?: ""
+        if (listString.isEmpty()) return emptyList()
+
+        return listString.split(";").mapNotNull { item ->
+            val parts = item.split("|")
+            if (parts.size != 3) return@mapNotNull null
+
+            val id = parts[0].toIntOrNull() ?: return@mapNotNull null
+            val name = parts[1]
+            val latLng = parts[2].split(",")
+            if (latLng.size != 2) return@mapNotNull null
+
+            CompanyLocation(
+                id = id,
+                name = name,
+                lat = latLng[0].toDouble(),
+                lng = latLng[1].toDouble()
+            )
+        }
+    }
+
+
 
     fun saveBaseUrl(url: String) {
         prefs.edit { putString("base_url", url) }

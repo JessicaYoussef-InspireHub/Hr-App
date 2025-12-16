@@ -139,10 +139,13 @@ fun TimeOffScreen(
             println("publicHolidayDates = $publicHolidayDates")
 
             val monthResult = SendApiForTimeOff(
+                context = context,
+                retry = true,
                 timeOffRequest = TimeOffRequest(
                     employee_token = token,
                     action = "this_month_time_off"
-                )
+                ),
+
             )
 
             if (monthResult is TimeOffYearResponse) {
@@ -151,6 +154,8 @@ fun TimeOffScreen(
             }
 
             val remainingResult = SendApiForTimeOff(
+                context = context,
+                retry = true,
                 timeOffRequest = TimeOffRequest(
                     employee_token = token,
                     action = "remaining_leaves"
@@ -186,6 +191,8 @@ fun TimeOffScreen(
 
 
             val timeOffStatus = SendApiForTimeOff(
+                context = context,
+                retry = true,
                 timeOffRequest = TimeOffRequest(
                     employee_token = token,
                     action = "time_off_status"
@@ -216,6 +223,8 @@ fun TimeOffScreen(
 
 
             val yearResult = SendApiForTimeOff(
+                context = context,
+                retry = true,
                 timeOffRequest = TimeOffRequest(
                     employee_token = token,
                     action = "this_year_time_off"

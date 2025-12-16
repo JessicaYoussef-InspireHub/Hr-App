@@ -64,7 +64,9 @@ object SignInApiService {
         )
 
         return try {
-            val response: HttpResponse = net.inspirehub.hr.check_in_out.data.httpClient.post(AppConfig.baseUrl + "/api/employee/renew_token") {
+            val response: HttpResponse = httpClient.post(
+                AppConfig.baseUrl + "/api/employee/renew_token"
+            ) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(payload)
@@ -84,6 +86,62 @@ object SignInApiService {
             throw e
         }
     }
+
+//    suspend fun signIn(
+//        email: String,
+//        password: String,
+//        companyId: String,
+//        apiKey: String
+//    ): SignInResponseWrapper {
+//        val payload = SignInRequest(
+//            email = email,
+//            password = password,
+//            company_id = companyId,
+//            api_key = apiKey
+//        )
+//
+//        return try {
+//            val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/validate_company") {
+//                contentType(ContentType.Application.Json)
+//                accept(ContentType.Application.Json)
+//                setBody(payload)
+//            }
+//
+//            val responseBody: String = response.body()
+//            Log.d("HTTP", "Raw Response: $responseBody")
+//
+//            // نفحص status قبل ال decode الكامل
+//            val jsonElement = Json.parseToJsonElement(responseBody).jsonObject
+//            val resultElement = jsonElement["result"]!!.jsonObject
+//            val status = resultElement["status"]!!.jsonPrimitive.content
+//
+//            return if (status == "error") {
+//                // لو خطأ، نرجع SignInResponseWrapper مع رسالة الخطأ
+//                val errorMsg = resultElement["message"]!!.jsonPrimitive.content
+//                SignInResponseWrapper(
+//                    jsonrpc = jsonElement["jsonrpc"]!!.jsonPrimitive.content,
+//                    id = jsonElement["id"]?.jsonPrimitive?.content,
+//                    result = SignInResult(
+//                        status = "error",
+//                        message = null, // message هنا مش هتستخدم لأنها error
+//                        company_name = null,
+//                        license_expiry_date = null,
+//                        company_url = null
+//                    )
+//                )
+//            } else {
+//                // لو success نعمل decode كامل
+//                Json {
+//                    ignoreUnknownKeys = true
+//                    isLenient = true
+//                }.decodeFromString<SignInResponseWrapper>(responseBody)
+//            }
+//
+//        } catch (e: Exception) {
+//            Log.e("API_ERROR", "Exception: ${e.message}", e)
+//            throw e
+//        }
+//    }
 
     suspend fun signIn(
         email: String,
@@ -142,49 +200,4 @@ object SignInApiService {
         }
     }
 
-
-//    suspend fun signIn(
-//        email: String,
-//        password: String,
-//        companyId: String,
-//        apiKey: String
-//    ): SignInResponseWrapper {
-//        val payload =
-////            SignInResponse(
-////            jsonrpc = "2.0",
-////            method = "call",
-////            params =
-//            SignInRequest(
-//                email = email,
-//                password = password,
-//                company_id = companyId,
-//                api_key = apiKey
-////            )
-//        )
-//
-//        return try {
-//            val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/validate_company") {
-//                contentType(ContentType.Application.Json)
-//                accept(ContentType.Application.Json)
-//                setBody(payload)
-//            }
-//
-//            val responseBody: String = response.body()
-//            Log.d("HTTP", "Raw Response: $responseBody")
-//
-//            val parsed = Json.decodeFromString<SignInResponseWrapper>(responseBody)
-//
-//            if (parsed.result.status == "error") {
-//                Log.d("STATUS", "Sign-in error")
-//            } else {
-//                Log.d("STATUS", "Sign-in success")
-//
-//            }
-//
-//            parsed
-//        } catch (e: Exception) {
-//            Log.e("API_ERROR", "Exception: ${e.message}", e)
-//            throw e
-//        }
-//    }
 }

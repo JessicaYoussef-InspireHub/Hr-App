@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -96,7 +97,7 @@ fun DateInfoDialog(
 
     var permissionChecked by remember { mutableStateOf(false) }
 
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
 
@@ -698,6 +699,7 @@ fun DateInfoDialog(
 
                                     val response = sendApiForRequestTimeOff(request)
 
+
                                     Log.d("API_RESPONSE_Permission", response.toString())
 
                                     withContext(Dispatchers.Main) {
@@ -711,7 +713,8 @@ fun DateInfoDialog(
                                                 showPermissionErrorDialog = true
 
                                             } else {
-                                                errorMessage = "Error requesting Permission"
+//                                                errorMessage = "Error requesting Permission"
+                                                errorMessage = apiMessage
                                                 showPermissionErrorDialog = true                                            }
                                         }
                                     }
@@ -757,7 +760,10 @@ fun DateInfoDialog(
                                         if (response?.result?.status == "success") {
                                             onConfirm()
                                         } else {
-                                            errorMessage = "Error requesting half day"
+                                            val apiMessage = response?.result?.message ?: ""
+
+//                                            errorMessage = "Error requesting half day"
+                                            errorMessage = apiMessage
                                             showErrorDialog = true
                                         }
                                     }
@@ -816,6 +822,8 @@ fun DateInfoDialog(
                                             selectedStartDate.format(formatter)
                                         var endDateStrFormatted = selectedEndDate.format(formatter)
 
+                                        val apiMessage = response?.result?.message ?: ""
+
                                         if (locale.language == "ar") {
                                             startDateStrFormatted =
                                                 startDateStrFormatted.replaceDigitsWithArabic()
@@ -823,11 +831,12 @@ fun DateInfoDialog(
                                                 endDateStrFormatted.replaceDigitsWithArabic()
                                         }
 
-                                        errorMessage = String.format(
-                                            errorMessageTemplate,
-                                            startDateStrFormatted,
-                                            endDateStrFormatted
-                                        )
+                                        errorMessage = apiMessage
+//                                        errorMessage = String.format(
+//                                            errorMessageTemplate,
+//                                            startDateStrFormatted,
+//                                            endDateStrFormatted
+//                                        )
 
                                         showErrorDialog = true
                                     }

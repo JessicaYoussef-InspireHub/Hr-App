@@ -34,6 +34,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
             _uiState.value = SignInUiState.Loading
             try {
                 val response = SignInApiService.signIn(email, password, companyId, apiKey)
+                val result = response.result
 
                 if (response.result.status == "error") {
                     // لو في خطأ، نحوله لحالة Error
@@ -47,22 +48,27 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 }
 
                 // Success
-                val employeeData = response.result.message?.employee_data
-                val employeeCompanyId = employeeData?.company_id ?: 0
+                val employeeData = result.message
+                    ?.employee_data
+                    ?.employee_data
+
+                val companies = response.result.message?.company ?: emptyList()
 
                 val companyAddress = response.result.message?.company
-                    ?.firstOrNull { it.address.id == employeeCompanyId }
+                    ?.firstOrNull { it.name == response.result.company_name }
                     ?.address
+
 
                 saveEmployeeData(
                     token = employeeData?.employee_token ?: "",
                     tokenExpiry = employeeData?.token_expiry ?: "",
-                    employeeCompanyId = employeeData?.company_id ?: 0,
                     companyId = companyId,
                     apiKey = apiKey,
                     latitude = companyAddress?.latitude ?: 0.0,
                     longitude = companyAddress?.longitude ?: 0.0,
-                    allowedDistance = companyAddress?.allowed_distance ?: 0.0
+                    allowedDistance = companyAddress?.allowed_distance ?: 0.0,
+                    allowedLocationsIds = employeeData?.allowed_locations_ids ?: emptyList(),
+                    companies = companies
                 )
 
                 _uiState.value = SignInUiState.Success(response)
@@ -101,22 +107,24 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         token: String,
         tokenExpiry: String,
         companyId: String,
-        employeeCompanyId: Int,
         apiKey: String,
         latitude: Double,
         longitude: Double,
-        allowedDistance: Double
+        allowedDistance: Double,
+        allowedLocationsIds: List<Int>,
+        companies: List<Company>
     ) {
         val sharedPref = SharedPrefManager(getApplication())
 
         sharedPref.saveToken(token)
         sharedPref.saveTokenExpiry(tokenExpiry)
         sharedPref.saveCompanyId(companyId)
-        sharedPref.saveEmployeeCompanyId(employeeCompanyId)
         sharedPref.saveApiKey(apiKey)
         sharedPref.saveLatitude(latitude)
         sharedPref.saveLongitude(longitude)
         sharedPref.saveAllowedDistance(allowedDistance)
+        sharedPref.saveAllowedLocationsIds(allowedLocationsIds)
+        sharedPref.saveCompaniesLatLng(companies)
     }
 
 

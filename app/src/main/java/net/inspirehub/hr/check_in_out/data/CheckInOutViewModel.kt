@@ -1,9 +1,11 @@
 package net.inspirehub.hr.check_in_out.data
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
 import android.location.Location
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
@@ -13,6 +15,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import net.inspirehub.hr.SharedPrefManager
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -47,18 +50,204 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     val message: StateFlow<String> = _message
     val showTimeChangedDialog: StateFlow<Boolean> = _showTimeChangedDialog
     val attendanceStatus: StateFlow<String> = _attendanceStatus
+    private val _availableCompanies = MutableStateFlow<List<String>>(emptyList())
+    val availableCompanies: StateFlow<List<String>> = _availableCompanies
+
+    private val _currentCompanyId = MutableStateFlow<Int?>(null)
+    val currentCompanyId: StateFlow<Int?> = _currentCompanyId
+
+    private val _isAllowedLocation = MutableStateFlow(true)
+    val isAllowedLocation: StateFlow<Boolean> = _isAllowedLocation
+
+
 
     init {
-        // 🔹 Load local values immediately upon opening the app
-        val (status, checkIn, checkOut) = cache.getStatus()
-        _attendanceStatus.value = status
-        _lastCheckIn.value = checkIn
-        _lastCheckOut.value = checkOut
+        viewModelScope.launch {
+            val online = !NetworkUtils.isNetworkAvailable(context).not() && NetworkUtils.hasRealInternet()
+            if (online) {
+                // 🔹 Online → جلب من السيرفر
+                val token = SharedPrefManager(context).getToken() ?: ""
+                val result = fetchAttendanceStatus(token)
+                if (result != null) {
+                    _attendanceStatus.value = result.attendance_status ?: "checked_out"
+                    _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
+                    _lastCheckOut.value = result.lastCheckOut ?: result.lastCheckOut
+
+                    // 🔹 احفظ النسخة الأخيرة في الكاش
+                    cache.saveStatus(
+                        _attendanceStatus.value,
+                        _lastCheckIn.value,
+                        _lastCheckOut.value
+                    )
+                } else {
+                    // ❌ في حالة فشل السيرفر → fallback على الكاش
+                    val (status, checkIn, checkOut) = cache.getStatus()
+                    _attendanceStatus.value = status
+                    _lastCheckIn.value = checkIn
+                    _lastCheckOut.value = checkOut
+                }
+            } else {
+                // 🔹 Offline → جلب من الكاش
+                val (status, checkIn, checkOut) = cache.getStatus()
+                _attendanceStatus.value = status
+                _lastCheckIn.value = checkIn
+                _lastCheckOut.value = checkOut
+            }
+        }
     }
+
 
     fun dismissTimeChangedDialog() {
         _showTimeChangedDialog.value = false
     }
+
+
+
+    @RequiresPermission(
+        allOf = [
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ]
+    )
+    fun checkLocationAndDistanceAllCompanies(
+        companies: List<CompanyLocation>,
+        allowedDistance: Double,
+        allowedLocationIds: List<Int>
+    ) {
+        fusedLocationClient.getCurrentLocation(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            null
+        ).addOnSuccessListener { location ->
+
+            if (location == null) {
+                Log.e("Location", "❌ Location is null")
+                _isWithinDistance.value = false
+                _isAllowedLocation.value = true
+                _currentCompanyId.value = null
+                return@addOnSuccessListener
+            }
+
+            _currentLat.value = location.latitude
+            _currentLng.value = location.longitude
+            Log.d("Location", "📍 Current location: ${location.latitude}, ${location.longitude}")
+
+            var matchedCompany: CompanyLocation? = null
+
+            companies.forEach { company ->
+                val results = FloatArray(1)
+                Location.distanceBetween(
+                    location.latitude,
+                    location.longitude,
+                    company.lat,
+                    company.lng,
+                    results
+                )
+                val distance = results[0]
+
+//                if (_isAllowedLocation.value) {
+//                    Log.d("DistanceCheck", "✅ Company ID ${matchedCompany!!.id} is allowed")
+//                } else {
+//                    Log.d("DistanceCheck", "❌ Company ID ${matchedCompany!!.id} is NOT allowed")
+//                }
+
+                Log.d(
+                    "DistanceCheck",
+                    "Company: ${company.name} | Lat: ${company.lat}, Lng: ${company.lng} | " +
+                            "Distance: $distance meters | AllowedDistance: $allowedDistance meters"
+                )
+
+                if (distance <= allowedDistance) {
+                    matchedCompany = company
+                    Log.d("DistanceCheck", "${company.name} is within allowed distance ✅")
+                }
+            }
+
+            if (matchedCompany != null) {
+                _isWithinDistance.value = true
+                _currentCompanyId.value = matchedCompany!!.id
+
+                // 🔥 تحقق من صلاحية الموقع
+                _isAllowedLocation.value = allowedLocationIds.contains(matchedCompany!!.id)
+
+                Log.d(
+                    "DistanceCheck",
+                    "Employee is within allowed distance for company: ${matchedCompany!!.name} | " +
+                            "ID: ${matchedCompany!!.id} | Allowed: ${_isAllowedLocation.value}"
+                )
+
+            } else {
+                _isWithinDistance.value = false
+                _currentCompanyId.value = null
+                _isAllowedLocation.value = true
+                Log.d("DistanceCheck", "User is not within any allowed company distance")
+            }
+        }
+    }
+
+
+
+//    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+//    fun checkLocationAndDistanceAllCompanies(
+//        companies: Map<String, Pair<Double, Double>>,
+//        allowedDistance: Double) {
+//        fusedLocationClient.getCurrentLocation(
+//            Priority.PRIORITY_HIGH_ACCURACY,
+//            null
+//        ).addOnSuccessListener { location: Location? ->
+//            if (location != null) {
+//                _currentLat.value = location.latitude
+//                _currentLng.value = location.longitude
+//
+//                Log.d("Location", "📍 Current location: ${location.latitude}, ${location.longitude}")
+//
+//                var withinAnyCompany = false
+//                var currentCompany: String? = null
+//                var currentCompanyLat: Double? = null
+//                var currentCompanyLng: Double? = null
+//
+//                companies.forEach { (companyName, latLng) ->
+//                    val (companyLat, companyLng) = latLng
+//                    val results = FloatArray(1)
+//                    Location.distanceBetween(
+//                        location.latitude, location.longitude,
+//                        companyLat, companyLng,
+//                        results
+//                    )
+//                    val distance = results[0]
+//                    Log.d(
+//                        "DistanceCheck",
+//                        "Company: $companyName | Lat: $companyLat, Lng: $companyLng | Distance: $distance meters | AllowedDistance: $allowedDistance meters"
+//                    )
+//
+//                    if (distance <= allowedDistance) {
+//                        withinAnyCompany = true
+//                        currentCompany = companyName
+//                        currentCompanyLat = companyLat
+//                        currentCompanyLng = companyLng
+//                        Log.d("DistanceCheck", "$companyName is within allowed distance ✅")
+//                    }
+//                }
+//
+//                _isWithinDistance.value = withinAnyCompany
+//
+//                if (withinAnyCompany && currentCompany != null) {
+//                    Log.d(
+//                        "DistanceCheck",
+//                        "Employee is within allowed distance for company: $currentCompany | Lat: $currentCompanyLat, Lng: $currentCompanyLng"
+//                    )
+//                }
+//
+//                Log.d("DistanceCheck", "User is within any allowed company distance: $withinAnyCompany")
+//
+//            } else {
+//                Log.e("Location", "❌ Location is null")
+//                _isWithinDistance.value = false
+//            }
+//        }
+//    }
+
+
+
 
     suspend fun isOffline(): Boolean {
         val noNetwork = !NetworkUtils.isNetworkAvailable(context)
@@ -103,63 +292,64 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+
     @SuppressLint("MissingPermission")
-    fun checkLocationAndDistance(targetLat: Double, targetLng: Double, allowedDistance: Double) {
-        Log.d("disable", "checkLocationAndDistance called with targetLat=$targetLat, targetLng=$targetLng, allowedDistance=$allowedDistance")
-
-        fusedLocationClient.getCurrentLocation(
-            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
-            null
-        ).addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                // ✅ Accurate location from getCurrentLocation
-                Log.d(
-                    "Location",
-                    "✅ Accurate Lat: ${location.latitude}, Lng: ${location.longitude}"
-                )
-                Log.d("disable", "✅ Current Location: ${location.latitude}, ${location.longitude}")
-                Log.d(
-                    "disable",
-                    "✅ Target Location: $targetLat, $targetLng | Allowed Distance: $allowedDistance"
-                )
-
-                _currentLat.value = location.latitude
-                _currentLng.value = location.longitude
-
-
-                // 👇الوطنية getCurrentLocation
-//                _currentLat.value = 27.192085
-//                _currentLng.value = 31.186931
-
-//                // اول الشارع
-//                _currentLat.value = 27.190936
-//                _currentLng.value = 31.187951
-
-
-                val results = FloatArray(1)
-                Location.distanceBetween(
-                    _currentLat.value, _currentLng.value, // my current location
-                    targetLat, targetLng, // my company location (Step)
-                    results
-                )
-                val distance = results[0]
-                Log.d("Distance", "🚩 Distance to company: $distance meters")
-                Log.d(
-                    "disable",
-                    "allowedDistance: $allowedDistance | isWithinDistance: ${distance <= allowedDistance}"
-                )
-                Log.d("disable", "🚩 Calculated Distance: $distance meters")
-
-                _isWithinDistance.value = distance <= allowedDistance
-                Log.d("disable", "✅ isWithinDistance updated to: ${_isWithinDistance.value}")
-
-            } else {
-                Log.e("Location", "❌ Location is null")
-                Log.e("disable", "❌ Location is null")
-
-            }
-        }
-    }
+//    fun checkLocationAndDistance(targetLat: Double, targetLng: Double, allowedDistance: Double) {
+//        Log.d("disable", "checkLocationAndDistance called with targetLat=$targetLat, targetLng=$targetLng, allowedDistance=$allowedDistance")
+//
+//        fusedLocationClient.getCurrentLocation(
+//            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+//            null
+//        ).addOnSuccessListener { location: Location? ->
+//            if (location != null) {
+//                // ✅ Accurate location from getCurrentLocation
+//                Log.d(
+//                    "Location",
+//                    "✅ Accurate Lat: ${location.latitude}, Lng: ${location.longitude}"
+//                )
+//                Log.d("disable", "✅ Current Location: ${location.latitude}, ${location.longitude}")
+//                Log.d(
+//                    "disable",
+//                    "✅ Target Location: $targetLat, $targetLng | Allowed Distance: $allowedDistance"
+//                )
+//
+//                _currentLat.value = location.latitude
+//                _currentLng.value = location.longitude
+//
+//
+//                // 👇الوطنية getCurrentLocation
+////                _currentLat.value = 27.192085
+////                _currentLng.value = 31.186931
+//
+////                // اول الشارع
+////                _currentLat.value = 27.190936
+////                _currentLng.value = 31.187951
+//
+//
+//                val results = FloatArray(1)
+//                Location.distanceBetween(
+//                    _currentLat.value, _currentLng.value, // my current location
+//                    targetLat, targetLng, // my company location (Step)
+//                    results
+//                )
+//                val distance = results[0]
+//                Log.d("Distance", "🚩 Distance to company: $distance meters")
+//                Log.d(
+//                    "disable",
+//                    "allowedDistance: $allowedDistance | isWithinDistance: ${distance <= allowedDistance}"
+//                )
+//                Log.d("disable", "🚩 Calculated Distance: $distance meters")
+//
+//                _isWithinDistance.value = distance <= allowedDistance
+//                Log.d("disable", "✅ isWithinDistance updated to: ${_isWithinDistance.value}")
+//
+//            } else {
+//                Log.e("Location", "❌ Location is null")
+//                Log.e("disable", "❌ Location is null")
+//
+//            }
+//        }
+//    }
 
     fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
         val cache = AttendanceCache(context)
@@ -178,23 +368,15 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 ?.replace("Z", "")
                 ?.substringBefore("+")
                 ?: utcFormat.format(Date())
+            Log.d("CheckInOut", "📤 Sending attendance with time: $finalActionTime")
 
             Log.d("Attendance", "📅 Final Action Time to send: $finalActionTime")
 
             val isOnline = NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()
 
-//            // 🔹 Update screen immediately (after verifying the conditions)
-//            if (action == "check_in") {
-//                _attendanceStatus.value = "checked_in"
-//                _lastCheckIn.value = finalActionTime
-//                cache.saveStatus("checked_in", finalActionTime, _lastCheckOut.value)
-//            } else if (action == "check_out") {
-//                _attendanceStatus.value = "checked_out"
-//                _lastCheckOut.value = finalActionTime
-//                cache.saveStatus("checked_out", _lastCheckIn.value, finalActionTime)
-//            }
 
             if (isOnline) {
+
                 // 🔸 Online → Send directly
                 val result = sendAttendanceAction(
                     token,
@@ -203,13 +385,49 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                     _currentLng.value.toString(),
                     finalActionTime
                 )
+                println("🔹 Check-in response: $result")
 
                 if (result != null) {
+
+                    if (result.status.equals("error", ignoreCase = true)) {
+                        _message.value = result.message
+                        onComplete(null)
+                        return@launch
+                    }
+
                     _message.value = result.message
-                    _attendanceStatus.value = result.attendance_status ?: _attendanceStatus.value
-                    _lastCheckIn.value = result.last_check_in ?: _lastCheckIn.value
-                    _lastCheckOut.value = result.last_check_out ?: _lastCheckOut.value
+
+                    result.attendance_status?.let {
+                        _attendanceStatus.value = it
+                    }
+
+                    result.checkInTime?.let {
+                        _lastCheckIn.value = it
+                    } ?: result.lastCheckIn?.let {
+                        _lastCheckIn.value = it
+                    }
+
+                    result.checkOutTime?.let {
+                        _lastCheckOut.value = it
+                    } ?: result.lastCheckOut?.let {
+                        _lastCheckOut.value = it
+                    }
+
                     _workedHours.value = result.worked_hours
+
+//                    _attendanceStatus.value = result.attendance_status ?: _attendanceStatus.value
+//                    _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
+//                    _lastCheckOut.value = result.lastCheckOut ?: result.lastCheckOut
+//
+//                    _workedHours.value = result.worked_hours
+
+
+                    println("Before assign _lastCheckIn: ${_lastCheckIn.value}")
+                    println("Server last_check_in: ${result.lastCheckIn } and ${result.checkInTime}")
+
+                    _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
+
+                    println("After assign _lastCheckIn: ${_lastCheckIn.value}")
 
                     cache.saveStatus(
                         _attendanceStatus.value,
@@ -219,8 +437,12 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                     onComplete(result.attendance_status)
                 } else {
-                    enqueueWorkManager(token, action, finalActionTime)
-                    onComplete("queued")
+                    // ❌ Online but server error → cancel everything
+                    _message.value = "Something went wrong. Please try again."
+                    onComplete(null)
+
+//                    enqueueWorkManager(token, action, finalActionTime)
+//                    onComplete("queued")
                 }
             } else {
                 // 🔸 Offline (but the time is right)
@@ -265,8 +487,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             val result = fetchAttendanceStatus(token)
             if (result != null) {
                 _attendanceStatus.value = result.attendance_status ?: "checked_out"
-                _lastCheckIn.value = result.last_check_in
-                _lastCheckOut.value = result.last_check_out
+                _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
+                _lastCheckOut.value = result.lastCheckOut ?: result.lastCheckOut
                 _workedHours.value = result.worked_hours
                 calculateWorkedHours()
             }
