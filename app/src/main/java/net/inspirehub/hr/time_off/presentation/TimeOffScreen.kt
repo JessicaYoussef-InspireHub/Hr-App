@@ -112,7 +112,7 @@ fun TimeOffScreen(
                 return@LaunchedEffect
             }
 
-            val leaveTypesResponse = fetchEmployeeLeaveTypes(token)
+            val leaveTypesResponse = fetchEmployeeLeaveTypes(context, token)
             leaveTypesResponse?.let {
                 leaveTypesState.value = it.result.leave_types
 
@@ -128,7 +128,7 @@ fun TimeOffScreen(
 
             }
 
-            val result = fetchAndPrintHolidays(token)
+            val result = fetchAndPrintHolidays(token , context)
 
             holidayText = result.weekendText
             weekendDayNames = result.weekendDays.toSet()

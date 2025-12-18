@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LunchDining
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -74,6 +75,26 @@ fun BottomBar(
                     unselectedIconColor =  colors.onBackgroundColor,
                     unselectedTextColor =  colors.onBackgroundColor,
                     indicatorColor =  colors.transparent
+                )
+            )
+
+            NavigationBarItem(
+                selected = currentRoute == "NotificationsScreen",
+                onClick = {
+                    if (currentRoute != "NotificationsScreen") {
+                        navController.navigate("NotificationsScreen") {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                icon = { Icon(Icons.Default.Notifications, contentDescription = "Lunch") },
+                label = { Text(stringResource(R.string.notification)) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = colors.tertiaryColor,
+                    selectedTextColor = colors.tertiaryColor,
+                    unselectedIconColor = colors.onBackgroundColor,
+                    unselectedTextColor = colors.onBackgroundColor,
+                    indicatorColor = colors.transparent
                 )
             )
 //

@@ -33,7 +33,8 @@ object SignInApiService {
     suspend fun sendDeviceToken(employeeToken: String, mobileToken: String) {
         val payload = mapOf(
             "employee_token" to employeeToken,
-            "mobile_token" to mobileToken
+            "mobile_token" to mobileToken,
+            "mobile_type" to "android"
         )
 
         try {

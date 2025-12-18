@@ -151,8 +151,11 @@ suspend fun SendApiForTimeOff(
 ): Any? {
     return try {
         println("Sending TimeOff request...")
+        val sharedPref = SharedPrefManager(context)
+        val companyUrl = sharedPref.getCompanyUrl()
 
-        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/employee_time_off") {
+
+        val response: HttpResponse = httpClient.post("$companyUrl/api/employee_time_off") {
             contentType(ContentType.Application.Json)
             setBody(timeOffRequest)
         }

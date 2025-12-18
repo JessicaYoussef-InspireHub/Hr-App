@@ -488,7 +488,7 @@ fun PermissionDialog(
 
                             Log.d("REQUEST_BODY", request.toString())
 
-                            val response = sendApiForRequestTimeOff(request)
+                            val response = sendApiForRequestTimeOff(context , request)
                             Log.d("API_RESPONSE", response.toString())
 
                             withContext(Dispatchers.Main) {

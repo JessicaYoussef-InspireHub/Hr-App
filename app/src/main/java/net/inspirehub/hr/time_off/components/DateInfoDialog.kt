@@ -163,6 +163,7 @@ fun DateInfoDialog(
                 }
 
                 val response = getLeaveDuration(
+                    context = context,
                     employeeToken = token,
                     requestDateFrom = requestDateFrom,
                     requestDateTo = requestDateTo,
@@ -225,7 +226,7 @@ fun DateInfoDialog(
 
 
     LaunchedEffect(token) {
-        val result = fetchEmployeeLeaveTypes(token)
+        val result = fetchEmployeeLeaveTypes(context , token)
         result?.result?.leave_types?.let {
             leaveTypes = it
         }
@@ -364,6 +365,7 @@ fun DateInfoDialog(
                                                     )
 
                                                     val response = getLeaveDuration(
+                                                        context = context,
                                                         employeeToken = token,
                                                         requestDateFrom = requestDateFrom,
                                                         requestDateTo = requestDateTo,
@@ -474,6 +476,7 @@ fun DateInfoDialog(
                                                     )
 
                                                     val response = getLeaveDuration(
+                                                        context = context,
                                                         employeeToken = token,
                                                         requestDateFrom = requestDateFrom,
                                                         requestDateTo = requestDateTo,
@@ -697,7 +700,7 @@ fun DateInfoDialog(
 
                                     Log.d("REQUEST_BODY_Permission", request.toString())
 
-                                    val response = sendApiForRequestTimeOff(request)
+                                    val response = sendApiForRequestTimeOff(context , request)
 
 
                                     Log.d("API_RESPONSE_Permission", response.toString())
@@ -751,7 +754,7 @@ fun DateInfoDialog(
 
                                     Log.d("REQUEST_BODY_HALF_DAY", request.toString())
 
-                                    val response = sendApiForRequestTimeOff(request)
+                                    val response = sendApiForRequestTimeOff(context , request)
 
                                     Log.d("API_RESPONSE_HALF_DAY", response.toString())
 
@@ -787,7 +790,7 @@ fun DateInfoDialog(
 
                                 Log.d("REQUEST_BODY", request.toString())
 
-                                val response = sendApiForRequestTimeOff(request)
+                                val response = sendApiForRequestTimeOff(context , request)
 
                                 Log.d("API_RESPONSE", response.toString())
 

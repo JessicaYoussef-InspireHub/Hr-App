@@ -68,7 +68,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     longitude = companyAddress?.longitude ?: 0.0,
                     allowedDistance = companyAddress?.allowed_distance ?: 0.0,
                     allowedLocationsIds = employeeData?.allowed_locations_ids ?: emptyList(),
-                    companies = companies
+                    companies = companies,
+                    companyUrl = response.result.company_url ?: ""
                 )
 
                 _uiState.value = SignInUiState.Success(response)
@@ -112,7 +113,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         longitude: Double,
         allowedDistance: Double,
         allowedLocationsIds: List<Int>,
-        companies: List<Company>
+        companies: List<Company>,
+        companyUrl: String
     ) {
         val sharedPref = SharedPrefManager(getApplication())
 
@@ -125,6 +127,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         sharedPref.saveAllowedDistance(allowedDistance)
         sharedPref.saveAllowedLocationsIds(allowedLocationsIds)
         sharedPref.saveCompaniesLatLng(companies)
+        sharedPref.saveCompanyUrl(companyUrl)
+
     }
 
 

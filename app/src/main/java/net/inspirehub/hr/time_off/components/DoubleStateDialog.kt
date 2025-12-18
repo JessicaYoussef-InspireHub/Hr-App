@@ -40,6 +40,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -79,6 +80,8 @@ fun DoubleStateDialog(
     leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
 
     val currentLanguage = Locale.getDefault().language
 
@@ -310,7 +313,7 @@ fun DoubleStateDialog(
 
                                             Log.d("REQUEST_BODY", request.toString())
 
-                                            val response = sendApiForRequestTimeOff(request)
+                                            val response = sendApiForRequestTimeOff(context , request)
                                             Log.d("API_RESPONSE", response.toString())
 
                                             withContext(Dispatchers.Main) {

@@ -58,6 +58,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.ui.platform.LocalContext
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -77,6 +79,8 @@ fun DoublePermissionDialog(
     startDate: LocalDate? = null,
     leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
     ){
+
+    val context = LocalContext.current
 
     val formattedDate = clickedDate?.format(
         DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
@@ -397,7 +401,8 @@ fun DoublePermissionDialog(
                                         )
 
                                         Log.d("REQUEST_BODY", request.toString())
-                                        val response = sendApiForRequestTimeOff(request)
+
+                                        val response = sendApiForRequestTimeOff(context = context , request)
                                         Log.d("API_RESPONSE", response.toString())
 
                                         withContext(Dispatchers.Main) {

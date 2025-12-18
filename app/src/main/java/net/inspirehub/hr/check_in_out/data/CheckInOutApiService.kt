@@ -1,5 +1,6 @@
 package net.inspirehub.hr.check_in_out.data
 
+import android.content.Context
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -16,6 +17,7 @@ import kotlinx.serialization.SerialName
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.serialization.json.jsonObject
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -78,10 +80,15 @@ val httpClient = HttpClient {
     }
 }
 
-suspend fun fetchServerTime(token: String): String? {
+suspend fun fetchServerTime(
+    token: String,
+    context: Context
+): String? {
     return try {
+        val sharedPref = SharedPrefManager(context)
+        val companyUrl = sharedPref.getCompanyUrl()
         val response: HttpResponse =
-            httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
+            httpClient.post("$companyUrl/api/employee_attendance") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     mapOf(
@@ -109,7 +116,9 @@ suspend fun fetchServerTime(token: String): String? {
     }
 }
 
-fun sendOfflineAttendanceAction(token: String, logs: List<Map<String, Any>>) {
+fun sendOfflineAttendanceAction(
+    context:  Context,
+    token: String, logs: List<Map<String, Any>>) {
     try {
         println("🟡 [1] ENTERED sendOfflineAttendanceAction()")
         println("🟡 [2] Token received: $token")
@@ -153,9 +162,11 @@ fun sendOfflineAttendanceAction(token: String, logs: List<Map<String, Any>>) {
         val client = OkHttpClient()
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val body = payload.toString().toRequestBody(mediaType)
+        val sharedPref = SharedPrefManager(context)
+        val companyUrl = sharedPref.getCompanyUrl()
 
         val request = Request.Builder()
-            .url(AppConfig.baseUrl + "/api/offline_attendance")
+            .url("$companyUrl/api/offline_attendance")
             .post(body)
             .addHeader("Content-Type", "application/json")
             .build()
@@ -242,6 +253,7 @@ fun sendOfflineAttendanceAction(token: String, logs: List<Map<String, Any>>) {
 
 
 suspend fun sendAttendanceAction(
+    context: Context,
     token: String,
     action: String,
     latitude: String,
@@ -252,9 +264,11 @@ suspend fun sendAttendanceAction(
         val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
         utcFormat.timeZone = TimeZone.getTimeZone("UTC")
         val currentTime = actionTime ?: utcFormat.format(Date())
+        val sharedPref = SharedPrefManager(context)
+        val companyUrl = sharedPref.getCompanyUrl()
 
         val response: HttpResponse =
-            httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
+            httpClient.post("$companyUrl/api/employee_attendance") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     mapOf(
@@ -284,10 +298,14 @@ suspend fun sendAttendanceAction(
 }
 
 
-suspend fun fetchAttendanceStatus(token: String): AttendanceStatusResult? {
+suspend fun fetchAttendanceStatus(
+    context: Context,
+    token: String): AttendanceStatusResult? {
     return try {
+        val sharedPref = SharedPrefManager(context)
+        val companyUrl = sharedPref.getCompanyUrl()
         val response: HttpResponse =
-            httpClient.post(AppConfig.baseUrl + "/api/employee_attendance") {
+            httpClient.post("$companyUrl/api/employee_attendance") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     mapOf(

@@ -1,5 +1,6 @@
 package net.inspirehub.hr.time_off.data
 
+import android.content.Context
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -11,6 +12,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
 
 @Serializable
@@ -70,6 +72,7 @@ val client = HttpClient{
 
 
 suspend fun getLeaveDuration(
+    context: Context,
     employeeToken: String,
     requestDateFrom: String,
     requestDateTo: String,
@@ -96,8 +99,9 @@ suspend fun getLeaveDuration(
         "LEAVE_REQUEST",
         "Request Body: $request"
     )
-
-    val response = client.post(AppConfig.baseUrl + "/api/leave/duration") {
+    val sharedPref = SharedPrefManager(context)
+    val companyUrl = sharedPref.getCompanyUrl()
+    val response = client.post("$companyUrl/api/leave/duration") {
         contentType(ContentType.Application.Json)
         setBody(request)
     }

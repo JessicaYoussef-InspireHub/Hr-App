@@ -41,7 +41,6 @@ data class EmployeeData(
     val email: String,
     val department: String,
     val allowed_locations_ids: List<Int> = emptyList(),
-
     val job_title: String,
     val is_active: Boolean,
     val employee_token: String,

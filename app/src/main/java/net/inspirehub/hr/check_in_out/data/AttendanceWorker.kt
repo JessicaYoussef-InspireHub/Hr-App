@@ -68,7 +68,9 @@ class AttendanceWorker(
 
         return try {
             val result = if (isSingleRecord) {
-                val res = sendAttendanceAction(token, action, lat, lng, adjustedActionTime)
+                val res = sendAttendanceAction(
+                    context = applicationContext,
+                    token, action, lat, lng, adjustedActionTime)
                 Log.d("AttendanceWorker", "one")
                 res
             } else {
@@ -80,7 +82,9 @@ class AttendanceWorker(
                     "action_time" to adjustedActionTime,
                     "action_tz" to "UTC"
                 )
-                sendOfflineAttendanceAction(token, listOf(log))
+                sendOfflineAttendanceAction(
+                    context = applicationContext,
+                    token, listOf(log))
 
                 Log.d("AttendanceWorker", "more")
             }

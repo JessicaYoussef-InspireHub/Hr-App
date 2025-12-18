@@ -67,7 +67,9 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             if (online) {
                 // 🔹 Online → جلب من السيرفر
                 val token = SharedPrefManager(context).getToken() ?: ""
-                val result = fetchAttendanceStatus(token)
+                val result = fetchAttendanceStatus(
+                    context = application.applicationContext ,
+                    token)
                 if (result != null) {
                     _attendanceStatus.value = result.attendance_status ?: "checked_out"
                     _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
@@ -259,7 +261,9 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             try {
                 Log.d("TimeCheck", "🚀 Start calculating the time difference with the server...")
-                val serverTimeString = fetchServerTime(token)
+                val serverTimeString = fetchServerTime(
+                    context = context, token = token
+                )
                 Log.d("TimeCheck", "🕒 Time coming from server (raw): $serverTimeString")
                 if (serverTimeString != null) {
 
@@ -358,7 +362,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         utcFormat.timeZone = TimeZone.getTimeZone("UTC")
 
         viewModelScope.launch {
-            val serverTime = fetchServerTime(token)
+            val serverTime = fetchServerTime( token , context)
 
             val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
             utcFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -379,6 +383,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                 // 🔸 Online → Send directly
                 val result = sendAttendanceAction(
+                    context,
                     token,
                     action,
                     _currentLat.value.toString(),
@@ -484,7 +489,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
     fun getAttendanceStatus(token: String) {
         viewModelScope.launch {
-            val result = fetchAttendanceStatus(token)
+            val result = fetchAttendanceStatus(
+                context,token)
             if (result != null) {
                 _attendanceStatus.value = result.attendance_status ?: "checked_out"
                 _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn

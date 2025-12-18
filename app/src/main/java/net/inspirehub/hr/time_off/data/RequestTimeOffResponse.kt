@@ -1,7 +1,9 @@
 package net.inspirehub.hr.time_off.data
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.platform.LocalContext
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -18,6 +20,7 @@ import io.ktor.http.contentType
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import java.time.LocalDate
 
@@ -128,9 +131,13 @@ private val httpClient = HttpClient {
 
 
 
-suspend fun fetchEmployeeLeaveTypes(token: String): LeaveTypeResponse? {
+suspend fun fetchEmployeeLeaveTypes(
+    context: Context,
+    token: String): LeaveTypeResponse? {
     return try {
-        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/request_time_off") {
+        val sharedPref = SharedPrefManager(context)
+        val companyUrl = sharedPref.getCompanyUrl()
+        val response: HttpResponse = httpClient.post("$companyUrl/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(
                 LeaveTypeRequest(
@@ -154,9 +161,13 @@ suspend fun fetchEmployeeLeaveTypes(token: String): LeaveTypeResponse? {
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-suspend fun fetchAndPrintHolidays(token: String): HolidaysResult {
+suspend fun fetchAndPrintHolidays(
+    token: String ,
+    context: Context): HolidaysResult {
     return try {
-        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/request_time_off") {
+        val sharedPref = SharedPrefManager(context)
+        val companyUrl = sharedPref.getCompanyUrl()
+        val response: HttpResponse = httpClient.post("$companyUrl/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(
                 TimeOffRequestForRequestEmployee(
@@ -226,12 +237,15 @@ suspend fun fetchAndPrintHolidays(token: String): HolidaysResult {
 
 
 suspend fun sendApiForRequestTimeOff(
+    context: Context,
     timeOffRequestForRequestEmployee: TimeOffRequestForRequestEmployee
 ): RequestTimeOffResponse? {
     return try {
         println("Sending SendApiForRequestTimeOff request...")
+        val sharedPref = SharedPrefManager(context)
+        val companyUrl = sharedPref.getCompanyUrl()
 
-        val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/request_time_off") {
+        val response: HttpResponse = httpClient.post("$companyUrl/api/request_time_off") {
             contentType(ContentType.Application.Json)
             setBody(timeOffRequestForRequestEmployee)
         }
