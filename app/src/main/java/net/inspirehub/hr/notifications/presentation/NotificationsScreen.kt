@@ -1,10 +1,14 @@
 package net.inspirehub.hr.notifications.presentation
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import net.inspirehub.hr.BottomBar
@@ -44,8 +49,10 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import androidx.core.content.edit
+import net.inspirehub.hr.notifications.components.NotificationPermissionDialog
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotificationsScreen(
     navController: NavController
@@ -53,6 +60,7 @@ fun NotificationsScreen(
     val context = LocalContext.current
     val colors = appColors()
     val isLoading = remember { mutableStateOf(true) }
+    val showPermissionDialog = remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -60,6 +68,35 @@ fun NotificationsScreen(
             prefs.edit { putLong("last_open_time", System.currentTimeMillis()) }
         }
     }
+
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permissionStatus = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+            if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
+                showPermissionDialog.value = true
+            }
+        }
+    }
+
+    if (showPermissionDialog.value) {
+        NotificationPermissionDialog(
+            onDismiss = { showPermissionDialog.value = false },
+            onGoToSettings = {
+                val intent =Intent(
+                    android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                ).apply {
+                    putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+                showPermissionDialog.value = false
+            }
+        )
+    }
+
 
 
 
@@ -154,6 +191,9 @@ fun NotificationsScreen(
                             items(list) { notification ->
                                 NotificationItem(notification = notification)
                             }
+                        }
+                        item {
+                            Spacer(modifier = Modifier.height(20.dp))
                         }
                     }
                 }

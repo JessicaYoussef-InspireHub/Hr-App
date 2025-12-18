@@ -161,6 +161,8 @@ Protection Method</string>
     <string name="my_order_is_here">My order is here</string>
     <string name="you_have_items_in_your_list">You have 3 items in your list</string>
     <string name="no_notifications_yet">No notifications yet</string>
-    <string name="not_allowed_location_warning">not_allowed_location_warning</string>
+    <string name="you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed">You are currently at a different branch from your registered one. HR will be informed</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="please_enable_notification_permission_to_receive_notifications">Please enable notification permission to receive notifications</string>
 
 </resources>

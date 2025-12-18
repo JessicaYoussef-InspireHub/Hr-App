@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -101,19 +102,10 @@ fun SecurityCard(
                 )
 //
 //                SettingsItem(
-//                    stringResource(R.string.notification),
-//                    icon = Icons.Default.Notifications,
+//                    stringResource(R.string.lunch),
+//                    icon = Icons.Default.Restaurant,
 //                    onClick = {
-//                        navController.navigate("NotificationsScreen")
-//                    },
-//                    trailingIcon = {
-//                        CustomSwitch(
-//                            checked = isNotificationEnabled,
-//                            onCheckedChange = { newValue ->
-//                                isNotificationEnabled = newValue
-//                                sharedPrefManager.setNotificationsEnabled(newValue)
-//                            }
-//                        )
+//                        navController.navigate("LunchScreen")
 //                    }
 //                )
             }

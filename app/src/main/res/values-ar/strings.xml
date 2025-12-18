@@ -159,5 +159,8 @@
     <string name="my_order_is_here">طلبي هنا</string>
     <string name="you_have_items_in_your_list">لديك 3 عناصر في قائمتك</string>
     <string name="no_notifications_yet">لا توجد إخطارات حتى الآن</string>
+    <string name="you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed">أنت الآن في فرع مختلف عن فرعك المسجل. سيتم إخطار قسم الموارد البشرية</string>
+    <string name="enable_notifications">تفعيل الإشعارات</string>
+    <string name="please_enable_notification_permission_to_receive_notifications">يرجى تفعيل إذن الإشعارات لتلقي الإشعارات</string>
 
 </resources>
