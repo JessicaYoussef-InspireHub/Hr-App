@@ -20,8 +20,9 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun DescriptionInput(
+    description: String,
+    onDescriptionChange: (String) -> Unit
 ) {
-    var description by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     val colors = appColors()
 
@@ -34,7 +35,7 @@ fun DescriptionInput(
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         TextField(
             value = description,
-            onValueChange = { description = it },
+            onValueChange = { onDescriptionChange(it) },
             placeholder = {
                 Text(
                     stringResource(R.string.add_a_description),

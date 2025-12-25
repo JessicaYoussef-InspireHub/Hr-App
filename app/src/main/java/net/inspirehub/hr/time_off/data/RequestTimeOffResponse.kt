@@ -31,6 +31,7 @@ data class TimeOffRequestForRequestEmployee(
     val employee_token: String,
     val action: String,
     val leave_type_id: Int? = null,
+    val description: String? = null,
     val request_date_from: String? = null,
     val request_date_to: String? = null,
     val request_date_from_period: String? = null,

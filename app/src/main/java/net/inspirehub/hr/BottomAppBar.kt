@@ -117,7 +117,6 @@ fun BottomBar(
                         indicatorColor = colors.transparent
                     )
                 )
-                //
                 NavigationBarItem(
                     selected = false,
                     onClick = {

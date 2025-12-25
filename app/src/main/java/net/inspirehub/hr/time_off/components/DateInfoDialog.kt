@@ -108,6 +108,16 @@ fun DateInfoDialog(
 
     var showPermissionErrorDialog by remember { mutableStateOf(false) }
 
+    val isPermissionOrOvertime =
+        selectedLeaveType?.name.equals("Permission", ignoreCase = true) ||
+        selectedLeaveType?.name.equals("Overtime", ignoreCase = true) ||
+        selectedLeaveType?.name.equals("Unpaid", ignoreCase = true) ||
+        selectedLeaveType?.name.equals("Customer Meetings", ignoreCase = true)
+
+    var description by remember { mutableStateOf("") }
+
+
+
     fun convertToDoubleHour(time: String): Double? {
         try {
             val formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)
@@ -303,7 +313,7 @@ fun DateInfoDialog(
                             isHalfDay = isHalfDay,
                             halfDayOption = halfDayOption,
                             onHalfDayOptionChange = { halfDayOption = it },
-                            hideEndDate = permissionChecked
+                            hideEndDate = permissionChecked && isPermissionOrOvertime
                         )
                     }
 
@@ -518,7 +528,6 @@ fun DateInfoDialog(
                                             vertical = 10.dp
                                         )
                                     )
-
                                 }
                             }
                         }
@@ -540,8 +549,7 @@ fun DateInfoDialog(
                             modifier = Modifier
                                 .padding(start = 30.dp)
                         )
-                        if (selectedLeaveType?.name.equals("Permission", ignoreCase = true)) {
-
+                        if (isPermissionOrOvertime) {
                             CustomHours(
                                 isCheckedHours = permissionChecked,
                                 onCheckedHoursChange = { checked ->
@@ -555,7 +563,7 @@ fun DateInfoDialog(
                     }
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    if (permissionChecked) {
+                    if (permissionChecked && isPermissionOrOvertime) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -567,7 +575,6 @@ fun DateInfoDialog(
                                 selectedPermissionHour = selectedFromHour,
                                 onPermissionHourSelected = { time ->
                                     selectedFromHour = time
-//                                    selectedFromHour = convertSelectedTimeToHour24(time, currentLanguage)
                                     calculatePermissionDuration()
                                 }
                             )
@@ -575,7 +582,6 @@ fun DateInfoDialog(
                                 label = stringResource(R.string.to),
                                 selectedPermissionHour = selectedToHour,
                                 onPermissionHourSelected = { time ->
-//                                    selectedToHour = convertSelectedTimeToHour24(time, currentLanguage)
                                     selectedToHour = time
                                     calculatePermissionDuration()
                                 },
@@ -593,7 +599,7 @@ fun DateInfoDialog(
                     }
 
                     when {
-                        permissionChecked -> {
+                        permissionChecked && isPermissionOrOvertime -> {
                             Spacer(modifier = Modifier.height(15.dp))
                             Row (
                                 modifier = Modifier.fillMaxWidth(),
@@ -662,7 +668,10 @@ fun DateInfoDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ){
                         FirstText(stringResource(R.string.description))
-                        DescriptionInput()
+                        DescriptionInput(
+                            description = description,
+                            onDescriptionChange = { description = it }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(30.dp))
@@ -673,11 +682,8 @@ fun DateInfoDialog(
                                 return@DialogActionsRow
                             }
 
-                            if (selectedLeaveType?.name.equals(
-                                    "Permission",
-                                    ignoreCase = true
-                                ) && permissionChecked
-                            ) {
+                            if (isPermissionOrOvertime && permissionChecked) {
+
                                 Log.d("SAVE_ACTION", "Permission with custom hour")
 
                                 isLoading = true
@@ -691,6 +697,7 @@ fun DateInfoDialog(
                                         employee_token = token,
                                         action = "request_annual_leave",
                                         leave_type_id = selectedLeaveType?.id ?: 0,
+                                        description = description,
                                         request_date_from = startDateStr,
                                         request_date_to = startDateStr,
                                         request_hour_from = fromHourForApi,
@@ -745,6 +752,7 @@ fun DateInfoDialog(
                                         employee_token = token,
                                         action = "request_annual_leave",
                                         leave_type_id = selectedLeaveType?.id ?: 0,
+                                        description = description,
                                         request_date_from = startDateStr,
                                         request_date_to = startDateStr,
                                         request_date_from_period = period,
@@ -784,6 +792,7 @@ fun DateInfoDialog(
                                     employee_token = token,
                                     action = "request_annual_leave",
                                     leave_type_id = selectedLeaveType?.id ?: 0,
+                                    description = description,
                                     request_date_from = startDateStr,
                                     request_date_to = endDateStr
                                 )
