@@ -138,7 +138,7 @@ fun BottomBar(
             DropdownMenu(
                 expanded = moreMenuExpanded,
                 onDismissRequest = { moreMenuExpanded = false },
-                offset = DpOffset(x = (-45).dp, y = (-10).dp),
+                offset = DpOffset(x = (-1).dp, y = (-3).dp),
                 modifier = Modifier.background(colors.surfaceContainerHigh)
             ) {
                 DropdownMenuItem(

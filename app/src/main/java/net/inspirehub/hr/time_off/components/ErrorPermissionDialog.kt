@@ -50,7 +50,7 @@ fun ErrorPermissionDialog(
                     )
                 }
                 Text(
-                    stringResource(R.string.validation_error),
+                    stringResource(R.string.invalid_request),
                     color = colors.tertiaryColor,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,

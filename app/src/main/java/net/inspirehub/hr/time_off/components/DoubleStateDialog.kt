@@ -85,18 +85,6 @@ fun DoubleStateDialog(
 
     val currentLanguage = Locale.getDefault().language
 
-    fun translateState(state: String, language: String): String {
-        return when (language) {
-            "ar" -> when (state.lowercase(Locale.ROOT)) {
-                "draft" -> "قيد الموافقة"
-                "validate" -> "تمت الموافقة النهائية"
-                "confirm" -> "قيد الموافقة"
-                "refuse" -> "مرفوض"
-                else -> state
-            }
-            else -> state
-        }
-    }
 
     val locale = if (currentLanguage == "ar") Locale("ar") else Locale.ENGLISH
 
@@ -113,19 +101,6 @@ fun DoubleStateDialog(
         convertToArabicDigits(formattedDateRaw)
     } else {
         formattedDateRaw
-    }
-
-    fun translateLeaveType(typeKey: String, language: String): String {
-        return when (language) {
-            "ar" -> when (typeKey.lowercase(Locale.ROOT)) {
-                "annual leave" -> "إجازة سنوية"
-                "sick time off" -> "إجازة مرضية"
-                "unpaid" -> "بدون راتب"
-                "permissions" -> "أذونات"
-                else -> typeKey
-            }
-            else -> typeKey
-        }
     }
 
     fun getLocalizedDayText(context: android.content.Context, count: Int, language: String): String {
@@ -209,10 +184,10 @@ fun DoubleStateDialog(
                     leaveRecords.forEach { record ->
 
 
-                        val translatedLeaveType = translateLeaveType(record.leave_type, currentLanguage)
+                        val translatedLeaveType = record.leave_type
                         val durationInt = record.duration_days.toInt()
                         val daysText = if (currentLanguage == "ar") convertToArabicDigits(durationInt.toString()) else durationInt.toString()
-                        val dayWord = getLocalizedDayText(context = androidx.compose.ui.platform.LocalContext.current, count = durationInt, language = currentLanguage)
+                        val dayWord = getLocalizedDayText(context = LocalContext.current, count = durationInt, language = currentLanguage)
 
 
                         Column {
@@ -279,7 +254,7 @@ fun DoubleStateDialog(
 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    translateState(record.state, currentLanguage),
+                                   record.state,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = colors.onBackgroundColor,

@@ -3,16 +3,15 @@ package net.inspirehub.hr.time_off.components
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -30,20 +29,6 @@ fun MyActualTimeOff(
     leaveTypes: List<LeaveType> ,
 ) {
 
-    fun translateLeaveName(name: String, locale: Locale): String {
-        return if (locale.language == "ar" ) {
-            when (name) {
-                "Annual Leave" -> "اجازة سنوية"
-                "Sick Time Off" -> "أجازة مرضية"
-                "Unpaid" -> "بدون راتب"
-                "Permission" -> "إذن"
-                else -> name
-            }
-        } else {
-            name
-        }
-    }
-
     fun String.replaceDigitsWithArabic(): String {
         val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
         return this.map { char ->
@@ -58,18 +43,15 @@ fun MyActualTimeOff(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
+        LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
                 .background(colors.onSecondaryColor),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
-
         ) {
-
-            visibleLeaveTypes.forEachIndexed { index, leave ->
-                    val balance = if (currentLocale.language == "ar") {
+            itemsIndexed(visibleLeaveTypes) { index, leave ->
+                 val balance = if (currentLocale.language == "ar") {
                         (leave.remaining_balance ?: 0f).toString().replaceDigitsWithArabic()
                     } else {
                         (leave.remaining_balance ?: 0f).toString()
@@ -83,21 +65,20 @@ fun MyActualTimeOff(
                     ) {
 
                         MyActualTimeOffText(
-                            label1 = translateLeaveName(leave.name, currentLocale),
+                            label1 = leave.name,
                             label2 = balance,
                             label3 = if (currentLocale.language == "ar") {
                                 if (leave.request_unit == "day" || leave.request_unit == "half_day") "من الأيام المتاحة" else "من الساعات المتاحة"
                             } else {
                                 if (leave.request_unit == "day" || leave.request_unit == "half_day") "DAYS AVAILABLE" else "HOURS AVAILABLE"
                             },
-                            showIcon = leave.name == "Annual Leave" || translateLeaveName(leave.name, currentLocale) == "اجازة سنوية"
+                            showIcon = leave.name == "Annual Leaves"
                         )
                     }
-//                }
                 if ( index < visibleLeaveTypes.lastIndex) {
                     VerticalDivider(
                         modifier = Modifier
-                            .height(150.dp)
+                            .height(120.dp)
                             .width(1.dp)
                             .background(colors.inverseOnSurface)
                     )

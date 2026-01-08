@@ -1,7 +1,7 @@
 package net.inspirehub.hr.time_off.presentation
 
 import RemainingLeavesResponse
-import SendApiForTimeOff
+import sendApiForTimeOff
 import TimeOffRequest
 import TimeOffStatusResponse
 import TimeOffYearResponse
@@ -138,7 +138,7 @@ fun TimeOffScreen(
             println("weekendDayNames = $weekendDayNames")
             println("publicHolidayDates = $publicHolidayDates")
 
-            val monthResult = SendApiForTimeOff(
+            val monthResult = sendApiForTimeOff(
                 context = context,
                 retry = true,
                 timeOffRequest = TimeOffRequest(
@@ -153,7 +153,7 @@ fun TimeOffScreen(
                 Log.i("TimeOffScreen", "this_month_time_off = $monthResult")
             }
 
-            val remainingResult = SendApiForTimeOff(
+            val remainingResult = sendApiForTimeOff(
                 context = context,
                 retry = true,
                 timeOffRequest = TimeOffRequest(
@@ -190,7 +190,7 @@ fun TimeOffScreen(
             }
 
 
-            val timeOffStatus = SendApiForTimeOff(
+            val timeOffStatus = sendApiForTimeOff(
                 context = context,
                 retry = true,
                 timeOffRequest = TimeOffRequest(
@@ -222,7 +222,7 @@ fun TimeOffScreen(
             }
 
 
-            val yearResult = SendApiForTimeOff(
+            val yearResult = sendApiForTimeOff(
                 context = context,
                 retry = true,
                 timeOffRequest = TimeOffRequest(
@@ -256,13 +256,16 @@ fun TimeOffScreen(
         }
     }
 
-
-
         Scaffold(
             containerColor = colors.onSecondaryColor,
             topBar = {
                 MyAppBar(
                     label = stringResource(R.string.time_off_screen),
+                    onBackClick = {
+                        navController.navigate("CheckInOutScreen") {
+                            popUpTo("CheckInOutScreen") { inclusive = true }
+                        }
+                    }
                 )
             },
             bottomBar = {
@@ -439,7 +442,7 @@ fun TimeOffScreen(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     LeaveTypesLazyRow(leaveTypes)

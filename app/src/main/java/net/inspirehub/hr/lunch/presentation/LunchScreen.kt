@@ -78,7 +78,11 @@ fun LunchScreen(
 
     Scaffold (
         containerColor = colors.onSecondaryColor,
-        topBar = @Composable { LunchSearchBox() },
+        topBar = @Composable { LunchSearchBox(
+            onBackClick = {
+                navController.navigate("CheckInOutScreen")
+            }
+        ) },
         bottomBar = { BottomBar(navController = navController) }
     ){
         innerPadding ->

@@ -144,7 +144,7 @@ private val httpClient = HttpClient {
 }
 
 
-suspend fun SendApiForTimeOff(
+suspend fun sendApiForTimeOff(
     context: Context,
     timeOffRequest: TimeOffRequest,
     retry: Boolean = true
@@ -170,7 +170,7 @@ suspend fun SendApiForTimeOff(
 
                 val errorCode = resultObj["error_code"]?.jsonPrimitive?.content
 
-                if (errorCode == "INVALID_TOKEN" && retry) {
+                if ((errorCode == "INVALID_TOKEN" || errorCode == "TOKEN_EXPIRED") && retry) {
 
                     println("🔄 Token expired, renewing…")
 
@@ -194,7 +194,7 @@ suspend fun SendApiForTimeOff(
 
                     // إعادة إرسال نفس الطلب بتوكن جديد
                     val updatedRequest = timeOffRequest.copy(employee_token = newToken)
-                    return SendApiForTimeOff(context , updatedRequest, retry = false)
+                    return sendApiForTimeOff(context , updatedRequest, retry = false)
                 }
 
                 val error = Json.decodeFromString<JsonRpcResponse<ErrorResponse>>(rawResponse)

@@ -100,6 +100,7 @@ private fun checkInternetConnection(context: Context): Boolean {
     }
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPermissionsApi::class)
@@ -385,7 +386,7 @@ fun CheckInOutScreen(
                         "checked_out" -> {
                             stringResource(R.string.you_are_checked_out)
                         }
-                        else -> "Loading"
+                        else -> " "
                     },
                     color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,
@@ -401,23 +402,21 @@ fun CheckInOutScreen(
                 if (isOffline) {
                     Text(
                         text = stringResource(R.string.you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available),
-                        color = colors.onBackgroundColor,
+                        color = colors.error,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium,
                     )
                 } else {
                     Text(
                         if (attendanceStatus == "checked_in") {
-                            println("jessicayoussef $checkInTime")
+                            println("jessica youssef $checkInTime")
                             stringResource(R.string.checked_in_message,
                                 checkInTime)
                         } else if (attendanceStatus == "checked_out"){
                             stringResource(
                                 R.string.checked_out_message,
                                 checkOutLabel,
-                                checkOutTime,
-//                                hours,
-//                                minutes
+                                checkOutTime
                             )
                         } else "Loading",
                         color = colors.onBackgroundColor,
@@ -430,7 +429,7 @@ fun CheckInOutScreen(
                 if (isWithinDistance == false) {
                     Text(
                         text = stringResource(R.string.outside_company_range),
-                        color = colors.tertiaryColor,
+                        color = colors.error,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
@@ -574,11 +573,20 @@ fun CheckInOutScreen(
                                             ) { newStatus ->
                                                 isButtonLoading = false
                                                 isErrorDialogLoading = false
-                                                if (!isAllowedLocation) {
-                                                    showNotAllowedDialog = true
 
+                                                if (newStatus != null) {
+                                                    // ✅ Success
+                                                    if (!isAllowedLocation) {
+                                                        showNotAllowedDialog = true
+                                                    }
                                                 }
-                                                if (newStatus == null) {
+//
+
+//                                                if (!isAllowedLocation) {
+//                                                    showNotAllowedDialog = true
+//
+//                                                }
+                                                else {
                                                     errorMessage = viewModel.message.value
                                                     showErrorMessageDialog = true
                                                 }
@@ -629,9 +637,6 @@ fun CheckInOutScreen(
             showDialog = showNotAllowedDialog,
             onDismiss = { showNotAllowedDialog = false }
         )
-
-
-
 
 //        if (isButtonLoading) {
 //            Box(
@@ -705,24 +710,25 @@ fun CheckInOutScreen(
             hours = hours,
             minutes = minutes,
             isLoading = isDialogLoading,
-//            onConfirm = {
-//                showErrorDialog = false
-//                isDialogLoading = true
-//                viewModel.sendAttendance(token, "check_out") { newStatus ->
-//                    isDialogLoading = false
-//                    if (newStatus != null) {
-//                        println("✅ Check Out sent successfully: $newStatus")
-//                    } else {
-//                        errorMessage = viewModel.message.value.ifEmpty { context.getString(R.string.error) }
-//                        showErrorMessageDialog = true
-//                    }
-//                }
-//            },
             onConfirm = {
-                showErrorDialog = false
+                isDialogLoading = true
                 viewModel.sendAttendance(token, "check_out") { newStatus ->
+                    isDialogLoading = false
                     if (newStatus != null) {
+                        // ✅ Success
                         println("✅ Forced Check Out with status: $newStatus")
+                        showErrorDialog = false
+
+                        if (!isAllowedLocation) {
+                            showNotAllowedDialog = true
+                        }
+                    } else {
+                        // ❌  Error
+                        errorMessage = viewModel.message.value.ifEmpty {
+                            context.getString(R.string.error)
+                        }
+                        showErrorDialog = false
+                        showErrorMessageDialog = true
                     }
                 }
             },

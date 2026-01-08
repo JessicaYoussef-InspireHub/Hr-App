@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 @Composable
 fun MyAppBar(
     label: String,
-    backIcon : Boolean = false
+    onBackClick: () -> Unit
 ) {
     val colors = appColors()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
@@ -30,16 +30,13 @@ fun MyAppBar(
 
 
         navigationIcon = {
-            if(backIcon){
-            IconButton(onClick = {
-                backDispatcher?.onBackPressed()
-            }) {
+            IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = colors.onSecondaryColor
                 )
-            }}
+            }
         }
     )
 }

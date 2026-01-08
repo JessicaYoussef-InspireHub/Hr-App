@@ -199,7 +199,7 @@ fun EnterPinScreen(
                         singleLine = true,
                         textStyle = TextStyle(
                             fontSize = 30.sp,
-                            color = colors.tertiaryColor,
+                            color = colors.onBackgroundColor,
                             textAlign = TextAlign.Center,
                             textDirection = TextDirection.Ltr
                         ),
@@ -208,8 +208,8 @@ fun EnterPinScreen(
                             unfocusedBorderColor = borderColor,
                             focusedBorderColor = colors.tertiaryColor,
                             cursorColor = colors.tertiaryColor,
-                            focusedTextColor = colors.tertiaryColor,
-                            unfocusedTextColor = colors.tertiaryColor
+                            focusedTextColor = colors.onBackgroundColor,
+                            unfocusedTextColor = colors.onBackgroundColor
                         )
                     )
 
@@ -226,7 +226,7 @@ fun EnterPinScreen(
                 if (errorText.isNotEmpty()) {
                     Text(
                         text = errorText,
-                        color = colors.tertiaryColor,
+                        color = colors.error,
                         fontSize = 16.sp,
                     )
                 }

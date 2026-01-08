@@ -63,33 +63,6 @@ fun DailyAndHourlyDialog(
         DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
     ) ?: ""
 
-    fun translateState(state: String, language: String): String {
-        return when (language) {
-            "ar" -> when (state.lowercase(Locale.ROOT)) {
-                "draft" -> "قيد الموافقة"
-                "validate" -> "تمت الموافقة النهائية"
-                "confirm" -> "قيد الموافقة"
-                "refuse" -> "مرفوض"
-                else -> state
-            }
-            else -> state
-        }
-    }
-
-
-    fun translateLeaveType(typeKey: String, language: String): String {
-        return when (language) {
-            "ar" -> when (typeKey.lowercase(Locale.ROOT)) {
-                "annual leave" -> "إجازة سنوية"
-                "sick time off" -> "إجازة مرضية"
-                "unpaid" -> "بدون راتب"
-                "permissions" -> "أذونات"
-                else -> typeKey
-            }
-
-            else ->  typeKey
-        }
-    }
 
     val currentLanguage = Locale.getDefault().language
 
@@ -164,18 +137,6 @@ fun DailyAndHourlyDialog(
         }
     }
 
-//    val hasValidate = hourlyRecords.any { it.state == "validate" } || dailyRecords.any { it.state == "validate" }
-//    val hasConfirm = hourlyRecords.any { it.state == "confirm" } || dailyRecords.any { it.state == "confirm" }
-//    val hasDraft = hourlyRecords.any { it.state == "draft" } || dailyRecords.any { it.state == "draft" }
-
-//    val buttonColor = if ( hasValidate ) {
-//        MaterialTheme.colorScheme.secondary
-//    } else if (hasDraft || hasConfirm) {
-//        colors.tertiaryColor
-//    } else {
-//        MaterialTheme.colorScheme.error
-//    }
-
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = colors.surfaceVariant,
@@ -208,8 +169,7 @@ fun DailyAndHourlyDialog(
                 Column {
                     dailyRecords.forEach { record ->
 
-                        val translatedLeaveType =
-                            translateLeaveType(record.leave_type, currentLanguage)
+                        val translatedLeaveType = record.leave_type
                         val durationInt = record.duration_days.toInt()
                         val daysText =
                             if (currentLanguage == "ar") convertToArabicDigits(durationInt.toString()) else durationInt.toString()
@@ -282,7 +242,7 @@ fun DailyAndHourlyDialog(
 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    translateState(record.state, currentLanguage),
+                                    record.state,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = colors.onBackgroundColor,
@@ -303,8 +263,7 @@ fun DailyAndHourlyDialog(
                     hourlyRecords.forEach { record ->
 
 
-                        val translatedLeaveType =
-                            translateLeaveType(record.leave_type, currentLanguage)
+                        val translatedLeaveType = record.leave_type
                         val durationInt = record.duration_hours
                         val hourWord = getLocalizedHourText(
                             context = androidx.compose.ui.platform.LocalContext.current,

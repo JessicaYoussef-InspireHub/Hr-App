@@ -70,6 +70,9 @@ fun NotificationsScreen(
     }
 
 
+
+
+
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissionStatus = ContextCompat.checkSelfPermission(
@@ -96,10 +99,6 @@ fun NotificationsScreen(
             }
         )
     }
-
-
-
-
 
     // Using Flow to collect notifications interactively
     val notificationsFlow = remember {
@@ -136,12 +135,18 @@ fun NotificationsScreen(
     }
 
 
+
+
     Scaffold(
         containerColor = colors.onSecondaryColor,
         topBar = {
             MyAppBar(
                 label = stringResource(R.string.notification),
-                backIcon = true
+                onBackClick = {
+                    navController.navigate("CheckInOutScreen") {
+                        popUpTo("CheckInOutScreen") { inclusive = true }
+                    }
+                }
             )
         },
         bottomBar = { BottomBar(navController = navController) }

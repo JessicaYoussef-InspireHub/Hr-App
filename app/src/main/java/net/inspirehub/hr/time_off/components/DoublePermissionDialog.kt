@@ -89,34 +89,6 @@ fun DoublePermissionDialog(
     var recordToDelete by remember { mutableStateOf<HourlyTimeOffRecord?>(null) }
 
 
-    fun translateLeaveType(typeKey: String, language: String): String {
-        return when (language) {
-            "ar" -> when (typeKey.lowercase(Locale.ROOT)) {
-                "annual leave" -> "إجازة سنوية"
-                "sick time off" -> "إجازة مرضية"
-                "unpaid" -> "بدون راتب"
-                "permissions" -> "أذونات"
-                else -> typeKey
-            }
-
-            else ->  typeKey
-        }
-    }
-
-    fun translateState(state: String, language: String): String {
-        return when (language) {
-            "ar" -> when (state.lowercase(Locale.ROOT)) {
-                "draft" -> "قيد الموافقة"
-                "validate" -> "تمت الموافقة النهائية"
-                "confirm" -> "قيد الموافقة"
-                "refuse" -> "مرفوض"
-                else -> state
-            }
-            else -> state
-        }
-    }
-
-
     val currentLanguage = Locale.getDefault().language
 
     fun convertToArabicDigits(input: String): String {
@@ -241,8 +213,7 @@ fun DoublePermissionDialog(
                     records.forEach { record ->
 
 
-                        val translatedLeaveType =
-                            translateLeaveType(record.leave_type, currentLanguage)
+                        val translatedLeaveType = record.leave_type
                         val durationInt = record.duration_hours
                         val hourWord = getLocalizedHourText(
                             count = durationInt,
@@ -313,7 +284,7 @@ fun DoublePermissionDialog(
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    translateState(record.state, currentLanguage),
+                                    record.state,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = colors.onBackgroundColor,

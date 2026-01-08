@@ -118,38 +118,6 @@ fun TimeOffDetailsDialog(
         record.duration_days.toString()
     }
 
-
-
-    fun translateState(state: String, language: String): String {
-        return when (language) {
-            "ar" -> when (state.lowercase(Locale.ROOT)) {
-                "draft" -> "قيد الموافقة"
-                "validate" -> "تمت الموافقة النهائية"
-                "confirm" -> "قيد الموافقة"
-                "refuse" -> "مرفوض"
-                else -> state
-            }
-            else -> state
-        }
-    }
-
-
-
-    fun translateLeaveType(typeKey: String, language: String): String {
-        return when (language) {
-            "ar" -> when (typeKey.lowercase(Locale.ROOT)) {
-                "annual leave" -> "إجازة سنوية"
-                "sick time off" -> "إجازة مرضية"
-                "unpaid" -> "بدون راتب"
-                "permissions" -> "أذونات"
-                else -> typeKey
-            }
-            else -> typeKey
-        }
-    }
-
-    val translatedLeaveType = translateLeaveType(record.leave_type, currentLanguage)
-
     fun getLocalizedDayText(context: Context, count: Int, language: String): String {
         return if (language == "ar") {
             when (count) {
@@ -228,7 +196,7 @@ fun TimeOffDetailsDialog(
                     )
                 }
                 Text(
-                    text = translateState(record.state, currentLanguage),
+                    text = record.state,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -313,7 +281,7 @@ fun TimeOffDetailsDialog(
 
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "$translatedLeaveType: $formattedDuration $dayLabel",
+                        text = "${record.leave_type}: $formattedDuration $dayLabel",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Normal,
                         color = colors.onBackgroundColor,

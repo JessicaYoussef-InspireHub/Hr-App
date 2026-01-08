@@ -52,7 +52,7 @@ fun CheckInOutErrorDialog(
                     )
                 }
                 Text(
-                    stringResource(R.string.error_dialog),
+                    stringResource(R.string.invalid_request),
                     color = colors.tertiaryColor,
                     fontSize = 25.sp,
                      fontWeight = FontWeight.Bold,
@@ -64,6 +64,7 @@ fun CheckInOutErrorDialog(
                 message,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
+//                color = Color.Red
                 color = colors.onBackgroundColor
             )
         },

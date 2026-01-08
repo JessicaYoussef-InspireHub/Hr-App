@@ -520,6 +520,3 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 }
-
-
-

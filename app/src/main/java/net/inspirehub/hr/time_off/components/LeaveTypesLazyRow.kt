@@ -10,11 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.time_off.data.LeaveType
 import androidx.core.graphics.toColorInt
-import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 
 @Composable
@@ -22,21 +20,6 @@ fun LeaveTypesLazyRow(
     leaveTypes: List<LeaveType>
 ){
     val colors = appColors()
-    val context = LocalContext.current
-    val sharedPrefManager = SharedPrefManager(context)
-    val language = sharedPrefManager.getLanguage()
-
-    fun translateLeaveTypeName(name: String, language: String): String {
-        if (language != "ar") return name
-
-        return when (name.trim().lowercase()) {
-            "sick time off" -> "إجازة مرضية"
-            "unpaid" -> "إجازة بدون راتب"
-            "permission" -> "إذن"
-            "annual leave" -> "إجازة سنوية"
-            else -> name
-        }
-    }
 
     LazyRow(
         contentPadding = PaddingValues(horizontal = 15.dp, vertical = 8.dp),
@@ -50,15 +33,13 @@ fun LeaveTypesLazyRow(
                 colors.tertiaryColor
             }
 
-            val translatedName = translateLeaveTypeName(leaveType.name, language)
-
+            val translatedName = leaveType.name
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .wrapContentWidth()
-//                  modifier =  Modifier.width(140.dp).padding(vertical = 4.dp)
             ){
                 Box(
                     modifier = Modifier

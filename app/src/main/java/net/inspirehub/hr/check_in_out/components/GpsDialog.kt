@@ -43,7 +43,6 @@ fun GpsDialog(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
@@ -75,7 +74,6 @@ fun GpsDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ){
-
                     Button(
                         colors = ButtonDefaults.buttonColors(
                             contentColor = colors.onSecondaryColor,
@@ -104,7 +102,6 @@ fun GpsDialog(
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold)
                     }
-
                 }
             },
         )

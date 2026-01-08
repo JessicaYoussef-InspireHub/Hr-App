@@ -41,6 +41,9 @@ fun SettingsScreen(
         topBar = {
             MyAppBar(
                 label = stringResource(R.string.settings_screen),
+                onBackClick = {
+                    navController.popBackStack()
+                }
             )
         },
         bottomBar = { BottomBar(navController = navController) }

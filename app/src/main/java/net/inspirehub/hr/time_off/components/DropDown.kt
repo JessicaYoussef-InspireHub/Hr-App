@@ -50,22 +50,6 @@ fun DropDown(
         return input.map { arabicNumbers[it] ?: it }.joinToString("")
     }
 
-    fun translateLeaveType(typeKey: String, language: String): String {
-        return when (language) {
-            "ar" -> when (typeKey) {
-                "Annual Leave" -> "اجازة سنوية"
-                "Sick Time Off" -> "أجازة مرضية"
-                "Unpaid" -> "بدون راتب"
-                "Permission" -> "إذن"
-                "Customer Meeting" -> "اجتماع عميل"
-                "Overtime" -> "عمل إضافي"
-                else -> typeKey
-            }
-            else -> typeKey
-
-        }
-    }
-
 
 
 
@@ -75,7 +59,7 @@ fun DropDown(
         ){
             Text(
                 text = selectedLeaveType?.let {
-                    val translatedName = translateLeaveType(it.name, currentLanguage)
+                    val translatedName = it.name
                     val remaining = it.remaining_balance?.toString() ?: ""
                     val original = it.original_balance?.toString() ?: ""
 
@@ -116,7 +100,7 @@ fun DropDown(
             leaveTypes
                 .filter { it.remaining_balance == null || it.remaining_balance > 0 }
                 .forEach { item ->
-                    val translatedName = translateLeaveType(item.name, currentLanguage)
+                    val translatedName = item.name
                     val remaining = item.remaining_balance ?: 0
                     val original = item.original_balance ?: 0
 

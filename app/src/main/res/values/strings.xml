@@ -165,5 +165,7 @@ Protection Method</string>
     <string name="enable_notifications">Enable Notifications</string>
     <string name="please_enable_notification_permission_to_receive_notifications">Please enable notification permission to receive notifications</string>
     <string name="more">More</string>
+    <string name="invalid_request">Invalid Request</string>
+    <string name="apply">Apply</string>
 
 </resources>

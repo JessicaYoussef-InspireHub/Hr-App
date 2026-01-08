@@ -163,5 +163,7 @@
     <string name="enable_notifications">تفعيل الإشعارات</string>
     <string name="please_enable_notification_permission_to_receive_notifications">يرجى تفعيل إذن الإشعارات لتلقي الإشعارات</string>
     <string name="more">المزيد</string>
+    <string name="invalid_request">طلب غير صالح</string>
+    <string name="apply">تأكيد</string>
 
 </resources>

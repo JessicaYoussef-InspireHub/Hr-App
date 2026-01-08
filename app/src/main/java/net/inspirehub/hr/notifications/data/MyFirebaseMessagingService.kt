@@ -52,12 +52,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
 
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
         //  Extract data from data payload instead of notification
         val title = remoteMessage.data["title"] ?: remoteMessage.notification?.title ?: "New notification"
         val message = remoteMessage.data["body"] ?: remoteMessage.notification?.body ?: "You have a new notification"
+        Log.e("FCM_CHECK", "notification = ${remoteMessage.notification}")
+        Log.e("FCM_CHECK", "data = ${remoteMessage.data}")
 
         // Save in Room
         saveNotificationToRoom(title, message)
@@ -68,6 +71,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         //  sendBroadcast
         sendBroadcast(title, message)
     }
+
+
+
 
 
     private fun sendNotification(title: String?, message: String?) {
@@ -82,7 +88,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
        // Intent opens the vacation page when clicked
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("navigateTo", "NotificationsScreen")
         }
         val pendingIntent = PendingIntent.getActivity(
@@ -90,6 +96,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             0,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
 
@@ -107,9 +115,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 //        notificationManager.notify(0, notification)
     }
 
-//    override fun onNewToken(token: String) {
-//        super.onNewToken(token)
-//        //Here you can send the token to the server
-//    }
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+        //Here you can send the token to the server
+    }
 }
-

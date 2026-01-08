@@ -17,5 +17,3 @@ class NotificationsReceiver : BroadcastReceiver() {
         // Here you can save it in SharedPreferences or any local database such as Room
     }
 }
-
-

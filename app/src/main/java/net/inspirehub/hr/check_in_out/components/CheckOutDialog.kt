@@ -71,7 +71,9 @@ fun CheckOutDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                   CircularProgressIndicator()
+                   CircularProgressIndicator(
+                       color = colors.tertiaryColor
+                   )
                 }
             } else {
             Text(
@@ -114,7 +116,6 @@ fun CheckOutDialog(
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold)
                 }
-
             }
         },
     )

@@ -26,7 +26,10 @@ fun OrderScreen(
 
     Scaffold (
         containerColor = colors.onSecondaryColor,
-        topBar = { MyAppBar("My Order" , true) } ,
+        topBar = { MyAppBar("My Order" ,
+            onBackClick = {
+            navController.popBackStack()
+        }) } ,
         bottomBar = { BottomBar( navController = navController) }
     ){
         innerPadding ->

@@ -186,7 +186,7 @@ fun PinCodeScreen(
                             singleLine = true,
                             textStyle = TextStyle(
                                 fontSize = 30.sp,
-                                color = colors.tertiaryColor,
+                                color = colors.onBackgroundColor,
                                 textAlign = TextAlign.Center,
                             ),
                             keyboardOptions = KeyboardOptions(
@@ -201,8 +201,8 @@ fun PinCodeScreen(
                                 unfocusedBorderColor = borderColor,
                                 focusedBorderColor = colors.tertiaryColor,
                                 cursorColor = colors.tertiaryColor,
-                                focusedTextColor = colors.tertiaryColor,
-                                unfocusedTextColor = colors.tertiaryColor,
+                                focusedTextColor = colors.onBackgroundColor,
+                                unfocusedTextColor = colors.onBackgroundColor,
                                 focusedLabelColor = colors.tertiaryColor,
                                 unfocusedLabelColor = colors.tertiaryColor
                             )
@@ -216,7 +216,7 @@ fun PinCodeScreen(
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = viewModel.errorMessage,
-                        color = colors.tertiaryColor,
+                        color = colors.error,
                         fontSize = 16.sp,
                         modifier = Modifier.align(Alignment.TopStart)
                     )

@@ -34,6 +34,7 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun LunchSearchBox(
+    onBackClick: () -> Unit
 ) {
     val colors = appColors()
     val searchText = remember { mutableStateOf("") }
@@ -51,7 +52,10 @@ fun LunchSearchBox(
             .fillMaxWidth()
             .background(colors.surfaceContainerHigh)
     ) {
-        MyAppBar(stringResource(R.string.lunch))
+        MyAppBar(
+            stringResource(R.string.lunch),
+            onBackClick = onBackClick
+        )
         Row (
             modifier = Modifier
                 .fillMaxWidth()

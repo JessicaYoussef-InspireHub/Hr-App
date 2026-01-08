@@ -52,7 +52,7 @@ fun ErrorCompanyInformationDialog(
                     )
                 }
                 Text(
-                    stringResource(R.string.error_dialog) ,
+                    stringResource(R.string.invalid_request) ,
                     color = colors.tertiaryColor,
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,)

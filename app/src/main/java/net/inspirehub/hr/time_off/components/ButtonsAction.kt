@@ -23,10 +23,11 @@ fun DialogActionsRow(
     onConfirm: () -> Unit,
     onDiscard: () -> Unit,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    isCalendarDialog: Boolean = false
 ){
     val colors = appColors()
-
+    val confirmText = if (isCalendarDialog) stringResource(R.string.apply) else stringResource(R.string.save)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -48,14 +49,14 @@ fun DialogActionsRow(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier
-                        .height(20.dp)
+//                        .height(20.dp)
                         .padding(2.dp),
                     color = colors.tertiaryColor,
                     strokeWidth = 2.dp
                 )
             } else {
                 Text(
-                    stringResource(R.string.save),
+                    confirmText,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 )

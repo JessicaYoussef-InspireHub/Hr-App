@@ -138,12 +138,6 @@ fun FingerPrintScreen(
             exitProcess(0)
         }
     }
-//    Box(
-//        modifier = Modifier
-//            .background(colors.onSecondaryColor)
-//            .fillMaxSize()
-//            .verticalScroll(rememberScrollState())
-//        ){
 
         Column (
             modifier = Modifier
@@ -346,9 +340,3 @@ fun Context.findActivity(): Activity? {
     }
     return null
 }
-
-
-
-
-
-

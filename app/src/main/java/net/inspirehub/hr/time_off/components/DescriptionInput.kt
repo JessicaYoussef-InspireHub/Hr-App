@@ -51,8 +51,8 @@ fun DescriptionInput(
                 unfocusedContainerColor = colors.transparent,
                 disabledContainerColor = colors.transparent,
                 cursorColor =colors.tertiaryColor,
-                focusedTextColor = colors.tertiaryColor,
-                unfocusedTextColor = colors.tertiaryColor,
+                focusedTextColor = colors.onBackgroundColor,
+                unfocusedTextColor = colors.onBackgroundColor,
                 focusedIndicatorColor = colors.tertiaryColor,
                 unfocusedIndicatorColor = colors.tertiaryColor,
                 disabledIndicatorColor = colors.transparent

@@ -81,19 +81,6 @@ fun PermissionDialog(
 
     val colors = appColors()
 
-    fun translateState(state: String, language: String): String {
-        return when (language) {
-            "ar" -> when (state.lowercase(Locale.ROOT)) {
-                "draft" -> "قيد الموافقة"
-                "validate" -> "تمت الموافقة النهائية"
-                "confirm" -> "قيد الموافقة"
-                "refuse" -> "مرفوض"
-                else -> state
-            }
-            else -> state
-        }
-    }
-
 
     val startDate = LocalDate.parse(record?.leave_day)
     val context = LocalContext.current
@@ -108,22 +95,7 @@ fun PermissionDialog(
     }
 
 
-
-    fun translateLeaveType(typeKey: String?, language: String): String? {
-        return when (language) {
-            "ar" -> when (typeKey?.lowercase(Locale.ROOT)) {
-                "annual leave" -> "إجازة سنوية"
-                "sick time off" -> "إجازة مرضية"
-                "unpaid" -> "بدون راتب"
-                "permission" -> "إذن"
-                else -> typeKey
-            }
-
-            else -> typeKey
-        }
-    }
-
-    val translatedLeaveType = translateLeaveType(record?.leave_type, currentLanguage)
+    val translatedLeaveType = record?.leave_type
 
 
     fun getLocalizedHourText(count: Double?, language: String): String {
@@ -243,7 +215,7 @@ fun PermissionDialog(
                     )
                 }
                 Text(
-                    text = translateState(record?.state ?: "", currentLanguage),
+                    text = record?.state ?: "",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,

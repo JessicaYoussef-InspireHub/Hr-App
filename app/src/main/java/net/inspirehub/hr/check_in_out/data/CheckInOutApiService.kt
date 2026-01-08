@@ -58,18 +58,6 @@ data class AttendanceStatusResult(
     val lastCheckOut: String? = null
 )
 
-
-//@Serializable
-//data class AttendanceStatusResult(
-//    val status: String,
-//    val message: String,
-//    val attendance_status: String? = null,
-//    val worked_hours: Double? = null,
-//    val last_check_in: String? = null,
-//    val last_check_out: String? = null
-//)
-
-
 val httpClient = HttpClient {
     install(ContentNegotiation) {
         json(Json {
@@ -340,4 +328,3 @@ suspend fun fetchAttendanceStatus(
         null
     }
 }
-

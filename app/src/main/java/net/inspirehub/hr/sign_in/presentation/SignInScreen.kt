@@ -209,7 +209,7 @@ fun SignInScreen(
         if (errorMessage != null) {
             Text(
                 text = errorMessage,
-                color = colors.tertiaryColor,
+                color = colors.error,
                 fontSize = 18.sp,
                 modifier = Modifier
                     .align(Alignment.Start)

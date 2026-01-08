@@ -18,6 +18,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,13 +35,20 @@ import net.inspirehub.hr.scan_qr_code.data.AppConfig
 
 class MainActivity : AppCompatActivity() {
 
+
+
+
     private lateinit var broadcastReceiver: BroadcastReceiver
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_Hr)
 
         super.onCreate(savedInstanceState)
+
+
+
         WindowCompat.setDecorFitsSystemWindows(window, true)
         val sharedPref = SharedPrefManager(this)
         val lang = sharedPref.getLanguage()
@@ -58,8 +66,6 @@ class MainActivity : AppCompatActivity() {
                 println("FCM Token: $token")
             }
         }
-
-
         setupBroadcastReceiver()
 
         setContent {
@@ -78,19 +84,42 @@ class MainActivity : AppCompatActivity() {
                     val viewModel: ScanQrCodeViewModel = viewModel()
                     val navController = rememberNavController()
 
+                    val navigateToNotifications =
+                        rememberSaveable { mutableStateOf(false) }
                     val navigateTo = intent.getStringExtra("navigateTo")
-                    LaunchedEffect(navigateTo) {
-                        if (navigateTo == "NotificationsScreen") {
-                            navController.navigate("NotificationsScreen")
+//                    LaunchedEffect(navigateTo) {
+//                        if (navigateTo == "NotificationsScreen") {
+//                            navController.navigate("NotificationsScreen")
+//                        }
+//                    }
+
+                    LaunchedEffect(Unit) {
+                        if (intent.getStringExtra("navigateTo") == "NotificationsScreen") {
+                            navigateToNotifications.value = true
+                        }
+                    }
+
+                    LaunchedEffect(navigateToNotifications.value) {
+                        if (navigateToNotifications.value) {
+                            navController.navigate("NotificationsScreen") {
+                                launchSingleTop = true
+                            }
+                            navigateToNotifications.value = false
                         }
                     }
 
                     MyAppNavHost(viewModel, navController)
-
                 }
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent) // مهم
+    }
+
+
 
     private fun setupBroadcastReceiver() {
         broadcastReceiver = object : BroadcastReceiver() {

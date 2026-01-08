@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -64,20 +63,20 @@ fun CheckInOutButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            if (isLoading) {
-                Row{
-                    CircularProgressIndicator(
-                        color = colors.tertiaryColor.copy(alpha = 0.4f),
-                        modifier = Modifier.size(20.dp),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-            }
+//            if (isLoading) {
+//                Row{
+//                    CircularProgressIndicator(
+//                        color = colors.tertiaryColor.copy(alpha = 0.4f),
+//                        modifier = Modifier.size(20.dp),
+//                    )
+//                    Spacer(modifier = Modifier.width(8.dp))
+//                }
+//            }
             Text(
                 when (attendanceStatus) {
                     "checked_in" -> stringResource(R.string.check_out)
                     "checked_out" -> stringResource(R.string.check_in)
-                    else -> stringResource(R.string.loading)
+                    else -> " " //loading
                 },
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold

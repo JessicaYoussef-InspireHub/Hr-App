@@ -26,7 +26,7 @@ fun MyActualTimeOffText(
     val colors = appColors()
 
     Column(
-        modifier = Modifier.padding( vertical = 10.dp),
+        modifier = Modifier.padding( vertical = 0.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){

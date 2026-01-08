@@ -108,11 +108,14 @@ fun DateInfoDialog(
 
     var showPermissionErrorDialog by remember { mutableStateOf(false) }
 
-    val isPermissionOrOvertime =
-        selectedLeaveType?.name.equals("Permission", ignoreCase = true) ||
-        selectedLeaveType?.name.equals("Overtime", ignoreCase = true) ||
-        selectedLeaveType?.name.equals("Unpaid", ignoreCase = true) ||
-        selectedLeaveType?.name.equals("Customer Meetings", ignoreCase = true)
+    val isEndDateHide = selectedLeaveType?.request_unit == "hours_only"
+    val isHalfDayHide = selectedLeaveType?.request_unit == "day" || selectedLeaveType?.request_unit == "hours_only"
+
+//    val isPermissionOrOvertime =
+//        selectedLeaveType?.name.equals("Permission", ignoreCase = true) ||
+//        selectedLeaveType?.name.equals("Overtime", ignoreCase = true) ||
+//        selectedLeaveType?.name.equals("Unpaid", ignoreCase = true) ||
+//        selectedLeaveType?.name.equals("Customer Meetings", ignoreCase = true)
 
     var description by remember { mutableStateOf("") }
 
@@ -146,6 +149,33 @@ fun DateInfoDialog(
         return normalized
     }
 
+    fun calculateLeaveDuration() {
+        if (selectedLeaveType == null) return
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+
+                val response = getLeaveDuration(
+                    context = context,
+                    employeeToken = token,
+                    requestDateFrom = selectedStartDate.format(formatter),
+                    requestDateTo = selectedEndDate.format(formatter),
+                    leaveTypeId = selectedLeaveType!!.id
+                )
+
+                withContext(Dispatchers.Main) {
+                    leaveDays = response.result.data?.days ?: 1.0
+                }
+
+                Log.d("LEAVE_DURATION", "days=$leaveDays")
+
+            } catch (e: Exception) {
+                Log.e("LEAVE_DURATION", e.message ?: "error")
+            }
+        }
+    }
+
     fun calculatePermissionDuration() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -171,6 +201,9 @@ fun DateInfoDialog(
                 if (fromHourDouble == null || toHourDouble == null) {
                     return@launch
                 }
+
+                Log.d("DEBUG_REQUEST", "leaveTypeId=${selectedLeaveType?.id}")
+
 
                 val response = getLeaveDuration(
                     context = context,
@@ -206,7 +239,6 @@ fun DateInfoDialog(
         }
     }
 
-
     fun convertSelectedTimeToHour24(time: String, language: String): String {
         val arabicToEnglish = mapOf(
             '٠' to '0', '١' to '1', '٢' to '2', '٣' to '3', '٤' to '4',
@@ -231,10 +263,6 @@ fun DateInfoDialog(
         return if (minute == 30) "${hour}.5" else "$hour"
     }
 
-
-
-
-
     LaunchedEffect(token) {
         val result = fetchEmployeeLeaveTypes(context , token)
         result?.result?.leave_types?.let {
@@ -242,6 +270,13 @@ fun DateInfoDialog(
         }
     }
 
+    LaunchedEffect(
+        selectedLeaveType,
+        selectedStartDate,
+        selectedEndDate
+    ) {
+        calculateLeaveDuration()
+    }
 
     fun getDatesBetween(startDate: LocalDate, endDate: LocalDate): Set<LocalDate> {
         val dates = mutableSetOf<LocalDate>()
@@ -259,8 +294,7 @@ fun DateInfoDialog(
         Surface(
             shape = RoundedCornerShape(12.dp),
             color = colors.surfaceVariant,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column {
                 DialogTitle {
@@ -290,7 +324,7 @@ fun DateInfoDialog(
                     if (leaveTypeError.isNotEmpty()) {
                         Text(
                             text = leaveTypeError,
-                            color = colors.tertiaryColor,
+                            color = colors.error,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 50.dp, top = 4.dp)
                         )
@@ -299,6 +333,38 @@ fun DateInfoDialog(
 
 
                     Spacer(modifier = Modifier.height(15.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    )
+                    {
+                        if(!isHalfDayHide){
+                            HalfDayCheckbox(
+                                isChecked = isHalfDay,
+                                onCheckedChange = { checked ->
+                                    isHalfDay = checked
+                                    if (checked) {
+                                        permissionChecked = false
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(start = 30.dp)
+                            )}
+                        if (selectedLeaveType?.request_unit == "hour" ) {
+                            CustomHours(
+                                isCheckedHours = permissionChecked,
+                                onCheckedHoursChange = { checked ->
+                                    permissionChecked = checked
+                                    if (checked) {
+                                        isHalfDay = false
+                                    }
+                                },
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
                     Row (
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -313,7 +379,7 @@ fun DateInfoDialog(
                             isHalfDay = isHalfDay,
                             halfDayOption = halfDayOption,
                             onHalfDayOptionChange = { halfDayOption = it },
-                            hideEndDate = permissionChecked && isPermissionOrOvertime
+                            hideEndDate = permissionChecked || isEndDateHide
                         )
                     }
 
@@ -374,6 +440,9 @@ fun DateInfoDialog(
                                                         "start=$requestDateFrom, end=$requestDateTo, token=$token, type=6"
                                                     )
 
+                                                    Log.d("DEBUG_REQUEST", "leaveTypeId=${selectedLeaveType?.id}")
+
+
                                                     val response = getLeaveDuration(
                                                         context = context,
                                                         employeeToken = token,
@@ -418,10 +487,12 @@ fun DateInfoDialog(
                                         onDiscard = {
                                             showStartCalendar = false
                                         },
+
                                         modifier = Modifier.padding(
                                             horizontal = 15.dp,
                                             vertical = 10.dp
-                                        )
+                                        ),
+                                        isCalendarDialog = true
                                     )
 
                                 }
@@ -463,9 +534,7 @@ fun DateInfoDialog(
                                         dailyRecords = dailyRecords,
                                         hourlyRecords = hourlyRecords,
                                         leaveTypeColors = leaveTypeColors
-
-
-                                        )
+ )
 
                                     DialogActionsRow(
                                         onConfirm = {
@@ -484,6 +553,9 @@ fun DateInfoDialog(
                                                         "DEBUG_DATES",
                                                         "start=$requestDateFrom, end=$requestDateTo, token=$token, type=6"
                                                     )
+
+                                                    Log.d("DEBUG_REQUEST", "leaveTypeId=${selectedLeaveType?.id}")
+
 
                                                     val response = getLeaveDuration(
                                                         context = context,
@@ -526,44 +598,17 @@ fun DateInfoDialog(
                                         modifier = Modifier.padding(
                                             horizontal = 15.dp,
                                             vertical = 10.dp
-                                        )
+                                        ),
+                                        isCalendarDialog = true
                                     )
                                 }
                             }
                         }
                     }
                     Spacer(modifier = Modifier.height(15.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        HalfDayCheckbox(
-                            isChecked = isHalfDay,
-                            onCheckedChange = { checked ->
-                                isHalfDay = checked
-                                if (checked) {
-                                    permissionChecked = false
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(start = 30.dp)
-                        )
-                        if (isPermissionOrOvertime) {
-                            CustomHours(
-                                isCheckedHours = permissionChecked,
-                                onCheckedHoursChange = { checked ->
-                                    permissionChecked = checked
-                                    if (checked) {
-                                        isHalfDay = false
-                                    }
-                                },
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
 
-                    if (permissionChecked && isPermissionOrOvertime) {
+
+                    if (permissionChecked || selectedLeaveType?.request_unit == "hours_only") {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -592,14 +637,14 @@ fun DateInfoDialog(
                     if (permissionErrorMessage.isNotEmpty()) {
                         Text(
                             text = permissionErrorMessage,
-                            color = colors.tertiaryColor,
+                            color = colors.error,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 50.dp, top = 4.dp)
                         )
                     }
 
                     when {
-                        permissionChecked && isPermissionOrOvertime -> {
+                        permissionChecked || selectedLeaveType?.request_unit == "hours_only" -> {
                             Spacer(modifier = Modifier.height(15.dp))
                             Row (
                                 modifier = Modifier.fillMaxWidth(),
@@ -611,16 +656,10 @@ fun DateInfoDialog(
                             }
                         }
 
-                        isHalfDay && !selectedLeaveType?.name.equals(
-                            "Permission",
-                            ignoreCase = true
-                        ) -> {
-                        }
+                        isHalfDay  -> {}
 
-                        isHalfDay && selectedLeaveType?.name.equals(
-                            "Permission",
-                            ignoreCase = true
-                        ) -> {
+                        selectedLeaveType?.request_unit == "hour" || selectedLeaveType?.request_unit == "hours_only"
+                        -> {
                             Spacer(modifier = Modifier.height(15.dp))
                             Row (
                                 modifier = Modifier.fillMaxWidth(),
@@ -632,21 +671,21 @@ fun DateInfoDialog(
                             }
                         }
 
-                        !isHalfDay && selectedLeaveType?.name.equals(
-                            "Permission",
-                            ignoreCase = true
-                        ) -> {
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Row (
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ){
-                                FirstText(stringResource(R.string.duration))
-                                DurationDays(days = 1)
-                                DurationHours(hours = 8.0)
-                            }
-                        }
+//                        !isHalfDay && selectedLeaveType?.name.equals(
+//                            "Permission",
+//                            ignoreCase = true
+//                        ) -> {
+//                            Spacer(modifier = Modifier.height(15.dp))
+//                            Row (
+//                                modifier = Modifier.fillMaxWidth(),
+//                                verticalAlignment = Alignment.CenterVertically,
+//                                horizontalArrangement = Arrangement.SpaceBetween
+//                            ){
+//                                FirstText(stringResource(R.string.duration))
+//                                DurationDays(days = 1)
+//                                DurationHours(hours = 8.0)
+//                            }
+//                        }
 
                         else -> {
                             Spacer(modifier = Modifier.height(15.dp))
@@ -682,7 +721,8 @@ fun DateInfoDialog(
                                 return@DialogActionsRow
                             }
 
-                            if (isPermissionOrOvertime && permissionChecked) {
+//                            if (isPermissionOrOvertime && permissionChecked) {
+                         if (permissionChecked) {
 
                                 Log.d("SAVE_ACTION", "Permission with custom hour")
 
