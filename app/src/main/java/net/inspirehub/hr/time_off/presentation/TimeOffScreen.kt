@@ -299,7 +299,7 @@ fun TimeOffScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(colors.onSecondaryColor),
+                        .background(Color(0x88000000)),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(

@@ -49,7 +49,6 @@ fun DialogActionsRow(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier
-//                        .height(20.dp)
                         .padding(2.dp),
                     color = colors.tertiaryColor,
                     strokeWidth = 2.dp

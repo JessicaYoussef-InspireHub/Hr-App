@@ -32,7 +32,8 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun AddToCart(
-    price: Double
+    price: Double,
+    onAddClick: () -> Unit
 ){
     val colors = appColors()
     var quantity by remember { mutableIntStateOf(1) }
@@ -134,7 +135,7 @@ fun AddToCart(
         }
 
         Button(
-            onClick = { },
+            onClick = { onAddClick() },
             modifier = Modifier.height(50.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colors.tertiaryColor

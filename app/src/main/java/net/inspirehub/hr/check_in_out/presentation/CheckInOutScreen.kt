@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 import java.time.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -62,6 +63,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -156,7 +158,6 @@ fun CheckInOutScreen(
             if (char.isDigit()) arabicDigits[char.digitToInt()] else char
         }.joinToString("")
     }
-
 
 
     @Composable
@@ -279,7 +280,8 @@ fun CheckInOutScreen(
                     viewModel.checkLocationAndDistanceAllCompanies(
                         companies = companies,
                         allowedDistance = allowedDistance,
-                        allowedLocationIds = allowedIds)
+                        allowedLocationIds = allowedIds
+                    )
 
                     // ✅ Loading will be temporarily enabled after returning
                     isInitialLoading = true
@@ -348,7 +350,8 @@ fun CheckInOutScreen(
             viewModel.checkLocationAndDistanceAllCompanies(
                 companies = companies,
                 allowedDistance = allowedDistance,
-                allowedLocationIds = allowedIds)
+                allowedLocationIds = allowedIds
+            )
 
         } else {
             locationPermissionState.launchPermissionRequest()
@@ -386,6 +389,7 @@ fun CheckInOutScreen(
                         "checked_out" -> {
                             stringResource(R.string.you_are_checked_out)
                         }
+
                         else -> " "
                     },
                     color = colors.tertiaryColor,
@@ -410,9 +414,11 @@ fun CheckInOutScreen(
                     Text(
                         if (attendanceStatus == "checked_in") {
                             println("jessica youssef $checkInTime")
-                            stringResource(R.string.checked_in_message,
-                                checkInTime)
-                        } else if (attendanceStatus == "checked_out"){
+                            stringResource(
+                                R.string.checked_in_message,
+                                checkInTime
+                            )
+                        } else if (attendanceStatus == "checked_out") {
                             stringResource(
                                 R.string.checked_out_message,
                                 checkOutLabel,
@@ -530,7 +536,10 @@ fun CheckInOutScreen(
 
                                     // 🔹 Case 3: User is online → Calculate the time difference with the server
                                     viewModel.getTimeDifferenceWithServer(token!!) { diff ->
-                                        Log.d("CheckInOut", "🕒 Time difference with server (minutes): $diff")
+                                        Log.d(
+                                            "CheckInOut",
+                                            "🕒 Time difference with server (minutes): $diff"
+                                        )
 
                                         sharedPrefManager.saveTimeDifference(diff)
                                         sharedPrefManager.setWasOfflineDuringTimeChange(false)
@@ -540,7 +549,10 @@ fun CheckInOutScreen(
                                         )
                                         val deviceDate = Date()
                                         val finalActionTime = Date(deviceDate.time + diff * 60_000)
-                                        Log.d("CheckInOut", "🕒 Final Action Time (to send): $finalActionTime")
+                                        Log.d(
+                                            "CheckInOut",
+                                            "🕒 Final Action Time (to send): $finalActionTime"
+                                        )
 
 
                                         // 🔹 After checking the time, we start implementing the procedure.
@@ -603,7 +615,7 @@ fun CheckInOutScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(colors.transparent)
+                                .background(Color(0x88000000))
                                 .noClickable(),
                             contentAlignment = Alignment.Center
                         ) {
@@ -656,7 +668,7 @@ fun CheckInOutScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(colors.surfaceColor.copy(alpha = 0.4f))
+                    .background(Color(0x88000000))
                     .noClickable(),
                 contentAlignment = Alignment.Center
             ) {

@@ -60,7 +60,7 @@ fun LunchSearchBox(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp)
-                .offset(y = 70.dp),
+                .offset(y = 75.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround
         ){

@@ -43,7 +43,7 @@ fun OrderCard() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 25.dp , bottom = 15.dp),
+            .padding(top = 25.dp , bottom = 0.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.Top
     ) {

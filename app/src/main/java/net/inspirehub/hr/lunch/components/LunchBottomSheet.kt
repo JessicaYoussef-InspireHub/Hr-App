@@ -122,9 +122,11 @@ fun LunchBottomSheet(
             Spacer(Modifier.height(80.dp))
 
             AddToCart(
-                price = price.toDouble()
+                price = price.toDouble(),
+                onAddClick = {
+                    onDismiss()
+                }
             )
-
         }
     }
 }

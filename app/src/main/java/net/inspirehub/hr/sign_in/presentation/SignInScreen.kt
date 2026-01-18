@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import net.inspirehub.hr.R
@@ -272,7 +273,7 @@ fun SignInScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colors.surfaceColor.copy(alpha = 0.4f)),
+                .background(Color(0x88000000)),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
