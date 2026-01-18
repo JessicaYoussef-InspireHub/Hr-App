@@ -46,7 +46,7 @@ fun DialogTitle(
             )
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Close",
+                contentDescription = stringResource(R.string.close),
                 modifier = Modifier
                     .size(30.dp)
                     .clickable {

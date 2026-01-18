@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -82,7 +83,7 @@ fun BottomBar(
                             }
                         }
                     },
-                    icon = { Icon(Icons.Default.BeachAccess, contentDescription = "Time Off") },
+                    icon = { Icon(Icons.Default.BeachAccess, contentDescription = stringResource(R.string.time_off)) },
                     label = { Text(stringResource(R.string.time_off)) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = colors.tertiaryColor,
@@ -105,7 +106,7 @@ fun BottomBar(
                     icon = {
                         Icon(
                             Icons.Default.Notifications,
-                            contentDescription = "Notifications"
+                            contentDescription = stringResource(R.string.notification)
                         )
                     },
                     label = { Text(stringResource(R.string.notification)) },
@@ -122,7 +123,7 @@ fun BottomBar(
                     onClick = {
                         moreMenuExpanded = true
                     },
-                    icon = { Icon(Icons.Default.MoreVert, contentDescription = "More") },
+                    icon = { Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more)) },
                     label = { Text(stringResource(R.string.more)) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = colors.tertiaryColor,
@@ -148,7 +149,7 @@ fun BottomBar(
                         ) {
                             Icon(
                                 Icons.Default.Settings,
-                                contentDescription = "Settings",
+                                stringResource(R.string.settings),
                                 tint = colors.onBackgroundColor
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -174,7 +175,7 @@ fun BottomBar(
                                 verticalAlignment = Alignment.CenterVertically
                             ){
                                 Icon(Icons.Default.LunchDining,
-                                    contentDescription = "LunchDining" ,
+                                    stringResource(R.string.lunch),
                                     tint = colors.onBackgroundColor )
                                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -188,6 +189,33 @@ fun BottomBar(
                         moreMenuExpanded = false
                         if (currentRoute != "LunchScreen") {
                             navController.navigate("LunchScreen") {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
+
+                DropdownMenuItem(
+                    text =
+                        {
+                            Row (
+                                verticalAlignment = Alignment.CenterVertically
+                            ){
+                                Icon(Icons.Default.Paid,
+                                    stringResource(R.string.expenses)  ,
+                                    tint = colors.onBackgroundColor )
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Text(
+                                    stringResource(R.string.expenses) ,
+                                    color = colors.onBackgroundColor
+                                )
+                            }
+                        },
+                    onClick = {
+                        moreMenuExpanded = false
+                        if (currentRoute != "ExpensesScreen") {
+                            navController.navigate("ExpensesScreen") {
                                 launchSingleTop = true
                             }
                         }

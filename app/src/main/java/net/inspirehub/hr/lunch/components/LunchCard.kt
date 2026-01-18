@@ -1,6 +1,7 @@
 package net.inspirehub.hr.lunch.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -34,12 +35,12 @@ import net.inspirehub.hr.appColors
 fun LunchCard(
     title: String,
     price: String,
-    phone : String,
-    restaurant: String ,
-    imageRes: Int,
+    phone: String,
+    restaurant: String,
+    imageRes: Int?,
     onClick: () -> Unit,
 
-){
+    ) {
     val colors = appColors()
     var isFavorite by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -47,8 +48,9 @@ fun LunchCard(
     val currentLanguage = sharedPrefManager.getLanguage()
 
     fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }.joinToString("")
+        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
+        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
+            .joinToString("")
     }
 
     val localizedPrice = if (currentLanguage == "ar") convertToArabicDigits(price) else price
@@ -96,9 +98,9 @@ fun LunchCard(
                         imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
                         contentDescription = "Favourite Icon",
                         tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .clickable { isFavorite = !isFavorite }
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clickable { isFavorite = !isFavorite }
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -106,7 +108,7 @@ fun LunchCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
                     Text(
                         text = restaurant + "\n" + localizedPhone,
                         fontSize = 16.sp,
@@ -123,15 +125,32 @@ fun LunchCard(
             }
         }
 
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(260.dp)
-                .offset(y = (50).dp, x = (100).dp)
-                .clip(RoundedCornerShape(100.dp))
-                .shadow(8.dp, CircleShape)
-        )
+        if (imageRes != null) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(260.dp)
+                    .offset(y = (50).dp, x = (100).dp)
+                    .clip(RoundedCornerShape(100.dp))
+                    .shadow(8.dp, CircleShape)
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(260.dp)
+                    .offset(y = 50.dp, x = 100.dp)
+                    .clip(RoundedCornerShape(100.dp))
+                    .background(colors.surfaceContainerHigh),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No Image",
+                    fontSize = 14.sp,
+                    color = colors.onBackgroundColor
+                )
+            }
+        }
     }
 }

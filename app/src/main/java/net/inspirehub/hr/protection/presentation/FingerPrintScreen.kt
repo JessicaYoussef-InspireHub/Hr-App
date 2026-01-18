@@ -187,7 +187,7 @@ fun FingerPrintScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Fingerprint,
-                        contentDescription = "Fingerprint Icon",
+                        contentDescription = stringResource(R.string.fingerprint_authentication),
                         modifier = Modifier
                             .size(200.dp)
                             .clickable {

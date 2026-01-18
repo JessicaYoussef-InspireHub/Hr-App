@@ -138,7 +138,7 @@ fun SignInScreen(
         }
         Image(
             painter = painterResource(id = R.drawable.sign_in),
-            contentDescription = "Sign in",
+            contentDescription = stringResource(R.string.sign_in),
             modifier = Modifier.size(130.dp)
                 .statusBarsPadding()
 

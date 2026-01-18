@@ -42,7 +42,7 @@ fun LunchScreen(
     data class LunchItem(
         val title: String,
         val price: String,
-        val imageRes: Int,
+        val imageRes: Int?,
         val restaurantName: String,
         val phoneNumber: String
     )
@@ -58,7 +58,7 @@ fun LunchScreen(
         LunchItem(
             title = "Vegetarian Pasta",
             price = "40.00",
-            imageRes = R.drawable.grilled_chicken,
+            imageRes = null,
             restaurantName = "Green Plate",
             phoneNumber = "0109876543"
         ),

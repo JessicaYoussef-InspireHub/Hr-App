@@ -31,7 +31,7 @@ fun NoNotifications() {
     ){
         Image(
             painter = painterResource(id = R.drawable.no_notifications),
-            contentDescription = "no notifications",
+            contentDescription = stringResource(R.string.no_notifications_yet),
             modifier = Modifier.height(250.dp).width(250.dp)
         )
         Text(

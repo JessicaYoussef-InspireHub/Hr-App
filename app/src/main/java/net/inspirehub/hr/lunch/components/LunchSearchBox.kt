@@ -81,7 +81,7 @@ fun LunchSearchBox(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search Icon",
+                        contentDescription = stringResource(R.string.search_your_meal),
                         tint = iconAndCursorColor,
                         modifier = Modifier.padding(end = 8.dp)
                     )

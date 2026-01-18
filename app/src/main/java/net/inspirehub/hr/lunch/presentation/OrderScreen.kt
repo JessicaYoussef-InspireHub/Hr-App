@@ -26,11 +26,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.MyAppBar
+import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.components.NumberOfItems
 import net.inspirehub.hr.lunch.components.OrderCard
@@ -46,7 +48,9 @@ fun OrderScreen(
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
-
+    val successMessage = stringResource(
+        R.string.your_order_has_been_placed_successfully
+    )
 
 
     Box {
@@ -102,10 +106,10 @@ fun OrderScreen(
 
                     Spacer(modifier = Modifier.height(90.dp))
 
-                    TotalPrice("Total Price", 100.0)
+                    TotalPrice(stringResource(R.string.total_price), 100.0)
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    TotalPrice("Delivery", 10.0)
+                    TotalPrice(stringResource(R.string.delivery), 10.0)
                     Spacer(modifier = Modifier.height(10.dp))
 
                     HorizontalDivider(
@@ -114,7 +118,7 @@ fun OrderScreen(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    TotalPrice("Total", 110.0)
+                    TotalPrice(stringResource(R.string.total), 110.0)
 
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -124,7 +128,7 @@ fun OrderScreen(
                                 isLoading = true
 
                                 val result = snackBarHostState.showSnackbar(
-                                    message = "Your order has been placed successfully!",
+                                    message = successMessage,
                                 )
 
                                 if (result == SnackbarResult.Dismissed || result == SnackbarResult.ActionPerformed) {

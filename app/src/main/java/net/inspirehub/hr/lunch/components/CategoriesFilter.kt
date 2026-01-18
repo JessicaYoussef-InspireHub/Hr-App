@@ -47,7 +47,7 @@ fun CategoriesFilter() {
     ){
         Icon(
             imageVector = Icons.Default.Restaurant,
-            contentDescription = "Categories",
+            contentDescription = stringResource(R.string.categories),
             tint = colors.onBackgroundColor,
             modifier = Modifier
                 .size(40.dp)

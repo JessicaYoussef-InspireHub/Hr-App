@@ -48,7 +48,7 @@ fun NotAllowedLocationDialog(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = "Close",
+                                contentDescription = stringResource(R.string.close),
                                 tint = colors.tertiaryColor,
                                 modifier = Modifier
                                     .clickable { onDismiss() }

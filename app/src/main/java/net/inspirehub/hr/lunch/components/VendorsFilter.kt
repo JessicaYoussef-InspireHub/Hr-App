@@ -46,7 +46,7 @@ fun VendorsFilter(){
     ){
         Icon(
             imageVector = Icons.Default.LocalCarWash,
-            contentDescription = "Vendors",
+            contentDescription = stringResource(R.string.vendors),
             tint = colors.onBackgroundColor,
             modifier = Modifier
                 .size(40.dp)

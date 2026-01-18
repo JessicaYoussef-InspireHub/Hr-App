@@ -8,8 +8,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
@@ -31,7 +33,7 @@ fun OrderNowButton(
             onClick()
         },
     ){
-        Text(text = "Order Now",
+        Text(text = stringResource(R.string.order_now),
             fontWeight = FontWeight.Bold)
 
 

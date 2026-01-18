@@ -2,7 +2,6 @@ package net.inspirehub.hr
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -11,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
+import net.inspirehub.hr.expenses.presentation.ExpensesScreen
 import net.inspirehub.hr.lunch.presentation.LunchScreen
 import net.inspirehub.hr.lunch.presentation.OrderScreen
 import net.inspirehub.hr.notifications.presentation.NotificationsScreen
@@ -108,6 +108,8 @@ fun MyAppNavHost(
         }
 
         composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
+
+        composable("ExpensesScreen") { ExpensesScreen(navController) }
 
         composable("LunchScreen") {
             LunchScreen(
@@ -213,7 +215,6 @@ fun MyAppNavHost(
         composable("SignInScreen/{companyId}/{apiKey}") { backStackEntry ->
             val companyId = backStackEntry.arguments?.getString("companyId") ?: ""
             val apiKey = backStackEntry.arguments?.getString("apiKey") ?: ""
-            val numberToBack = backStackEntry.arguments?.getString("numberToBack")?.toIntOrNull() ?: 0
 
             SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey )
         }

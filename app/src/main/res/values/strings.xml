@@ -167,5 +167,11 @@ Protection Method</string>
     <string name="more">More</string>
     <string name="invalid_request">Invalid Request</string>
     <string name="apply">Apply</string>
+    <string name="expenses">Expenses</string>
+    <string name="total_price">Total Price</string>
+    <string name="delivery">Delivery</string>
+    <string name="total">Total</string>
+    <string name="your_order_has_been_placed_successfully">Your order has been placed successfully!</string>
+    <string name="order_now">Order Now</string>
 
 </resources>

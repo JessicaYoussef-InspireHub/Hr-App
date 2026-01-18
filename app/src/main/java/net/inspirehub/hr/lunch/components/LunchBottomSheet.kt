@@ -36,7 +36,7 @@ import net.inspirehub.hr.appColors
 fun LunchBottomSheet(
     title: String,
     price: String,
-    imageRes: Int,
+    imageRes: Int?,
     onDismiss: () -> Unit
 ) {
     val colors = appColors()
@@ -76,7 +76,7 @@ fun LunchBottomSheet(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(R.string.close),
                         tint = colors.tertiaryColor,
                     )
                 }
@@ -86,13 +86,16 @@ fun LunchBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                if (imageRes != null){
                 Image(
                     painter = painterResource(id = imageRes),
                     contentDescription = title,
                     modifier = Modifier
                         .width(150.dp)
                         .height(150.dp)
-                )
+                )} else {
+                    Text("No image available")
+                }
 
                 Column(
                     modifier = Modifier,

@@ -165,5 +165,12 @@
     <string name="more">المزيد</string>
     <string name="invalid_request">طلب غير صالح</string>
     <string name="apply">تأكيد</string>
+    <string name="expenses">النفقات</string>
+    <string name="total_price">السعر الإجمالي</string>
+    <string name="delivery">التوصيل</string>
+    <string name="total">المجموع</string>
+    <string name="your_order_has_been_placed_successfully">تم تقديم طلبك بنجاح!</string>
+    <string name="order_now">اطلب الآن</string>
+
 
 </resources>
