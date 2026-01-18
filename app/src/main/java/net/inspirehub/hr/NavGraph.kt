@@ -2,6 +2,7 @@ package net.inspirehub.hr
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -28,7 +29,11 @@ import net.inspirehub.hr.time_off.presentation.TimeOffScreen
 
 @SuppressLint("NewApi")
 @Composable
-fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostController) {
+fun MyAppNavHost(
+    viewModel: ScanQrCodeViewModel,
+    navController: NavHostController,
+    openedFromNotification: Boolean = false
+    ) {
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val savedPin = sharedPrefManager.getPin()
@@ -48,6 +53,9 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
 //    }
 
     val nextDestination = when {
+
+        openedFromNotification -> "NotificationsScreen"
+
         // ✅ Has token and fingerprint enabled
         !token.isNullOrEmpty() && fingerprintSuccess -> "FingerPrintScreen"
 
@@ -71,8 +79,27 @@ fun MyAppNavHost(viewModel: ScanQrCodeViewModel, navController: NavHostControlle
     }
 
 
+//    LaunchedEffect(notificationDestination) {
+//        if (notificationDestination == "NotificationsScreen") {
+//            navController.navigate("NotificationsScreen") {
+//                popUpTo("SplashScreen") { inclusive = true }
+//                launchSingleTop = true
+//            }
+//        }
+//    }
 
-    NavHost(navController = navController, startDestination = "SplashScreen") {
+    val startDestination = if (openedFromNotification) {
+        "NotificationsScreen"
+    } else {
+        "SplashScreen"
+    }
+
+
+
+
+
+    NavHost(navController = navController,
+        startDestination = startDestination) {
         composable("SplashScreen") {
             SplashScreen(
                 navController = navController,

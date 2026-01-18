@@ -45,9 +45,11 @@ fun SplashScreen(
                                     object : Animatable2Compat.AnimationCallback() {
                                         override fun onAnimationEnd(drawable: android.graphics.drawable.Drawable?) {
                                             super.onAnimationEnd(drawable)
-                                            navController.navigate(nextDestination) {
-                                                popUpTo("SplashScreen") { inclusive = true }
-                                            }
+
+                                            if (nextDestination != "NotificationsScreen") {
+                                                navController.navigate(nextDestination) {
+                                                    popUpTo("SplashScreen") { inclusive = true }
+                                                }}
                                         }
                                     }
                                 )

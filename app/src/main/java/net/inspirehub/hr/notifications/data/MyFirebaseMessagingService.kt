@@ -87,10 +87,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
 
        // Intent opens the vacation page when clicked
+//        val intent = Intent(this, MainActivity::class.java).apply {
+////            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//            putExtra("navigateTo", "NotificationsScreen")
+//        }
+
         val intent = Intent(this, MainActivity::class.java).apply {
-//            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("navigateTo", "NotificationsScreen")
         }
+
+
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
