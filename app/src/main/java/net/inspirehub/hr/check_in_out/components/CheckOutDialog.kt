@@ -16,18 +16,17 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SmallLoading
 import net.inspirehub.hr.appColors
 
 @Composable
@@ -71,16 +70,7 @@ fun CheckOutDialog(
         },
         text = {
             if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0x88000000)),
-                    contentAlignment = Alignment.Center
-                ) {
-                   CircularProgressIndicator(
-                       color = colors.tertiaryColor
-                   )
-                }
+                SmallLoading()
             } else {
             Text(
                 stringResource(R.string.check_out_confirmation, hours, minutes),

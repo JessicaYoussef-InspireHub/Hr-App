@@ -12,7 +12,6 @@ import androidx.navigation.navArgument
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
 import net.inspirehub.hr.expenses.presentation.ExpensesScreen
 import net.inspirehub.hr.lunch.presentation.LunchScreen
-import net.inspirehub.hr.lunch.presentation.OrderScreen
 import net.inspirehub.hr.notifications.presentation.NotificationsScreen
 import net.inspirehub.hr.protection.presentation.ConfirmPinScreen
 import net.inspirehub.hr.protection.presentation.EnterPinScreen
@@ -113,13 +112,9 @@ fun MyAppNavHost(
 
         composable("LunchScreen") {
             LunchScreen(
-                navController = navController
+                navController = navController,
             )
         }
-
-        composable("OrderScreen") { OrderScreen(
-            navController = navController
-        ) }
 
         composable("TimeOffScreen") {
             TimeOffScreen(

@@ -23,6 +23,7 @@ fun OrderSnackBar(
         contentColor = colors.tertiaryColor,
         modifier = Modifier
             .padding(horizontal = 16.dp)
+            .padding(bottom = 32.dp)
             .border(
                 width = 2.dp,
                 color = colors.tertiaryColor,

@@ -63,15 +63,6 @@ fun CheckInOutButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-//            if (isLoading) {
-//                Row{
-//                    CircularProgressIndicator(
-//                        color = colors.tertiaryColor.copy(alpha = 0.4f),
-//                        modifier = Modifier.size(20.dp),
-//                    )
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                }
-//            }
             Text(
                 when (attendanceStatus) {
                     "checked_in" -> stringResource(R.string.check_out)

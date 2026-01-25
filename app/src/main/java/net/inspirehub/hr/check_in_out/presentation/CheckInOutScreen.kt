@@ -60,10 +60,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -74,6 +71,7 @@ import net.inspirehub.hr.check_in_out.components.OfflineCheckOutDialog
 import net.inspirehub.hr.check_in_out.components.OfflineSnackBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.check_in_out.components.CheckInOutErrorDialog
 import net.inspirehub.hr.check_in_out.components.NotAllowedLocationDialog
 import java.net.InetSocketAddress
@@ -612,17 +610,7 @@ fun CheckInOutScreen(
                     )
 
                     if (isErrorDialogLoading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0x88000000))
-                                .noClickable(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                color = colors.tertiaryColor
-                            )
-                        }
+                        FullLoading()
                     }
                 }
             }
@@ -650,32 +638,8 @@ fun CheckInOutScreen(
             onDismiss = { showNotAllowedDialog = false }
         )
 
-//        if (isButtonLoading) {
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .background(colors.onSurfaceColor.copy(alpha = 0.4f))
-//                    .noClickable(),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                CircularProgressIndicator(
-//                    color = colors.tertiaryColor
-//                )
-//            }
-//        }
-
         if (isInitialLoading && !isOffline) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x88000000))
-                    .noClickable(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = colors.tertiaryColor
-                )
-            }
+           FullLoading()
         }
 
 

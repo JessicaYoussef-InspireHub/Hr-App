@@ -3,6 +3,7 @@ package net.inspirehub.hr.lunch.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -14,22 +15,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.lunch.data.LunchCategory
 
 @Composable
 fun LunchCategoryRow(
-    onCategorySelected: (String) -> Unit = {}
+    categories: List<LunchCategory>,
+    onCategorySelected: (LunchCategory) -> Unit = {}
 ) {
     val colors = appColors()
-    val categories = listOf("Food", "Drink", "Dessert", "Salad")
 
-    var selectedCategory by remember { mutableStateOf(categories.first()) }
+
+    var selectedCategory by remember {
+        mutableStateOf<LunchCategory?>(null)
+    }
 
     LazyRow(
+        modifier = Modifier.fillMaxWidth(0.9f),
         contentPadding = PaddingValues(horizontal = 0.dp)
     ) {
         items(categories) { category ->
             Text(
-                text = category,
+                text = category.name,
                 fontSize = 18.sp,
                 fontWeight = if (selectedCategory == category) FontWeight.Bold else FontWeight.Medium,
                 color = if (selectedCategory == category)

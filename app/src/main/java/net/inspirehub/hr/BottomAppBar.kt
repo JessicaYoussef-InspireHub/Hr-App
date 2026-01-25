@@ -142,31 +142,7 @@ fun BottomBar(
                 offset = DpOffset(x = (-1).dp, y = (-3).dp),
                 modifier = Modifier.background(colors.surfaceContainerHigh)
             ) {
-                DropdownMenuItem(
-                    text = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.Settings,
-                                stringResource(R.string.settings),
-                                tint = colors.onBackgroundColor
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                stringResource(R.string.settings),
-                                color = colors.onBackgroundColor
-                            )
-                        }
-                    }, onClick = {
-                        moreMenuExpanded = false
-                        if (currentRoute != "SettingsScreen") {
-                            navController.navigate("SettingsScreen") {
-                                launchSingleTop = true
-                            }
-                        }
-                    }
-                )
+
 
                 DropdownMenuItem(
                     text =
@@ -176,12 +152,20 @@ fun BottomBar(
                             ){
                                 Icon(Icons.Default.LunchDining,
                                     stringResource(R.string.lunch),
-                                    tint = colors.onBackgroundColor )
+                                    tint =
+                                        if (currentRoute == "LunchScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor )
                                 Spacer(modifier = Modifier.width(8.dp))
 
                                 Text(
                                     stringResource(R.string.lunch) ,
-                                    color = colors.onBackgroundColor
+                                    color =
+                                        if (currentRoute == "LunchScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor
                                 )
                             }
                         },
@@ -203,12 +187,20 @@ fun BottomBar(
                             ){
                                 Icon(Icons.Default.Paid,
                                     stringResource(R.string.expenses)  ,
-                                    tint = colors.onBackgroundColor )
+                                    tint =
+                                       if (currentRoute == "ExpensesScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor )
                                 Spacer(modifier = Modifier.width(8.dp))
 
                                 Text(
                                     stringResource(R.string.expenses) ,
-                                    color = colors.onBackgroundColor
+                                    color =
+                                    if (currentRoute == "ExpensesScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor
                                 )
                             }
                         },
@@ -216,6 +208,39 @@ fun BottomBar(
                         moreMenuExpanded = false
                         if (currentRoute != "ExpensesScreen") {
                             navController.navigate("ExpensesScreen") {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Settings,
+                                stringResource(R.string.settings),
+                                tint = if (currentRoute == "SettingsScreen")
+                                    colors.tertiaryColor
+                                else
+                                    colors.onBackgroundColor
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.settings),
+                                color =
+                                    if (currentRoute == "SettingsScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor
+                            )
+                        }
+                    }, onClick = {
+                        moreMenuExpanded = false
+                        if (currentRoute != "SettingsScreen") {
+                            navController.navigate("SettingsScreen") {
                                 launchSingleTop = true
                             }
                         }

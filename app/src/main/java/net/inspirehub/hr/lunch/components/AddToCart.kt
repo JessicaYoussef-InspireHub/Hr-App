@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,7 +54,7 @@ fun AddToCart(
 
     val localizedTotal =
         if (currentLanguage == "ar") convertToArabicDigits(totalPrice.toInt().toString())
-        else totalPrice.toInt().toString()
+        else totalPrice.toInt()
 
     Row (
         modifier = Modifier
@@ -81,9 +82,9 @@ fun AddToCart(
                     .border(
                         width = 2.dp,
                         color = colors.onBackgroundColor,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = CircleShape
                     ),
-                shape = RoundedCornerShape(8.dp),
+                shape = CircleShape,
                 contentPadding = PaddingValues(0.dp)
 
             ) {
@@ -115,9 +116,9 @@ fun AddToCart(
                     .border(
                         width = 2.dp,
                         color = colors.onBackgroundColor,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = CircleShape
                     ),
-                shape = RoundedCornerShape(8.dp),
+                shape = CircleShape,
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Box(
@@ -142,7 +143,7 @@ fun AddToCart(
             ),
             shape = RoundedCornerShape(8.dp)
         ){
-            Text(stringResource(R.string.add_to_cart, localizedTotal),
+            Text(stringResource(R.string.add) + " " + localizedTotal,
                 color = colors.onSecondaryColor,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp

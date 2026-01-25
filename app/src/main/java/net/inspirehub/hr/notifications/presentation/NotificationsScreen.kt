@@ -51,6 +51,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import androidx.core.content.edit
+import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.notifications.components.NotificationPermissionDialog
 
 
@@ -164,16 +165,7 @@ fun NotificationsScreen(
 
             when {
                 isLoading.value -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0x88000000)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        androidx.compose.material3.CircularProgressIndicator(
-                            color = colors.tertiaryColor
-                        )
-                    }
+                    FullLoading()
                 }
 
                 sortedNotifications.isEmpty() -> {

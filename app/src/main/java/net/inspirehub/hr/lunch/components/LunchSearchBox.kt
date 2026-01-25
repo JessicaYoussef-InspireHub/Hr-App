@@ -19,25 +19,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 
 
 @Composable
 fun LunchSearchBox(
-    onBackClick: () -> Unit
 ) {
     val colors = appColors()
     val searchText = remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val sharedPref = SharedPrefManager(context)
+    val token = sharedPref.getToken() ?: " "
+
 
     val customTextSelectionColors = TextSelectionColors(
         handleColor = colors.onBackgroundColor,
@@ -47,76 +50,69 @@ fun LunchSearchBox(
     val isTextEntered = searchText.value.isNotEmpty()
     val iconAndCursorColor = if (isTextEntered) colors.tertiaryColor else colors.onBackgroundColor
 
-    Box(
+    Row (
         modifier = Modifier
-            .fillMaxWidth()
-            .background(colors.surfaceContainerHigh)
-    ) {
-        MyAppBar(
-            stringResource(R.string.lunch),
-            onBackClick = onBackClick
-        )
-        Row (
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround
+    ){
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp)
-                .offset(y = 75.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround
-        ){
-            Box(
+                .fillMaxWidth(0.75f)
+                .background(colors.surfaceContainerHigh, RoundedCornerShape(50.dp))
+        )
+        {
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth(0.75f)
-                    .background(colors.surfaceContainerHigh, RoundedCornerShape(50.dp))
-            )
-            {
-                Row(
-                    modifier = Modifier
-                        .background(
-                            color = colors.surfaceContainerHigh,
-                            shape = RoundedCornerShape(50.dp)
-                        )
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(R.string.search_your_meal),
-                        tint = iconAndCursorColor,
-                        modifier = Modifier.padding(end = 8.dp)
+                    .background(
+                        color = colors.surfaceContainerHigh,
+                        shape = RoundedCornerShape(50.dp)
                     )
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search_your_meal),
+                    tint = iconAndCursorColor,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
 
-                    CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
-                        BasicTextField(
-                            value = searchText.value,
-                            onValueChange = { searchText.value = it },
-                            singleLine = true,
-                            textStyle = TextStyle(
-                                color = colors.tertiaryColor,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            cursorBrush = Brush.linearGradient(
-                                colors = listOf(iconAndCursorColor, iconAndCursorColor)
-                            ),
-                            decorationBox = { innerTextField ->
-                                if (searchText.value.isEmpty()) {
-                                    Text(
-                                        text = stringResource(R.string.search_your_meal),
-                                        fontSize = 16.sp,
-                                        color = colors.onBackgroundColor
-                                    )
-                                }
-                                innerTextField()
-                            },
-                        )
-                    }
+                CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+                    BasicTextField(
+                        value = searchText.value,
+                        onValueChange = { searchText.value = it },
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            color = colors.tertiaryColor,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        cursorBrush = Brush.linearGradient(
+                            colors = listOf(iconAndCursorColor, iconAndCursorColor)
+                        ),
+                        decorationBox = { innerTextField ->
+                            if (searchText.value.isEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.search_your_meal),
+                                    fontSize = 16.sp,
+                                    color = colors.onBackgroundColor
+                                )
+                            }
+                            innerTextField()
+                        },
+                    )
                 }
             }
-
-            CategoriesFilter()
-
-            VendorsFilter()
         }
+
+
+        SuppliersFilterBottomSheet(
+            context = context,
+            token = token
+        )
+
+        MyFavorite()
+
     }
 }

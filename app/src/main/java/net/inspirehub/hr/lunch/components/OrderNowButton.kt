@@ -35,8 +35,5 @@ fun OrderNowButton(
     ){
         Text(text = stringResource(R.string.order_now),
             fontWeight = FontWeight.Bold)
-
-
     }
-
 }

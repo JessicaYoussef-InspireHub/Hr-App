@@ -4,7 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -20,24 +20,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.lunch.presentation.base64ToImageBitmap
 
 @Composable
 fun LunchCard(
-    title: String,
+    name: String,
+    supplierName: String,
     price: String,
-    phone: String,
-    restaurant: String,
-    imageRes: Int?,
+    imageBase64: String?,
+    isNew: Boolean,
     onClick: () -> Unit,
 
     ) {
@@ -54,102 +53,99 @@ fun LunchCard(
     }
 
     val localizedPrice = if (currentLanguage == "ar") convertToArabicDigits(price) else price
-    val localizedPhone = if (currentLanguage == "ar") convertToArabicDigits(phone) else phone
 
-
-    Box(
+    Card(
         modifier = Modifier
-            .width(250.dp)
-            .padding(bottom = 30.dp)
+            .fillMaxWidth()
             .clickable { onClick() },
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Card(
+        colors = CardDefaults.cardColors(
+            containerColor = colors.surfaceContainerHigh
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    )
+    {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(350.dp)
-                .align(Alignment.BottomCenter),
-            colors = CardDefaults.cardColors(
-                containerColor = colors.surfaceContainerHigh
-            ),
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                .padding(start = 16.dp, end = 8.dp)
+                .padding(top = 8.dp, bottom = 28.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp, bottom = 12.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.Start
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
             ) {
-                Row(
+
+                if (isNew) {
+                    Box(
+                        modifier = Modifier
+                            .background(colors.surfaceColor, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.is_new),
+                            color = colors.tertiaryColor,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                }
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                    contentDescription = "Favourite Icon",
+                    tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { isFavorite = !isFavorite }
+                )
+
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                val imageBitmap = remember(imageBase64) {
+                    imageBase64?.let { base64ToImageBitmap(it) }
+                }
+
+                imageBitmap?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = null,
+                        modifier = Modifier.size(80.dp)
+                    )
+                }
+
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     Text(
-                        text = title,
+                        text = name,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.onBackgroundColor
                     )
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                        contentDescription = "Favourite Icon",
-                        tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clickable { isFavorite = !isFavorite }
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
                     Text(
-                        text = restaurant + "\n" + localizedPhone,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.onBackgroundColor
+                        text = supplierName,
+                        color = colors.inverseOnSurface,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp
                     )
                     Text(
-                        text = " \n$localizedPrice",
+                        text = localizedPrice,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.surfaceContainerHigh
+                        fontWeight = FontWeight.Medium,
+                        color = colors.inverseOnSurface
                     )
                 }
-            }
-        }
-
-        if (imageRes != null) {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(260.dp)
-                    .offset(y = (50).dp, x = (100).dp)
-                    .clip(RoundedCornerShape(100.dp))
-                    .shadow(8.dp, CircleShape)
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(260.dp)
-                    .offset(y = 50.dp, x = 100.dp)
-                    .clip(RoundedCornerShape(100.dp))
-                    .background(colors.surfaceContainerHigh),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No Image",
-                    fontSize = 14.sp,
-                    color = colors.onBackgroundColor
-                )
             }
         }
     }

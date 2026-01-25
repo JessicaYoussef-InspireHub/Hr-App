@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
@@ -28,19 +29,26 @@ fun LunchTextField() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
-        label = { Text(
-            stringResource(R.string.note_to_restaurant),
-            color = colors.onBackgroundColor) },
+        label = {
+            Text(
+                stringResource(
+                    R.string.note_to_restaurant
+                ),
+                color = colors.onBackgroundColor,
+                fontWeight = FontWeight.Normal
+            )
+        },
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = colors.transparent,
-            unfocusedContainerColor = colors.transparent,
-            disabledContainerColor = colors.transparent,
             cursorColor = colors.tertiaryColor,
-            focusedTextColor = colors.tertiaryColor,
-            unfocusedTextColor = colors.tertiaryColor,
+            focusedContainerColor = colors.surfaceContainerHigh,
+            unfocusedContainerColor = colors.surfaceContainerHigh,
+            disabledContainerColor = colors.surfaceContainerHigh,
+            focusedTextColor = colors.onBackgroundColor,
+            unfocusedTextColor = colors.onBackgroundColor,
+            disabledTextColor = colors.onBackgroundColor,
             focusedIndicatorColor = colors.tertiaryColor,
             unfocusedIndicatorColor = colors.tertiaryColor,
-            disabledIndicatorColor = colors.transparent
+            disabledIndicatorColor = colors.tertiaryColor,
         )
     )
 }

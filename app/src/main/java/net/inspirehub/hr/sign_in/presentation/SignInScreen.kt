@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,6 +45,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.sign_in.components.InCorrectCompanyIdDialog
@@ -270,15 +270,6 @@ fun SignInScreen(
 
 
     if (uiState is SignInUiState.Loading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0x88000000)),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = colors.tertiaryColor,
-            )
-        }
+        FullLoading()
     }
 }

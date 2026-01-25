@@ -150,13 +150,13 @@
     <string name="search_your_meal">ابحث عن وجبتك...</string>
     <string name="your_account_is">حسابك</string>
     <string name="the_last_time_to_order_is">آخر وقت للطلب هو</string>
-    <string name="add_to_cart">أضف +%1$s ج.م</string>
+    <string name="add">أضف</string>
     <string name="categories">فئات</string>
-    <string name="price_label">%1$s ج.م</string>
     <string name="note_to_restaurant">ملاحظة للمطعم</string>
-    <string name="vendors">البائعين</string>
+    <string name="filter_by_suppliers">تصفية حسب الموردين</string>
     <string name="outside_company_range">أنت خارج نطاق الشركة</string>
     <string name="my_order_is_here">طلبي هنا</string>
+    <string name="my_order">طلبي</string>
     <string name="you_have_items_in_your_list">لديك 3 عناصر في قائمتك</string>
     <string name="no_notifications_yet">لا توجد إخطارات حتى الآن</string>
     <string name="you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed">أنت الآن في فرع مختلف عن فرعك المسجل. سيتم إخطار قسم الموارد البشرية</string>
@@ -171,6 +171,7 @@
     <string name="total">المجموع</string>
     <string name="your_order_has_been_placed_successfully">تم تقديم طلبك بنجاح!</string>
     <string name="order_now">اطلب الآن</string>
+    <string name="is_new">جديد</string>
 
 
 </resources>
