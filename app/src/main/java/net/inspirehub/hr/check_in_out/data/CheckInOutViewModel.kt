@@ -113,7 +113,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     )
     fun checkLocationAndDistanceAllCompanies(
         companies: List<CompanyLocation>,
-        allowedDistance: Double,
         allowedLocationIds: List<Int>
     ) {
         fusedLocationClient.getCurrentLocation(
@@ -155,10 +154,10 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 Log.d(
                     "DistanceCheck",
                     "Company: ${company.name} | Lat: ${company.lat}, Lng: ${company.lng} | " +
-                            "Distance: $distance meters | AllowedDistance: $allowedDistance meters"
+                            "Distance: $distance meters | AllowedDistance: ${company.allowedDistance} meters"
                 )
 
-                if (distance <= allowedDistance) {
+                if (distance <=  company.allowedDistance) {
                     matchedCompany = company
                     Log.d("DistanceCheck", "${company.name} is within allowed distance ✅")
                 }

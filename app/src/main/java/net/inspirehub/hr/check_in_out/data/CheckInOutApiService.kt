@@ -35,7 +35,8 @@ data class CompanyLocation(
     val id: Int,
     val name: String,
     val lat: Double,
-    val lng: Double
+    val lng: Double,
+    val allowedDistance: Double
 )
 
 @Serializable

@@ -277,7 +277,6 @@ fun CheckInOutScreen(
 
                     viewModel.checkLocationAndDistanceAllCompanies(
                         companies = companies,
-                        allowedDistance = allowedDistance,
                         allowedLocationIds = allowedIds
                     )
 
@@ -347,7 +346,6 @@ fun CheckInOutScreen(
             val allowedIds = prefManager.getAllowedLocationsIds()
             viewModel.checkLocationAndDistanceAllCompanies(
                 companies = companies,
-                allowedDistance = allowedDistance,
                 allowedLocationIds = allowedIds
             )
 

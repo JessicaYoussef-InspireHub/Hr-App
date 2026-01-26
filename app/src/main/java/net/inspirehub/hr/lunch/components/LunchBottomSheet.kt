@@ -51,7 +51,8 @@ fun LunchBottomSheet(
     description: String?,
     supplierName: String,
     imageBase64: String?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onAddToCart: (String) -> Unit
 ) {
     val colors = appColors()
 
@@ -182,8 +183,8 @@ fun LunchBottomSheet(
                             maxLines = 4,
                             overflow = TextOverflow.Ellipsis
                         )
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = supplierName,
                         color = colors.inverseOnSurface,
@@ -208,6 +209,7 @@ fun LunchBottomSheet(
             AddToCart(
                 price = price.toDouble(),
                 onAddClick = {
+                    onAddToCart(name)
                     onDismiss()
                 }
             )

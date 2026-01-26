@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,7 +31,8 @@ fun LunchCategoryRow(
     }
 
     LazyRow(
-        modifier = Modifier.fillMaxWidth(0.9f),
+        modifier = Modifier.fillMaxWidth(0.75f),
+        verticalAlignment = Alignment.CenterVertically,
         contentPadding = PaddingValues(horizontal = 0.dp)
     ) {
         items(categories) { category ->
@@ -54,7 +56,7 @@ fun LunchCategoryRow(
                            colors.transparent,
                         shape = RoundedCornerShape(12.dp)
                     )
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 8.dp, vertical = 8.dp)
             )
         }
     }

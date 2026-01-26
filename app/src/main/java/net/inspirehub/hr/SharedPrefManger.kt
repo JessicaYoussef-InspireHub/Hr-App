@@ -34,11 +34,10 @@ class SharedPrefManager(context: Context) {
     fun saveCompaniesLatLng(companies: List<Company>) {
         // addressId|name|lat,lng
         val listString = companies.joinToString(";") {
-            "${it.address.id}|${it.name}|${it.address.latitude},${it.address.longitude}"
+            "${it.address.id}|${it.name}|${it.address.latitude},${it.address.longitude}|${it.address.allowed_distance}"
         }
         prefs.edit { putString("companies_lat_lng", listString) }
     }
-
 
     fun getCompaniesLatLng(): List<CompanyLocation> {
         val listString = prefs.getString("companies_lat_lng", "") ?: ""
@@ -46,21 +45,48 @@ class SharedPrefManager(context: Context) {
 
         return listString.split(";").mapNotNull { item ->
             val parts = item.split("|")
-            if (parts.size != 3) return@mapNotNull null
+            if (parts.size != 4) return@mapNotNull null
 
             val id = parts[0].toIntOrNull() ?: return@mapNotNull null
             val name = parts[1]
             val latLng = parts[2].split(",")
+            val allowedDistance = parts[3].toDoubleOrNull() ?: return@mapNotNull null
+
             if (latLng.size != 2) return@mapNotNull null
 
             CompanyLocation(
                 id = id,
                 name = name,
                 lat = latLng[0].toDouble(),
-                lng = latLng[1].toDouble()
+                lng = latLng[1].toDouble(),
+                allowedDistance = allowedDistance
             )
         }
     }
+
+
+
+//    fun getCompaniesLatLng(): List<CompanyLocation> {
+//        val listString = prefs.getString("companies_lat_lng", "") ?: ""
+//        if (listString.isEmpty()) return emptyList()
+//
+//        return listString.split(";").mapNotNull { item ->
+//            val parts = item.split("|")
+//            if (parts.size != 3) return@mapNotNull null
+//
+//            val id = parts[0].toIntOrNull() ?: return@mapNotNull null
+//            val name = parts[1]
+//            val latLng = parts[2].split(",")
+//            if (latLng.size != 2) return@mapNotNull null
+//
+//            CompanyLocation(
+//                id = id,
+//                name = name,
+//                lat = latLng[0].toDouble(),
+//                lng = latLng[1].toDouble()
+//            )
+//        }
+//    }
 
 
 

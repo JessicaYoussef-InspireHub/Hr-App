@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +48,7 @@ import net.inspirehub.hr.lunch.components.OrderSnackBar
 import net.inspirehub.hr.lunch.data.LunchProduct
 import net.inspirehub.hr.lunch.data.fetchLunchProducts
 import androidx.core.graphics.scale
+import net.inspirehub.hr.lunch.components.MyHistory
 import net.inspirehub.hr.lunch.components.MyOrderBottomSheet
 import net.inspirehub.hr.lunch.data.LunchCategory
 import net.inspirehub.hr.lunch.data.fetchLunchCategories
@@ -117,7 +119,14 @@ fun LunchScreen(
                 description = selectedItem!!.description,
                 supplierName = selectedItem!!.supplier_name,
                 imageBase64 = selectedItem!!.imageBase64,
-                onDismiss = { showBottomSheet = false }
+                onDismiss = { showBottomSheet = false },
+                onAddToCart = { productName ->
+                    scope.launch {
+                        snackBarHostState.showSnackbar(
+                            "$productName added to cart"
+                        )
+                    }
+                }
             )
         }
 
@@ -146,7 +155,11 @@ fun LunchScreen(
                 ) {
                     Spacer(modifier = Modifier.height(30.dp))
 
-                    Row {
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ){
                         LunchCategoryRow(
                             categories = categories,
                             onCategorySelected = { category ->
@@ -160,13 +173,21 @@ fun LunchScreen(
                             }
                         )
 
-                        MyOrderBottomSheet(
-                            onOrderSuccess = {
-                                scope.launch {
-                                    snackBarHostState.showSnackbar(successMessage)
+                        Row (
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+                            MyHistory()
+                            Spacer(modifier = Modifier.width(5.dp))
+                            MyOrderBottomSheet(
+                                onOrderSuccess = {
+                                    scope.launch {
+                                        snackBarHostState.showSnackbar(successMessage)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
 
                     }
                     Spacer(modifier = Modifier.height(30.dp))
