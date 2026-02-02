@@ -154,18 +154,18 @@ fun BottomBar(
                                     stringResource(R.string.lunch),
                                     tint =
                                         if (currentRoute == "LunchScreen")
-                                        colors.tertiaryColor
-                                    else
-                                        colors.onBackgroundColor )
+                                            colors.tertiaryColor
+                                        else
+                                            colors.onBackgroundColor )
                                 Spacer(modifier = Modifier.width(8.dp))
 
                                 Text(
                                     stringResource(R.string.lunch) ,
                                     color =
                                         if (currentRoute == "LunchScreen")
-                                        colors.tertiaryColor
-                                    else
-                                        colors.onBackgroundColor
+                                            colors.tertiaryColor
+                                        else
+                                            colors.onBackgroundColor
                                 )
                             }
                         },
@@ -188,19 +188,19 @@ fun BottomBar(
                                 Icon(Icons.Default.Paid,
                                     stringResource(R.string.expenses)  ,
                                     tint =
-                                       if (currentRoute == "ExpensesScreen")
-                                        colors.tertiaryColor
-                                    else
-                                        colors.onBackgroundColor )
+                                        if (currentRoute == "ExpensesScreen")
+                                            colors.tertiaryColor
+                                        else
+                                            colors.onBackgroundColor )
                                 Spacer(modifier = Modifier.width(8.dp))
 
                                 Text(
                                     stringResource(R.string.expenses) ,
                                     color =
-                                    if (currentRoute == "ExpensesScreen")
-                                        colors.tertiaryColor
-                                    else
-                                        colors.onBackgroundColor
+                                        if (currentRoute == "ExpensesScreen")
+                                            colors.tertiaryColor
+                                        else
+                                            colors.onBackgroundColor
                                 )
                             }
                         },

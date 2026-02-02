@@ -17,8 +17,10 @@ import kotlinx.serialization.SerialName
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
+import net.inspirehub.hr.sign_in.data.SignInApiService
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -241,55 +243,150 @@ fun sendOfflineAttendanceAction(
 //}
 
 
+
 suspend fun sendAttendanceAction(
     context: Context,
     token: String,
     action: String,
     latitude: String,
     longitude: String,
-    actionTime: String? = null
+    actionTime: String? = null,
+    retry: Boolean = true
 ): AttendanceStatusResult? {
     return try {
         val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
         utcFormat.timeZone = TimeZone.getTimeZone("UTC")
         val currentTime = actionTime ?: utcFormat.format(Date())
+
         val sharedPref = SharedPrefManager(context)
         val companyUrl = sharedPref.getCompanyUrl()
 
-        val response: HttpResponse =
-            httpClient.post("$companyUrl/api/employee_attendance") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    mapOf(
-                        "params" to mapOf(
-                            "employee_token" to token,
-                            "action" to action,
-                            "lat" to latitude,
-                            "lng" to longitude,
-                            "action_time" to currentTime
-                        )
+        val response: HttpResponse = httpClient.post("$companyUrl/api/employee_attendance") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                mapOf(
+                    "params" to mapOf(
+                        "employee_token" to token,
+                        "action" to action,
+                        "lat" to latitude,
+                        "lng" to longitude,
+                        "action_time" to currentTime
                     )
                 )
-            }
+            )
+        }
 
-        println("Status: ${response.status}")
-        println("Headers: ${response.headers}")
-        println("Body: ${response.bodyAsText()}")
+        val responseText = response.bodyAsText()
+        println("🟢 Server Response: $responseText")
 
-        val responseBody = response.body<AttendanceStatusResponseWrapper>()
-        println("⚪ Server response: $responseBody")
+        val json = Json.parseToJsonElement(responseText).jsonObject
+        val resultObj = json["result"]?.jsonObject
+        val status = resultObj?.get("status")?.jsonPrimitive?.content
+        val errorCode = resultObj?.get("error_code")?.jsonPrimitive?.content
+
+        // ✅ تحقق من انتهاء التوكن
+        if ((errorCode == "INVALID_TOKEN" || errorCode == "TOKEN_EXPIRED") && retry) {
+            println("🔄 Token expired, renewing…")
+
+            val apiKey = sharedPref.getApiKey()
+            val companyId = sharedPref.getCompanyId()
+
+            val newTokenResponse = SignInApiService.renewToken(
+                apiKey = apiKey.orEmpty(),
+                companyId = companyId.orEmpty(),
+                employeeToken = token
+            )
+
+            val newToken = newTokenResponse.result.new_token
+            sharedPref.saveToken(newToken)
+            println("✅ New token generated: $newToken")
+
+            // إعادة إرسال نفس الطلب بالتوكن الجديد
+            return sendAttendanceAction(
+                context,
+                newToken,
+                action,
+                latitude,
+                longitude,
+                actionTime,
+                retry = false
+            )
+        }
+
+        // ❌ لو السيرفر رجع Error → نوقف هنا
+        if (status.equals("Error", ignoreCase = true)) {
+            println("❌ Server Error: ${resultObj?.get("message")?.jsonPrimitive?.content}")
+            return null
+        }
+
+        val jsonParser = Json { ignoreUnknownKeys = true }
+
+        // ✅ تحويل النص إلى الـ data class
+        val responseBody = jsonParser.decodeFromString(
+            AttendanceStatusResponseWrapper.serializer(),
+            responseText
+        )
         responseBody.result
 
     } catch (e: Exception) {
-        println("🔴 Exception: ${e.message}")
+        println("🔴 Exception in sendAttendanceAction: ${e.message}")
         null
     }
 }
 
 
+
+//suspend fun sendAttendanceAction(
+//    context: Context,
+//    token: String,
+//    action: String,
+//    latitude: String,
+//    longitude: String,
+//    actionTime: String? = null
+//): AttendanceStatusResult? {
+//    return try {
+//        val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+//        utcFormat.timeZone = TimeZone.getTimeZone("UTC")
+//        val currentTime = actionTime ?: utcFormat.format(Date())
+//        val sharedPref = SharedPrefManager(context)
+//        val companyUrl = sharedPref.getCompanyUrl()
+//
+//        val response: HttpResponse =
+//            httpClient.post("$companyUrl/api/employee_attendance") {
+//                contentType(ContentType.Application.Json)
+//                setBody(
+//                    mapOf(
+//                        "params" to mapOf(
+//                            "employee_token" to token,
+//                            "action" to action,
+//                            "lat" to latitude,
+//                            "lng" to longitude,
+//                            "action_time" to currentTime
+//                        )
+//                    )
+//                )
+//            }
+//
+//        println("Status: ${response.status}")
+//        println("Headers: ${response.headers}")
+//        println("Body: ${response.bodyAsText()}")
+//
+//        val responseBody = response.body<AttendanceStatusResponseWrapper>()
+//        println("⚪ Server response: $responseBody")
+//        responseBody.result
+//
+//    } catch (e: Exception) {
+//        println("🔴 Exception: ${e.message}")
+//        null
+//    }
+//}
+
+
 suspend fun fetchAttendanceStatus(
     context: Context,
-    token: String): AttendanceStatusResult? {
+    token: String,
+    retry: Boolean = true
+): AttendanceStatusResult? {
     return try {
         val sharedPref = SharedPrefManager(context)
         val companyUrl = sharedPref.getCompanyUrl()
@@ -306,23 +403,65 @@ suspend fun fetchAttendanceStatus(
                 )
             }
 
-        println("Status: ${response.status}")
-        println("Headers: ${response.headers}")
-        println("Body: ${response.bodyAsText()}")
+        val responseText = response.bodyAsText()
+        println("🟢 Server Response: $responseText")
 
-        val responseBody = response.body<AttendanceStatusResponseWrapper>()
-        println("⚪ Server response (status): $responseBody")
+        val json = Json.parseToJsonElement(responseText).jsonObject
+        val resultObj = json["result"]?.jsonObject
+        val status = resultObj?.get("status")?.jsonPrimitive?.content
+        val errorCode = resultObj?.get("error_code")?.jsonPrimitive?.content
 
-        val result = responseBody.result
+        if ((errorCode == "INVALID_TOKEN" || errorCode == "TOKEN_EXPIRED") && retry) {
+            println("🔄 Token expired, renewing…")
 
-        // ❌ لو السيرفر رجع Error → نوقف هنا
-        if (result.status.equals("Error", ignoreCase = true)) {
-            println("❌ Server Error: ${result.message}")
+            val apiKey = sharedPref.getApiKey()
+            val companyId = sharedPref.getCompanyId()
+
+            val newTokenResponse = SignInApiService.renewToken(
+                apiKey = apiKey.orEmpty(),
+                companyId = companyId.orEmpty(),
+                employeeToken = token
+            )
+
+            val newToken = newTokenResponse.result.new_token
+            sharedPref.saveToken(newToken)
+            println("✅ New token generated: $newToken")
+
+            return fetchAttendanceStatus(context, newToken, retry = false)
+        }
+
+        if (status.equals("Error", ignoreCase = true)) {
+            println("❌ Server Error: ${resultObj?.get("message")?.jsonPrimitive?.content}")
             return null
         }
 
-        // ✅ نجاح
-        result
+        val jsonParser = Json {
+            ignoreUnknownKeys = true
+        }
+
+        val responseBody = jsonParser.decodeFromString(
+            AttendanceStatusResponseWrapper.serializer(),
+            responseText
+        )
+        responseBody.result
+
+//        println("Status: ${response.status}")
+//        println("Headers: ${response.headers}")
+//        println("Body: ${response.bodyAsText()}")
+//
+//        val responseBody = response.body<AttendanceStatusResponseWrapper>()
+//        println("⚪ Server response (status): $responseBody")
+//
+//        val result = responseBody.result
+//
+//        // ❌ لو السيرفر رجع Error → نوقف هنا
+//        if (result.status.equals("Error", ignoreCase = true)) {
+//            println("❌ Server Error: ${result.message}")
+//            return null
+//        }
+//
+//        // ✅ نجاح
+//        result
 
     } catch (e: Exception) {
         println("🔴 Exception fetching status: ${e.message}")

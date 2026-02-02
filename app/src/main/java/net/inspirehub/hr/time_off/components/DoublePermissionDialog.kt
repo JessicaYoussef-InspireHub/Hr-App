@@ -78,7 +78,7 @@ fun DoublePermissionDialog(
     onDateSelectedChange: ((Set<LocalDate>) -> Unit)? = null,
     startDate: LocalDate? = null,
     leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
-    ){
+) {
 
     val context = LocalContext.current
 
@@ -87,6 +87,7 @@ fun DoublePermissionDialog(
     ) ?: ""
 
     var recordToDelete by remember { mutableStateOf<HourlyTimeOffRecord?>(null) }
+    var apiErrorMessage by remember { mutableStateOf<String?>(null) }
 
 
     val currentLanguage = Locale.getDefault().language
@@ -146,7 +147,7 @@ fun DoublePermissionDialog(
 
     val allRefused = records.all { it.state == "refuse" }
     val hasConfirmOrDraft = records.any { it.state == "confirm" || it.state == "draft" }
-    val hasValidate = records.any { it .state == "validate" }
+    val hasValidate = records.any { it.state == "validate" }
     val hasOtherThanConfirm = records.any { it.state != "confirm" }
     val approveWithOtherThanConfirm = hasValidate && hasOtherThanConfirm && !hasConfirmOrDraft
     var showNewVacationDialog by remember { mutableStateOf(false) }
@@ -333,11 +334,11 @@ fun DoublePermissionDialog(
                                 modifier = Modifier.padding(start = 20.dp),
                             )
                             if (record.state == "draft" || record.state == "confirm") {
-                                Row (
+                                Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.End,
                                     verticalAlignment = Alignment.CenterVertically,
-                                ){
+                                ) {
                                     Button(
                                         onClick = {
                                             recordToDelete = record
@@ -373,15 +374,33 @@ fun DoublePermissionDialog(
 
                                         Log.d("REQUEST_BODY", request.toString())
 
-                                        val response = sendApiForRequestTimeOff(context = context , request)
+                                        val response =
+                                            sendApiForRequestTimeOff(context = context, request)
                                         Log.d("API_RESPONSE", response.toString())
 
                                         withContext(Dispatchers.Main) {
-                                            recordToDelete = null
-                                            onDismiss()
-                                            onRefreshRequest()
+                                            if (response?.result?.status == "error") {
+                                                apiErrorMessage =
+                                                    response.result.message ?: "Unknown error"
+                                            } else {
+
+                                                recordToDelete = null
+                                                onDismiss()
+                                                onRefreshRequest()
+                                            }
                                         }
                                     }
+                                }
+                            )
+                        }
+
+                        if (apiErrorMessage != null) {
+                            DeleteErrorDialog(
+                                message = apiErrorMessage!!,
+                                onDismiss = { apiErrorMessage = null },
+                                onConfirm = {
+                                    onRefreshRequest()
+                                    apiErrorMessage = null
                                 }
                             )
                         }
@@ -425,9 +444,6 @@ fun DoublePermissionDialog(
                                     showNewVacationDialog = true
                                 },
                             tint = colors.tertiaryColor
-//                            tint = if (allRefused) MaterialTheme.colorScheme.error
-//                            else if (hasConfirmOrDraft) MaterialTheme.colorScheme.tertiary
-//                            else MaterialTheme.colorScheme.secondary,
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
@@ -436,9 +452,6 @@ fun DoublePermissionDialog(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             color = colors.tertiaryColor,
-//                            color = if (allRefused) MaterialTheme.colorScheme.error
-//                                   else if (hasConfirmOrDraft) MaterialTheme.colorScheme.tertiary
-//                                   else MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.clickable {
                                 showNewVacationDialog = true
 

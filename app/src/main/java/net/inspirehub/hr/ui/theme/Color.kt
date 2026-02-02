@@ -9,7 +9,13 @@ val Discard_color = Color(0xFFD3D3D3)
 val Dark_grey = Color(0xFF5E5D5D)
 val Lunch_card = Color(0xFF2D2C2C)
 
-val Light_green = Color(0xFFC8E6C9)
+//val Light_green = Color(0xFFC8E6C9)
+val Light_green = Color(0xFFDFF4D9)
+val Dark_green = Color(0xFF2E7D32)
+val Light_yellow = Color(0xFFFFF3CD)
+val Dark_yellow = Color(0xFFF0AD4E)
+
+
 val Delete_color = Color(0xFF3F3F4D)
 val Close_color = Color(0xFFA6A4A4)
 val Validate_color = Color(0xFF4CAF50)

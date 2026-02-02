@@ -89,8 +89,9 @@ fun DoubleStateDialog(
     val locale = if (currentLanguage == "ar") Locale("ar") else Locale.ENGLISH
 
     fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }.joinToString("")
+        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
+        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
+            .joinToString("")
     }
 
     val formattedDateRaw = selectedDate.format(
@@ -103,7 +104,13 @@ fun DoubleStateDialog(
         formattedDateRaw
     }
 
-    fun getLocalizedDayText(context: android.content.Context, count: Int, language: String): String {
+
+
+    fun getLocalizedDayText(
+        context: android.content.Context,
+        count: Int,
+        language: String
+    ): String {
         return if (language == "ar") {
             when (count) {
                 1 -> "يوم"
@@ -129,7 +136,7 @@ fun DoubleStateDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
 //            if (!allRefused) {
-                Button(
+            Button(
                 onClick = {
                     if (hasDraftOrConfirm) {
                         showDeleteConfirmation = true
@@ -186,8 +193,13 @@ fun DoubleStateDialog(
 
                         val translatedLeaveType = record.leave_type
                         val durationInt = record.duration_days.toInt()
-                        val daysText = if (currentLanguage == "ar") convertToArabicDigits(durationInt.toString()) else durationInt.toString()
-                        val dayWord = getLocalizedDayText(context = LocalContext.current, count = durationInt, language = currentLanguage)
+                        val daysText =
+                            if (currentLanguage == "ar") convertToArabicDigits(durationInt.toString()) else durationInt.toString()
+                        val dayWord = getLocalizedDayText(
+                            context = LocalContext.current,
+                            count = durationInt,
+                            language = currentLanguage
+                        )
 
 
                         Column {
@@ -254,7 +266,7 @@ fun DoubleStateDialog(
 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                   record.state,
+                                    record.state,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = colors.onBackgroundColor,
@@ -270,9 +282,14 @@ fun DoubleStateDialog(
                             Spacer(modifier = Modifier.height(12.dp))
                         }
 
+                        var apiErrorMessage by remember { mutableStateOf<String?>(null) }
+
+
                         if (showDeleteConfirmation) {
-                            val draftRecord = leaveRecords.find { it.state == "draft" || it.state == "confirm" }
+                            val draftRecord =
+                                leaveRecords.find { it.state == "draft" || it.state == "confirm" }
                             if (draftRecord != null) {
+
                                 DeleteConfirmationDialog(
                                     onDismiss = { showDeleteConfirmation = false },
                                     onConfirmDelete = {
@@ -288,17 +305,34 @@ fun DoubleStateDialog(
 
                                             Log.d("REQUEST_BODY", request.toString())
 
-                                            val response = sendApiForRequestTimeOff(context , request)
+                                            val response =
+                                                sendApiForRequestTimeOff(context, request)
                                             Log.d("API_RESPONSE", response.toString())
 
                                             withContext(Dispatchers.Main) {
-                                                showDeleteConfirmation = false
-                                                onDismiss()
-                                                onRefreshRequest()
+                                                if (response?.result?.status == "error") {
+                                                    apiErrorMessage = response.result.message ?: "Unknown error"
+                                                } else {
+                                                    showDeleteConfirmation = false
+                                                    onDismiss()
+                                                    onRefreshRequest()
+                                                }
                                             }
                                         }
                                     }
                                 )
+
+                                if (apiErrorMessage != null) {
+                                    DeleteErrorDialog (
+                                        message = apiErrorMessage!!,
+                                        onDismiss = { apiErrorMessage = null },
+                                        onConfirm = {
+                                            onRefreshRequest()
+                                            apiErrorMessage = null
+                                        }
+                                    )
+                                }
+
                             }
                         }
 

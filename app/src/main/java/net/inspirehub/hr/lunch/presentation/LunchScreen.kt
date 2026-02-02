@@ -3,7 +3,9 @@ package net.inspirehub.hr.lunch.presentation
 import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,10 +13,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -48,19 +56,22 @@ import net.inspirehub.hr.lunch.components.OrderSnackBar
 import net.inspirehub.hr.lunch.data.LunchProduct
 import net.inspirehub.hr.lunch.data.fetchLunchProducts
 import androidx.core.graphics.scale
-import net.inspirehub.hr.lunch.components.MyHistory
+import net.inspirehub.hr.lunch.components.MyHistoryBottomSheet
 import net.inspirehub.hr.lunch.components.MyOrderBottomSheet
 import net.inspirehub.hr.lunch.data.LunchCategory
 import net.inspirehub.hr.lunch.data.fetchLunchCategories
 
 
-fun base64ToImageBitmap(base64: String, targetWidth: Int = 80, targetHeight: Int = 80): ImageBitmap {
+fun base64ToImageBitmap(
+    base64: String,
+    targetWidth: Int = 80,
+    targetHeight: Int = 80
+): ImageBitmap {
     val decoded = Base64.decode(base64, Base64.DEFAULT)
     val bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
     val resized = bitmap.scale(targetWidth, targetHeight)
     return resized.asImageBitmap()
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,8 +91,8 @@ fun LunchScreen(
     val sharedPref = remember { SharedPrefManager(context) }
     val token = sharedPref.getToken()
     var categories by remember { mutableStateOf<List<LunchCategory>>(emptyList()) }
-
-
+    var openCartSheet by remember { mutableStateOf(false) }
+    var showHistorySheet by remember { mutableStateOf(false) }
 
 
     LaunchedEffect(token) {
@@ -99,7 +110,11 @@ fun LunchScreen(
             SnackbarHost(
                 hostState = snackBarHostState
             ) { data ->
-                OrderSnackBar(snackBarData = data)
+                OrderSnackBar(
+                    snackBarData = data,
+                    onViewCart = {
+                        openCartSheet = true
+                    })
             }
         },
         topBar = {
@@ -113,8 +128,9 @@ fun LunchScreen(
 
         if (showBottomSheet && selectedItem != null) {
             LunchBottomSheet(
+                productId = selectedItem!!.id,
                 name = selectedItem!!.name,
-                price = "${selectedItem!!.price} ${ selectedItem!!.currency}",
+                price = "${selectedItem!!.price} ${selectedItem!!.currency}",
                 isNew = selectedItem!!.isNew,
                 description = selectedItem!!.description,
                 supplierName = selectedItem!!.supplier_name,
@@ -155,11 +171,11 @@ fun LunchScreen(
                 ) {
                     Spacer(modifier = Modifier.height(30.dp))
 
-                    Row (
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
-                    ){
+                    ) {
                         LunchCategoryRow(
                             categories = categories,
                             onCategorySelected = { category ->
@@ -173,29 +189,62 @@ fun LunchScreen(
                             }
                         )
 
-                        Row (
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
-                        ){
-                            MyHistory()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(colors.surfaceContainerHigh, CircleShape)
+                                    .clickable { showHistorySheet = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.History,
+                                    contentDescription = "History",
+                                    tint = colors.onBackgroundColor,
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .padding(8.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(5.dp))
+                            Box(
+                                modifier = Modifier
+                                    .background(colors.surfaceContainerHigh, CircleShape)
+                                    .clickable { openCartSheet = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Fastfood,
+                                    contentDescription = "MyOrder",
+                                    tint = colors.onBackgroundColor,
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .padding(8.dp)
+                                )
+                            }
+
                             MyOrderBottomSheet(
+                                showSheet = openCartSheet,
+                                onDismiss = { openCartSheet = false },
                                 onOrderSuccess = {
                                     scope.launch {
                                         snackBarHostState.showSnackbar(successMessage)
                                     }
                                 }
                             )
-                        }
+                            MyHistoryBottomSheet(
+                                showSheet = showHistorySheet,
+                                onDismiss = { showHistorySheet = false }
+                            )
 
+                        }
                     }
                     Spacer(modifier = Modifier.height(30.dp))
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(bottom = 0.dp)
                     ) {
-
                         itemsIndexed(lunchProducts) { _, product ->
                             Column {
                                 LunchCard(

@@ -12,6 +12,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
 
@@ -56,6 +57,10 @@ data class LeaveDurationData(
     val date_to: String,
     val days: Double? = null,
     val hours: Double? = null,
+    val check_casual_leave: Boolean? = false,
+    val casual_days_count: Double? = null,
+    val remaining_casual_days: Double? = null,
+    val casual_leave_warning: JsonElement? = null
 )
 
 

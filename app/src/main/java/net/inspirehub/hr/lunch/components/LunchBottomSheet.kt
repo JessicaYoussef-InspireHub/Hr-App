@@ -45,6 +45,7 @@ import net.inspirehub.hr.lunch.presentation.base64ToImageBitmap
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LunchBottomSheet(
+    productId: Int,
     name: String,
     price: String,
     isNew: Boolean,
@@ -208,6 +209,8 @@ fun LunchBottomSheet(
 
             AddToCart(
                 price = price.toDouble(),
+                name = name,
+                productId = productId,
                 onAddClick = {
                     onAddToCart(name)
                     onDismiss()

@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -85,7 +83,7 @@ fun ScanQrCodeScreen(
 
                 navController.navigate("SignInScreen/${middleware.companyId}/${middleware.apiKey}")
             } catch (e: Exception) {
-                println("ERROR: ${e.message}")
+                println("test ERROR: ${e.message}")
             }
         }
     }
@@ -94,6 +92,39 @@ fun ScanQrCodeScreen(
         exitProcess(0)
     }
     val colors = appColors()
+
+    fun handleCompanyInput() {
+        if (str.isBlank()) {
+            errorMessage = "Please enter your company information."
+            showErrorDialog = true
+            return
+        }
+        try {
+            middleware = Middleware.initialize(str)
+            println("Full decryption result: $middleware")
+            println("Company ID: ${middleware!!.companyId}")
+            println("API Key: ${middleware!!.apiKey}")
+            println("Base URL: ${middleware!!.baseUrl}")
+
+            AppConfig.setBaseUrl(
+                middleware!!.baseUrl.replace("http://", "https://"),
+                context
+            )
+
+            navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}")
+        } catch (e: Exception) {
+            errorMessage = when {
+                e.message?.contains("decryption", ignoreCase = true) == true ||
+//                        e.message?.contains("Empty input", ignoreCase = true) == true ||
+                        e.message?.contains("decrypted", ignoreCase = true) == true ->
+                    "The company information you entered is invalid. Please check and try again."
+                else ->
+                    "An unexpected error occurred. Please try again."
+            }
+            showErrorDialog = true
+            println("ERROR: ${e.message}")
+        }
+    }
 
     Column (
         modifier = Modifier
@@ -146,25 +177,26 @@ fun ScanQrCodeScreen(
             onValueChange = { str = it },
             label = stringResource(R.string.enter_your_company_information),
             imeAction = ImeAction.Done,
-            onImeAction = {
-                if (str.isBlank()) {
-                    println("ERROR: Empty input")
-                }
-                try {
-                    middleware = Middleware.initialize(str)
-
-                    println("Full decryption result: $middleware")
-                    println("Company ID: ${middleware!!.companyId}")
-                    println("API Key: ${middleware!!.apiKey}")
-                    println("Base URL: ${middleware!!.baseUrl}")
-
-                    navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}")
-                } catch (e: Exception) {
-                    errorMessage = e.message ?: "Unknown decryption error."
-                    showErrorDialog = true
-                    println("ERROR: ${e.message}")
-                }
-            }
+            onImeAction = { handleCompanyInput() }
+//            onImeAction = {
+//                if (str.isBlank()) {
+//                    println("test4 ERROR: Empty input")
+//                }
+//                try {
+//                    middleware = Middleware.initialize(str)
+//
+//                    println("Full decryption result: $middleware")
+//                    println("Company ID: ${middleware!!.companyId}")
+//                    println("API Key: ${middleware!!.apiKey}")
+//                    println("Base URL: ${middleware!!.baseUrl}")
+//
+//                    navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}")
+//                } catch (e: Exception) {
+//                    errorMessage = e.message ?: "Unknown decryption error."
+//                    showErrorDialog = true
+//                    println("test2 ERROR: ${e.message}")
+//                }
+//            }
         )
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -176,97 +208,40 @@ fun ScanQrCodeScreen(
                 containerColor = colors.tertiaryColor,
                 contentColor = colors.onSecondaryColor
             ),
+            enabled = str.isNotBlank(),
             shape = RoundedCornerShape(8.dp),
-            onClick = {
-                try {
-                    middleware = Middleware.initialize(str)
-                    println("Full decryption result: $middleware")
-                    println("Company ID: ${middleware!!.companyId}")
-                    println("API Key: ${middleware!!.apiKey}")
-                    println("Base URL: ${middleware!!.baseUrl}")
-//                    AppConfig.baseUrl = middleware!!.baseUrl
-
-//                    AppConfig.baseUrl = middleware!!.baseUrl.replace("http://", "https://")
-
-                    AppConfig.setBaseUrl(
-                        middleware!!.baseUrl.replace("http://", "https://"),
-                        context
-                    )
-
-                    navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}")
-                } catch (e: Exception) {
-                    errorMessage = e.message ?: "Invalid company information"
-                    showErrorDialog = true
-                    println("ERROR: ${e.message}")
-                }
-            }
+//            onClick = {
+//                try {
+//                    middleware = Middleware.initialize(str)
+//                    println("Full decryption result: $middleware")
+//                    println("Company ID: ${middleware!!.companyId}")
+//                    println("API Key: ${middleware!!.apiKey}")
+//                    println("Base URL: ${middleware!!.baseUrl}")
+//                    AppConfig.setBaseUrl(
+//                        middleware!!.baseUrl.replace("http://", "https://"),
+//                        context
+//                    )
+//
+//                    navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}")
+//                } catch (e: Exception) {
+//                     errorMessage = when{
+//                         e.message?.contains("decryption", ignoreCase = true) == true ||
+//                                 e.message?.contains("Empty input", ignoreCase = true) == true ||
+//                                 e.message?.contains("decrypted", ignoreCase = true) == true ->
+//                             "The company information you entered is invalid. Please check and try again."
+//                         else ->
+//                             "An unexpected error occurred. Please try again."
+//                     }
+//                    showErrorDialog = true
+//                    println("test3 ERROR: ${e.message}")
+//                }
+//            }
+            onClick = { handleCompanyInput() }
 
         ) {
             Text(stringResource(R.string.done))
         }
 
-
-
-//        Spacer(modifier = Modifier.height(30.dp))
-//        Button(
-//            modifier = Modifier.fillMaxWidth(),
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = MaterialTheme.colorScheme.tertiary,
-//                contentColor = MaterialTheme.colorScheme.onPrimary
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            onClick = {
-////                navController.navigate("CheckInOutScreen")
-//                navController.navigate("CheckInOutScreen")
-//            }) {
-//            Text("Go To CheckIn Screen")
-//        }
-//        Spacer(modifier = Modifier.height(30.dp))
-//
-//        Button(
-//            modifier = Modifier.fillMaxWidth(),
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = MaterialTheme.colorScheme.tertiary,
-//                contentColor = MaterialTheme.colorScheme.onPrimary
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            onClick = {
-//                navController.navigate("TimeOffScreen")
-//            }) {
-//            Text("Go To TimeOff Screen D4AF37")
-//        }
-//        Spacer(modifier = Modifier.height(30.dp))
-//
-//        Button(
-//            modifier = Modifier.fillMaxWidth(),
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = MaterialTheme.colorScheme.tertiary,
-//               contentColor = MaterialTheme.colorScheme.onPrimary
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            onClick = {
-//
-////                navController.navigate("ProtectionScreen")
-//                navController.navigate("ProtectionScreen")
-//            }) {
-//            Text("Go To Protection Screen")
-//        }
-//
-//        Spacer(modifier = Modifier.height(30.dp))
-//
-//        Button(
-//            modifier = Modifier.fillMaxWidth(),
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = MaterialTheme.colorScheme.tertiary,
-//               contentColor = MaterialTheme.colorScheme.onPrimary
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            onClick = {
-//
-//                navController.navigate("SettingsScreen")
-//            }) {
-//            Text("Go To Settings Screen")
-//        }
 
         if (showErrorDialog) {
             ErrorCompanyInformationDialog(
@@ -277,5 +252,3 @@ fun ScanQrCodeScreen(
 
     }
 }
-
-

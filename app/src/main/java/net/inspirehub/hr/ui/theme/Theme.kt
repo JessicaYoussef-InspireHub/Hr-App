@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.graphics.Color.Companion.LightGray
+import net.inspirehub.hr.ui.theme.Light_green
 
 val LocalDarkMode = staticCompositionLocalOf { mutableStateOf(false) }
 
@@ -27,7 +28,11 @@ private val DarkColorScheme = darkColorScheme(
     surface = Dark_grey,
     error = Red,
     onSurface = Gray,
-    surfaceContainerHigh = Lunch_card
+    surfaceContainerHigh = Lunch_card,
+    inversePrimary = Light_green,
+    scrim = Dark_green,
+    onErrorContainer = Dark_yellow,
+    errorContainer = Light_yellow
 
 //    secondary = Validate_color,
 //    onPrimary = dark_background_color,
@@ -50,7 +55,12 @@ private val LightColorScheme = lightColorScheme(
     surface = Dark_grey,
     error = Red,
     onSurface = Gray,
-    surfaceContainerHigh = Lunch_card
+    surfaceContainerHigh = Lunch_card,
+    inversePrimary = Light_green,
+    scrim = Dark_green,
+    onErrorContainer = Dark_yellow,
+    errorContainer = Light_yellow,
+
 
 //    secondary = Validate_color,
 //    tertiary = Main_color,
@@ -101,7 +111,6 @@ fun HrTheme(
 //        darkTheme -> DarkColorScheme
 //        else -> LightColorScheme
 //    }
-
 
 
     MaterialTheme(

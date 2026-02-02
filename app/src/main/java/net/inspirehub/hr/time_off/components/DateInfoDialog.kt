@@ -43,6 +43,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
+import net.inspirehub.hr.time_off.data.LeaveDurationData
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -71,7 +75,6 @@ fun DateInfoDialog(
     val colors = appColors()
     var isHalfDay by remember { mutableStateOf(false) }
     val pleaseChooseTypeText = stringResource(R.string.please_choose_the_time_off_type)
-    val errorMessageTemplate = stringResource(R.string.error_message_overlap)
 
     var showStartCalendar by remember { mutableStateOf(false) }
     var showEndCalendar by remember { mutableStateOf(false) }
@@ -109,16 +112,11 @@ fun DateInfoDialog(
     var showPermissionErrorDialog by remember { mutableStateOf(false) }
 
     val isEndDateHide = selectedLeaveType?.request_unit == "hours_only"
-    val isHalfDayHide = selectedLeaveType?.request_unit == "day" || selectedLeaveType?.request_unit == "hours_only"
-
-//    val isPermissionOrOvertime =
-//        selectedLeaveType?.name.equals("Permission", ignoreCase = true) ||
-//        selectedLeaveType?.name.equals("Overtime", ignoreCase = true) ||
-//        selectedLeaveType?.name.equals("Unpaid", ignoreCase = true) ||
-//        selectedLeaveType?.name.equals("Customer Meetings", ignoreCase = true)
+    val isHalfDayHide =
+        selectedLeaveType?.request_unit == "day" || selectedLeaveType?.request_unit == "hours_only"
 
     var description by remember { mutableStateOf("") }
-
+    var leaveDurationData by remember { mutableStateOf<LeaveDurationData?>(null) }
 
 
     fun convertToDoubleHour(time: String): Double? {
@@ -165,6 +163,7 @@ fun DateInfoDialog(
                 )
 
                 withContext(Dispatchers.Main) {
+                    leaveDurationData = response.result.data
                     leaveDays = response.result.data?.days ?: 1.0
                 }
 
@@ -239,6 +238,23 @@ fun DateInfoDialog(
         }
     }
 
+    fun LeaveDurationData.casualWarningMessage(): String? {
+        val warning = casual_leave_warning ?: return null
+
+        return when {
+            warning is JsonPrimitive && warning.isString ->
+                warning.contentOrNull
+
+            warning is JsonPrimitive && warning.booleanOrNull != null ->
+                null
+
+            else -> null
+        }
+    }
+
+    val warningMessage = leaveDurationData?.casualWarningMessage()
+
+
     fun convertSelectedTimeToHour24(time: String, language: String): String {
         val arabicToEnglish = mapOf(
             '٠' to '0', '١' to '1', '٢' to '2', '٣' to '3', '٤' to '4',
@@ -264,7 +280,7 @@ fun DateInfoDialog(
     }
 
     LaunchedEffect(token) {
-        val result = fetchEmployeeLeaveTypes(context , token)
+        val result = fetchEmployeeLeaveTypes(context, token)
         result?.result?.leave_types?.let {
             leaveTypes = it
         }
@@ -305,7 +321,7 @@ fun DateInfoDialog(
                         .fillMaxWidth()
                         .padding(vertical = 15.dp, horizontal = 20.dp),
                 ) {
-                    Row (
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.Top
                     ) {
@@ -318,6 +334,10 @@ fun DateInfoDialog(
                                 selectedLeaveType = it
                                 leaveTypeError = ""
                             },
+                            token = token,
+                            selectedStartDate = selectedStartDate,
+                            selectedEndDate = selectedEndDate,
+                            leaveDays = { leaveDays = it }
                         )
                     }
 
@@ -333,573 +353,611 @@ fun DateInfoDialog(
 
 
                     Spacer(modifier = Modifier.height(15.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    )
-                    {
-                        if(!isHalfDayHide){
-                            HalfDayCheckbox(
-                                isChecked = isHalfDay,
-                                onCheckedChange = { checked ->
-                                    isHalfDay = checked
-                                    if (checked) {
-                                        permissionChecked = false
-                                    }
-                                },
-                                modifier = Modifier
-                                    .padding(start = 30.dp)
-                            )}
-                        if (selectedLeaveType?.request_unit == "hour" ) {
-                            CustomHours(
-                                isCheckedHours = permissionChecked,
-                                onCheckedHoursChange = { checked ->
-                                    permissionChecked = checked
-                                    if (checked) {
-                                        isHalfDay = false
-                                    }
-                                },
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row (
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        FirstText(stringResource(R.string.dates))
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Dates(
-                            startDate = selectedStartDate,
-                            lastDate = selectedEndDate,
-                            onStartDateClick = { showStartCalendar = true },
-                            onEndDateClick = { showEndCalendar = true },
-                            isHalfDay = isHalfDay,
-                            halfDayOption = halfDayOption,
-                            onHalfDayOptionChange = { halfDayOption = it },
-                            hideEndDate = permissionChecked || isEndDateHide
-                        )
-                    }
-
-
-                    if (showStartCalendar) {
-                        Dialog(
-                            onDismissRequest = { showStartCalendar = false }) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(colors.surfaceVariant)
-                            ) {
-                                Column(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .background(colors.surfaceVariant)
-                                ) {
-                                    var tempStartDate by remember { mutableStateOf(selectedStartDate) }
-
-                                    MyCalendarPicker(
-                                        selectedDates = selectedDates,
-                                        onDateSelectedChange = {
-                                            onDateSelectedChange(it)
-                                        },
-                                        isDialogMode = true,
-                                        validatedDates = validatedDates,
-                                        initialMonth = YearMonth.from(date),
-                                        onDateSelected = {
-                                            tempStartDate = it
-                                        },
-                                        token = token,
-                                        onRefreshRequest = onRefreshRequest,
-                                        startDate = tempStartDate,
-                                        endDate = selectedEndDate,
-                                        weekendDayNames = weekendDayNames,
-                                        publicHolidayDates = publicHolidayDates,
-                                        dailyRecords = dailyRecords,
-                                        hourlyRecords = hourlyRecords,
-                                        leaveTypeColors = leaveTypeColors
-
-                                    )
-                                    DialogActionsRow(
-                                        onConfirm = {
-                                            Log.d("CALENDAR", "save")
-
-                                            CoroutineScope(Dispatchers.IO).launch {
-                                                try {
-                                                    val formatter =
-                                                        DateTimeFormatter.ofPattern("MM-dd-yyyy")
-                                                    val requestDateFrom =
-                                                        selectedStartDate.format(formatter)
-                                                    val requestDateTo =
-                                                        selectedEndDate.format(formatter)
-
-                                                    Log.d(
-                                                        "DEBUG_DATES",
-                                                        "start=$requestDateFrom, end=$requestDateTo, token=$token, type=6"
-                                                    )
-
-                                                    Log.d("DEBUG_REQUEST", "leaveTypeId=${selectedLeaveType?.id}")
-
-
-                                                    val response = getLeaveDuration(
-                                                        context = context,
-                                                        employeeToken = token,
-                                                        requestDateFrom = requestDateFrom,
-                                                        requestDateTo = requestDateTo,
-                                                        leaveTypeId = selectedLeaveType?.id ?: 0,
-                                                    )
-
-
-                                                    response.result.data.let {
-                                                        leaveDays = if ((it?.days
-                                                                ?: 0.0) == 0.0
-                                                        ) 1.0 else it?.days
-                                                            ?: 1.0
-                                                    }
-
-
-                                                    Log.d("LEAVE_API", "Parsed Response: $response")
-                                                } catch (e: Exception) {
-                                                    Log.e(
-                                                        "LEAVE_API",
-                                                        "Error in call: ${e.message}",
-                                                        e
-                                                    )
-                                                }
-                                            }
-
-
-                                            if (tempStartDate.isBefore(selectedEndDate)) {
-                                                selectedStartDate = tempStartDate
-                                            } else {
-                                                selectedStartDate = selectedEndDate
-                                                selectedEndDate = tempStartDate
-                                            }
-
-                                            val updatedDates =
-                                                getDatesBetween(selectedStartDate, selectedEndDate)
-                                            onDateSelectedChange(updatedDates)
-
-                                            showStartCalendar = false
-                                        },
-                                        onDiscard = {
-                                            showStartCalendar = false
-                                        },
-
-                                        modifier = Modifier.padding(
-                                            horizontal = 15.dp,
-                                            vertical = 10.dp
-                                        ),
-                                        isCalendarDialog = true
-                                    )
-
-                                }
-                            }
-                        }
-                    }
-                    if (showEndCalendar) {
-                        Dialog(onDismissRequest = { showEndCalendar = false }) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(colors.surfaceVariant)
-                            ) {
-                                Column(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .background(colors.surfaceVariant)
-                                ) {
-                                    var tempEndDate by remember { mutableStateOf(selectedEndDate) }
-
-                                    MyCalendarPicker(
-                                        selectedDates = selectedDates,
-                                        onDateSelectedChange = {
-                                            onDateSelectedChange(it)
-                                        },
-                                        isDialogMode = true,
-                                        initialMonth = YearMonth.from(date),
-                                        validatedDates = validatedDates,
-                                        onDateSelected = {
-                                            tempEndDate = it
-                                        },
-                                        token = token,
-                                        onRefreshRequest = onRefreshRequest,
-                                        startDate = selectedStartDate,
-                                        endDate = tempEndDate,
-                                        weekendDayNames = weekendDayNames,
-                                        publicHolidayDates = publicHolidayDates,
-                                        dailyRecords = dailyRecords,
-                                        hourlyRecords = hourlyRecords,
-                                        leaveTypeColors = leaveTypeColors
- )
-
-                                    DialogActionsRow(
-                                        onConfirm = {
-                                            Log.d("CALENDAR", "save")
-
-                                            CoroutineScope(Dispatchers.IO).launch {
-                                                try {
-                                                    val formatter =
-                                                        DateTimeFormatter.ofPattern("MM-dd-yyyy")
-                                                    val requestDateFrom =
-                                                        selectedStartDate.format(formatter)
-                                                    val requestDateTo =
-                                                        selectedEndDate.format(formatter)
-
-                                                    Log.d(
-                                                        "DEBUG_DATES",
-                                                        "start=$requestDateFrom, end=$requestDateTo, token=$token, type=6"
-                                                    )
-
-                                                    Log.d("DEBUG_REQUEST", "leaveTypeId=${selectedLeaveType?.id}")
-
-
-                                                    val response = getLeaveDuration(
-                                                        context = context,
-                                                        employeeToken = token,
-                                                        requestDateFrom = requestDateFrom,
-                                                        requestDateTo = requestDateTo,
-                                                        leaveTypeId = selectedLeaveType?.id ?: 0,
-                                                    )
-
-                                                    response.result.data.let {
-                                                        leaveDays = if ((it?.days
-                                                                ?: 0.0) == 0.0
-                                                        ) 1.0 else it?.days
-                                                            ?: 1.0
-                                                    }
-
-
-                                                    Log.d("LEAVE_API", "Parsed Response: $response")
-                                                } catch (e: Exception) {
-                                                    Log.e(
-                                                        "LEAVE_API",
-                                                        "Error in call: ${e.message}",
-                                                        e
-                                                    )
-                                                }
-                                            }
-
-
-                                            if (tempEndDate.isAfter(selectedStartDate)) {
-                                                selectedEndDate = tempEndDate
-                                            } else {
-                                                selectedEndDate = selectedStartDate
-                                                selectedStartDate = tempEndDate
-                                            }
-                                            showEndCalendar = false
-                                        },
-                                        onDiscard = {
-                                            showEndCalendar = false
-                                        },
-                                        modifier = Modifier.padding(
-                                            horizontal = 15.dp,
-                                            vertical = 10.dp
-                                        ),
-                                        isCalendarDialog = true
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(15.dp))
-
-
-                    if (permissionChecked || selectedLeaveType?.request_unit == "hours_only") {
+                    if (selectedLeaveType != null) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 50.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
+                        )
+                        {
+                            if (!isHalfDayHide) {
+                                HalfDayCheckbox(
+                                    isChecked = isHalfDay,
+                                    onCheckedChange = { checked ->
+                                        isHalfDay = checked
+                                        if (checked) {
+                                            permissionChecked = false
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .padding(start = 30.dp)
+                                )
+                            }
+                            if (selectedLeaveType?.request_unit == "hour") {
+                                CustomHours(
+                                    isCheckedHours = permissionChecked,
+                                    onCheckedHoursChange = { checked ->
+                                        permissionChecked = checked
+                                        if (checked) {
+                                            isHalfDay = false
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            CustomHourDropDown(
-                                stringResource(R.string.from),
-                                selectedPermissionHour = selectedFromHour,
-                                onPermissionHourSelected = { time ->
-                                    selectedFromHour = time
-                                    calculatePermissionDuration()
+                            FirstText(stringResource(R.string.dates))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Dates(
+                                startDate = selectedStartDate,
+                                lastDate = selectedEndDate,
+                                onStartDateClick = { showStartCalendar = true },
+                                onEndDateClick = { showEndCalendar = true },
+                                isHalfDay = isHalfDay,
+                                halfDayOption = halfDayOption,
+                                onHalfDayOptionChange = { halfDayOption = it },
+                                hideEndDate = permissionChecked || isEndDateHide
+                            )
+                        }
+
+
+                        if (showStartCalendar) {
+                            Dialog(
+                                onDismissRequest = { showStartCalendar = false }) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(colors.surfaceVariant)
+                                ) {
+                                    Column(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .background(colors.surfaceVariant)
+                                    ) {
+                                        var tempStartDate by remember {
+                                            mutableStateOf(
+                                                selectedStartDate
+                                            )
+                                        }
+
+                                        MyCalendarPicker(
+                                            selectedDates = selectedDates,
+                                            onDateSelectedChange = {
+                                                onDateSelectedChange(it)
+                                            },
+                                            isDialogMode = true,
+                                            validatedDates = validatedDates,
+                                            initialMonth = YearMonth.from(date),
+                                            onDateSelected = {
+                                                tempStartDate = it
+                                            },
+                                            token = token,
+                                            onRefreshRequest = onRefreshRequest,
+                                            startDate = tempStartDate,
+                                            endDate = selectedEndDate,
+                                            weekendDayNames = weekendDayNames,
+                                            publicHolidayDates = publicHolidayDates,
+                                            dailyRecords = dailyRecords,
+                                            hourlyRecords = hourlyRecords,
+                                            leaveTypeColors = leaveTypeColors
+
+                                        )
+                                        DialogActionsRow(
+                                            onConfirm = {
+                                                Log.d("CALENDAR", "save")
+
+                                                CoroutineScope(Dispatchers.IO).launch {
+                                                    try {
+                                                        val formatter =
+                                                            DateTimeFormatter.ofPattern("MM-dd-yyyy")
+                                                        val requestDateFrom =
+                                                            selectedStartDate.format(formatter)
+                                                        val requestDateTo =
+                                                            selectedEndDate.format(formatter)
+
+                                                        Log.d(
+                                                            "DEBUG_DATES",
+                                                            "start=$requestDateFrom, end=$requestDateTo, token=$token, type=6"
+                                                        )
+
+                                                        Log.d(
+                                                            "DEBUG_REQUEST",
+                                                            "leaveTypeId=${selectedLeaveType?.id}"
+                                                        )
+
+
+                                                        val response = getLeaveDuration(
+                                                            context = context,
+                                                            employeeToken = token,
+                                                            requestDateFrom = requestDateFrom,
+                                                            requestDateTo = requestDateTo,
+                                                            leaveTypeId = selectedLeaveType?.id
+                                                                ?: 0,
+                                                        )
+
+
+                                                        response.result.data.let {
+                                                            leaveDays = if ((it?.days
+                                                                    ?: 0.0) == 0.0
+                                                            ) 1.0 else it?.days
+                                                                ?: 1.0
+                                                        }
+
+
+                                                        Log.d(
+                                                            "LEAVE_API",
+                                                            "Parsed Response: $response"
+                                                        )
+                                                    } catch (e: Exception) {
+                                                        Log.e(
+                                                            "LEAVE_API",
+                                                            "Error in call: ${e.message}",
+                                                            e
+                                                        )
+                                                    }
+                                                }
+
+
+                                                if (tempStartDate.isBefore(selectedEndDate)) {
+                                                    selectedStartDate = tempStartDate
+                                                } else {
+                                                    selectedStartDate = selectedEndDate
+                                                    selectedEndDate = tempStartDate
+                                                }
+
+                                                val updatedDates =
+                                                    getDatesBetween(
+                                                        selectedStartDate,
+                                                        selectedEndDate
+                                                    )
+                                                onDateSelectedChange(updatedDates)
+
+                                                showStartCalendar = false
+                                            },
+                                            onDiscard = {
+                                                showStartCalendar = false
+                                            },
+
+                                            modifier = Modifier.padding(
+                                                horizontal = 15.dp,
+                                                vertical = 10.dp
+                                            ),
+                                            isCalendarDialog = true
+                                        )
+
+                                    }
                                 }
+                            }
+                        }
+                        if (showEndCalendar) {
+                            Dialog(onDismissRequest = { showEndCalendar = false }) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(colors.surfaceVariant)
+                                ) {
+                                    Column(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .background(colors.surfaceVariant)
+                                    ) {
+                                        var tempEndDate by remember { mutableStateOf(selectedEndDate) }
+
+                                        MyCalendarPicker(
+                                            selectedDates = selectedDates,
+                                            onDateSelectedChange = {
+                                                onDateSelectedChange(it)
+                                            },
+                                            isDialogMode = true,
+                                            initialMonth = YearMonth.from(date),
+                                            validatedDates = validatedDates,
+                                            onDateSelected = {
+                                                tempEndDate = it
+                                            },
+                                            token = token,
+                                            onRefreshRequest = onRefreshRequest,
+                                            startDate = selectedStartDate,
+                                            endDate = tempEndDate,
+                                            weekendDayNames = weekendDayNames,
+                                            publicHolidayDates = publicHolidayDates,
+                                            dailyRecords = dailyRecords,
+                                            hourlyRecords = hourlyRecords,
+                                            leaveTypeColors = leaveTypeColors
+                                        )
+
+                                        DialogActionsRow(
+                                            onConfirm = {
+                                                Log.d("CALENDAR", "save")
+
+                                                CoroutineScope(Dispatchers.IO).launch {
+                                                    try {
+                                                        val formatter =
+                                                            DateTimeFormatter.ofPattern("MM-dd-yyyy")
+                                                        val requestDateFrom =
+                                                            selectedStartDate.format(formatter)
+                                                        val requestDateTo =
+                                                            selectedEndDate.format(formatter)
+
+                                                        Log.d(
+                                                            "DEBUG_DATES",
+                                                            "start=$requestDateFrom, end=$requestDateTo, token=$token, type=6"
+                                                        )
+
+                                                        Log.d(
+                                                            "DEBUG_REQUEST",
+                                                            "leaveTypeId=${selectedLeaveType?.id}"
+                                                        )
+
+
+                                                        val response = getLeaveDuration(
+                                                            context = context,
+                                                            employeeToken = token,
+                                                            requestDateFrom = requestDateFrom,
+                                                            requestDateTo = requestDateTo,
+                                                            leaveTypeId = selectedLeaveType?.id
+                                                                ?: 0,
+                                                        )
+
+                                                        response.result.data.let {
+                                                            leaveDays = if ((it?.days
+                                                                    ?: 0.0) == 0.0
+                                                            ) 1.0 else it?.days
+                                                                ?: 1.0
+                                                        }
+
+
+                                                        Log.d(
+                                                            "LEAVE_API",
+                                                            "Parsed Response: $response"
+                                                        )
+                                                    } catch (e: Exception) {
+                                                        Log.e(
+                                                            "LEAVE_API",
+                                                            "Error in call: ${e.message}",
+                                                            e
+                                                        )
+                                                    }
+                                                }
+
+
+                                                if (tempEndDate.isAfter(selectedStartDate)) {
+                                                    selectedEndDate = tempEndDate
+                                                } else {
+                                                    selectedEndDate = selectedStartDate
+                                                    selectedStartDate = tempEndDate
+                                                }
+                                                showEndCalendar = false
+                                            },
+                                            onDiscard = {
+                                                showEndCalendar = false
+                                            },
+                                            modifier = Modifier.padding(
+                                                horizontal = 15.dp,
+                                                vertical = 10.dp
+                                            ),
+                                            isCalendarDialog = true
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(15.dp))
+
+
+                        if (permissionChecked || selectedLeaveType?.request_unit == "hours_only") {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 50.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                CustomHourDropDown(
+                                    stringResource(R.string.from),
+                                    selectedPermissionHour = selectedFromHour,
+                                    onPermissionHourSelected = { time ->
+                                        selectedFromHour = time
+                                        calculatePermissionDuration()
+                                    }
+                                )
+                                CustomHourDropDown(
+                                    label = stringResource(R.string.to),
+                                    selectedPermissionHour = selectedToHour,
+                                    onPermissionHourSelected = { time ->
+                                        selectedToHour = time
+                                        calculatePermissionDuration()
+                                    },
+                                )
+                            }
+                        }
+
+                        if (permissionErrorMessage.isNotEmpty()) {
+                            Text(
+                                text = permissionErrorMessage,
+                                color = colors.error,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(start = 50.dp, top = 4.dp)
                             )
-                            CustomHourDropDown(
-                                label = stringResource(R.string.to),
-                                selectedPermissionHour = selectedToHour,
-                                onPermissionHourSelected = { time ->
-                                    selectedToHour = time
-                                    calculatePermissionDuration()
-                                },
+                        }
+
+                        when {
+                            permissionChecked || selectedLeaveType?.request_unit == "hours_only" -> {
+                                Spacer(modifier = Modifier.height(15.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    FirstText(stringResource(R.string.duration))
+                                    Spacer(Modifier.width(10.dp))
+                                    DurationHours(hours = leaveHours)
+                                }
+                            }
+
+                            isHalfDay -> {}
+
+                            selectedLeaveType?.request_unit == "hour" || selectedLeaveType?.request_unit == "hours_only"
+                                -> {
+                                Spacer(modifier = Modifier.height(15.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    FirstText(stringResource(R.string.duration))
+                                    Spacer(Modifier.width(10.dp))
+                                    DurationHours(hours = 0.0)
+                                }
+                            }
+
+
+                            else -> {
+                                Spacer(modifier = Modifier.height(15.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    FirstText(stringResource(R.string.duration))
+                                    Spacer(Modifier.width(10.dp))
+                                    DurationDays(days = leaveDays.toInt())
+                                }
+                            }
+                        }
+
+
+                        Spacer(modifier = Modifier.height(15.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FirstText(stringResource(R.string.description))
+                            DescriptionInput(
+                                description = description,
+                                onDescriptionChange = { description = it }
                             )
                         }
-                    }
 
-                    if (permissionErrorMessage.isNotEmpty()) {
-                        Text(
-                            text = permissionErrorMessage,
-                            color = colors.error,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(start = 50.dp, top = 4.dp)
-                        )
-                    }
 
-                    when {
-                        permissionChecked || selectedLeaveType?.request_unit == "hours_only" -> {
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Row (
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ){
-                                FirstText(stringResource(R.string.duration))
-                                Spacer(Modifier.width(10.dp))
-                                DurationHours(hours = leaveHours)
+
+                        when {
+                            warningMessage != null -> {
+                                Spacer(modifier = Modifier.height(55.dp))
+                                FirstText(stringResource(R.string.casual_leave))
+                                Spacer(modifier = Modifier.height(10.dp))
+                                CasualLeaveWarning(message = warningMessage)
+                            }
+
+                            leaveDurationData?.check_casual_leave == true -> {
+                                Spacer(modifier = Modifier.height(55.dp))
+                                FirstText(stringResource(R.string.casual_leave))
+                                Spacer(modifier = Modifier.height(10.dp))
+                                CasualLeave(
+                                    remainingDays = leaveDurationData?.remaining_casual_days ?: 0.0
+                                )
                             }
                         }
+                        Spacer(modifier = Modifier.height(30.dp))
 
-                        isHalfDay  -> {}
-
-                        selectedLeaveType?.request_unit == "hour" || selectedLeaveType?.request_unit == "hours_only"
-                        -> {
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Row (
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ){
-                                FirstText(stringResource(R.string.duration))
-                                Spacer(Modifier.width(10.dp))
-                                DurationHours(hours = 4.0)
-                            }
-                        }
-
-//                        !isHalfDay && selectedLeaveType?.name.equals(
-//                            "Permission",
-//                            ignoreCase = true
-//                        ) -> {
-//                            Spacer(modifier = Modifier.height(15.dp))
-//                            Row (
-//                                modifier = Modifier.fillMaxWidth(),
-//                                verticalAlignment = Alignment.CenterVertically,
-//                                horizontalArrangement = Arrangement.SpaceBetween
-//                            ){
-//                                FirstText(stringResource(R.string.duration))
-//                                DurationDays(days = 1)
-//                                DurationHours(hours = 8.0)
-//                            }
-//                        }
-
-                        else -> {
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Row (
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ){
-                                FirstText(stringResource(R.string.duration))
-                                Spacer(Modifier.width(10.dp))
-                                DurationDays(days = leaveDays.toInt())
-                            }
-                        }
-                    }
+                        DialogActionsRow(
+                            onConfirm = {
+                                if (permissionErrorMessage.isNotEmpty()) {
+                                    return@DialogActionsRow
+                                }
 
 
-                    Spacer(modifier = Modifier.height(15.dp))
-                    Row (
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        FirstText(stringResource(R.string.description))
-                        DescriptionInput(
-                            description = description,
-                            onDescriptionChange = { description = it }
-                        )
-                    }
+                                if (permissionChecked) {
 
-                    Spacer(modifier = Modifier.height(30.dp))
+                                    Log.d("SAVE_ACTION", "Permission with custom hour")
 
-                    DialogActionsRow(
-                        onConfirm = {
-                            if (permissionErrorMessage.isNotEmpty()) {
-                                return@DialogActionsRow
-                            }
+                                    isLoading = true
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        val startDateStr = selectedStartDate.toString()
 
-//                            if (isPermissionOrOvertime && permissionChecked) {
-                         if (permissionChecked) {
+                                        val fromHourForApi = selectedFromHour?.let {
+                                            convertSelectedTimeToHour24(
+                                                it,
+                                                currentLanguage
+                                            )
+                                        } ?: "0"
+                                        val toHourForApi = selectedToHour?.let {
+                                            convertSelectedTimeToHour24(
+                                                it,
+                                                currentLanguage
+                                            )
+                                        } ?: "0"
 
-                                Log.d("SAVE_ACTION", "Permission with custom hour")
+                                        val request = TimeOffRequestForRequestEmployee(
+                                            employee_token = token,
+                                            action = "request_annual_leave",
+                                            leave_type_id = selectedLeaveType?.id ?: 0,
+                                            description = description,
+                                            request_date_from = startDateStr,
+                                            request_date_to = startDateStr,
+                                            request_hour_from = fromHourForApi,
+                                            request_hour_to = toHourForApi,
+                                            request_unit_hours = true
+                                        )
 
-                                isLoading = true
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    val startDateStr = selectedStartDate.toString()
+                                        Log.d("REQUEST_BODY_Permission", request.toString())
 
-                                    val fromHourForApi = selectedFromHour?.let { convertSelectedTimeToHour24(it, currentLanguage) } ?: "0"
-                                    val toHourForApi = selectedToHour?.let { convertSelectedTimeToHour24(it, currentLanguage) } ?: "0"
-
-                                    val request = TimeOffRequestForRequestEmployee(
-                                        employee_token = token,
-                                        action = "request_annual_leave",
-                                        leave_type_id = selectedLeaveType?.id ?: 0,
-                                        description = description,
-                                        request_date_from = startDateStr,
-                                        request_date_to = startDateStr,
-                                        request_hour_from = fromHourForApi,
-                                        request_hour_to = toHourForApi,
-                                        request_unit_hours = true
-                                    )
-
-                                    Log.d("REQUEST_BODY_Permission", request.toString())
-
-                                    val response = sendApiForRequestTimeOff(context , request)
+                                        val response = sendApiForRequestTimeOff(context, request)
 
 
-                                    Log.d("API_RESPONSE_Permission", response.toString())
+                                        Log.d("API_RESPONSE_Permission", response.toString())
 
-                                    withContext(Dispatchers.Main) {
-                                        isLoading = false
-                                        if (response?.result?.status == "success") {
-                                            onConfirm()
-                                        } else {
-                                            val apiMessage = response?.result?.message ?: ""
-                                            if (apiMessage.contains("No allocation found for this leave type", ignoreCase = true)) {
-                                                errorMessage = apiMessage
-                                                showPermissionErrorDialog = true
-
+                                        withContext(Dispatchers.Main) {
+                                            isLoading = false
+                                            if (response?.result?.status == "success") {
+                                                onConfirm()
                                             } else {
-//                                                errorMessage = "Error requesting Permission"
-                                                errorMessage = apiMessage
-                                                showPermissionErrorDialog = true                                            }
+                                                val apiMessage = response?.result?.message ?: ""
+                                                if (apiMessage.contains(
+                                                        "No allocation found for this leave type",
+                                                        ignoreCase = true
+                                                    )
+                                                ) {
+                                                    errorMessage = apiMessage
+                                                    showPermissionErrorDialog = true
+
+                                                } else {
+                                                    errorMessage = apiMessage
+                                                    showPermissionErrorDialog = true
+                                                }
+                                            }
                                         }
                                     }
+
+                                    return@DialogActionsRow
                                 }
 
-                                return@DialogActionsRow
-                            }
 
+                                if (selectedLeaveType == null) {
+                                    leaveTypeError = pleaseChooseTypeText
+                                    return@DialogActionsRow
+                                }
 
-                            if (selectedLeaveType == null) {
-                                leaveTypeError = pleaseChooseTypeText
-                                return@DialogActionsRow
-                            }
+                                if (isHalfDay) {
+                                    Log.d("HALF_DAY", "نص يوم - $halfDayOption")
 
-                            if (isHalfDay) {
-                                Log.d("HALF_DAY", "نص يوم - $halfDayOption")
+                                    isLoading = true
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        val startDateStr = selectedStartDate.toString()
+
+                                        val period =
+                                            if (halfDayOption == morningText) "am" else "pm"
+
+                                        val request = TimeOffRequestForRequestEmployee(
+                                            employee_token = token,
+                                            action = "request_annual_leave",
+                                            leave_type_id = selectedLeaveType?.id ?: 0,
+                                            description = description,
+                                            request_date_from = startDateStr,
+                                            request_date_to = startDateStr,
+                                            request_date_from_period = period,
+                                            request_unit_half = true,
+                                            request_unit_hours = true
+                                        )
+
+                                        Log.d("REQUEST_BODY_HALF_DAY", request.toString())
+
+                                        val response = sendApiForRequestTimeOff(context, request)
+
+                                        Log.d("API_RESPONSE_HALF_DAY", response.toString())
+
+                                        withContext(Dispatchers.Main) {
+                                            isLoading = false
+                                            if (response?.result?.status == "success") {
+                                                onConfirm()
+                                            } else {
+                                                val apiMessage = response?.result?.message ?: ""
+
+                                                errorMessage = apiMessage
+                                                showErrorDialog = true
+                                            }
+                                        }
+                                    }
+
+                                    return@DialogActionsRow
+                                }
+
 
                                 isLoading = true
                                 CoroutineScope(Dispatchers.IO).launch {
                                     val startDateStr = selectedStartDate.toString()
-
-                                    val period = if (halfDayOption == morningText) "am" else "pm"
-
+                                    val endDateStr = selectedEndDate.toString()
                                     val request = TimeOffRequestForRequestEmployee(
                                         employee_token = token,
                                         action = "request_annual_leave",
                                         leave_type_id = selectedLeaveType?.id ?: 0,
                                         description = description,
                                         request_date_from = startDateStr,
-                                        request_date_to = startDateStr,
-                                        request_date_from_period = period,
-                                        request_unit_half = true,
-                                        request_unit_hours = true
+                                        request_date_to = endDateStr
                                     )
 
-                                    Log.d("REQUEST_BODY_HALF_DAY", request.toString())
+                                    Log.d("REQUEST_BODY", request.toString())
 
-                                    val response = sendApiForRequestTimeOff(context , request)
+                                    val response = sendApiForRequestTimeOff(context, request)
 
-                                    Log.d("API_RESPONSE_HALF_DAY", response.toString())
+                                    Log.d("API_RESPONSE", response.toString())
 
                                     withContext(Dispatchers.Main) {
                                         isLoading = false
                                         if (response?.result?.status == "success") {
                                             onConfirm()
                                         } else {
+                                            fun String.replaceDigitsWithArabic(): String {
+                                                val arabicDigits = listOf(
+                                                    '٠',
+                                                    '١',
+                                                    '٢',
+                                                    '٣',
+                                                    '٤',
+                                                    '٥',
+                                                    '٦',
+                                                    '٧',
+                                                    '٨',
+                                                    '٩'
+                                                )
+                                                return this.map { char ->
+                                                    if (char.isDigit()) arabicDigits[char.digitToInt()] else char
+                                                }.joinToString("")
+                                            }
+
+                                            val locale = Locale.getDefault()
+                                            val formatter =
+                                                DateTimeFormatter.ofPattern("d-M-yyyy", locale)
+
+                                            var startDateStrFormatted =
+                                                selectedStartDate.format(formatter)
+                                            var endDateStrFormatted =
+                                                selectedEndDate.format(formatter)
+
                                             val apiMessage = response?.result?.message ?: ""
 
-//                                            errorMessage = "Error requesting half day"
+                                            if (locale.language == "ar") {
+                                                startDateStrFormatted =
+                                                    startDateStrFormatted.replaceDigitsWithArabic()
+                                                endDateStrFormatted =
+                                                    endDateStrFormatted.replaceDigitsWithArabic()
+                                            }
+
                                             errorMessage = apiMessage
+
+
                                             showErrorDialog = true
                                         }
                                     }
                                 }
-
-                                return@DialogActionsRow
-                            }
-
-
-                            isLoading = true
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val startDateStr = selectedStartDate.toString()
-                                val endDateStr = selectedEndDate.toString()
-                                val request = TimeOffRequestForRequestEmployee(
-                                    employee_token = token,
-                                    action = "request_annual_leave",
-                                    leave_type_id = selectedLeaveType?.id ?: 0,
-                                    description = description,
-                                    request_date_from = startDateStr,
-                                    request_date_to = endDateStr
-                                )
-
-                                Log.d("REQUEST_BODY", request.toString())
-
-                                val response = sendApiForRequestTimeOff(context , request)
-
-                                Log.d("API_RESPONSE", response.toString())
-
-                                withContext(Dispatchers.Main) {
-                                    isLoading = false
-                                    if (response?.result?.status == "success") {
-                                        onConfirm()
-                                    } else {
-                                        fun String.replaceDigitsWithArabic(): String {
-                                            val arabicDigits = listOf(
-                                                '٠',
-                                                '١',
-                                                '٢',
-                                                '٣',
-                                                '٤',
-                                                '٥',
-                                                '٦',
-                                                '٧',
-                                                '٨',
-                                                '٩'
-                                            )
-                                            return this.map { char ->
-                                                if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-                                            }.joinToString("")
-                                        }
-
-                                        val locale = Locale.getDefault()
-                                        val formatter =
-                                            DateTimeFormatter.ofPattern("d-M-yyyy", locale)
-
-                                        var startDateStrFormatted =
-                                            selectedStartDate.format(formatter)
-                                        var endDateStrFormatted = selectedEndDate.format(formatter)
-
-                                        val apiMessage = response?.result?.message ?: ""
-
-                                        if (locale.language == "ar") {
-                                            startDateStrFormatted =
-                                                startDateStrFormatted.replaceDigitsWithArabic()
-                                            endDateStrFormatted =
-                                                endDateStrFormatted.replaceDigitsWithArabic()
-                                        }
-
-                                        errorMessage = apiMessage
-//                                        errorMessage = String.format(
-//                                            errorMessageTemplate,
-//                                            startDateStrFormatted,
-//                                            endDateStrFormatted
-//                                        )
-
-                                        showErrorDialog = true
-                                    }
-                                }
-                            }
-                        },
-                        onDiscard = {
-                            if (!isLoading) onDiscard()
-                        },
-                        isLoading = isLoading
-                    )
+                            },
+                            onDiscard = {
+                                if (!isLoading) onDiscard()
+                            },
+                            isLoading = isLoading
+                        )
+                    }
 
                     if (showErrorDialog) {
                         ErrorDialog(
@@ -916,7 +974,6 @@ fun DateInfoDialog(
                             onDismiss = { showPermissionErrorDialog = false }
                         )
                     }
-
                 }
             }
         }

@@ -56,7 +56,7 @@ fun LunchCategoryRow(
                            colors.transparent,
                         shape = RoundedCornerShape(12.dp)
                     )
-                    .padding(horizontal = 8.dp, vertical = 8.dp)
+                    .padding(8.dp)
             )
         }
     }

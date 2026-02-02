@@ -14,6 +14,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,24 +24,26 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
-fun ErrorDialog(
+fun DeleteErrorDialog(
     message: String,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
 ){
     val colors = appColors()
 
     AlertDialog(
         containerColor = colors.surfaceVariant,
-        onDismissRequest = {
-            onDismiss()
-        },
+        onDismissRequest = onDismiss,
         title = {
-            Column {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
-                ) {
+                ){
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.close),
@@ -52,33 +55,31 @@ fun ErrorDialog(
                 Text(
                     stringResource(R.string.invalid_request),
                     color = colors.tertiaryColor,
-                    fontSize = 20.sp,
+                    fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
         },
-        text = {
-            Text(
-                "$message \n " ,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Normal,
-                color = colors.onBackgroundColor,
-            )
-        },
+        text = {  Text(
+            message,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Normal,
+            color = colors.onBackgroundColor
+        ) },
         confirmButton = {
             Button(
-                onClick = { onDismiss() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.tertiaryColor,
-                    contentColor = colors.onSecondaryColor
+                    contentColor = colors.onSecondaryColor,
+                    containerColor = colors.tertiaryColor
                 ),
-                shape = RoundedCornerShape(10.dp)
-            ) {
+                shape = RoundedCornerShape(10.dp),
+                onClick = onConfirm
+            ){
                 Text(
-                    stringResource(R.string.cancel) ,
-                    color = colors.onSecondaryColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold)
+                    stringResource(R.string.ok),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     )

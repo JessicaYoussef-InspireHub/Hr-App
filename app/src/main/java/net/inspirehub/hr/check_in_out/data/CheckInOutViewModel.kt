@@ -16,6 +16,7 @@ import androidx.work.workDataOf
 import net.inspirehub.hr.SharedPrefManager
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -102,6 +103,28 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     fun dismissTimeChangedDialog() {
         _showTimeChangedDialog.value = false
     }
+
+    @RequiresPermission(
+        allOf = [
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ]
+    )
+    fun startLocationChecking(
+        companies: List<CompanyLocation>,
+        allowedLocationIds: List<Int>
+    ) {
+        viewModelScope.launch {
+            while (true) {
+                checkLocationAndDistanceAllCompanies(
+                    companies = companies,
+                    allowedLocationIds = allowedLocationIds
+                )
+                delay(5_000)
+            }
+        }
+    }
+
 
 
 

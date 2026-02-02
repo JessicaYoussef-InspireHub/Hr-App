@@ -74,10 +74,11 @@ fun PermissionDialog(
     dailyRecords: List<TimeOffRecord>,
     hourlyRecords: List<HourlyTimeOffRecord>,
     leaveTypeColors: Map<String, androidx.compose.ui.graphics.Color>
-    ) {
+) {
 
     val record = records.firstOrNull()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var apiErrorMessage by remember { mutableStateOf<String?>(null) }
 
     val colors = appColors()
 
@@ -127,7 +128,7 @@ fun PermissionDialog(
         }
     }
 
-    val hourLabel = getLocalizedHourText( record?.duration_hours, currentLanguage)
+    val hourLabel = getLocalizedHourText(record?.duration_hours, currentLanguage)
 
     val currentLocale = if (currentLanguage == "ar") Locale("ar") else Locale.ENGLISH
     val rawFormattedLeaveDay = startDate?.format(
@@ -311,12 +312,12 @@ fun PermissionDialog(
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row (
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
-                    ){
+                    ) {
                         when (record?.state?.lowercase(Locale.ROOT)) {
                             "validate" -> {
                                 Box(
@@ -377,15 +378,31 @@ fun PermissionDialog(
                         Text(
                             text = "${stringResource(R.string.from)} ${
                                 if (currentLanguage == "ar") {
-                                    convertToArabicDigits(formatDecimalHourToTime(record?.request_hour_from?.toDoubleOrNull(), currentLanguage))
+                                    convertToArabicDigits(
+                                        formatDecimalHourToTime(
+                                            record?.request_hour_from?.toDoubleOrNull(),
+                                            currentLanguage
+                                        )
+                                    )
                                 } else {
-                                    formatDecimalHourToTime(record?.request_hour_from?.toDoubleOrNull(), currentLanguage)
+                                    formatDecimalHourToTime(
+                                        record?.request_hour_from?.toDoubleOrNull(),
+                                        currentLanguage
+                                    )
                                 }
                             } ${stringResource(R.string.to)} ${
                                 if (currentLanguage == "ar") {
-                                    convertToArabicDigits(formatDecimalHourToTime(record?.request_hour_to?.toDoubleOrNull(), currentLanguage))
+                                    convertToArabicDigits(
+                                        formatDecimalHourToTime(
+                                            record?.request_hour_to?.toDoubleOrNull(),
+                                            currentLanguage
+                                        )
+                                    )
                                 } else {
-                                    formatDecimalHourToTime(record?.request_hour_to?.toDoubleOrNull(), currentLanguage)
+                                    formatDecimalHourToTime(
+                                        record?.request_hour_to?.toDoubleOrNull(),
+                                        currentLanguage
+                                    )
                                 }
                             }",
                             fontSize = 17.sp,
@@ -396,33 +413,32 @@ fun PermissionDialog(
                     }
                 }
                 Spacer(modifier = Modifier.height(15.dp))
-//                if (record?.state == "refuse") {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add",
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clickable { showNewVacationDialog = true },
-                            tint = colors.tertiaryColor
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = stringResource(R.string.create_another_one),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            color = colors.tertiaryColor,
-                            modifier = Modifier.clickable {
-                                showNewVacationDialog = true
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clickable { showNewVacationDialog = true },
+                        tint = colors.tertiaryColor
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = stringResource(R.string.create_another_one),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = colors.tertiaryColor,
+                        modifier = Modifier.clickable {
+                            showNewVacationDialog = true
 
-                            }
-                        )
-                    }
+                        }
+                    )
+                }
 //                }
                 if (showNewVacationDialog) {
                     DateInfoDialog(
@@ -460,14 +476,29 @@ fun PermissionDialog(
 
                             Log.d("REQUEST_BODY", request.toString())
 
-                            val response = sendApiForRequestTimeOff(context , request)
+                            val response = sendApiForRequestTimeOff(context, request)
                             Log.d("API_RESPONSE", response.toString())
 
                             withContext(Dispatchers.Main) {
-                                showDeleteConfirmation = false
-                                onDismiss()
-                                onRefreshRequest()
+                                if (response?.result?.status == "error") {
+                                    apiErrorMessage = response.result.message ?: "Unknown error"
+                                } else {
+                                    showDeleteConfirmation = false
+                                    onDismiss()
+                                    onRefreshRequest()
+                                }
                             }
+                        }
+                    )
+                }
+
+                if (apiErrorMessage != null) {
+                    DeleteErrorDialog(
+                        message = apiErrorMessage!!,
+                        onDismiss = { apiErrorMessage = null },
+                        onConfirm = {
+                            onRefreshRequest()
+                            apiErrorMessage = null
                         }
                     )
                 }

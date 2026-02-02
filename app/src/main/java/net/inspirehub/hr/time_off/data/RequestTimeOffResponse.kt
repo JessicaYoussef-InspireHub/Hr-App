@@ -252,7 +252,7 @@ suspend fun sendApiForRequestTimeOff(
         }
 
         val rawResponse = response.bodyAsText()
-        println("Raw API response: $rawResponse")
+        println("Request page Raw API response: $rawResponse")
 
         val json = Json {
             ignoreUnknownKeys = true

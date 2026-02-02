@@ -58,6 +58,7 @@ Protection Method</string>
     <string name="dates">Dates:</string>
     <string name="duration">Duration:</string>
     <string name="description">Description:</string>
+    <string name="casual_leave">Casual Leave:</string>
     <string name="please_choose_the_time_off_type">Please choose the time off type</string>
     <string name="error_message_overlap">
     You\'ve already booked time off which overlaps with this period: from %1$s to %2$s - To Approve.
@@ -159,6 +160,7 @@ Protection Method</string>
     <string name="outside_company_range">You are outside the company range</string>
     <string name="my_order_is_here">My order is here</string>
     <string name="my_order">My order</string>
+    <string name="my_order_history">My order History</string>
     <string name="you_have_items_in_your_list">You have 3 items in your list</string>
     <string name="no_notifications_yet">No notifications yet</string>
     <string name="you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed">You are currently at a different branch from your registered one. HR will be informed</string>
@@ -174,5 +176,10 @@ Protection Method</string>
     <string name="your_order_has_been_placed_successfully">Your order has been placed successfully!</string>
     <string name="order_now">Order Now</string>
     <string name="is_new">New</string>
+    <string name="this_is_a_casual_leave">This is a Casual Leave</string>
+    <string name="casual_leave_warnings">Casual Leave Warnings</string>
+    <string name="remaining_for_this_year">remaining for this year.</string>
+    <string name="this_leave_qualifies_as_a_casual_emergency_leave_according_to_egyptian_labor_law_you_have">This leave qualifies as a casual/emergency leave according to Egyptian Labor Law.
+You have</string>
 
 </resources>

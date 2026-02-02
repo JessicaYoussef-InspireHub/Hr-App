@@ -25,11 +25,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.lunch.data.CartItem
 
 @Composable
-fun OrderRow(){
+fun OrderRow(
+    item: CartItem,
+    onQuantityChange: (CartItem) -> Unit
+){
     val colors = appColors()
-    var quantity by remember { mutableIntStateOf(1) }
+    var itemQuantity by remember { mutableIntStateOf(item.quantity) }
 
     Row (
         modifier = Modifier
@@ -55,7 +59,10 @@ fun OrderRow(){
                         shape = CircleShape
                     )
                     .clickable {
-                        if (quantity > 0) quantity--
+                        if (itemQuantity > 0) {
+                            itemQuantity--
+                            onQuantityChange(item.copy(quantity = itemQuantity))
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -67,10 +74,7 @@ fun OrderRow(){
                 )
             }
 
-            Text( "$quantity" ,
-                color = colors.onBackgroundColor,
-                fontWeight = FontWeight.Medium
-            )
+            Text("$itemQuantity", color = colors.onBackgroundColor, fontWeight = FontWeight.Medium)
             Box (
                 modifier = Modifier
                     .size(23.dp)
@@ -83,8 +87,9 @@ fun OrderRow(){
                         color = colors.tertiaryColor,
                         shape = CircleShape
                     )
-                    .clickable{
-                        quantity++
+                    .clickable {
+                        itemQuantity++
+                        onQuantityChange(item.copy(quantity = itemQuantity))
                     },
                 contentAlignment = Alignment.Center
             ){
@@ -97,11 +102,7 @@ fun OrderRow(){
             }
         }
 
-        Text("Burger" ,
-            color = colors.onBackgroundColor,
-            fontWeight = FontWeight.Medium)
-        Text("250.0 EGP" ,
-            color = colors.onBackgroundColor,
-            fontWeight = FontWeight.Medium)
+        Text(item.name, color = colors.onBackgroundColor, fontWeight = FontWeight.Medium)
+        Text(item.price.toString(), color = colors.onBackgroundColor, fontWeight = FontWeight.Medium)
     }
 }

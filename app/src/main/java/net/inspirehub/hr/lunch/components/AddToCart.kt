@@ -1,5 +1,7 @@
 package net.inspirehub.hr.lunch.components
 
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,15 +29,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.lunch.data.CartItem
+import net.inspirehub.hr.lunch.data.DatabaseProvider
 
 @Composable
 fun AddToCart(
+    productId: Int,
     price: Double,
+    name: String,
     onAddClick: () -> Unit
-){
+) {
     val colors = appColors()
     var quantity by remember { mutableIntStateOf(1) }
     val totalPrice = quantity * price
@@ -43,9 +52,12 @@ fun AddToCart(
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
 
+
+
     fun convertToArabicDigits(input: String): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }.joinToString("")
+        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
+            .joinToString("")
     }
 
     val localizedQuantity =
@@ -56,13 +68,13 @@ fun AddToCart(
         if (currentLanguage == "ar") convertToArabicDigits(totalPrice.toInt().toString())
         else totalPrice.toInt()
 
-    Row (
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(end = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .padding(start = 20.dp),
@@ -70,7 +82,8 @@ fun AddToCart(
             verticalAlignment = Alignment.CenterVertically
 
         )
-        { Button(
+        {
+            Button(
                 onClick = {
                     if (quantity > 1) quantity--
                 },
@@ -136,14 +149,34 @@ fun AddToCart(
         }
 
         Button(
-            onClick = { onAddClick() },
+            onClick = {
+                val db = DatabaseProvider.getDatabase(context)
+                val activity = context as? ComponentActivity
+
+                activity?.lifecycleScope?.launch(Dispatchers.IO) {
+                    val item = CartItem(
+                        productId = productId,
+                        name = name,
+                        price = price,
+                        quantity = quantity
+                    )
+                    db.cartDao().insertItem(item)
+
+                    val allItems = db.cartDao().getAllItems()
+                    allItems.forEach {
+                        Log.d("ROOM_CART", "Name: ${it.name}, Price: ${it.price}, Quantity: ${it.quantity}, ID: ${it.productId}")
+                    }
+                }
+                onAddClick()
+            },
             modifier = Modifier.height(50.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colors.tertiaryColor
             ),
             shape = RoundedCornerShape(8.dp)
-        ){
-            Text(stringResource(R.string.add) + " " + localizedTotal,
+        ) {
+            Text(
+                stringResource(R.string.add) + " " + localizedTotal,
                 color = colors.onSecondaryColor,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp

@@ -16,7 +16,7 @@ import net.inspirehub.hr.appColors
 @Composable
 fun TotalPrice(
     itemsName: String,
-    itemsPrice: String
+    itemsPrice: Double
 ){
     val color = appColors()
     Row(
@@ -31,7 +31,8 @@ fun TotalPrice(
             fontWeight = FontWeight.Bold
         )
 
-        Text(itemsPrice,
+        Text(
+            itemsPrice.toString(),
             color = color.onBackgroundColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold)

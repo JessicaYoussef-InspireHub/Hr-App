@@ -348,11 +348,23 @@ fun CheckInOutScreen(
                 companies = companies,
                 allowedLocationIds = allowedIds
             )
+            delay(60_000)
 
         } else {
             locationPermissionState.launchPermissionRequest()
         }
     }
+
+    LaunchedEffect(Unit) {
+        val companies = prefManager.getCompaniesLatLng()
+        val allowedIds = prefManager.getAllowedLocationsIds()
+
+        viewModel.startLocationChecking(
+            companies = companies,
+            allowedLocationIds = allowedIds
+        )
+    }
+
 
     BackHandler(enabled = true) {
         exitProcess(0)
@@ -449,11 +461,27 @@ fun CheckInOutScreen(
                     CheckInOutButton(
                         attendanceStatus = attendanceStatus,
                         isWithinDistance = (isWithinDistance == true),
-//                        isWithinDistance = true,
                         isLoading = isButtonLoading || isWithinDistance == null,
                         onClick = {
                             if (!isButtonLoading) {
                                 coroutineScope.launch {
+
+                                    // ️Perform an immediate re-check of the site.
+                                    val companies = prefManager.getCompaniesLatLng()
+                                    val allowedIds = prefManager.getAllowedLocationsIds()
+
+                                    viewModel.checkLocationAndDistanceAllCompanies(
+                                        companies = companies,
+                                        allowedLocationIds = allowedIds
+                                    )
+
+                                    if(isWithinDistance != true) {
+                                        showNotAllowedDialog = true
+                                        isButtonLoading = false
+                                        return@launch
+                                    }
+
+
                                     val locationManager =
                                         context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
                                     val gpsEnabled =

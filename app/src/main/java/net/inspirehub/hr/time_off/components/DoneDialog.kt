@@ -88,6 +88,7 @@ fun TimeOffDetailsDialog(
     val sameDay = startDate == endDate
     val sameMonth = startDate.month == endDate.month && startDate.year == endDate.year
     val colors = appColors()
+    var apiErrorMessage by remember { mutableStateOf<String?>(null) }
 
 
     fun convertToArabicDigits(input: String): String {
@@ -340,9 +341,13 @@ fun TimeOffDetailsDialog(
                             Log.d("API_RESPONSE", response.toString())
 
                             withContext(Dispatchers.Main) {
+
+                                if (response?.result?.status == "error") {
+                                    apiErrorMessage = response.result.message ?: "Unknown error"
+                                } else {
                                 showDeleteConfirmation = false
                                 onDismiss()
-                                onRefreshRequest()
+                                onRefreshRequest()}
                             }
                         }
                     )
@@ -367,6 +372,17 @@ fun TimeOffDetailsDialog(
                         dailyRecords = dailyRecords,
                         hourlyRecords = hourlyRecords,
                         leaveTypeColors = leaveTypeColors,
+                    )
+                }
+
+                if (apiErrorMessage != null) {
+                    DeleteErrorDialog (
+                        message = apiErrorMessage!!,
+                        onDismiss = { apiErrorMessage = null },
+                        onConfirm = {
+                            onRefreshRequest()
+                            apiErrorMessage = null
+                        }
                     )
                 }
             }
