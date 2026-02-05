@@ -123,7 +123,9 @@ Protection Method</string>
     <string name="days_few">days</string>
     <string name="days_many">days</string>
     <string name="today">today</string>
+    <string name="Today">Today</string>
     <string name="yesterday">yesterday</string>
+    <string name="Yesterday">Yesterday</string>
     <string name="home">Home</string>
     <string name="time_off">Time Off</string>
     <string name="settings">Settings</string>
@@ -161,8 +163,12 @@ Protection Method</string>
     <string name="my_order_is_here">My order is here</string>
     <string name="my_order">My order</string>
     <string name="my_order_history">My order History</string>
+    <string name="my_favorite">My Favorite</string>
     <string name="you_have_items_in_your_list">You have 3 items in your list</string>
     <string name="no_notifications_yet">No notifications yet</string>
+    <string name="no_previous_orders_yet">No previous orders yet</string>
+    <string name="no_favorites_yet">No favorites yet</string>
+    <string name="no_new_orders_today">No new orders today</string>
     <string name="you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed">You are currently at a different branch from your registered one. HR will be informed</string>
     <string name="enable_notifications">Enable Notifications</string>
     <string name="please_enable_notification_permission_to_receive_notifications">Please enable notification permission to receive notifications</string>
@@ -170,7 +176,7 @@ Protection Method</string>
     <string name="invalid_request">Invalid Request</string>
     <string name="apply">Apply</string>
     <string name="expenses">Expenses</string>
-    <string name="total_price">Total Price</string>
+    <string name="total_price">Total Price:</string>
     <string name="delivery">Delivery</string>
     <string name="total">Total</string>
     <string name="your_order_has_been_placed_successfully">Your order has been placed successfully!</string>
@@ -181,5 +187,13 @@ Protection Method</string>
     <string name="remaining_for_this_year">remaining for this year.</string>
     <string name="this_leave_qualifies_as_a_casual_emergency_leave_according_to_egyptian_labor_law_you_have">This leave qualifies as a casual/emergency leave according to Egyptian Labor Law.
 You have</string>
+    <string name="re_order">Re order</string>
+    <string name="view_cart">View cart</string>
+    <string name="add_to_cart">Add to cart</string>
+    <string name="added">Added</string>
+    <string name="clear_favorites">Clear favorites</string>
+    <string name="are_you_sure_you_want_to_clear_all_favorites">Are you sure you want to clear all favorites?</string>
+    <string name="clear">Clear</string>
+
 
 </resources>

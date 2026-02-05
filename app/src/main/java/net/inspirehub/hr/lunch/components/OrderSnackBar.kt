@@ -10,29 +10,36 @@ import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
 fun OrderSnackBar(
     snackBarData: SnackbarData,
-    onViewCart: () -> Unit
+    onViewCart: () -> Unit,
+    showViewCart: Boolean
 ) {
     val colors = appColors()
 
     Snackbar(
-        action = {
-            Text(
-                text = "View cart",
-                modifier = Modifier.clickable {
-                    onViewCart()
-                    snackBarData.dismiss()
-                },
-                color = colors.tertiaryColor,
-                fontWeight = FontWeight.Bold
-            )
-        },
+        action = if (showViewCart) {
+            {
+                Text(
+                    text = stringResource(R.string.view_cart),
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .clickable {
+                            onViewCart()
+                            snackBarData.dismiss()
+                        },
+                    color = colors.tertiaryColor,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        } else null,
         containerColor = colors.onSecondaryColor,
         contentColor = colors.tertiaryColor,
         modifier = Modifier

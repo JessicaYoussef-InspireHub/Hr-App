@@ -101,7 +101,17 @@ fun MyOrderBottomSheet(
 
                 // Display Cart Items dynamically
                 if (cartItems.isEmpty()) {
-                    Text("No previous orders yet 🧾")
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_new_orders_today),
+                            color = colors.tertiaryColor,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 } else {
                     cartItems.forEach { item ->
                         OrderRow(item = item) { updatedItem ->
@@ -122,42 +132,46 @@ fun MyOrderBottomSheet(
 
 
                 Spacer(modifier = Modifier.height(20.dp))
+                if (cartItems.isEmpty()) {
+                    Spacer(modifier = Modifier.height(0.dp))
+                } else {
 
-                TotalPrice(stringResource(R.string.total_price), total)
+                    TotalPrice(stringResource(R.string.total_price), total)
 
-                Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                OrderNowButton(
-                    onClick = {
-                        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
-                            .launch {
-                                val orderId = db.orderDao().insertOrder(
-                                    OrderEntity(
-                                        orderDate = System.currentTimeMillis(),
-                                        totalPrice = total
-                                    )
-                                ).toInt()
+                    OrderNowButton(
+                        onClick = {
+                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
+                                .launch {
+                                    val orderId = db.orderDao().insertOrder(
+                                        OrderEntity(
+                                            orderDate = System.currentTimeMillis(),
+                                            totalPrice = total
+                                        )
+                                    ).toInt()
 
-                                val orderItems = cartItems.map {
-                                    OrderItemEntity(
-                                        orderId = orderId,
-                                        productId = it.productId,
-                                        name = it.name,
-                                        price = it.price,
-                                        quantity = it.quantity
-                                    )
+                                    val orderItems = cartItems.map {
+                                        OrderItemEntity(
+                                            orderId = orderId,
+                                            productId = it.productId,
+                                            name = it.name,
+                                            price = it.price,
+                                            quantity = it.quantity
+                                        )
+                                    }
+                                    db.orderDao().insertOrderItem(orderItems)
+                                    db.cartDao().clearCart()
+                                    cartItems = emptyList()
+
+                                    launch(kotlinx.coroutines.Dispatchers.Main) {
+                                        onDismiss()
+                                        onOrderSuccess()
+                                    }
                                 }
-                                db.orderDao().insertOrderItem(orderItems)
-                                db.cartDao().clearCart()
-                                cartItems = emptyList()
-
-                                launch(kotlinx.coroutines.Dispatchers.Main) {
-                                    onDismiss()
-                                    onOrderSuccess()
-                                }
-                            }
-                    }
-                )
+                        }
+                    )
+                }
             }
         }
     }

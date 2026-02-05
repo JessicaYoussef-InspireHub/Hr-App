@@ -110,11 +110,16 @@ fun LunchScreen(
             SnackbarHost(
                 hostState = snackBarHostState
             ) { data ->
+                val showViewCart = data.visuals.message.contains("added to cart") ||
+                        data.visuals.message.contains("reorder")
+
                 OrderSnackBar(
                     snackBarData = data,
                     onViewCart = {
                         openCartSheet = true
-                    })
+                    },
+                    showViewCart = showViewCart
+                )
             }
         },
         topBar = {
@@ -235,9 +240,13 @@ fun LunchScreen(
                             )
                             MyHistoryBottomSheet(
                                 showSheet = showHistorySheet,
-                                onDismiss = { showHistorySheet = false }
+                                onDismiss = { showHistorySheet = false },
+                                onReorderSuccess = {
+                                    scope.launch {
+                                        snackBarHostState.showSnackbar("Order reordered successfully")
+                                    }
+                                }
                             )
-
                         }
                     }
                     Spacer(modifier = Modifier.height(30.dp))
@@ -248,6 +257,7 @@ fun LunchScreen(
                         itemsIndexed(lunchProducts) { _, product ->
                             Column {
                                 LunchCard(
+                                    productId = product.id,
                                     name = product.name,
                                     supplierName = product.supplier_name,
                                     price = "${product.price} ${product.currency}",

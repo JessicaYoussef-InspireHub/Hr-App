@@ -415,14 +415,15 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 println("🔹 Check-in response: $result")
 
                 if (result != null) {
+                    _message.value = result.message ?: "Something went wrong. Please try again."
 
                     if (result.status.equals("error", ignoreCase = true)) {
-                        _message.value = result.message
+//                        _message.value = result.message
                         onComplete(null)
                         return@launch
                     }
 
-                    _message.value = result.message
+//                    _message.value = result.message
 
                     result.attendance_status?.let {
                         _attendanceStatus.value = it

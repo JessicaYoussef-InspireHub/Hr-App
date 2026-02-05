@@ -146,8 +146,6 @@ fun DoubleStateDialog(
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colors.tertiaryColor,
-//                        if (hasDraftOrConfirm) MaterialTheme.colorScheme.tertiary
-//                    else if (allRefused) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary ,
                     contentColor = colors.onSecondaryColor
                 ),
                 shape = RoundedCornerShape(10.dp)
@@ -158,7 +156,6 @@ fun DoubleStateDialog(
                         stringResource(R.string.remove_pending) else stringResource(R.string.ok),
                 )
             }
-//        }
         },
         text = {
             Column(

@@ -10,6 +10,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import android.content.Context
 import androidx.room.Room
+import kotlinx.coroutines.flow.Flow
 
 object DatabaseProvider {
     private var db: AppDatabase? = null
@@ -47,6 +48,9 @@ interface CartDao {
     @Query("SELECT * FROM cart_items")
     suspend fun getAllItems(): List<CartItem>
 
+    @Query("SELECT * FROM cart_items")
+    fun getAllItemsFlow(): Flow<List<CartItem>>
+
     @Query("DELETE FROM cart_items")
     suspend fun clearCart()
 }
@@ -55,10 +59,12 @@ interface CartDao {
     entities = [
         CartItem::class,
         OrderEntity::class,
-        OrderItemEntity::class
-    ], version = 2
+        OrderItemEntity::class,
+        FavoriteLunch::class
+    ], version = 3
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun cartDao(): CartDao
     abstract fun orderDao(): OrderDao
+    abstract fun favoriteLunchDao(): FavoriteLunchDao
 }

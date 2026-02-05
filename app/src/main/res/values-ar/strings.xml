@@ -109,7 +109,6 @@
     <string name="you_are_checked_in">لقد تم تسجيل وصولك</string>
     <string name="you_are_checked_out">لقد تم تسجيل خروجك</string>
     <string name="checked_in_message">لقد قمت بتسجيل الدخول بنجاح في %1$s\nأتمنى لك يومًا مباركًا</string>
-<!--    <string name="checked_out_message">لقد قمت بتسجيل الخروج بنجاح بتاريخ %1$s في الساعة %2$s بعد %3$d ساعة و %4$d دقيقة .. عمل رائع</string>-->
     <string name="checked_out_message">لقد قمت بتسجيل الخروج بنجاح بتاريخ %1$s في الساعة %2$s .. عمل رائع</string>
     <string name="attention">انتبه</string>
     <string name="check_out_confirmation">لقد قضيت %1$d ساعة و %2$d دقيقة\n\nهل أنت متأكد أنك تريد تسجيل الخروج؟</string>
@@ -117,6 +116,8 @@
     <string name="check_in">تسجيل الدخول</string>
     <string name="loading">جارٍ التحميل</string>
     <string name="today">اليوم</string>
+    <string name="Today">اليوم</string>
+    <string name="Yesterday">أمس</string>
     <string name="day">يوم</string>
     <string name="day_two">يومين</string>
     <string name="days_few">أيام</string>
@@ -159,8 +160,12 @@
     <string name="my_order_is_here">طلبي هنا</string>
     <string name="my_order">طلبي</string>
     <string name="my_order_history">طلباتي السابقة</string>
+    <string name="my_favorite">مفضلتي</string>
     <string name="you_have_items_in_your_list">لديك 3 عناصر في قائمتك</string>
     <string name="no_notifications_yet">لا توجد إخطارات حتى الآن</string>
+    <string name="no_previous_orders_yet">لا توجد طلبات سابقة حتى الآن</string>
+    <string name="no_favorites_yet">لا توجد عناصر مفضلة بعد</string>
+    <string name="no_new_orders_today">لا يوجد طلبات جديدة اليوم</string>
     <string name="you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed">أنت الآن في فرع مختلف عن فرعك المسجل. سيتم إخطار قسم الموارد البشرية</string>
     <string name="enable_notifications">تفعيل الإشعارات</string>
     <string name="please_enable_notification_permission_to_receive_notifications">يرجى تفعيل إذن الإشعارات لتلقي الإشعارات</string>
@@ -168,7 +173,7 @@
     <string name="invalid_request">طلب غير صالح</string>
     <string name="apply">تأكيد</string>
     <string name="expenses">النفقات</string>
-    <string name="total_price">السعر الإجمالي</string>
+    <string name="total_price">:السعر الإجمالي</string>
     <string name="delivery">التوصيل</string>
     <string name="total">المجموع</string>
     <string name="your_order_has_been_placed_successfully">تم تقديم طلبك بنجاح!</string>
@@ -179,5 +184,13 @@
     <string name="remaining_for_this_year">المتبقي لهذا العام.</string>
     <string name="this_leave_qualifies_as_a_casual_emergency_leave_according_to_egyptian_labor_law_you_have">تُعتبر هذه الإجازة إجازة طارئة/عرضية وفقًا لقانون العمل المصري.
 لديك</string>
+    <string name="re_order">إعادة الطلب</string>
+    <string name="view_cart">عرض السلة</string>
+    <string name="add_to_cart">أضف إلى السلة</string>
+    <string name="added">تمت الإضافة</string>
+    <string name="clear_favorites">مسح المفضلة</string>
+    <string name="are_you_sure_you_want_to_clear_all_favorites">هل أنت متأكد من رغبتك في مسح جميع المفضلة؟</string>
+    <string name="clear">مسح</string>
+
 
 </resources>

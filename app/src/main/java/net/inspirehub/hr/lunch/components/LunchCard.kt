@@ -1,5 +1,6 @@
 package net.inspirehub.hr.lunch.components
 
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,10 +15,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,26 +27,37 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.lunch.data.DatabaseProvider
+import net.inspirehub.hr.lunch.data.FavoriteLunch
 import net.inspirehub.hr.lunch.presentation.base64ToImageBitmap
 
 @Composable
 fun LunchCard(
+    productId: Int,
     name: String,
     supplierName: String,
     price: String,
     imageBase64: String?,
     isNew: Boolean,
     onClick: () -> Unit,
-
-    ) {
+) {
     val colors = appColors()
-    var isFavorite by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val db = DatabaseProvider.getDatabase(context)
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
+    val scope = rememberCoroutineScope()
+
+    val isFavorite by db.favoriteLunchDao()
+        .getFavoriteByIdFlow(productId)
+        .collectAsState(initial = null)
+        .let { state -> remember { derivedStateOf { state.value != null } } }
+
+
 
     fun convertToArabicDigits(input: String): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
@@ -63,8 +76,7 @@ fun LunchCard(
         ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    )
-    {
+    ) {
         Column(
             modifier = Modifier
                 .padding(start = 16.dp, end = 8.dp)
@@ -90,17 +102,33 @@ fun LunchCard(
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-
                 }
+
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
                     contentDescription = "Favourite Icon",
                     tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
                     modifier = Modifier
                         .size(20.dp)
-                        .clickable { isFavorite = !isFavorite }
+                        .clickable {
+                            scope.launch {
+                                if (isFavorite) {
+                                    db.favoriteLunchDao().getFavoriteByIdFlow(productId).let {
+                                        db.favoriteLunchDao().deleteFavorite(productId)
+                                    }
+                                } else {
+                                    val favorite = FavoriteLunch(
+                                        id = productId,
+                                        name = name,
+                                        supplierName = supplierName,
+                                        price = price,
+                                        imageBase64 = imageBase64
+                                    )
+                                    db.favoriteLunchDao().insert(favorite)
+                                }
+                            }
+                        }
                 )
-
             }
 
             Row(
@@ -119,7 +147,6 @@ fun LunchCard(
                         modifier = Modifier.size(80.dp)
                     )
                 }
-
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -141,7 +168,7 @@ fun LunchCard(
                     )
                     Text(
                         text = localizedPrice,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = colors.inverseOnSurface
                     )

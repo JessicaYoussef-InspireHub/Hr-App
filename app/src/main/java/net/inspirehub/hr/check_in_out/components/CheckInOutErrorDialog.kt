@@ -64,7 +64,6 @@ fun CheckInOutErrorDialog(
                 message,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
-//                color = Color.Red
                 color = colors.onBackgroundColor
             )
         },

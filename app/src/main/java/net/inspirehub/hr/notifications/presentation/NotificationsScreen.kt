@@ -1,6 +1,7 @@
 package net.inspirehub.hr.notifications.presentation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -218,8 +219,13 @@ private fun formatTimestamp(timestamp: Long): Pair<String, String> {
     }
 }
 
+@SuppressLint("LocalContextConfigurationRead")
+@Composable
 private fun formatDateHeader(dateStr: String): String {
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val context = LocalContext.current
+    val locale = context.resources.configuration.locales[0]
+
+    val sdf = SimpleDateFormat("dd/MM/yyyy", locale)
     val date = sdf.parse(dateStr) ?: return dateStr
 
     val todayCal = Calendar.getInstance()
@@ -229,11 +235,15 @@ private fun formatDateHeader(dateStr: String): String {
 
     return when {
         dateCal.get(Calendar.YEAR) == todayCal.get(Calendar.YEAR) &&
-                dateCal.get(Calendar.DAY_OF_YEAR) == todayCal.get(Calendar.DAY_OF_YEAR) -> "Today"
+                dateCal.get(Calendar.DAY_OF_YEAR) == todayCal.get(Calendar.DAY_OF_YEAR) ->
+            stringResource(R.string.Today)
 
         dateCal.get(Calendar.YEAR) == yesterdayCal.get(Calendar.YEAR) &&
-                dateCal.get(Calendar.DAY_OF_YEAR) == yesterdayCal.get(Calendar.DAY_OF_YEAR) -> "Yesterday"
+                dateCal.get(Calendar.DAY_OF_YEAR) == yesterdayCal.get(Calendar.DAY_OF_YEAR) ->
+            stringResource(R.string.Yesterday)
 
-        else -> dateStr
+        else -> {
+            SimpleDateFormat("d MMM yyyy", locale).format(date)
+        }
     }
 }

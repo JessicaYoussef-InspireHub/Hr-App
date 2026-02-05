@@ -1,5 +1,6 @@
 package net.inspirehub.hr.check_in_out.data
 
+import android.R.id.message
 import android.content.Context
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -43,8 +44,10 @@ data class CompanyLocation(
 
 @Serializable
 data class AttendanceStatusResult(
-    val status: String,
-    val message: String,
+//    val status: String,
+//    val message: String,
+    val status: String? = null,
+    val message: String? = null,
     val attendance_status: String? = null,
     val worked_hours: Double? = null,
 
@@ -316,7 +319,19 @@ suspend fun sendAttendanceAction(
         // ❌ لو السيرفر رجع Error → نوقف هنا
         if (status.equals("Error", ignoreCase = true)) {
             println("❌ Server Error: ${resultObj?.get("message")?.jsonPrimitive?.content}")
-            return null
+            val serverMessage = resultObj?.get("message")?.jsonPrimitive?.content
+
+            return AttendanceStatusResult(
+
+            status = status,
+            message = serverMessage ?: "Unknown error",
+                attendance_status = null,
+                checkInTime = null,
+                lastCheckIn = null,
+                checkOutTime = null,
+                lastCheckOut = null,
+                worked_hours = null
+            )
         }
 
         val jsonParser = Json { ignoreUnknownKeys = true }
@@ -330,7 +345,16 @@ suspend fun sendAttendanceAction(
 
     } catch (e: Exception) {
         println("🔴 Exception in sendAttendanceAction: ${e.message}")
-        null
+        AttendanceStatusResult(
+            status = "error",
+            message = e.message ?: "Unknown exception",
+            attendance_status = null,
+            checkInTime = null,
+            lastCheckIn = null,
+            checkOutTime = null,
+            lastCheckOut = null,
+            worked_hours = null
+        )
     }
 }
 

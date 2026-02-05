@@ -25,10 +25,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,9 +37,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.lunch.data.DatabaseProvider
+import net.inspirehub.hr.lunch.data.FavoriteLunch
 import net.inspirehub.hr.lunch.presentation.base64ToImageBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,13 +73,22 @@ fun LunchBottomSheet(
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
-    var isFavorite by remember { mutableStateOf(false) }
 
     val localizedPrice = if (currentLanguage == "ar") {
         convertToArabicDigits(price)
     } else {
         price
     }
+    val db = DatabaseProvider.getDatabase(context)
+    val scope = rememberCoroutineScope()
+
+    val favorite by db.favoriteLunchDao()
+        .getFavoriteByIdFlow(productId)
+        .collectAsState(initial = null)
+
+    val isFavorite = favorite != null
+
+
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -169,9 +181,26 @@ fun LunchBottomSheet(
                                 tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
                                 modifier = Modifier
                                     .size(20.dp)
-                                    .clickable { isFavorite = !isFavorite }
+                                    .clickable {
+                                        scope.launch {
+                                            if (isFavorite) {
+                                                db.favoriteLunchDao()
+                                                    .getFavoriteByIdFlow(productId)
+                                                    .let { db.favoriteLunchDao().deleteFavorite(productId) }
+                                            } else {
+                                                db.favoriteLunchDao().insert(
+                                                    FavoriteLunch(
+                                                        id = productId,
+                                                        name = name,
+                                                        supplierName = supplierName,
+                                                        price = price,
+                                                        imageBase64 = imageBase64
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    }
                             )
-
                         }
                     }
                     Spacer(modifier = Modifier.height(3.dp))

@@ -1,7 +1,5 @@
 package net.inspirehub.hr.lunch.components
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -25,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,8 +31,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import net.inspirehub.hr.lunch.data.OrderWithItems
 
@@ -42,19 +42,23 @@ import net.inspirehub.hr.lunch.data.OrderWithItems
 @Composable
 fun MyHistoryBottomSheet(
     showSheet: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onReorderSuccess: () -> Unit
 ) {
     if (!showSheet) return
 
     val context = LocalContext.current
     val db = DatabaseProvider.getDatabase(context)
     val colors = appColors()
+    val scope = rememberCoroutineScope()
 
     var orders by remember { mutableStateOf(emptyList<OrderWithItems>()) }
 
     LaunchedEffect(Unit) {
         orders = db.orderDao().getOrdersWithItems()
     }
+
+
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -73,8 +77,7 @@ fun MyHistoryBottomSheet(
             horizontalAlignment = Alignment.Start
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.TopEnd,
             ) {
                 IconButton(onClick = { onDismiss() }) {
@@ -96,54 +99,43 @@ fun MyHistoryBottomSheet(
             Spacer(modifier = Modifier.height(20.dp))
 
 
-
-
             if (orders.isEmpty()) {
-                Text("No previous orders yet 🧾")
+                Column (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(
+                        text = stringResource(R.string.no_previous_orders_yet),
+                        color = colors.tertiaryColor,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             } else {
                 orders.forEach { order ->
-                    HistoryOrderCard(order)
-                    Spacer(modifier = Modifier.height(12.dp))
+                    HistoryOrderCard(
+                        orderWithItems = order,
+                        onReorderClick = {
+
+                            scope.launch {
+                                order.items.forEach { item ->
+                                    db.cartDao().insertItem(
+                                        CartItem(
+                                            productId = item.productId,
+                                            name = item.name,
+                                            price = item.price,
+                                            quantity = item.quantity
+                                        )
+                                    )
+                                }
+                                onDismiss()
+                            onReorderSuccess()
+                        }}
+                    )
+                    Spacer(modifier = Modifier.height(25.dp))
                 }
             }
         }
-    }
-}
-
-@SuppressLint("SimpleDateFormat")
-@Composable
-fun HistoryOrderCard(orderWithItems: OrderWithItems) {
-
-    val order = orderWithItems.order
-    val items = orderWithItems.items
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(appColors().surfaceColor, RoundedCornerShape(12.dp))
-            .padding(12.dp)
-    ) {
-
-        Text(
-            text = "Date: ${
-                java.text.SimpleDateFormat("dd MMM yyyy")
-                    .format(java.util.Date(order.orderDate))
-            }",
-            fontWeight = FontWeight.Medium
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        items.forEach {
-            Text("• ${it.name} x${it.quantity}")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Total: ${order.totalPrice} EGP",
-            fontWeight = FontWeight.Bold
-        )
     }
 }
 
