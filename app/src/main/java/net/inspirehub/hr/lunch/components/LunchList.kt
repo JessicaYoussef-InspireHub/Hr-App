@@ -21,32 +21,53 @@ import net.inspirehub.hr.lunch.data.LunchCategory
 @Composable
 fun LunchCategoryRow(
     categories: List<LunchCategory>,
-    onCategorySelected: (LunchCategory) -> Unit = {}
+    selectedCategory: LunchCategory?,
+    onAllSelected: () -> Unit,
+    onCategorySelected: (LunchCategory) -> Unit
 ) {
     val colors = appColors()
-
-
-    var selectedCategory by remember {
-        mutableStateOf<LunchCategory?>(null)
-    }
 
     LazyRow(
         modifier = Modifier.fillMaxWidth(0.75f),
         verticalAlignment = Alignment.CenterVertically,
         contentPadding = PaddingValues(horizontal = 0.dp)
     ) {
+        item {
+            Text(
+                text = "All",
+                fontSize = 18.sp,
+                fontWeight = if (selectedCategory == null)
+                    FontWeight.Bold else FontWeight.Medium,
+                color = if (selectedCategory == null)
+                    colors.tertiaryColor else colors.onBackgroundColor,
+                modifier = Modifier
+                    .clickable { onAllSelected() }
+                    .background(
+                        if (selectedCategory == null)
+                            colors.surfaceContainerHigh
+                        else colors.transparent,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .padding(8.dp)
+            )
+        }
+
         items(categories) { category ->
             Text(
                 text = category.name,
                 fontSize = 18.sp,
-                fontWeight = if (selectedCategory == category) FontWeight.Bold else FontWeight.Medium,
-                color = if (selectedCategory == category)
+                fontWeight = if (selectedCategory?.id == category.id)
+                    FontWeight.Bold
+                else
+                    FontWeight.Medium,
+
+                color = if (selectedCategory?.id == category.id)
                     colors.tertiaryColor
                 else
                     colors.onBackgroundColor,
+
                 modifier = Modifier
                     .clickable {
-                        selectedCategory = category
                         onCategorySelected(category)
                     }
                     .background(

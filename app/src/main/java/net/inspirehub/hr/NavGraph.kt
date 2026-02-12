@@ -52,8 +52,15 @@ fun MyAppNavHost(
 //    }
 
     val nextDestination = when {
+        openedFromNotification && token.isNullOrEmpty() ->
+            "SignInScreen/$companyId/$apiKey"
 
-        openedFromNotification -> "NotificationsScreen"
+        openedFromNotification && !token.isNullOrEmpty() &&
+                (fingerprintSuccess || !savedPin.isNullOrEmpty()) ->
+            "ProtectionScreen/0"
+
+        openedFromNotification && !token.isNullOrEmpty() ->
+            "NotificationsScreen"
 
         // ✅ Has token and fingerprint enabled
         !token.isNullOrEmpty() && fingerprintSuccess -> "FingerPrintScreen"
@@ -77,21 +84,13 @@ fun MyAppNavHost(
         else -> "ScanQrCodeScreen"
     }
 
+    val startDestination = "SplashScreen"
 
-//    LaunchedEffect(notificationDestination) {
-//        if (notificationDestination == "NotificationsScreen") {
-//            navController.navigate("NotificationsScreen") {
-//                popUpTo("SplashScreen") { inclusive = true }
-//                launchSingleTop = true
-//            }
-//        }
+//    val startDestination = if (openedFromNotification) {
+//        "NotificationsScreen"
+//    } else {
+//        "SplashScreen"
 //    }
-
-    val startDestination = if (openedFromNotification) {
-        "NotificationsScreen"
-    } else {
-        "SplashScreen"
-    }
 
 
 

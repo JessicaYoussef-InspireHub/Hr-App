@@ -12,7 +12,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,9 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +50,7 @@ import java.util.Calendar
 import java.util.Locale
 import androidx.core.content.edit
 import net.inspirehub.hr.FullLoading
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.notifications.components.NotificationPermissionDialog
 
 
@@ -62,6 +60,16 @@ fun NotificationsScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
+    val sharedPrefManager = remember { SharedPrefManager(context) }
+    val token = sharedPrefManager.getToken()
+
+    LaunchedEffect(token) {
+        if (token.isNullOrEmpty()) {
+            navController.navigate("SignInScreen/${sharedPrefManager.getCompanyId()}/${sharedPrefManager.getApiKey()}") {
+                popUpTo("SplashScreen") { inclusive = true }             }
+        }
+    }
+
     val colors = appColors()
     val isLoading = remember { mutableStateOf(true) }
     val showPermissionDialog = remember { mutableStateOf(false) }

@@ -16,15 +16,19 @@ android {
         applicationId = "net.inspirehub.hr"
         minSdk = 24
         targetSdk = 36
-        versionCode = 6
-        versionName = "1.0"
+        versionCode = 7
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Enables code-related app optimization.
+            isMinifyEnabled = true
+
+            // Enables resource shrinking.
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

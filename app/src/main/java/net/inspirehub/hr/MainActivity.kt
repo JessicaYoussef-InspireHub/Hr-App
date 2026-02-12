@@ -15,15 +15,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.inspirehub.hr.notifications.data.NotificationDatabase
 import net.inspirehub.hr.notifications.data.NotificationEntity
 import net.inspirehub.hr.scan_qr_code.data.ScanQrCodeViewModel
@@ -33,6 +34,7 @@ import java.util.Locale
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -46,6 +48,17 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val db = NotificationDatabase.getDatabase(this@MainActivity)
+                db.notificationDao().getAllNotifications().collect { notificationsList ->
+                    Log.d("NOTIFICATIONS", "📋 Loaded ${notificationsList.size} notifications")
+                }
+            }}
+
+
         setTheme(R.style.Theme_Hr)
 
         super.onCreate(savedInstanceState)
@@ -88,7 +101,6 @@ class MainActivity : AppCompatActivity() {
             val title = extras.getString("title")
             val message = extras.getString("message")
             if (title != null && message != null) {
-                // هنا نحتاج نضيف رسالة للـ Room
                 saveNotificationToRoom(title, message)
             }
         }
@@ -100,67 +112,34 @@ class MainActivity : AppCompatActivity() {
 
             val navController = rememberNavController()
             val intentState = rememberSaveable { mutableStateOf(notificationIntent) }
+                val openedFromNotification =
+                notificationIntent?.getStringExtra("navigateTo") == "NotificationsScreen"
+
+            LaunchedEffect(openedFromNotification) {
+                if (openedFromNotification) {
+                    navController.navigate("NotificationsScreen") {
+                        popUpTo("SplashScreen") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
 
             val context = LocalContext.current
             val sharedPrefManager = SharedPrefManager(context)
             val darkModeState =
                 rememberSaveable { mutableStateOf(sharedPrefManager.isDarkModeEnabled()) }
 
-//            val localNavController = rememberNavController()
-//            navController = localNavController
-
-//            LaunchedEffect(intentState.value) {
-//                val navigateTo = intentState.value?.getStringExtra("navigateTo")
-//                if (navigateTo == "NotificationsScreen") {
-//                    navController.navigate("NotificationsScreen") {
-//                        launchSingleTop = true
-//                    }
-//                    // امسح intent بعد المعالجة
-//                    intentState.value = null
-//                }
-//            }
-
             CompositionLocalProvider(
                 LocalDarkMode provides darkModeState
             ) {
                 HrTheme {
-                    val viewModel: ScanQrCodeViewModel = viewModel()
-//                    val navController = rememberNavController()
-
-
-
-//
-//                    val navigateToNotifications =
-//                        rememberSaveable { mutableStateOf(false) }
-//                    val navigateTo = intent.getStringExtra("navigateTo")
-////                    LaunchedEffect(navigateTo) {
-////                        if (navigateTo == "NotificationsScreen") {
-////                            navController.navigate("NotificationsScreen")
-////                        }
-////                    }
-//
-//
-//
-//                    LaunchedEffect(Unit) {
-//                        if (intent.getStringExtra("navigateTo") == "NotificationsScreen") {
-//                            navigateToNotifications.value = true
-//                        }
-//                    }
-//
-//                    LaunchedEffect(navigateToNotifications.value) {
-//                        if (navigateToNotifications.value) {
-//                            navController.navigate("NotificationsScreen") {
-//                                launchSingleTop = true
-//                            }
-//                            navigateToNotifications.value = false
-//                        }
-//                    }
+                    val viewModell: ScanQrCodeViewModel = viewModel()
 
                     val openedFromNotification =
                         intent.getStringExtra("navigateTo") == "NotificationsScreen"
 
                     MyAppNavHost(
-                        viewModel = viewModel(),
+                        viewModel = viewModell,
                         navController = navController,
                         openedFromNotification = openedFromNotification)
 
@@ -232,7 +211,6 @@ class MainActivity : AppCompatActivity() {
 
                 Log.d("FCM_DEBUG", "📱 Broadcast received in MainActivity: $title - $message")
 
-                // تحديث UI فوراً عند استلام إشعار جديد
                 updateNotificationsList()
             }
         }
@@ -253,32 +231,57 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        loadAllNotifications()
-    }
 
-    private fun loadAllNotifications() {
-        lifecycleScope.launch {
-            try {
-                val notifications = withContext(Dispatchers.IO) {
-                    NotificationDatabase.getDatabase(this@MainActivity)
-                        .notificationDao()
-                        .getAllNotifications()
-                }
-                // استخدم first() للحصول على القائمة ثم size
-                notifications.collect { notificationsList ->
-                    Log.d("NOTIFICATIONS", "📋 Loaded ${notificationsList.size} notifications")
-                    // هنا يمكنك التعامل مع القائمة
-                    // يمكنك إرسالها إلى ViewModel أو تحديث State
-                }
-            } catch (e: Exception) {
-                Log.e("NOTIFICATIONS", "Error loading notifications: ${e.message}")
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = NotificationDatabase.getDatabase(this@MainActivity)
+            val notificationsFlow = db.notificationDao().getAllNotifications()
+
+            notificationsFlow.collect { notificationsList ->
+                Log.d("NOTIFICATIONS", "📋 Loaded ${notificationsList.size} notifications")
             }
         }
     }
 
+
+//    override fun onResume() {
+//        super.onResume()
+//        loadAllNotifications()
+//    }
+
+    private fun loadAllNotifications() {
+        lifecycleScope.launch {
+            val db = NotificationDatabase.getDatabase(this@MainActivity)
+            val notificationsFlow = db.notificationDao().getAllNotifications() // Flow<List<NotificationEntity>>
+
+            // آمن على Lifecycle
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                notificationsFlow.collect { notificationsList ->
+                    Log.d("NOTIFICATIONS", "📋 Loaded ${notificationsList.size} notifications")
+                }
+            }
+        }
+    }
+
+
+//    private fun loadAllNotifications() {
+//        lifecycleScope.launch {
+//            try {
+//                val notifications = withContext(Dispatchers.IO) {
+//                    NotificationDatabase.getDatabase(this@MainActivity)
+//                        .notificationDao()
+//                        .getAllNotifications()
+//                }
+//                notifications.collect { notificationsList ->
+//                    Log.d("NOTIFICATIONS", "📋 Loaded ${notificationsList.size} notifications")
+//                }
+//            } catch (e: Exception) {
+//                Log.e("NOTIFICATIONS", "Error loading notifications: ${e.message}")
+//            }
+//        }
+//    }
+
     override fun onDestroy() {
         super.onDestroy()
-        // إلغاء تسجيل الـ Broadcast Receiver
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
     }
 

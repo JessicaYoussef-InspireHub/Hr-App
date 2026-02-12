@@ -1,6 +1,7 @@
 package net.inspirehub.hr.lunch.components
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +39,7 @@ import net.inspirehub.hr.lunch.presentation.base64ToImageBitmap
 @Composable
 fun LunchCard(
     productId: Int,
+    supplierId: Int?,
     name: String,
     supplierName: String,
     price: String,
@@ -70,7 +72,9 @@ fun LunchCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable {
+                Log.d("LunchCard", "Supplier ID for product $productId = $supplierId")
+                onClick() },
         colors = CardDefaults.cardColors(
             containerColor = colors.surfaceContainerHigh
         ),

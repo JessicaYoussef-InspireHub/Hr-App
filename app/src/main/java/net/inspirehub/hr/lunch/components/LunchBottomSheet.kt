@@ -56,7 +56,7 @@ fun LunchBottomSheet(
     supplierName: String,
     imageBase64: String?,
     onDismiss: () -> Unit,
-    onAddToCart: (String) -> Unit
+    onAddToCart: (String, Int) -> Unit
 ) {
     val colors = appColors()
 
@@ -240,8 +240,8 @@ fun LunchBottomSheet(
                 price = price.toDouble(),
                 name = name,
                 productId = productId,
-                onAddClick = {
-                    onAddToCart(name)
+                onAddClick = { quantity ->
+                    onAddToCart(name, quantity)
                     onDismiss()
                 }
             )

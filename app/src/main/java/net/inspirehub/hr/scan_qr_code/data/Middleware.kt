@@ -1,6 +1,6 @@
 package net.inspirehub.hr.scan_qr_code.data
 
-
+import android.util.Log
 
 
 class Middleware private constructor(encryptedInput: String) {
@@ -15,6 +15,8 @@ class Middleware private constructor(encryptedInput: String) {
         this.companyId = cid
         this.apiKey = key
         this.baseUrl = url
+
+        Log.d("Middleware", "Initialized with companyId: $companyId, apiKey: $apiKey, baseUrl: $baseUrl")
     }
 
     private fun parseDecryptedData(decryptedData: String): Triple<String, String, String> {

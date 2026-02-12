@@ -2,6 +2,7 @@ package net.inspirehub.hr.lunch.presentation
 
 import android.graphics.BitmapFactory
 import android.util.Base64
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,7 +42,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.BottomBar
@@ -90,15 +95,27 @@ fun LunchScreen(
     var selectedItem by remember { mutableStateOf<LunchProduct?>(null) }
     val sharedPref = remember { SharedPrefManager(context) }
     val token = sharedPref.getToken()
-    var categories by remember { mutableStateOf<List<LunchCategory>>(emptyList()) }
     var openCartSheet by remember { mutableStateOf(false) }
     var showHistorySheet by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<LunchCategory?>(null) }
+    var allCategories by remember { mutableStateOf<List<LunchCategory>>(emptyList()) }
+    var visibleCategories by remember { mutableStateOf<List<LunchCategory>>(emptyList()) }
+    var selectedSupplierIds by remember { mutableStateOf<List<Int>>(emptyList()) }
+    var filteredProducts by remember { mutableStateOf<List<LunchProduct>>(emptyList()) }
 
+    LaunchedEffect(selectedSupplierIds) {
+        Log.d("LunchScreen", "Selected suppliers = $selectedSupplierIds")
+    }
 
     LaunchedEffect(token) {
         if (!token.isNullOrBlank()) {
-            categories = fetchLunchCategories(context, token)
+            allCategories = fetchLunchCategories(context, token)
             lunchProducts = fetchLunchProducts(context, token)
+
+            filteredProducts = lunchProducts
+            visibleCategories = allCategories
+
             isLoading = false
         }
     }
@@ -141,10 +158,10 @@ fun LunchScreen(
                 supplierName = selectedItem!!.supplier_name,
                 imageBase64 = selectedItem!!.imageBase64,
                 onDismiss = { showBottomSheet = false },
-                onAddToCart = { productName ->
+                onAddToCart = {  productName, quantity ->
                     scope.launch {
                         snackBarHostState.showSnackbar(
-                            "$productName added to cart"
+                            "$quantity $productName added to cart"
                         )
                     }
                 }
@@ -164,7 +181,57 @@ fun LunchScreen(
             if (isLoading) {
                 FullLoading()
             } else {
-                LunchSearchBox()
+                LunchSearchBox(
+                    searchText = searchText,
+                    onSearchChanged = { value ->
+                        searchText = value
+                        scope.launch {
+                            val products = fetchLunchProducts(
+                                context = context,
+                                token = token!!,
+                                search = value.takeIf { it.isNotBlank() },
+                                supplierId = selectedSupplierIds.firstOrNull()
+                            )
+
+                            lunchProducts = products
+                            filteredProducts = products.filter { product ->
+                                selectedSupplierIds.isEmpty() || product.supplierId in selectedSupplierIds
+                            }
+                            val categoryIds = products.map { it.categoryId }.distinct()
+                            visibleCategories = allCategories.filter { it.id in categoryIds }
+
+                            selectedCategory = null
+                        }
+                    },
+                    onSuppliersSelected = { supplierIds ->
+                        selectedSupplierIds = supplierIds
+
+                        scope.launch {
+                            val products =
+                                if (supplierIds.isEmpty()) {
+                                    fetchLunchProducts(context, token!!)
+                                } else {
+                                    fetchLunchProducts(
+                                        context = context,
+                                        token = token!!,
+                                        supplierId = supplierIds.first()
+                                    )
+                                }
+
+
+                            filteredProducts = products   // New Products
+                            filteredProducts = lunchProducts.filter { product ->
+                                selectedSupplierIds.isEmpty() || product.supplierId in selectedSupplierIds
+                            }
+                            // We retrieve category IDs from the products
+                            val categoryIds = filteredProducts.map { it.categoryId }.distinct()
+                            visibleCategories = allCategories.filter { it.id in categoryIds }
+
+                            selectedCategory = null
+                        }
+                    }
+                )
+
 
                 Column(
                     modifier = Modifier
@@ -182,17 +249,29 @@ fun LunchScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         LunchCategoryRow(
-                            categories = categories,
+                            categories = visibleCategories,
+                            selectedCategory = selectedCategory,
+                            onAllSelected = {
+                                selectedCategory = null
+
+                                filteredProducts = if (selectedSupplierIds.isEmpty()) {
+                                    lunchProducts
+                                } else {
+                                    lunchProducts.filter { it.supplierId in selectedSupplierIds }
+                                }
+                            },
+
                             onCategorySelected = { category ->
-                                scope.launch {
-                                    lunchProducts = fetchLunchProducts(
-                                        context = context,
-                                        token = token!!,
-                                        categoryId = category.id
-                                    )
+                                selectedCategory = category
+
+                                filteredProducts = lunchProducts.filter { product ->
+                                    product.categoryId == category.id &&
+                                            (selectedSupplierIds.isEmpty() || product.supplierId in selectedSupplierIds)
                                 }
                             }
+
                         )
+
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -250,14 +329,30 @@ fun LunchScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(30.dp))
+
+                    if (filteredProducts.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.no_results_found),
+                                color = colors.onBackgroundColor,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(bottom = 0.dp)
                     ) {
-                        itemsIndexed(lunchProducts) { _, product ->
+                        itemsIndexed(filteredProducts) { _, product ->
                             Column {
                                 LunchCard(
                                     productId = product.id,
+                                    supplierId = product.supplierId,
                                     name = product.name,
                                     supplierName = product.supplier_name,
                                     price = "${product.price} ${product.currency}",
@@ -269,7 +364,7 @@ fun LunchScreen(
                                     }
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
-                            }
+                            }}
                         }
                     }
                 }

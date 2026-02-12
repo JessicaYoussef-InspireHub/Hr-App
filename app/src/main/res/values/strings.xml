@@ -194,6 +194,9 @@ You have</string>
     <string name="clear_favorites">Clear favorites</string>
     <string name="are_you_sure_you_want_to_clear_all_favorites">Are you sure you want to clear all favorites?</string>
     <string name="clear">Clear</string>
+    <string name="select_all">Select All</string>
+    <string name="clear_all">Clear All</string>
+    <string name="no_results_found">No results found</string>
 
 
 </resources>

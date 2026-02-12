@@ -43,7 +43,7 @@ fun AddToCart(
     productId: Int,
     price: Double,
     name: String,
-    onAddClick: () -> Unit
+    onAddClick: (Int) -> Unit
 ) {
     val colors = appColors()
     var quantity by remember { mutableIntStateOf(1) }
@@ -167,7 +167,7 @@ fun AddToCart(
                         Log.d("ROOM_CART", "Name: ${it.name}, Price: ${it.price}, Quantity: ${it.quantity}, ID: ${it.productId}")
                     }
                 }
-                onAddClick()
+                onAddClick(quantity)
             },
             modifier = Modifier.height(50.dp),
             colors = ButtonDefaults.buttonColors(

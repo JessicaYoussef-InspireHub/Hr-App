@@ -35,7 +35,7 @@ data class LunchProduct(
     @SerialName("is_new")
     val isNew: Boolean
 
-    )
+)
 
 
 @Serializable
@@ -65,7 +65,7 @@ suspend fun fetchLunchProducts(
         }
 
         val response = ApiClient.httpClient.post("$baseUrl/api/lunch/products") {
-         contentType(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
             setBody(body.toString())
         }
 
@@ -78,7 +78,7 @@ suspend fun fetchLunchProducts(
 
         val productsJson = json.jsonObject["products"]
         Json.decodeFromJsonElement(productsJson!!)
- } catch (e: Exception) {
+    } catch (e: Exception) {
         println("Error fetching lunch products: ${e.message}")
         emptyList()
     }

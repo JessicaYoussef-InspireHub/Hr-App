@@ -191,6 +191,8 @@
     <string name="clear_favorites">مسح المفضلة</string>
     <string name="are_you_sure_you_want_to_clear_all_favorites">هل أنت متأكد من رغبتك في مسح جميع المفضلة؟</string>
     <string name="clear">مسح</string>
-
+    <string name="select_all">تحديد الكل</string>
+    <string name="clear_all">مسح الكل</string>
+    <string name="no_results_found">لا توجد نتائج</string>
 
 </resources>
