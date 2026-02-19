@@ -12,6 +12,58 @@ import java.util.TimeZone
 import androidx.work.WorkManager
 import androidx.work.WorkInfo
 
+class OfflineAttendanceWorker(
+    appContext: Context,
+    params: WorkerParameters
+) : CoroutineWorker(appContext, params) {
+
+    private val database = AppDatabase.getDatabase(appContext)
+    private val offlineDao = database.offlineLogDao()
+
+    override suspend fun doWork(): Result {
+        Log.d("OfflineWorker", "🚀 Worker started")
+
+        val token = inputData.getString("token") ?: return Result.failure()
+
+        try {
+            val logs = offlineDao.getAllLogs()
+            Log.d("OfflineWorker", "📦 Found ${logs.size} offline logs to send")
+
+            if (logs.isEmpty()) return Result.success()
+
+            val formattedLogs = logs.map { log ->
+                mapOf(
+                    "action" to log.action,
+                    "lat" to log.lat.toString(),
+                    "lng" to log.lng.toString(),
+                    "action_time" to log.action_time,
+                    "action_tz" to log.action_tz
+                )
+            }
+
+            val response = sendOfflineAttendanceAction(
+                context = applicationContext,
+                token = token,
+                logs = formattedLogs
+            )
+
+            if (response != null) {
+                Log.d("OfflineWorker", "✅ Successfully sent ${logs.size} logs")
+                offlineDao.deleteAllLogs()
+                return Result.success()
+            } else {
+                Log.e("OfflineWorker", "❌ Failed to send logs, will retry")
+                return Result.retry()
+            }
+
+        } catch (e: Exception) {
+            Log.e("OfflineWorker", "💥 Exception in OfflineWorker: ${e.message}", e)
+            return Result.retry()
+        }
+    }
+}
+
+
 
 class AttendanceWorker(
     appContext: Context,

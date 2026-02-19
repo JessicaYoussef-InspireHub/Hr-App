@@ -1,5 +1,6 @@
 package net.inspirehub.hr.expenses.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Text
@@ -7,6 +8,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,8 +40,7 @@ fun DescriptionInputExpenses(
                     fontWeight = FontWeight.SemiBold
                 )
             },
-//            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState),
-//            maxLines = 3,
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = colors.transparent,
                 unfocusedContainerColor = colors.transparent,
@@ -57,7 +58,7 @@ fun DescriptionInputExpenses(
                 fontWeight = FontWeight.SemiBold,
                 lineHeight = 20.sp
             ),
-            singleLine = false
+            singleLine = false,
         )
     }
 }

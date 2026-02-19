@@ -62,6 +62,28 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
 
 
+    private val dao =
+        AppDatabase.getDatabase(application).offlineLogDao()
+
+    private val _buttonText = MutableStateFlow("Check هتIn")
+    val buttonText: StateFlow<String> = _buttonText
+
+    fun loadLastOfflineStatus() {
+        viewModelScope.launch {
+            val lastLog = offlineDao.getLastLog()
+
+            if (lastLog != null) {
+                _attendanceStatus.value = when (lastLog.action) {
+                    "check_in" -> "checked_in"
+                    "check_out" -> "checked_out"
+                    else -> "checked_out"
+                }
+            }
+        }
+    }
+
+
+
     init {
         viewModelScope.launch {
             val online = !NetworkUtils.isNetworkAvailable(context).not() && NetworkUtils.hasRealInternet()
@@ -98,6 +120,54 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
     }
+
+    fun syncOfflineData(token: String) {
+        viewModelScope.launch {
+            if (NetworkUtils.isNetworkAvailable(context) && NetworkUtils.hasRealInternet()) {
+                enqueueOfflineWorker(token)
+            }
+        }
+    }
+    fun enqueueOfflineWorker(token: String) {
+        val data = workDataOf("token" to token)
+
+        val request = OneTimeWorkRequestBuilder<OfflineAttendanceWorker>()
+            .setInputData(data)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .addTag("offline_attendance_tag")
+            .build()
+
+        WorkManager.getInstance(context).enqueue(request)
+        Log.d("OfflineWorker", "⏳ OfflineWorker enqueued")
+    }
+
+    fun setAttendanceStatus(newStatus: String) {
+        _attendanceStatus.value = newStatus
+    }
+
+
+
+
+
+    private val database = AppDatabase.getDatabase(context)
+    private val offlineDao = database.offlineLogDao()
+
+    private suspend fun saveOfflineLog(action: String, lat: Double, lng: Double, actionTime: String) {
+        val log = OfflineLog(
+            action = action,
+            lat = lat,
+            lng = lng,
+            action_time = actionTime,
+            action_tz = "UTC"
+        )
+        offlineDao.insertLog(log)
+        Log.d("OfflineLog", "💾 Saved offline log: $log")
+    }
+
 
 
     fun dismissTimeChangedDialog() {
@@ -474,6 +544,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 }
             } else {
                 // 🔸 Offline (but the time is right)
+                saveOfflineLog(action, _currentLat.value, _currentLng.value, finalActionTime)
                 enqueueWorkManager(token, action, finalActionTime)
                 onComplete("queued")
             }

@@ -175,7 +175,7 @@
     <string name="expenses">النفقات</string>
     <string name="total_price">:السعر الإجمالي</string>
     <string name="delivery">التوصيل</string>
-    <string name="total">المجموع</string>
+    <string name="total">:المجموع</string>
     <string name="your_order_has_been_placed_successfully">تم تقديم طلبك بنجاح!</string>
     <string name="order_now">اطلب الآن</string>
     <string name="is_new">جديد</string>
@@ -194,5 +194,8 @@
     <string name="select_all">تحديد الكل</string>
     <string name="clear_all">مسح الكل</string>
     <string name="no_results_found">لا توجد نتائج</string>
+    <string name="all">الكل</string>
+    <string name="category">الفئة:</string>
+    <string name="expense_date">تاريخ النفقة:</string>
 
 </resources>

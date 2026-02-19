@@ -1,7 +1,14 @@
 package net.inspirehub.hr.expenses.presentation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
@@ -10,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -18,9 +26,13 @@ import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.expenses.ExpenseDate
+import net.inspirehub.hr.expenses.components.CategoryDropdown
 import net.inspirehub.hr.expenses.components.DescriptionInputExpenses
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
+import net.inspirehub.hr.expenses.components.TotalPriceExpenses
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ExpensesScreen(
     navController: NavController
@@ -47,17 +59,49 @@ fun ExpensesScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-            TextFirstExpenses(stringResource(R.string.description))
-            DescriptionInputExpenses(
-                description = description,
-                onDescriptionChange = {description = it}
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextFirstExpenses(stringResource(R.string.description))
+                DescriptionInputExpenses(
+                    description = description,
+                    onDescriptionChange = { description = it }
+                )
+            }
 
-            )
-            TextFirstExpenses("Category")
-            TextFirstExpenses(stringResource(R.string.total))
+            Spacer(modifier = Modifier.height(25.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextFirstExpenses(stringResource(R.string.category))
+                Spacer(modifier = Modifier.width(10.dp))
+                CategoryDropdown()
+            }
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                TextFirstExpenses(stringResource(R.string.expense_date))
+                Spacer(modifier = Modifier.width(10.dp))
+                ExpenseDate()
+            }
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextFirstExpenses(stringResource(R.string.total))
+                Spacer(modifier = Modifier.width(10.dp))
+                TotalPriceExpenses()
+            }
             TextFirstExpenses("Paid by")
             TextFirstExpenses("Notes:")
-            TextFirstExpenses("Expense Date")
+
             TextFirstExpenses("Analytic Distribution")
         }
     }

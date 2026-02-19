@@ -1,4 +1,4 @@
-package net.inspirehub.hr.check_in_out.presentation
+package   net.inspirehub.hr.check_in_out.presentation
 
 import android.Manifest
 import androidx.compose.foundation.layout.Arrangement
@@ -54,7 +54,6 @@ import kotlinx.coroutines.launch
 import java.time.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -74,9 +73,12 @@ import kotlinx.coroutines.withContext
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.check_in_out.components.CheckInOutErrorDialog
 import net.inspirehub.hr.check_in_out.components.NotAllowedLocationDialog
+import net.inspirehub.hr.check_in_out.data.AppDatabase
+import net.inspirehub.hr.check_in_out.data.OfflineLog
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.Date
+import java.util.TimeZone
 
 
 var timeChangeReceiver: BroadcastReceiver? = null
@@ -275,6 +277,10 @@ fun CheckInOutScreen(
                     val companies = prefManager.getCompaniesLatLng()
                     val allowedIds = prefManager.getAllowedLocationsIds()
 
+                    if (!isOffline) {
+                        viewModel.syncOfflineData(token)
+                    }
+
                     viewModel.checkLocationAndDistanceAllCompanies(
                         companies = companies,
                         allowedLocationIds = allowedIds
@@ -307,6 +313,8 @@ fun CheckInOutScreen(
 
         if (connected) {
             isInitialLoading = true
+            viewModel.syncOfflineData(token)
+
         }
 
         while (true) {
@@ -514,9 +522,23 @@ fun CheckInOutScreen(
 
                                     val nextAction =
                                         if (attendanceStatus == "checked_in") "check_out" else "check_in"
+
+                                    val nextStatus =
+                                        if (nextAction == "check_in") "checked_in" else "checked_out"
+
                                     Log.d("CheckInOut", "📌 Next Action: $nextAction")
                                     Log.d("CheckInOut", "🌐 Offline: $isOffline")
                                     Log.d("CheckInOut", "🕒 Device Time: ${Date()}")
+
+
+
+                                    Log.d("CheckInOutDebug", "🔹 Button clicked")
+                                    Log.d("CheckInOutDebug", "Current attendanceStatus: $attendanceStatus")
+                                    Log.d("CheckInOutDebug", "Is Offline: $isOffline")
+
+                                    Log.d("CheckInOutDebug", "Next action determined: $nextAction")
+
+
 
                                     // 🔹 Case 1: User changed the time while offline → Forbidden to execute
                                     if (isOffline && wasOfflineDuringChange) {
@@ -525,37 +547,65 @@ fun CheckInOutScreen(
                                         return@launch
                                     }
 
-                                    // 🔹 Case 2: The user is offline (but the time has not changed)
-                                    if (isOffline) {
+                                    // 🔹 إذا كانت العملية check_out، أظهر الـ OfflineCheckOutDialog
+                              if (isOffline) {
+
+                                        val db = AppDatabase.getDatabase(context)
+                                        val log = OfflineLog(
+                                            action = nextAction,
+                                            lat = currentLat ?: 0.0,
+                                            lng = currentLng ?: 0.0,
+                                            action_time = Date().toString(),
+                                            action_tz = TimeZone.getDefault().id
+                                        )
+
+                                  if (nextAction == "check_in") {
+                                        coroutineScope.launch {
+                                            // 🔹 تسجيل الـ offline log في الـ database
+                                            withContext(Dispatchers.IO) {
+                                                db.offlineLogDao().insertLog(log)
+
+                                                // ✅ طباعة للتأكد
+                                                val allLogs = db.offlineLogDao().getAllLogs()
+                                                allLogs.forEach { println("💾 Offline Log: $it") }
+                                            }}
+
+                                        Log.d("CheckInOutDebug", "Updating attendanceStatus in ViewModel")
+
+
+                                        // 🔹 تحديث حالة الحضور مباشرة في UI
+                                        viewModel.setAttendanceStatus(nextStatus)
+                                        isButtonLoading = false
+                                        Log.d("CheckInOutDebug", "AttendanceStatus after setAttendanceStatus(): $attendanceStatus")
+
+
+                                        // 🔹 رسالة للمستخدم
                                         val currentLanguage = Locale.getDefault().language
-                                        val message =
-                                            if (currentLanguage == "ar") {
-                                                "انت غير متصل بالانترنت! تم حفظ العملية، سيتم إرسالها عند توفر الإنترنت"
-                                            } else {
-                                                "You are offline! The operation has been saved and will be sent when the internet is available."
-                                            }
-                                        offlineMessage = message
-
-                                        if (nextAction == "check_out") {
-                                            showOfflineCheckOutDialog = true
+                                        offlineMessage = if (currentLanguage == "ar") {
+                                            "انت غير متصل بالانترنت! تم حفظ العملية، سيتم إرسالها عند توفر الإنترنت"
                                         } else {
-                                            viewModel.sendAttendance(
-                                                token!!,
-                                                nextAction
-                                            ) { newStatus ->
-                                                isButtonLoading = false
-                                                if (!isAllowedLocation) {
-                                                    showNotAllowedDialog = true
+                                            "You are offline! The operation has been saved and will be sent when the internet is available."
+                                        }} else {
 
-                                                }
-                                                Log.d(
-                                                    "CheckInOut",
-                                                    "📤 Offline Check-In saved in WorkManager: $newStatus"
-                                                )
-                                            }
+
+                                  if (nextAction == "check_out") {
+                                      showOfflineCheckOutDialog = true
+                                      isButtonLoading = false
+                                      return@launch
+                                  }}
+
+                                  // 🔹 محاولة إعادة إرسال الـ offline logs لو الإنترنت متاح بعدين
+                                        if (!isOffline) {
+                                            val token = prefManager.getToken()
+                                            if (token != null) {
+                                                viewModel.syncOfflineData(token)
+                                            } else {
+                                                Log.d("CheckInOut", "⚠️ Token is null, cannot sync offline data")
+                                            }                                            }
                                         }
-                                        return@launch
-                                    }
+
+
+
 
 
                                     // 🔹 Case 3: User is online → Calculate the time difference with the server
@@ -643,21 +693,71 @@ fun CheckInOutScreen(
         }
 
 
+//        if (showOfflineCheckOutDialog) {
+//            OfflineCheckOutDialog(
+//                onDismiss = {
+//                    showOfflineCheckOutDialog = false
+//                },
+//                onConfirm = {
+//                    showOfflineCheckOutDialog = false
+//
+//                    coroutineScope.launch {
+//                        val db = AppDatabase.getDatabase(context)
+//
+//                        val log = OfflineLog(
+//                            action = "check_out",
+//                            lat = currentLat ?: 0.0,
+//                            lng = currentLng ?: 0.0,
+//                            action_time = Date().toString(),
+//                            action_tz = TimeZone.getDefault().id
+//                        )
+//
+//                        withContext(Dispatchers.IO) {
+//                            db.offlineLogDao().insertLog(log)
+//                        }
+//
+//                        // ✅ تحديث الـ UI فورًا
+//                        viewModel.setAttendanceStatus("checked_out")
+//
+//                        offlineMessage =
+//                            if (Locale.getDefault().language == "ar")
+//                                "تم تسجيل الانصراف بدون إنترنت، وسيتم إرساله لاحقًا"
+//                            else
+//                                "Check-out saved offline and will be synced later."
+//
+//                        isButtonLoading = false
+//                        isErrorDialogLoading = false
+//                    }
+//                }
+//            )
+//        }
+
+
         if (showOfflineCheckOutDialog) {
             OfflineCheckOutDialog(
                 onDismiss = { showOfflineCheckOutDialog = false },
                 onConfirm = {
                     showOfflineCheckOutDialog = false
-                    viewModel.sendAttendance(token, "check_out") { newStatus ->
-                        isButtonLoading = false
-                        Log.d(
-                            "CheckInOut",
-                            "📤 Offline Check-Out operation saved in WorkManager: $newStatus"
+                    coroutineScope.launch {
+                        val db = AppDatabase.getDatabase(context)
+                        val log = OfflineLog(
+                            action = "check_out",
+                            lat = currentLat,
+                            lng = currentLng,
+                            action_time = Date().toString(),
+                            action_tz = TimeZone.getDefault().id
                         )
+                        withContext(Dispatchers.IO) {
+                            db.offlineLogDao().insertLog(log)
+                        }
+                        viewModel.setAttendanceStatus("checked_out")
+                        isButtonLoading = false
                     }
                 }
             )
         }
+
+
 
         NotAllowedLocationDialog(
             showDialog = showNotAllowedDialog,
@@ -665,7 +765,7 @@ fun CheckInOutScreen(
         )
 
         if (isInitialLoading && !isOffline) {
-           FullLoading()
+            FullLoading()
         }
 
 
@@ -736,5 +836,6 @@ fun CheckInOutScreen(
             },
             onCancel = { showErrorDialog = false }
         )
+
     }
 }

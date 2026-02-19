@@ -178,7 +178,7 @@ Protection Method</string>
     <string name="expenses">Expenses</string>
     <string name="total_price">Total Price:</string>
     <string name="delivery">Delivery</string>
-    <string name="total">Total</string>
+    <string name="total">Total:</string>
     <string name="your_order_has_been_placed_successfully">Your order has been placed successfully!</string>
     <string name="order_now">Order Now</string>
     <string name="is_new">New</string>
@@ -197,6 +197,9 @@ You have</string>
     <string name="select_all">Select All</string>
     <string name="clear_all">Clear All</string>
     <string name="no_results_found">No results found</string>
+    <string name="all">All</string>
+    <string name="category">Category:</string>
+    <string name="expense_date">Expense Date:</string>
 
 
 </resources>

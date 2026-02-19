@@ -12,9 +12,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.LunchCategory
 
@@ -34,7 +36,7 @@ fun LunchCategoryRow(
     ) {
         item {
             Text(
-                text = "All",
+                text = stringResource(R.string.all),
                 fontSize = 18.sp,
                 fontWeight = if (selectedCategory == null)
                     FontWeight.Bold else FontWeight.Medium,
