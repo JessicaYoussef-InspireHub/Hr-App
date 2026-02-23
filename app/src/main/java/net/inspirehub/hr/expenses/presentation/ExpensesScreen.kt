@@ -13,10 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,9 +22,13 @@ import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.expenses.ExpenseDate
+import net.inspirehub.hr.expenses.components.AnalyticDistribution
+import net.inspirehub.hr.expenses.components.ExpenseDate
 import net.inspirehub.hr.expenses.components.CategoryDropdown
 import net.inspirehub.hr.expenses.components.DescriptionInputExpenses
+import net.inspirehub.hr.expenses.components.IncludedTaxes
+import net.inspirehub.hr.expenses.components.Notes
+import net.inspirehub.hr.expenses.components.PaidBy
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.components.TotalPriceExpenses
 
@@ -38,7 +38,6 @@ fun ExpensesScreen(
     navController: NavController
 ) {
     val colors = appColors()
-    var description by remember { mutableStateOf("") }
 
     Scaffold(
         containerColor = colors.onSecondaryColor,
@@ -64,10 +63,7 @@ fun ExpensesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextFirstExpenses(stringResource(R.string.description))
-                DescriptionInputExpenses(
-                    description = description,
-                    onDescriptionChange = { description = it }
-                )
+                DescriptionInputExpenses( )
             }
 
             Spacer(modifier = Modifier.height(25.dp))
@@ -99,10 +95,45 @@ fun ExpensesScreen(
                 Spacer(modifier = Modifier.width(10.dp))
                 TotalPriceExpenses()
             }
-            TextFirstExpenses("Paid by")
-            TextFirstExpenses("Notes:")
+            Spacer(modifier = Modifier.height(25.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextFirstExpenses(stringResource(R.string.analytic_distribution))
+                Spacer(modifier = Modifier.width(10.dp))
+                AnalyticDistribution()
+            }
+            Spacer(modifier = Modifier.height(25.dp))
 
-            TextFirstExpenses("Analytic Distribution")
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                TextFirstExpenses(stringResource(R.string.included_taxes))
+                Spacer(modifier = Modifier.width(10.dp))
+                IncludedTaxes()
+            }
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                TextFirstExpenses(stringResource(R.string.paid_by))
+                Spacer(modifier = Modifier.width(10.dp))
+                PaidBy()
+            }
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                TextFirstExpenses(stringResource(R.string.notes))
+                Spacer(modifier = Modifier.width(10.dp))
+                Notes()
+            }
         }
     }
 }

@@ -112,6 +112,7 @@
     <string name="checked_out_message">لقد قمت بتسجيل الخروج بنجاح بتاريخ %1$s في الساعة %2$s .. عمل رائع</string>
     <string name="attention">انتبه</string>
     <string name="check_out_confirmation">لقد قضيت %1$d ساعة و %2$d دقيقة\n\nهل أنت متأكد أنك تريد تسجيل الخروج؟</string>
+    <string name="are_you_sure_you_want_to_check_out">هل أنت متأكد أنك تريد تسجيل الخروج؟</string>
     <string name="check_out">تسجيل الخروج</string>
     <string name="check_in">تسجيل الدخول</string>
     <string name="loading">جارٍ التحميل</string>
@@ -197,5 +198,10 @@
     <string name="all">الكل</string>
     <string name="category">الفئة:</string>
     <string name="expense_date">تاريخ النفقة:</string>
+    <string name="included_taxes">الضرائب المشمولة:</string>
+    <string name="analytic_distribution">التوزيع التحليلي:</string>
+    <string name="paid_by">المدفوع من قِبل:</string>
+    <string name="notes">ملاحظات:</string>
+    <string name="add_your_notes">أضف ملاحظاتك...</string>
 
 </resources>

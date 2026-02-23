@@ -8,6 +8,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -18,10 +22,9 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun DescriptionInputExpenses(
-    description: String,
-    onDescriptionChange: (String) -> Unit
 ) {
     val colors = appColors()
+    var description by remember { mutableStateOf("") }
 
     val customTextSelectionColors = TextSelectionColors(
         handleColor = colors.tertiaryColor,
@@ -31,7 +34,7 @@ fun DescriptionInputExpenses(
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         TextField(
             value = description,
-            onValueChange = { onDescriptionChange(it) },
+            onValueChange = { description = it },
             placeholder = {
                 Text(
                     stringResource(R.string.add_a_description),

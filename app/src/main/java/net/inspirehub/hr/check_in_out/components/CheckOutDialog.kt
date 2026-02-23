@@ -1,13 +1,10 @@
 package net.inspirehub.hr.check_in_out.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +28,7 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun CheckOutDialog(
+    isOffline: Boolean,
     hours: Int,
     minutes: Int,
     isLoading: Boolean,
@@ -73,7 +71,10 @@ fun CheckOutDialog(
                 SmallLoading()
             } else {
             Text(
-                stringResource(R.string.check_out_confirmation, hours, minutes),
+                if (!isOffline) {
+                stringResource(R.string.check_out_confirmation, hours, minutes)}
+                else {
+                stringResource(R.string.are_you_sure_you_want_to_check_out)},
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
                 color = colors.onBackgroundColor )

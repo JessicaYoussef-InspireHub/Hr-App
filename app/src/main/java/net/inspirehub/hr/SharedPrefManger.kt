@@ -6,8 +6,19 @@ import java.util.Locale
 import androidx.core.content.edit
 import net.inspirehub.hr.check_in_out.data.CompanyLocation
 import net.inspirehub.hr.sign_in.data.Company
+import java.util.Date
 
 class SharedPrefManager(context: Context) {
+
+
+    fun saveLastOfflineActionTime(date: Date) {
+        prefs.edit { putLong("last_offline_action_time", date.time) }
+    }
+
+    fun getLastOfflineActionTime(): Date? {
+        val time = prefs.getLong("last_offline_action_time", 0L)
+        return if (time != 0L) Date(time) else null
+    }
 
     private val prefs: SharedPreferences =
         context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)

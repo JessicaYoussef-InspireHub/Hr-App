@@ -115,6 +115,7 @@ Protection Method</string>
 <!--    <string name="checked_out_message">You have successfully checked out on %1$s at %2$s after %3$d h %4$d m .. Great job</string>-->
     <string name="attention">Attention</string>
     <string name="check_out_confirmation">You have spent %1$d h %2$d m\n\nAre you sure you want to check out?</string>
+    <string name="are_you_sure_you_want_to_check_out">Are you sure you want to check out?</string>
     <string name="check_out">Check Out</string>
     <string name="check_in">Check In</string>
     <string name="loading">Loading</string>
@@ -200,6 +201,11 @@ You have</string>
     <string name="all">All</string>
     <string name="category">Category:</string>
     <string name="expense_date">Expense Date:</string>
+    <string name="included_taxes">Included taxes:</string>
+    <string name="analytic_distribution">Analytic Distribution:</string>
+    <string name="paid_by">Paid By:</string>
+    <string name="notes">Notes:</string>
+    <string name="add_your_notes">Add your notes...</string>
 
 
 </resources>
