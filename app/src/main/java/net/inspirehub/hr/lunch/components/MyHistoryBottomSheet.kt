@@ -1,5 +1,6 @@
 package net.inspirehub.hr.lunch.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,9 @@ import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import net.inspirehub.hr.lunch.data.OrderWithItems
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +60,25 @@ fun MyHistoryBottomSheet(
 
     LaunchedEffect(Unit) {
         orders = db.orderDao().getOrdersWithItems()
+    }
+
+    @Composable
+    @SuppressLint("SimpleDateFormat")
+    fun getOrderDayLabel(orderDate: Long, context: android.content.Context): String {
+        val sdf = SimpleDateFormat("yyyyMMdd")
+
+        val orderDay = sdf.format(Date(orderDate))
+        val today = sdf.format(Date())
+
+        val yesterdayCal = Calendar.getInstance()
+        yesterdayCal.add(Calendar.DAY_OF_YEAR, -1)
+        val yesterday = sdf.format(yesterdayCal.time)
+
+        return when (orderDay) {
+            today -> context.getString(R.string.Today)
+            yesterday -> context.getString(R.string.Yesterday)
+            else -> SimpleDateFormat("d MMM yyyy").format(Date(orderDate))
+        }
     }
 
 
@@ -112,30 +135,44 @@ fun MyHistoryBottomSheet(
                     )
                 }
             } else {
-                orders.forEach { order ->
-                    HistoryOrderCard(
-                        orderWithItems = order,
-                        onReorderClick = {
+                val groupedOrders = orders.groupBy {
+                    getOrderDayLabel(it.order.orderDate, context)
+                }
+                groupedOrders.forEach { (dayLabel, dayOrders) ->
 
-                            scope.launch {
-                                order.items.forEach { item ->
-                                    db.cartDao().insertItem(
-                                        CartItem(
-                                            productId = item.productId,
-                                            name = item.name,
-                                            price = item.price,
-                                            quantity = item.quantity
-                                        )
-                                    )
-                                }
-                                onDismiss()
-                            onReorderSuccess()
-                        }}
+                    Text(
+                        text = dayLabel,
+                        color = colors.onBackgroundColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(start = 12.dp)
                     )
-                    Spacer(modifier = Modifier.height(25.dp))
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    dayOrders.forEach { order ->
+                        HistoryOrderCard(
+                            orderWithItems = order,
+                            onReorderClick = {
+                                scope.launch {
+                                    order.items.forEach { item ->
+                                        db.cartDao().insertItem(
+                                            CartItem(
+                                                productId = item.productId,
+                                                name = item.name,
+                                                price = item.price,
+                                                quantity = item.quantity
+                                            )
+                                        )
+                                    }
+                                    onDismiss()
+                                    onReorderSuccess()
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
                 }
             }
         }
     }
 }
-

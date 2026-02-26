@@ -29,6 +29,7 @@ import net.inspirehub.hr.expenses.components.DescriptionInputExpenses
 import net.inspirehub.hr.expenses.components.IncludedTaxes
 import net.inspirehub.hr.expenses.components.Notes
 import net.inspirehub.hr.expenses.components.PaidBy
+import net.inspirehub.hr.expenses.components.SaveCancelButton
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.components.TotalPriceExpenses
 
@@ -49,7 +50,15 @@ fun ExpensesScreen(
                 }
             )
         },
-        bottomBar = { BottomBar(navController = navController) }
+        bottomBar = {
+            Column {
+                SaveCancelButton(
+                    onCancel = {},
+                    onConfirm = {}
+                )
+                BottomBar(navController = navController)
+            }
+        }
 
     ) { innerPadding ->
         Column(
@@ -63,7 +72,7 @@ fun ExpensesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextFirstExpenses(stringResource(R.string.description))
-                DescriptionInputExpenses( )
+                DescriptionInputExpenses()
             }
 
             Spacer(modifier = Modifier.height(25.dp))
@@ -77,10 +86,10 @@ fun ExpensesScreen(
             }
             Spacer(modifier = Modifier.height(25.dp))
 
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 TextFirstExpenses(stringResource(R.string.expense_date))
                 Spacer(modifier = Modifier.width(10.dp))
                 ExpenseDate()
@@ -106,34 +115,36 @@ fun ExpensesScreen(
             }
             Spacer(modifier = Modifier.height(25.dp))
 
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 TextFirstExpenses(stringResource(R.string.included_taxes))
                 Spacer(modifier = Modifier.width(10.dp))
                 IncludedTaxes()
             }
             Spacer(modifier = Modifier.height(25.dp))
 
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 TextFirstExpenses(stringResource(R.string.paid_by))
                 Spacer(modifier = Modifier.width(10.dp))
                 PaidBy()
             }
             Spacer(modifier = Modifier.height(25.dp))
 
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 TextFirstExpenses(stringResource(R.string.notes))
                 Spacer(modifier = Modifier.width(10.dp))
                 Notes()
             }
+            Spacer(modifier = Modifier.height(25.dp))
+
         }
     }
 }

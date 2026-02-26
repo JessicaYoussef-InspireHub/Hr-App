@@ -254,15 +254,7 @@ fun MyCalendarPicker(
                     val hourlyStates = dateToHourlyStatesMap[date] ?: emptySet()
                     val isPermission = hourlyStates.isNotEmpty()
                     val isRefusedPermission = hourlyStates.contains("refuse")
-                    val isConfirmedPermission = hourlyStates.contains("confirm")
-                    val isDraftPermission = hourlyStates.contains("draft")
-                    val isApprovedPermission = hourlyStates.contains("validate")
-
-                    val hasMultipleStates = states.size > 1
                     val isRefused = states.contains("refuse")
-                    val isConfirmed = states.contains("confirm")
-                    val isDraft = states.contains("draft")
-                    val isApproved = states.contains("validate")
 
 
                     Box(
@@ -274,72 +266,8 @@ fun MyCalendarPicker(
                                 color = if (isDialogMode && inSelectedRange) colors.tertiaryColor else colors.transparent,
                                 shape = CircleShape
                             )
-//                            .background(
-//                                when {
-//                                    isWeekendHoliday -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    publicHolidayDates.contains(date) -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    isDialogMode && inSelectedRange -> MaterialTheme.colorScheme.onPrimary
-////                                  isRefusedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    isRefused && isDraft -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    isRefusedPermission && isDraftPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    isRefused && isConfirmed -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    isRefusedPermission && isConfirmedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    isRefused && isApproved -> MaterialTheme.colorScheme.onSurface
-//                                    isRefusedPermission && isApprovedPermission-> MaterialTheme.colorScheme.onSurface
-//
-//                                    states.contains("confirm") -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    isConfirmedPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-//
-//                                    states.contains("validate") -> MaterialTheme.colorScheme.onSurface
-//                                    isApprovedPermission -> MaterialTheme.colorScheme.onSurface
-//
-//                                    states.contains("draft") -> MaterialTheme.colorScheme.onSecondaryContainer
-//                                    isDraftPermission -> MaterialTheme.colorScheme.onSecondaryContainer
-//
-//                                    states.contains("refuse") -> Color.Transparent
-//                                    isRefusedPermission -> Color.Transparent
-//
-//                                    isToday -> tertiaryColor
-//                                    else -> Color.Transparent
-//                                },
-//                                shape = when {
-//                                    isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
-//
-//                                    else -> CircleShape
-//                                }
-//                            )
 
                             .background(
-//                                when {
-//                                    isWeekendHoliday -> MaterialTheme.colorScheme.surfaceVariant
-//                                    publicHolidayDates.contains(date) -> MaterialTheme.colorScheme.surfaceVariant
-//
-//                                    states.contains("refuse") || states.contains("refuse") ||
-//                                            hourlyStates.contains("refuse") || hourlyStates.contains("refuse") -> Color.Transparent
-//
-//                                    states.contains("draft") || states.contains("confirm") ||
-//                                            hourlyStates.contains("draft") || hourlyStates.contains("confirm") -> Color.Transparent
-//
-//                                    states.isNotEmpty() -> {
-//                                        val leaveType = dailyRecords.find {
-//                                            val start = LocalDate.parse(it.start_date)
-//                                            val end = LocalDate.parse(it.end_date)
-//                                            !date.isBefore(start) && !date.isAfter(end)
-//                                        }?.leave_type
-//                                        leaveTypeColors[leaveType] ?: MaterialTheme.colorScheme.primaryContainer
-//                                    }
-//
-//                                    hourlyStates.isNotEmpty() -> {
-//                                        val leaveType = hourlyRecords.find {
-//                                            val leaveDay = LocalDate.parse(it.leave_day)
-//                                            date == leaveDay
-//                                        }?.leave_type
-//                                        leaveTypeColors[leaveType] ?: MaterialTheme.colorScheme.primaryContainer
-//                                    }
-//
-//                                    isToday -> tertiaryColor
-//                                    else -> Color.Transparent
-//                                },
                                 when {
                                     isWeekendHoliday || publicHolidayDates.contains(date) -> if (isDialogMode) colors.surfaceColor else colors.surfaceVariant
                                     firstState == "refuse" -> colors.transparent
@@ -521,7 +449,7 @@ fun MyCalendarPicker(
                             text = dayText,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
-                            color = colors.onBackgroundColor,
+                            color = if(isToday) colors.onSecondaryColor else colors.onBackgroundColor,
                             fontSize = 16.sp
                         )
                         if (firstState == "refuse") {

@@ -24,9 +24,7 @@ import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.OrderWithItems
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
+
 
 @SuppressLint("SimpleDateFormat")
 @Composable
@@ -39,39 +37,11 @@ fun HistoryOrderCard(
     val items = orderWithItems.items
     val colors = appColors()
 
-
-
-    @Composable
-    @SuppressLint("SimpleDateFormat")
-    fun formatOrderDate(orderDate: Long): String {
-        val sdf = SimpleDateFormat("yyyyMMdd")
-
-        val orderDay = sdf.format(Date(orderDate))
-        val today = sdf.format(Date())
-
-        val yesterdayCal = Calendar.getInstance()
-        yesterdayCal.add(Calendar.DAY_OF_YEAR, -1)
-        val yesterday = sdf.format(yesterdayCal.time)
-
-        return when (orderDay) {
-            today -> stringResource(R.string.Today)
-            yesterday -> stringResource(R.string.Yesterday)
-            else -> SimpleDateFormat("d MMM yyyy").format(Date(orderDate))
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
     ) {
-        Text(
-            text =  formatOrderDate(order.orderDate),
-            color = colors.onBackgroundColor,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
-        Spacer(modifier = Modifier.height(5.dp))
         Card (
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -87,14 +57,15 @@ fun HistoryOrderCard(
                 Column(
                     modifier = Modifier.padding(vertical = 12.dp)
                 ) {
-                    items.forEach {
-                        Text(
-                            "${it.quantity} x ${it.name}",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = colors.onBackgroundColor
-                        )
-                    }
+                    items.filter { it.quantity > 0 }
+                        .forEach { item ->
+                            Text(
+                                "${item.quantity} x ${item.name}",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = colors.onBackgroundColor
+                            )
+                        }
 
                     Spacer(modifier = Modifier.height(15.dp))
 

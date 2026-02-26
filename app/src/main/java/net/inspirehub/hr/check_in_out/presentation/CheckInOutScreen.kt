@@ -420,7 +420,7 @@ fun CheckInOutScreen(
                             stringResource(R.string.you_are_checked_out)
                         }
 
-                        else -> " "
+                        else -> "..."
                     },
                     color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,

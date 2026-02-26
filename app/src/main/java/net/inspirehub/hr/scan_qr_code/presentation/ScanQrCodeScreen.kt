@@ -60,9 +60,6 @@ fun ScanQrCodeScreen(
     var middleware by remember { mutableStateOf<Middleware?>(null) }
     var showErrorDialog by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
-
-
-
     val context = LocalContext.current
 
 
@@ -100,7 +97,7 @@ fun ScanQrCodeScreen(
             return
         }
         try {
-            middleware = Middleware.initialize(str)
+            middleware = Middleware.initialize(str, forceUpdate = true)
             println("Full decryption result: $middleware")
             println("Company ID: ${middleware!!.companyId}")
             println("API Key: ${middleware!!.apiKey}")

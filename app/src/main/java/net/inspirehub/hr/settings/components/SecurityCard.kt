@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -42,9 +40,7 @@ fun SecurityCard(
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val protectionMethod = sharedPrefManager.getProtectionMethod()
     var showDialog by remember { mutableStateOf(false) }
-    var isNotificationEnabled by remember {
-        mutableStateOf(sharedPrefManager.isNotificationsEnabled())
-    }
+
 
 
     Column {
@@ -100,14 +96,6 @@ fun SecurityCard(
                         .padding(horizontal = 20.dp),
                     color = colors.surfaceColor
                 )
-//
-//                SettingsItem(
-//                    stringResource(R.string.lunch),
-//                    icon = Icons.Default.Restaurant,
-//                    onClick = {
-//                        navController.navigate("LunchScreen")
-//                    }
-//                )
             }
         }
     }

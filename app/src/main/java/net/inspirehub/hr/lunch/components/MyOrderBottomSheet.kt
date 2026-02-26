@@ -36,7 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
@@ -45,6 +44,7 @@ import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import net.inspirehub.hr.lunch.data.OrderEntity
 import net.inspirehub.hr.lunch.data.OrderItemEntity
+import net.inspirehub.hr.lunch.data.submitLunchOrder
 
 @SuppressLint("FrequentlyChangedStateReadInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +62,7 @@ fun MyOrderBottomSheet(
     val total = cartItems.sumOf { it.price * it.quantity }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(showSheet) {
         if (showSheet) {
@@ -167,34 +168,47 @@ fun MyOrderBottomSheet(
 
                         OrderNowButton(
                             onClick = {
-                                CoroutineScope(Dispatchers.IO)
-                                    .launch {
-                                        val orderId = db.orderDao().insertOrder(
-                                            OrderEntity(
-                                                orderDate = System.currentTimeMillis(),
-                                                totalPrice = total
-                                            )
-                                        ).toInt()
+                                coroutineScope.launch {
+                                    isLoading = true
+                                    val apiSuccess =
+                                        submitLunchOrder(context = context, cartItems = cartItems)
 
-                                        val orderItems = cartItems.map {
-                                            OrderItemEntity(
-                                                orderId = orderId,
-                                                productId = it.productId,
-                                                name = it.name,
-                                                price = it.price,
-                                                quantity = it.quantity
-                                            )
-                                        }
-                                        db.orderDao().insertOrderItem(orderItems)
-                                        db.cartDao().clearCart()
-                                        cartItems = emptyList()
+                                    if (apiSuccess) {
+                                        launch(Dispatchers.IO) {
+                                            val orderId = db.orderDao().insertOrder(
+                                                OrderEntity(
+                                                    orderDate = System.currentTimeMillis(),
+                                                    totalPrice = total
+                                                )
+                                            ).toInt()
 
-                                        launch(Dispatchers.Main) {
-                                            onDismiss()
-                                            onOrderSuccess()
+                                            val orderItems = cartItems.map {
+                                                OrderItemEntity(
+                                                    orderId = orderId,
+                                                    productId = it.productId,
+                                                    name = it.name,
+                                                    price = it.price,
+                                                    quantity = it.quantity
+                                                )
+                                            }
+
+                                            db.orderDao().insertOrderItem(orderItems)
+                                            db.cartDao().clearCart()
+
+                                            launch(Dispatchers.Main) {
+                                                cartItems = emptyList()
+                                                isLoading = false
+                                                onDismiss()
+                                                onOrderSuccess()
+                                            }
                                         }
+                                    } else {
+                                        println("Failed to submit lunch order to API")
+                                        isLoading = false
                                     }
-                            }
+                                }
+                            },
+                            isLoading = isLoading
                         )
                     }
                 }

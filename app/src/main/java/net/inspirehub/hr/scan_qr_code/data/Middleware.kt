@@ -34,11 +34,13 @@ class Middleware private constructor(encryptedInput: String) {
     companion object {
         private const val DATA_DELIMITER = "|§|"
         private var instance: Middleware? = null
-        fun initialize(encryptedInput: String): Middleware {
+        fun initialize(encryptedInput: String, forceUpdate: Boolean = false): Middleware {
+            if (forceUpdate) {
+                instance = Middleware(encryptedInput)
+            }
             return instance ?: synchronized(this) {
                 instance ?: Middleware(encryptedInput).also { instance = it }
             }
         }
     }
-
 }
