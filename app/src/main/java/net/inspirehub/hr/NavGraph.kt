@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
+import net.inspirehub.hr.expenses.presentation.AddExpensesScreen
 import net.inspirehub.hr.expenses.presentation.ExpensesScreen
 import net.inspirehub.hr.lunch.presentation.LunchScreen
 import net.inspirehub.hr.notifications.presentation.NotificationsScreen
@@ -32,7 +33,7 @@ fun MyAppNavHost(
     viewModel: ScanQrCodeViewModel,
     navController: NavHostController,
     openedFromNotification: Boolean = false
-    ) {
+) {
     val context = LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val savedPin = sharedPrefManager.getPin()
@@ -86,18 +87,10 @@ fun MyAppNavHost(
 
     val startDestination = "SplashScreen"
 
-//    val startDestination = if (openedFromNotification) {
-//        "NotificationsScreen"
-//    } else {
-//        "SplashScreen"
-//    }
-
-
-
-
-
-    NavHost(navController = navController,
-        startDestination = startDestination) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
         composable("SplashScreen") {
             SplashScreen(
                 navController = navController,
@@ -108,6 +101,8 @@ fun MyAppNavHost(
         composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
 
         composable("ExpensesScreen") { ExpensesScreen(navController) }
+
+        composable("AddExpensesScreen") { AddExpensesScreen(navController) }
 
         composable("LunchScreen") {
             LunchScreen(
@@ -190,8 +185,9 @@ fun MyAppNavHost(
 
         composable(
             route = "ProtectionScreen/{numberToBack}",
-        )  { backStackEntry ->
-            val numberToBack = backStackEntry.arguments?.getString("numberToBack")?.toIntOrNull() ?: 0
+        ) { backStackEntry ->
+            val numberToBack =
+                backStackEntry.arguments?.getString("numberToBack")?.toIntOrNull() ?: 0
 
             ProtectionScreen(
                 navController = navController,
@@ -210,7 +206,7 @@ fun MyAppNavHost(
             val companyId = backStackEntry.arguments?.getString("companyId") ?: ""
             val apiKey = backStackEntry.arguments?.getString("apiKey") ?: ""
 
-            SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey )
+            SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey)
         }
     }
 }

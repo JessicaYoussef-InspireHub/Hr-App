@@ -147,10 +147,11 @@ fun CheckInOutScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showNotAllowedDialog by remember { mutableStateOf(false) }
     val isAllowedLocation by viewModel.isAllowedLocation.collectAsState()
-
+    val isFakeLocation by viewModel.isFakeLocation.collectAsState()
     var showErrorMessageDialog by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var isErrorDialogLoading by remember { mutableStateOf(false) }
+    var showFakeLocationDialog by remember { mutableStateOf(isFakeLocation) }
 
     fun String.replaceDigitsWithArabic(): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
@@ -321,22 +322,11 @@ fun CheckInOutScreen(
             delay(3000)
         }
     }
-//    LaunchedEffect(Unit) {
-//        val connected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
-//        isOffline = !connected
-//
-//        if (connected) {
-//            isInitialLoading = true
-//            viewModel.syncOfflineData(token)
-//
-//        }
-//
-//        while (true) {
-//            val stillConnected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
-//            isOffline = !stillConnected
-//            delay(3000)
-//        }
-//    }
+
+    LaunchedEffect(Unit) {
+        viewModel.startPollingAttendance(token)
+    }
+
 
     LaunchedEffect(attendanceStatus, lastCheckIn, workedHours) {
         // First time logging in and no data coming from the server
@@ -673,7 +663,6 @@ fun CheckInOutScreen(
                                                     println("✅ Check Out sent successfully: $newStatus")
                                                     showErrorDialog = true
                                                 } else {
-                                                    // ✅ هنا الحل
                                                     errorMessage = viewModel.message.value.ifEmpty {
                                                         context.getString(R.string.error)
                                                     }
@@ -714,6 +703,13 @@ fun CheckInOutScreen(
             }
         }
 
+        if (showFakeLocationDialog) {
+            CheckInOutErrorDialog(
+                message = "تم اكتشاف موقع وهمي.\nيرجى إيقاف Fake GPS للمواصلة.",
+                onDismiss = { showFakeLocationDialog = false }
+            )
+        }
+
         if (showOfflineCheckOutDialog) {
             OfflineCheckOutDialog(
                 onDismiss = { showOfflineCheckOutDialog = false },
@@ -744,7 +740,15 @@ fun CheckInOutScreen(
 
         NotAllowedLocationDialog(
             showDialog = showNotAllowedDialog,
-            onDismiss = { showNotAllowedDialog = false }
+            onDismiss = {
+                showNotAllowedDialog = false
+                val companies = prefManager.getCompaniesLatLng()
+                val allowedIds = prefManager.getAllowedLocationsIds()
+
+                viewModel.checkLocationAndDistanceAllCompanies(
+                    companies = companies,
+                    allowedLocationIds = allowedIds
+                )}
         )
 
         if (isInitialLoading && !isOffline) {
@@ -782,7 +786,7 @@ fun CheckInOutScreen(
 
     if (showErrorMessageDialog) {
         CheckInOutErrorDialog(
-            message = errorMessage,
+            message = stringResource(R.string.a_fake_location_was_detected_please_turn_off_fake_gps_to_continue),
             onDismiss = { showErrorMessageDialog = false }
         )
     }

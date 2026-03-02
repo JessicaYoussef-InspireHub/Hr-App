@@ -60,7 +60,38 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     private val _isAllowedLocation = MutableStateFlow(true)
     val isAllowedLocation: StateFlow<Boolean> = _isAllowedLocation
 
+    private val _isFakeLocation = MutableStateFlow(false)
+    val isFakeLocation: StateFlow<Boolean> = _isFakeLocation
 
+    fun startPollingAttendance(token: String) {
+        viewModelScope.launch {
+            while(true) {
+                val result = fetchAttendanceStatus(context, token)
+                if(result != null) {
+                    _attendanceStatus.value = result.attendance_status ?: "checked_out"
+                    _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
+                    _lastCheckOut.value = result.lastCheckOut ?: result.lastCheckOut
+                    _workedHours.value = result.worked_hours
+                }
+                delay(3000)
+            }
+        }
+    }
+
+    private fun isLocationFake(location: Location): Boolean {
+
+        val mockDetected =
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                location.isMock
+            } else {
+                location.isFromMockProvider
+            }
+
+        // accuracy غير طبيعي (fake apps غالباً)
+        val badAccuracy = location.accuracy > 50f
+
+        return mockDetected || badAccuracy
+    }
 
     private val dao =
         AppDatabase.getDatabase(application).offlineLogDao()
@@ -221,6 +252,20 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 return@addOnSuccessListener
             }
 
+            if (isLocationFake(location)) {
+
+                Log.e("Security", "🚨 Fake location detected!")
+
+                _isFakeLocation.value = true
+                _isWithinDistance.value = false
+                _isAllowedLocation.value = false
+                _currentCompanyId.value = null
+
+                return@addOnSuccessListener
+            } else {
+                _isFakeLocation.value = false
+            }
+
             _currentLat.value = location.latitude
             _currentLng.value = location.longitude
             Log.d("Location", "📍 Current location: ${location.latitude}, ${location.longitude}")
@@ -280,65 +325,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
 
 
-//    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-//    fun checkLocationAndDistanceAllCompanies(
-//        companies: Map<String, Pair<Double, Double>>,
-//        allowedDistance: Double) {
-//        fusedLocationClient.getCurrentLocation(
-//            Priority.PRIORITY_HIGH_ACCURACY,
-//            null
-//        ).addOnSuccessListener { location: Location? ->
-//            if (location != null) {
-//                _currentLat.value = location.latitude
-//                _currentLng.value = location.longitude
-//
-//                Log.d("Location", "📍 Current location: ${location.latitude}, ${location.longitude}")
-//
-//                var withinAnyCompany = false
-//                var currentCompany: String? = null
-//                var currentCompanyLat: Double? = null
-//                var currentCompanyLng: Double? = null
-//
-//                companies.forEach { (companyName, latLng) ->
-//                    val (companyLat, companyLng) = latLng
-//                    val results = FloatArray(1)
-//                    Location.distanceBetween(
-//                        location.latitude, location.longitude,
-//                        companyLat, companyLng,
-//                        results
-//                    )
-//                    val distance = results[0]
-//                    Log.d(
-//                        "DistanceCheck",
-//                        "Company: $companyName | Lat: $companyLat, Lng: $companyLng | Distance: $distance meters | AllowedDistance: $allowedDistance meters"
-//                    )
-//
-//                    if (distance <= allowedDistance) {
-//                        withinAnyCompany = true
-//                        currentCompany = companyName
-//                        currentCompanyLat = companyLat
-//                        currentCompanyLng = companyLng
-//                        Log.d("DistanceCheck", "$companyName is within allowed distance ✅")
-//                    }
-//                }
-//
-//                _isWithinDistance.value = withinAnyCompany
-//
-//                if (withinAnyCompany && currentCompany != null) {
-//                    Log.d(
-//                        "DistanceCheck",
-//                        "Employee is within allowed distance for company: $currentCompany | Lat: $currentCompanyLat, Lng: $currentCompanyLng"
-//                    )
-//                }
-//
-//                Log.d("DistanceCheck", "User is within any allowed company distance: $withinAnyCompany")
-//
-//            } else {
-//                Log.e("Location", "❌ Location is null")
-//                _isWithinDistance.value = false
-//            }
-//        }
-//    }
 
 
 
@@ -389,65 +375,12 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     }
 
 
-    @SuppressLint("MissingPermission")
-//    fun checkLocationAndDistance(targetLat: Double, targetLng: Double, allowedDistance: Double) {
-//        Log.d("disable", "checkLocationAndDistance called with targetLat=$targetLat, targetLng=$targetLng, allowedDistance=$allowedDistance")
-//
-//        fusedLocationClient.getCurrentLocation(
-//            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
-//            null
-//        ).addOnSuccessListener { location: Location? ->
-//            if (location != null) {
-//                // ✅ Accurate location from getCurrentLocation
-//                Log.d(
-//                    "Location",
-//                    "✅ Accurate Lat: ${location.latitude}, Lng: ${location.longitude}"
-//                )
-//                Log.d("disable", "✅ Current Location: ${location.latitude}, ${location.longitude}")
-//                Log.d(
-//                    "disable",
-//                    "✅ Target Location: $targetLat, $targetLng | Allowed Distance: $allowedDistance"
-//                )
-//
-//                _currentLat.value = location.latitude
-//                _currentLng.value = location.longitude
-//
-//
-//                // 👇الوطنية getCurrentLocation
-////                _currentLat.value = 27.192085
-////                _currentLng.value = 31.186931
-//
-////                // اول الشارع
-////                _currentLat.value = 27.190936
-////                _currentLng.value = 31.187951
-//
-//
-//                val results = FloatArray(1)
-//                Location.distanceBetween(
-//                    _currentLat.value, _currentLng.value, // my current location
-//                    targetLat, targetLng, // my company location (Step)
-//                    results
-//                )
-//                val distance = results[0]
-//                Log.d("Distance", "🚩 Distance to company: $distance meters")
-//                Log.d(
-//                    "disable",
-//                    "allowedDistance: $allowedDistance | isWithinDistance: ${distance <= allowedDistance}"
-//                )
-//                Log.d("disable", "🚩 Calculated Distance: $distance meters")
-//
-//                _isWithinDistance.value = distance <= allowedDistance
-//                Log.d("disable", "✅ isWithinDistance updated to: ${_isWithinDistance.value}")
-//
-//            } else {
-//                Log.e("Location", "❌ Location is null")
-//                Log.e("disable", "❌ Location is null")
-//
-//            }
-//        }
-//    }
-
     fun sendAttendance(token: String, action: String, onComplete: (String?) -> Unit = {}) {
+        if (_isFakeLocation.value) {
+            _message.value = "Fake location detected"
+            onComplete(null)
+            return
+        }
         val cache = AttendanceCache(context)
 
         val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)

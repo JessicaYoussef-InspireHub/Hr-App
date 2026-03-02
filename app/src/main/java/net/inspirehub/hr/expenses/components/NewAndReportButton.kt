@@ -18,9 +18,9 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
-fun SaveCancelButton(
-    onCancel: () -> Unit,
-    onConfirm: () -> Unit,
+fun NewAndReportButton(
+    onCreateReport: () -> Unit,
+    onNewExpenses: () -> Unit,
 ) {
     val colors = appColors()
     Row(
@@ -30,7 +30,7 @@ fun SaveCancelButton(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Button(
-            onClick = { onConfirm() },
+            onClick = { onNewExpenses() },
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
                 contentColor = colors.onSecondaryColor,
@@ -38,14 +38,14 @@ fun SaveCancelButton(
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(stringResource(R.string.save),
+            Text(stringResource(R.string.new_expense),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold)
         }
 
 
         Button(
-            onClick = { onCancel() },
+            onClick = { onCreateReport() },
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colors.surfaceColor,
@@ -54,7 +54,7 @@ fun SaveCancelButton(
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
-                stringResource(R.string.discard),
+                stringResource(R.string.create_report),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
             )

@@ -3,11 +3,8 @@ package net.inspirehub.hr.check_in_out.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,7 +64,7 @@ fun CheckInOutButton(
                 when (attendanceStatus) {
                     "checked_in" -> stringResource(R.string.check_out)
                     "checked_out" -> stringResource(R.string.check_in)
-                    else -> " " //loading
+                    else -> "..." //loading
                 },
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold

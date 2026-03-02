@@ -177,6 +177,7 @@ Protection Method</string>
     <string name="invalid_request">Invalid Request</string>
     <string name="apply">Apply</string>
     <string name="expenses">Expenses</string>
+    <string name="add_expenses">Add Expenses</string>
     <string name="total_price">Total Price:</string>
     <string name="delivery">Delivery</string>
     <string name="total">Total:</string>
@@ -206,6 +207,10 @@ You have</string>
     <string name="paid_by">Paid By:</string>
     <string name="notes">Notes:</string>
     <string name="add_your_notes">Add your notes...</string>
-
+    <string name="create_report">Create Report</string>
+    <string name="new_expense">New Expense</string>
+    <string name="no_expenses_yet">No expenses yet</string>
+    <string name="you_have_no_expense_to_report">You have no expense to report</string>
+    <string name="a_fake_location_was_detected_please_turn_off_fake_gps_to_continue">A fake location was detected.&#10;Please turn off Fake GPS to continue</string>
 
 </resources>

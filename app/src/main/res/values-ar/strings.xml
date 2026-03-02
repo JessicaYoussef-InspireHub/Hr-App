@@ -174,6 +174,7 @@
     <string name="invalid_request">طلب غير صالح</string>
     <string name="apply">تأكيد</string>
     <string name="expenses">النفقات</string>
+    <string name="add_expenses">إضافة نفقات</string>
     <string name="total_price">:السعر الإجمالي</string>
     <string name="delivery">التوصيل</string>
     <string name="total">:المجموع</string>
@@ -203,5 +204,10 @@
     <string name="paid_by">المدفوع من قِبل:</string>
     <string name="notes">ملاحظات:</string>
     <string name="add_your_notes">أضف ملاحظاتك...</string>
+    <string name="create_report">إنشاء تقرير</string>
+    <string name="new_expense">نفقة جديدة</string>
+    <string name="no_expenses_yet">لا يوجد مصروفات بعد</string>
+    <string name="you_have_no_expense_to_report">ليس لديك أي نفقات يجب الإبلاغ عنها</string>
+    <string name="a_fake_location_was_detected_please_turn_off_fake_gps_to_continue">تم اكتشاف موقع وهمي&#10;يرجى إيقاف Fake GPS للمواصلة.</string>
 
 </resources>
