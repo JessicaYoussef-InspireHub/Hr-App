@@ -63,6 +63,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.work.WorkManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.check_in_out.components.GpsDialog
 import net.inspirehub.hr.check_in_out.components.InternetRequiredDialog
@@ -75,6 +76,7 @@ import net.inspirehub.hr.check_in_out.components.CheckInOutErrorDialog
 import net.inspirehub.hr.check_in_out.components.NotAllowedLocationDialog
 import net.inspirehub.hr.check_in_out.data.AppDatabase
 import net.inspirehub.hr.check_in_out.data.OfflineLog
+import net.inspirehub.hr.check_in_out.data.scheduleCheckOutReminder
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.Date
@@ -104,7 +106,7 @@ private fun checkInternetConnection(context: Context): Boolean {
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "SuspiciousIndentation")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CheckInOutScreen(
@@ -377,7 +379,14 @@ fun CheckInOutScreen(
         )
     }
 
+    val notificationPermission =
+        rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
 
+    LaunchedEffect(Unit) {
+        if (!notificationPermission.status.isGranted) {
+            notificationPermission.launchPermissionRequest()
+        }
+    }
     BackHandler(enabled = true) {
         exitProcess(0)
     }
@@ -597,9 +606,9 @@ fun CheckInOutScreen(
                                         // 🔹 تحديث حالة الحضور مباشرة في UI
                                         viewModel.setAttendanceStatus(nextStatus)
                                        prefManager.saveLastOfflineActionTime(Date())
-                                        isButtonLoading = false
-                                        Log.d("CheckInOutDebug", "AttendanceStatus after setAttendanceStatus(): $attendanceStatus")
 
+                                       isButtonLoading = false
+                                        Log.d("CheckInOutDebug", "AttendanceStatus after setAttendanceStatus(): $attendanceStatus")
 
                                         // 🔹 رسالة للمستخدم
                                         val currentLanguage = Locale.getDefault().language
@@ -676,6 +685,7 @@ fun CheckInOutScreen(
                                             ) { newStatus ->
                                                 isButtonLoading = false
                                                 isErrorDialogLoading = false
+                                                Log.d("ReminderDebug", "✅ Reminder scheduled after ONLINE check-in")
 
                                                 if (newStatus != null) {
                                                     // ✅ Success
@@ -705,7 +715,7 @@ fun CheckInOutScreen(
 
         if (showFakeLocationDialog) {
             CheckInOutErrorDialog(
-                message = "تم اكتشاف موقع وهمي.\nيرجى إيقاف Fake GPS للمواصلة.",
+                message = stringResource(R.string.a_fake_location_was_detected_please_turn_off_fake_gps_to_continue),
                 onDismiss = { showFakeLocationDialog = false }
             )
         }
@@ -786,7 +796,7 @@ fun CheckInOutScreen(
 
     if (showErrorMessageDialog) {
         CheckInOutErrorDialog(
-            message = stringResource(R.string.a_fake_location_was_detected_please_turn_off_fake_gps_to_continue),
+            message = errorMessage,
             onDismiss = { showErrorMessageDialog = false }
         )
     }
@@ -801,7 +811,7 @@ fun CheckInOutScreen(
             minutes = minutes,
             isLoading = isDialogLoading,
             onConfirm = {
-
+                WorkManager.getInstance(context).cancelAllWorkByTag("check_out_reminder_work")
                 isDialogLoading = true
                 viewModel.sendAttendance(token, "check_out") { newStatus ->
                     isDialogLoading = false

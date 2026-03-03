@@ -426,7 +426,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                         return@launch
                     }
 
-//                    _message.value = result.message
 
                     result.attendance_status?.let {
                         _attendanceStatus.value = it
@@ -446,13 +445,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                     _workedHours.value = result.worked_hours
 
-//                    _attendanceStatus.value = result.attendance_status ?: _attendanceStatus.value
-//                    _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
-//                    _lastCheckOut.value = result.lastCheckOut ?: result.lastCheckOut
-//
-//                    _workedHours.value = result.worked_hours
-
-
                     println("Before assign _lastCheckIn: ${_lastCheckIn.value}")
                     println("Server last_check_in: ${result.lastCheckIn } and ${result.checkInTime}")
 
@@ -465,6 +457,12 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                         _lastCheckIn.value,
                         _lastCheckOut.value
                     )
+
+                    if (action == "check_in") {
+                        result.todayScheduledHours?.let { hours ->
+                            scheduleCheckOutReminder(context, hours)
+                        }
+                    }
 
                     onComplete(result.attendance_status)
                 } else {

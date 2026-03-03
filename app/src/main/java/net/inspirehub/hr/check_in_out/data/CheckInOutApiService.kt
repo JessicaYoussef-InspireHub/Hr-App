@@ -44,8 +44,6 @@ data class CompanyLocation(
 
 @Serializable
 data class AttendanceStatusResult(
-//    val status: String,
-//    val message: String,
     val status: String? = null,
     val message: String? = null,
     val attendance_status: String? = null,
@@ -61,7 +59,10 @@ data class AttendanceStatusResult(
     val checkOutTime: String? = null,
 
     @SerialName("last_check_out")
-    val lastCheckOut: String? = null
+    val lastCheckOut: String? = null,
+
+    @SerialName("today_scheduled_hours")
+    val todayScheduledHours: Double? = null
 )
 
 val httpClient = HttpClient {
@@ -357,53 +358,6 @@ suspend fun sendAttendanceAction(
         )
     }
 }
-
-
-
-//suspend fun sendAttendanceAction(
-//    context: Context,
-//    token: String,
-//    action: String,
-//    latitude: String,
-//    longitude: String,
-//    actionTime: String? = null
-//): AttendanceStatusResult? {
-//    return try {
-//        val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-//        utcFormat.timeZone = TimeZone.getTimeZone("UTC")
-//        val currentTime = actionTime ?: utcFormat.format(Date())
-//        val sharedPref = SharedPrefManager(context)
-//        val companyUrl = sharedPref.getCompanyUrl()
-//
-//        val response: HttpResponse =
-//            httpClient.post("$companyUrl/api/employee_attendance") {
-//                contentType(ContentType.Application.Json)
-//                setBody(
-//                    mapOf(
-//                        "params" to mapOf(
-//                            "employee_token" to token,
-//                            "action" to action,
-//                            "lat" to latitude,
-//                            "lng" to longitude,
-//                            "action_time" to currentTime
-//                        )
-//                    )
-//                )
-//            }
-//
-//        println("Status: ${response.status}")
-//        println("Headers: ${response.headers}")
-//        println("Body: ${response.bodyAsText()}")
-//
-//        val responseBody = response.body<AttendanceStatusResponseWrapper>()
-//        println("⚪ Server response: $responseBody")
-//        responseBody.result
-//
-//    } catch (e: Exception) {
-//        println("🔴 Exception: ${e.message}")
-//        null
-//    }
-//}
 
 
 suspend fun fetchAttendanceStatus(
