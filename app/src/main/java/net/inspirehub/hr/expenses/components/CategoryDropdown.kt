@@ -23,26 +23,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.expenses.data.ExpenseCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryDropdown() {
+fun CategoryDropdown(
+    categories: List<ExpenseCategory>
+) {
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf("") }
-
+    var selectedItem by remember { mutableStateOf<ExpenseCategory?>(null) }
     val colors = appColors()
 
-    val items = listOf(
-        "[BNS] Bonus",
-        "[CER] Certificate",
-        "[COMACS] Computer Accessories",
-        "[COMM] Communication",
-        "[FOOD] Meals",
-        "[GIFT] Gifts",
-        "[HOSEXP] Hospital Expenses",
-        "[LEGF] Legal Fees"
-    )
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -50,7 +42,7 @@ fun CategoryDropdown() {
     ) {
 
         TextField(
-            value = selectedItem,
+            value = selectedItem?.name ?: "",
             onValueChange = {},
             readOnly = true,
             placeholder = {
@@ -95,20 +87,27 @@ fun CategoryDropdown() {
             onDismissRequest = { expanded = false },
             modifier = Modifier.background(colors.surfaceContainerHigh)
         ) {
-            items.forEach { option ->
+            if (categories.isEmpty()) {
                 DropdownMenuItem(
-                    text = {
-                        Text(
-                            option,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    },
-                    onClick = {
-                        selectedItem = option
-                        expanded = false
-                    }
+                    text = { Text("No categories available") },
+                    onClick = { expanded = false }
                 )
+            } else {
+                categories.forEach { category ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                category.name,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        },
+                        onClick = {
+                            selectedItem = category
+                            expanded = false
+                        }
+                    )
+                }
             }
         }
     }

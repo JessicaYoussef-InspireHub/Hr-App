@@ -28,33 +28,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.expenses.data.Tax
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IncludedTaxes(){
+fun IncludedTaxes(
+    taxes: List<Tax>
+) {
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedTaxes by remember { mutableStateOf("") }
+    var selectedTax by remember { mutableStateOf<Tax?>(null) }
 
     val colors = appColors()
-
-    val taxes = listOf(
-        "14% Tax - Expenses Purchase",
-        "0% Tax - Purchase",
-        "Foreigner - Purchase",
-        "1% Tax With-holding - Purchase",
-        "3% Tax With-holding - Purchase",
-        "5% Tax With-holding - Purchase",
-        "14% Tax Hardware Purchase",
-        "14% Tax Assets Purchase"
-    )
 
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         ExposedDropdownMenuBox(
             modifier = Modifier.fillMaxWidth(),
             expanded = expanded,
@@ -62,7 +54,7 @@ fun IncludedTaxes(){
         ) {
 
             TextField(
-                value = selectedTaxes,
+                value = selectedTax?.name ?: "",
                 onValueChange = {},
                 readOnly = true,
                 placeholder = {
@@ -109,20 +101,34 @@ fun IncludedTaxes(){
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(colors.surfaceContainerHigh)
             ) {
-                taxes.forEach { option ->
+                if (taxes.isEmpty()) {
                     DropdownMenuItem(
                         text = {
                             Text(
-                                option,
+                                "No taxes available",
                                 fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.SemiBold
                             )
                         },
-                        onClick = {
-                            selectedTaxes = option
-                            expanded = false
-                        }
+                        onClick = { expanded = false }
                     )
+
+                } else {
+                    taxes.forEach { tax ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    tax.name,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            },
+                            onClick = {
+                                selectedTax = tax
+                                expanded = false
+                            }
+                        )
+                    }
                 }
             }
         }

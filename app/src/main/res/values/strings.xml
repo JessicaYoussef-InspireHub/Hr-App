@@ -208,7 +208,11 @@ You have</string>
     <string name="notes">Notes:</string>
     <string name="add_your_notes">Add your notes...</string>
     <string name="create_report">Create Report</string>
+    <string name="reports">Reports</string>
+    <string name="view_reports">View Reports</string>
     <string name="new_expense">New Expense</string>
+    <string name="new_">New</string>
+    <string name="upload">Upload</string>
     <string name="no_expenses_yet">No expenses yet</string>
     <string name="you_have_no_expense_to_report">You have no expense to report</string>
     <string name="a_fake_location_was_detected_please_turn_off_fake_gps_to_continue">A fake location was detected.&#10;Please turn off Fake GPS to continue</string>

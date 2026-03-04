@@ -63,7 +63,9 @@ fun ExpensesScreen(
                             showNoReportDialog = true
                         } else {
                         }
-                    }
+                    },
+                    onUpload = {},
+                    viewReport = {}
                 )
                 BottomBar(navController = navController)
             }
@@ -95,13 +97,13 @@ fun ExpensesScreen(
                     ExpenseItemCard(it)
                 }
             }
+        }
 
-            if (showNoReportDialog) {
-                NoReportDialog(
-                    isLoading = false,
-                    onCancel = { showNoReportDialog = false }
-                )
-            }
+        if (showNoReportDialog) {
+            NoReportDialog(
+                isLoading = false,
+                onCancel = { showNoReportDialog = false }
+            )
         }
     }
 }

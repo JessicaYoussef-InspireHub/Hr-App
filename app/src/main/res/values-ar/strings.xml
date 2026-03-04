@@ -205,7 +205,11 @@
     <string name="notes">ملاحظات:</string>
     <string name="add_your_notes">أضف ملاحظاتك...</string>
     <string name="create_report">إنشاء تقرير</string>
+    <string name="reports">التقارير</string>
+    <string name="view_reports">عرض التقارير</string>
     <string name="new_expense">نفقة جديدة</string>
+    <string name="new_">إضافة</string>
+    <string name="upload">رفع</string>
     <string name="no_expenses_yet">لا يوجد مصروفات بعد</string>
     <string name="you_have_no_expense_to_report">ليس لديك أي نفقات يجب الإبلاغ عنها</string>
     <string name="a_fake_location_was_detected_please_turn_off_fake_gps_to_continue">تم اكتشاف موقع وهمي&#10;يرجى إيقاف Fake GPS للمواصلة.</string>

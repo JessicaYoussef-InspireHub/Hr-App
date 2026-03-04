@@ -197,7 +197,7 @@ fun BottomBar(
                                 Text(
                                     stringResource(R.string.expenses) ,
                                     color =
-                                        if (currentRoute == "AddExpensesScreen")
+                                        if (currentRoute == "ExpensesScreen")
                                             colors.tertiaryColor
                                         else
                                             colors.onBackgroundColor
