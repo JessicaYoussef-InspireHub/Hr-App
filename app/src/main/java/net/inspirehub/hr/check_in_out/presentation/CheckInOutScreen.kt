@@ -76,7 +76,6 @@ import net.inspirehub.hr.check_in_out.components.CheckInOutErrorDialog
 import net.inspirehub.hr.check_in_out.components.NotAllowedLocationDialog
 import net.inspirehub.hr.check_in_out.data.AppDatabase
 import net.inspirehub.hr.check_in_out.data.OfflineLog
-import net.inspirehub.hr.check_in_out.data.scheduleCheckOutReminder
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.Date
@@ -811,6 +810,7 @@ fun CheckInOutScreen(
             minutes = minutes,
             isLoading = isDialogLoading,
             onConfirm = {
+                prefManager.clearCheckOutScheduledTime()
                 WorkManager.getInstance(context).cancelAllWorkByTag("check_out_reminder_work")
                 isDialogLoading = true
                 viewModel.sendAttendance(token, "check_out") { newStatus ->
@@ -847,6 +847,5 @@ fun CheckInOutScreen(
             },
             onCancel = { showErrorDialog = false }
         )
-
     }
 }

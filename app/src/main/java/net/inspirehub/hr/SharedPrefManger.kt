@@ -2,6 +2,7 @@ package net.inspirehub.hr
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import java.util.Locale
 import androidx.core.content.edit
 import net.inspirehub.hr.check_in_out.data.CompanyLocation
@@ -9,6 +10,22 @@ import net.inspirehub.hr.sign_in.data.Company
 import java.util.Date
 
 class SharedPrefManager(context: Context) {
+
+    fun saveCheckOutScheduledTime(triggerTimeMillis: Long) {
+        prefs.edit().putLong("check_out_scheduled_time", triggerTimeMillis).apply()
+        Log.d("SharedPrefManager", "💾 Check-Out time saved: $triggerTimeMillis")
+    }
+
+    // 🔹 جلب وقت Check-Out
+    fun getCheckOutScheduledTime(): Long {
+        return prefs.getLong("check_out_scheduled_time", -1L)
+    }
+
+    // 🔹 مسح الوقت بعد ما ينفذ أو تم تسجيل الخروج
+    fun clearCheckOutScheduledTime() {
+        prefs.edit().remove("check_out_scheduled_time").apply()
+        Log.d("SharedPrefManager", "🗑️ Check-Out time cleared")
+    }
 
 
     fun saveLastOfflineActionTime(date: Date) {

@@ -62,10 +62,9 @@ fun ExpenseDate() {
                 unfocusedIndicatorColor = colors.tertiaryColor,
                 disabledIndicatorColor = colors.tertiaryColor,
 
-
-                focusedTextColor = colors.onBackgroundColor,
-                unfocusedTextColor = colors.onBackgroundColor,
-                disabledTextColor = colors.onBackgroundColor,
+                focusedTextColor = colors.tertiaryColor,
+                unfocusedTextColor = colors.tertiaryColor,
+                disabledTextColor = colors.tertiaryColor,
 
                 cursorColor = colors.tertiaryColor
             ),

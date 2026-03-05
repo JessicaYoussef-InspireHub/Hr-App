@@ -47,14 +47,14 @@ fun LunchSearchBox(
     val sharedPref = SharedPrefManager(context)
     val token = sharedPref.getToken() ?: " "
     var localSearch by remember { mutableStateOf(searchText) }
+    val isTextEntered = searchText.isNotEmpty()
 
 
     val customTextSelectionColors = TextSelectionColors(
-        handleColor = colors.onBackgroundColor,
-        backgroundColor = colors.onBackgroundColor
+        handleColor = if (isTextEntered) colors.tertiaryColor else colors.onBackgroundColor,
+        backgroundColor = if (isTextEntered) colors.onBackgroundColor else colors.tertiaryColor
     )
 
-    val isTextEntered = searchText.isNotEmpty()
     val iconAndCursorColor = if (isTextEntered) colors.tertiaryColor else colors.onBackgroundColor
 
     Row(

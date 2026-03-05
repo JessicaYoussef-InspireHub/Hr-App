@@ -55,7 +55,7 @@ fun AddExpensesScreen(
     var categories by remember { mutableStateOf<List<ExpenseCategory>>(emptyList()) }
     var isLoadingTaxes by remember { mutableStateOf(true) }
     val sharedPref = SharedPrefManager(context)
-
+    var description by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
 
@@ -99,7 +99,10 @@ fun AddExpensesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextFirstExpenses(stringResource(R.string.description))
-                DescriptionInputExpenses()
+                DescriptionInputExpenses(
+                    description = description,
+                    onDescriptionChange = { description = it }
+                )
             }
 
             Spacer(modifier = Modifier.height(25.dp))
@@ -109,7 +112,15 @@ fun AddExpensesScreen(
             ) {
                 TextFirstExpenses(stringResource(R.string.category))
                 Spacer(modifier = Modifier.width(10.dp))
-                CategoryDropdown(categories = categories)
+                CategoryDropdown(
+                    categories = categories,
+                    description = description,
+                    onCategorySelected = { category ->
+                        category.id
+                    },
+                    onDescriptionChange = { text ->
+                        description = text
+                    })
             }
             Spacer(modifier = Modifier.height(25.dp))
 
@@ -127,15 +138,6 @@ fun AddExpensesScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextFirstExpenses(stringResource(R.string.total))
-                Spacer(modifier = Modifier.width(10.dp))
-                TotalPriceExpenses()
-            }
-            Spacer(modifier = Modifier.height(25.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
                 TextFirstExpenses(stringResource(R.string.analytic_distribution))
                 Spacer(modifier = Modifier.width(10.dp))
                 AnalyticDistribution()
@@ -148,9 +150,18 @@ fun AddExpensesScreen(
             ) {
                 TextFirstExpenses(stringResource(R.string.included_taxes))
                 Spacer(modifier = Modifier.width(10.dp))
-                IncludedTaxes(taxes = taxes)            }
+                IncludedTaxes(taxes = taxes)
+            }
             Spacer(modifier = Modifier.height(25.dp))
-
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextFirstExpenses(stringResource(R.string.total))
+                Spacer(modifier = Modifier.width(10.dp))
+                TotalPriceExpenses()
+            }
+            Spacer(modifier = Modifier.height(25.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically

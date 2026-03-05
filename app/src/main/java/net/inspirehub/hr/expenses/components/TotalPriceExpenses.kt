@@ -39,7 +39,7 @@ fun TotalPriceExpenses(){
 
     val customTextSelectionColors = TextSelectionColors(
         handleColor = colors.tertiaryColor,
-        backgroundColor = colors.tertiaryColor
+        backgroundColor = colors.onBackgroundColor
     )
 
     Row(

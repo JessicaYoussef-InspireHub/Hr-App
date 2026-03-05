@@ -29,7 +29,7 @@ fun DescriptionInput(
 
     val customTextSelectionColors = TextSelectionColors(
         handleColor = colors.tertiaryColor,
-        backgroundColor = colors.tertiaryColor
+        backgroundColor = colors.onBackgroundColor
     )
 
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {

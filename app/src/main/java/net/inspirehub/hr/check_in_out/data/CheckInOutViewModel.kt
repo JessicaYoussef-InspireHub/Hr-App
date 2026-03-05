@@ -460,7 +460,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                     if (action == "check_in") {
                         result.todayScheduledHours?.let { hours ->
-                            scheduleCheckOutReminder(context, hours)
+                            scheduleCheckOutAlarm(context, hours)
+//                            scheduleCheckOutReminder(context, hours)
                         }
                     }
 
