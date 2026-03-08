@@ -460,8 +460,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                     if (action == "check_in") {
                         result.todayScheduledHours?.let { hours ->
-                            scheduleCheckOutAlarm(context, hours)
-//                            scheduleCheckOutReminder(context, hours)
+                            scheduleCheckOutReminder(context, hours)
                         }
                     }
 
@@ -522,27 +521,27 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
                 _lastCheckOut.value = result.lastCheckOut ?: result.lastCheckOut
                 _workedHours.value = result.worked_hours
-                calculateWorkedHours()
+//                calculateWorkedHours()
             }
         }
     }
 
-    fun calculateWorkedHours() {
-        val checkIn = _lastCheckIn.value
-        val checkOut = _lastCheckOut.value
-        if (checkIn != null && checkOut != null) {
-            try {
-                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-                val checkInDate = formatter.parse(checkIn)
-                val checkOutDate = formatter.parse(checkOut)
-                if (checkInDate != null && checkOutDate != null) {
-                    val diffMillis = checkOutDate.time - checkInDate.time
-                    val diffHours = diffMillis / (1000.0 * 60.0 * 60.0)
-                    _workedHours.value = diffHours
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
+//    fun calculateWorkedHours() {
+//        val checkIn = _lastCheckIn.value
+//        val checkOut = _lastCheckOut.value
+//        if (checkIn != null && checkOut != null) {
+//            try {
+//                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+//                val checkInDate = formatter.parse(checkIn)
+//                val checkOutDate = formatter.parse(checkOut)
+//                if (checkInDate != null && checkOutDate != null) {
+//                    val diffMillis = checkOutDate.time - checkInDate.time
+//                    val diffHours = diffMillis / (1000.0 * 60.0 * 60.0)
+//                    _workedHours.value = diffHours
+//                }
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//        }
+//    }
 }

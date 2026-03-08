@@ -135,7 +135,7 @@ fun CheckInOutScreen(
     var isOffline by remember { mutableStateOf(false) }
     var isButtonLoading by remember { mutableStateOf(true) }
     val workedHours by viewModel.workedHours.collectAsState()
-    val totalMinutes = ((workedHours ?: 0.0) * 60).toInt()
+    val totalMinutes = ((workedHours ?: 0.0) * 100).toInt()
     val hours = totalMinutes / 60
     val minutes = totalMinutes % 60
     var showErrorDialog by remember { mutableStateOf(false) }
