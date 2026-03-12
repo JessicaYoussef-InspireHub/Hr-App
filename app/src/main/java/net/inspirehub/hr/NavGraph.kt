@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
 import net.inspirehub.hr.expenses.presentation.AddExpensesScreen
 import net.inspirehub.hr.expenses.presentation.ExpensesScreen
+import net.inspirehub.hr.expenses.presentation.MyReportScreen
 import net.inspirehub.hr.lunch.presentation.LunchScreen
 import net.inspirehub.hr.notifications.presentation.NotificationsScreen
 import net.inspirehub.hr.protection.presentation.ConfirmPinScreen
@@ -99,6 +100,8 @@ fun MyAppNavHost(
         }
 
         composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
+
+        composable("MyReportScreen") { MyReportScreen(navController) }
 
         composable("ExpensesScreen") { ExpensesScreen(navController) }
 

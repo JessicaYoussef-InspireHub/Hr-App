@@ -91,7 +91,6 @@ fun LunchSearchBox(
                         onValueChange = { value ->
                             localSearch = value
                         },
-                        singleLine = true,
                         textStyle = TextStyle(
                             color = colors.tertiaryColor,
                             fontSize = 16.sp,

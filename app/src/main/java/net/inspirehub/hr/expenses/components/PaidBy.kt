@@ -7,20 +7,30 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
 fun PaidBy() {
     val colors = appColors()
-    var selectedOption by remember { mutableStateOf("employee") }
+    var selectedOption by remember { mutableStateOf("") }
+
+    val employeeText = stringResource(R.string.employee)
+    val companyText = stringResource(R.string.company)
+
+    LaunchedEffect(Unit) {
+        selectedOption = employeeText
+    }
 
 
     Row(
@@ -32,15 +42,15 @@ fun PaidBy() {
             modifier = Modifier.weight(1f)
         ) {
             RadioButton(
-                selected = selectedOption == "employee",
-                onClick = { selectedOption = "employee" },
+                selected = selectedOption == employeeText,
+                onClick = { selectedOption = employeeText },
                 colors = RadioButtonDefaults.colors(
                     selectedColor = colors.tertiaryColor,
                     unselectedColor = colors.onBackgroundColor,
                 )
             )
             Text(
-                "Employee",
+                stringResource(R.string.employee),
                 color = colors.onBackgroundColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
@@ -55,15 +65,15 @@ fun PaidBy() {
 
         ) {
             RadioButton(
-                selected = selectedOption == "company",
-                onClick = { selectedOption = "company" },
+                selected = selectedOption == companyText,
+                onClick = { selectedOption = companyText },
                 colors = RadioButtonDefaults.colors(
                     selectedColor = colors.tertiaryColor,
                     unselectedColor = colors.onBackgroundColor,
                 )
             )
             Text(
-                "Company",
+                stringResource(R.string.company),
                 color = colors.onBackgroundColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold

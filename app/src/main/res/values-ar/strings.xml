@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">HR</string>
     <string name="time_off_type">نوع الأجازة:</string>
     <string name="confirm_your_pin">تأكيد رقم التعريف الشخصي الخاص بك</string>
@@ -111,7 +111,11 @@
     <string name="checked_in_message">لقد قمت بتسجيل الدخول بنجاح في %1$s\nأتمنى لك يومًا مباركًا</string>
     <string name="checked_out_message">لقد قمت بتسجيل الخروج بنجاح بتاريخ %1$s في الساعة %2$s .. عمل رائع</string>
     <string name="attention">انتبه</string>
-    <string name="check_out_confirmation">لقد قضيت %1$d ساعة و %2$d دقيقة\n\nهل أنت متأكد أنك تريد تسجيل الخروج؟</string>
+    <plurals name="check_out_confirmation" tools:ignore="MissingQuantity">
+        <item quantity="one">إجمالي وقت العمل: %1$.2f ساعة\n\nهل أنت متأكد أنك تريد تسجيل الخروج؟</item>
+        <item quantity="two">إجمالي وقت العمل: %1$.2f ساعتين\n\nهل أنت متأكد أنك تريد تسجيل الخروج؟</item>
+        <item quantity="other">إجمالي وقت العمل: %1$.2f ساعات\n\nهل أنت متأكد أنك تريد تسجيل الخروج؟</item>
+    </plurals>
     <string name="are_you_sure_you_want_to_check_out">هل أنت متأكد أنك تريد تسجيل الخروج؟</string>
     <string name="check_out">تسجيل الخروج</string>
     <string name="check_in">تسجيل الدخول</string>
@@ -200,7 +204,9 @@
     <string name="category">الفئة:</string>
     <string name="expense_date">تاريخ النفقة:</string>
     <string name="included_taxes">الضرائب المشمولة:</string>
+    <string name="included_taxes_small">الضرائب المشمولة؟</string>
     <string name="analytic_distribution">التوزيع التحليلي:</string>
+    <string name="analytic_distribution_small">التوزيع التحليلي؟</string>
     <string name="paid_by">المدفوع من قِبل:</string>
     <string name="notes">ملاحظات:</string>
     <string name="add_your_notes">أضف ملاحظاتك...</string>
@@ -211,7 +217,19 @@
     <string name="new_">إضافة</string>
     <string name="upload">رفع</string>
     <string name="no_expenses_yet">لا يوجد مصروفات بعد</string>
+    <string name="no_reports_yet">لا يوجد تقارير بعد</string>
     <string name="you_have_no_expense_to_report">ليس لديك أي نفقات يجب الإبلاغ عنها</string>
     <string name="a_fake_location_was_detected_please_turn_off_fake_gps_to_continue">تم اكتشاف موقع وهمي&#10;يرجى إيقاف Fake GPS للمواصلة.</string>
+    <string name="projects">المشاريع</string>
+    <string name="percentage">النسبة المئوية</string>
+    <string name="no_analytic_distribution_available">لا توجد بيانات توزيع تحليلي متاحة</string>
+    <string name="no_categories_available">لا توجد فئات متاحة</string>
+    <string name="no_taxes_available">لا توجد ضرائب متاحة</string>
+    <string name="no_currencies_available">لا توجد عملات متاحة</string>    <string name="my_reports">تقاريري</string>
+    <string name="add_a_line">أضف سطرًا</string>
+    <string name="choose_the_category">اختر الفئة</string>
+    <string name="choose_the_currency">اختر العملة</string>
+    <string name="employee">الموظف</string>
+    <string name="company">الشركة</string>
 
 </resources>

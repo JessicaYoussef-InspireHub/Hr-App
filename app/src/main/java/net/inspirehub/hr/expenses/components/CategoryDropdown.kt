@@ -21,11 +21,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.ExpenseCategory
 
@@ -58,7 +60,7 @@ fun CategoryDropdown(
                 readOnly = true,
                 placeholder = {
                     Text(
-                        "choose the category",
+                        stringResource(R.string.choose_the_category),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = colors.onBackgroundColor,
@@ -67,7 +69,7 @@ fun CategoryDropdown(
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = null,
+                        contentDescription = "ArrowDropDown",
                         tint = colors.onBackgroundColor,
                         modifier = Modifier.size(28.dp)
                     )
@@ -100,7 +102,7 @@ fun CategoryDropdown(
             ) {
                 if (categories.isEmpty()) {
                     DropdownMenuItem(
-                        text = { Text("No categories available") },
+                        text = { Text(stringResource(R.string.no_categories_available)) },
                         onClick = { expanded = false }
                     )
                 } else {

@@ -60,6 +60,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -80,7 +81,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.Date
 import java.util.TimeZone
-
+import net.inspirehub.hr.BuildConfig
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -128,16 +129,12 @@ fun CheckInOutScreen(
     val rawDate = lastCheckOut?.substringBefore(" ") ?: ""
     val parts = rawDate.split("-") // [2025, 08, 18]
     var showOfflineCheckOutDialog by remember { mutableStateOf(false) }
-//    val showDialog by viewModel.showTimeChangedDialog.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var offlineMessage by remember { mutableStateOf("") }
     var showInternetRequiredDialog by remember { mutableStateOf(false) }
     var isOffline by remember { mutableStateOf(false) }
     var isButtonLoading by remember { mutableStateOf(true) }
     val workedHours by viewModel.workedHours.collectAsState()
-    val totalMinutes = ((workedHours ?: 0.0) * 100).toInt()
-    val hours = totalMinutes / 60
-    val minutes = totalMinutes % 60
     var showErrorDialog by remember { mutableStateOf(false) }
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val attendanceStatus by viewModel.attendanceStatus.collectAsState()
@@ -395,7 +392,17 @@ fun CheckInOutScreen(
     ) {
         Scaffold(
             bottomBar = {
-                BottomBar(navController = navController)
+                Column {
+                    Text(
+                        text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",                        modifier = Modifier
+//                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 12.dp),
+                        color = colors.onBackgroundColor.copy(alpha = 0.6f),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    BottomBar(navController = navController)
+                }
             }
         )
         { innerPadding ->
@@ -705,12 +712,15 @@ fun CheckInOutScreen(
                         }
                     )
 
+
+
                     if (isErrorDialogLoading) {
                         FullLoading()
                     }
                 }
             }
         }
+
 
         if (showFakeLocationDialog) {
             CheckInOutErrorDialog(
@@ -806,8 +816,7 @@ fun CheckInOutScreen(
     if (showErrorDialog) {
         CheckOutDialog(
             isOffline = isOffline,
-            hours = hours,
-            minutes = minutes,
+            workedHours = workedHours,
             isLoading = isDialogLoading,
             onConfirm = {
                 prefManager.clearCheckOutScheduledTime()

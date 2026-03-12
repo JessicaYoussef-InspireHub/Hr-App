@@ -25,27 +25,28 @@ import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SmallLoading
 import net.inspirehub.hr.appColors
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun CheckOutDialog(
     isOffline: Boolean,
-    hours: Int,
-    minutes: Int,
+    workedHours: Double?,
     isLoading: Boolean,
     onConfirm: () -> Unit,
     onCancel: () -> Unit
-){
+) {
     val colors = appColors()
+
 
     AlertDialog(
         containerColor = colors.surfaceVariant,
         onDismissRequest = { onCancel() },
         title = {
-            Column (
+            Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -60,30 +61,39 @@ fun CheckOutDialog(
                     )
                 }
                 Text(
-                    stringResource(R.string.attention) ,
+                    stringResource(R.string.attention),
                     color = colors.tertiaryColor,
                     fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold,)
+                    fontWeight = FontWeight.Bold,
+                )
             }
         },
         text = {
             if (isLoading) {
                 SmallLoading()
             } else {
-            Text(
-                if (!isOffline) {
-                stringResource(R.string.check_out_confirmation, hours, minutes)}
-                else {
-                stringResource(R.string.are_you_sure_you_want_to_check_out)},
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Normal,
-                color = colors.onBackgroundColor )
-        }},
+                Text(
+                    if (!isOffline) {
+                        val hoursInt = (workedHours ?: 0.0).toInt()
+                        LocalContext.current.resources.getQuantityString(
+                            R.plurals.check_out_confirmation,
+                            hoursInt,
+                            workedHours ?: 0.0
+                        )
+                    } else {
+                        stringResource(R.string.are_you_sure_you_want_to_check_out)
+                    },
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = colors.onBackgroundColor
+                )
+            }
+        },
         confirmButton = {
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
-            ){
+            ) {
 
                 Button(
                     colors = ButtonDefaults.buttonColors(
@@ -109,9 +119,11 @@ fun CheckOutDialog(
                     shape = RoundedCornerShape(10.dp),
                     onClick = { onCancel() }
                 ) {
-                    Text(stringResource(R.string.cancel),
+                    Text(
+                        stringResource(R.string.cancel),
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold)
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         },

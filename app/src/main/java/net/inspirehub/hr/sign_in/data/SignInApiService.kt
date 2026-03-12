@@ -88,61 +88,6 @@ object SignInApiService {
         }
     }
 
-//    suspend fun signIn(
-//        email: String,
-//        password: String,
-//        companyId: String,
-//        apiKey: String
-//    ): SignInResponseWrapper {
-//        val payload = SignInRequest(
-//            email = email,
-//            password = password,
-//            company_id = companyId,
-//            api_key = apiKey
-//        )
-//
-//        return try {
-//            val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/validate_company") {
-//                contentType(ContentType.Application.Json)
-//                accept(ContentType.Application.Json)
-//                setBody(payload)
-//            }
-//
-//            val responseBody: String = response.body()
-//            Log.d("HTTP", "Raw Response: $responseBody")
-//
-//            // نفحص status قبل ال decode الكامل
-//            val jsonElement = Json.parseToJsonElement(responseBody).jsonObject
-//            val resultElement = jsonElement["result"]!!.jsonObject
-//            val status = resultElement["status"]!!.jsonPrimitive.content
-//
-//            return if (status == "error") {
-//                // لو خطأ، نرجع SignInResponseWrapper مع رسالة الخطأ
-//                val errorMsg = resultElement["message"]!!.jsonPrimitive.content
-//                SignInResponseWrapper(
-//                    jsonrpc = jsonElement["jsonrpc"]!!.jsonPrimitive.content,
-//                    id = jsonElement["id"]?.jsonPrimitive?.content,
-//                    result = SignInResult(
-//                        status = "error",
-//                        message = null, // message هنا مش هتستخدم لأنها error
-//                        company_name = null,
-//                        license_expiry_date = null,
-//                        company_url = null
-//                    )
-//                )
-//            } else {
-//                // لو success نعمل decode كامل
-//                Json {
-//                    ignoreUnknownKeys = true
-//                    isLenient = true
-//                }.decodeFromString<SignInResponseWrapper>(responseBody)
-//            }
-//
-//        } catch (e: Exception) {
-//            Log.e("API_ERROR", "Exception: ${e.message}", e)
-//            throw e
-//        }
-//    }
 
     suspend fun signIn(
         email: String,
@@ -157,6 +102,12 @@ object SignInApiService {
             api_key = apiKey
         )
 
+        val jsonBody = Json { prettyPrint = true; ignoreUnknownKeys = true }.encodeToString(SignInRequest.serializer(), payload)
+        println("📤 SignIn Request:")
+        println("URL: ${AppConfig.baseUrl}/api/validate_company")
+        println("Headers: Content-Type=application/json, Accept=application/json")
+        println("Body: $jsonBody")
+
         return try {
             val response: HttpResponse = httpClient.post(
                 AppConfig.baseUrl + "/api/validate_company"
@@ -168,6 +119,7 @@ object SignInApiService {
 
             val responseBody: String = response.body()
             Log.d("HTTP", "Raw Response: $responseBody")
+            println("📥 Response Body: $responseBody")
 
             // Parse JSON manually للتحقق من status قبل Serialization
             val jsonElement = Json.parseToJsonElement(responseBody).jsonObject

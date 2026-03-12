@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,9 +54,11 @@ fun AddExpensesScreen(
     val context = LocalContext.current
     var taxes by remember { mutableStateOf<List<Tax>>(emptyList()) }
     var categories by remember { mutableStateOf<List<ExpenseCategory>>(emptyList()) }
-    var isLoadingTaxes by remember { mutableStateOf(true) }
     val sharedPref = SharedPrefManager(context)
     var description by remember { mutableStateOf("") }
+    var totalAmount by remember { mutableDoubleStateOf(0.0) }
+    var convertedAmount by remember { mutableStateOf<Double?>(null) }
+    val amountForTaxes = convertedAmount ?: totalAmount
 
     LaunchedEffect(Unit) {
 
@@ -64,8 +67,6 @@ fun AddExpensesScreen(
             taxes = fetchTaxes(context, token)
             categories = fetchExpenseCategories(context, token)
         }
-
-        isLoadingTaxes = false
     }
     Scaffold(
         containerColor = colors.onSecondaryColor,
@@ -80,7 +81,9 @@ fun AddExpensesScreen(
         bottomBar = {
             Column {
                 SaveCancelButton(
-                    onCancel = {},
+                    onCancel = {
+                        navController.navigate("ExpensesScreen")
+                    },
                     onConfirm = {}
                 )
                 BottomBar(navController = navController)
@@ -132,6 +135,37 @@ fun AddExpensesScreen(
                 Spacer(modifier = Modifier.width(10.dp))
                 ExpenseDate()
             }
+
+
+            Spacer(modifier = Modifier.height(25.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextFirstExpenses(stringResource(R.string.total))
+                Spacer(modifier = Modifier.width(10.dp))
+                TotalPriceExpenses(
+                    token = sharedPref.getToken() ?: "",
+                    context = context,
+                    onAmountChange = { totalAmount = it },
+                    onConvertedAmountChange = { convertedAmount = it }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextFirstExpenses(stringResource(R.string.included_taxes))
+                Spacer(modifier = Modifier.width(10.dp))
+                IncludedTaxes(
+                    taxes = taxes,
+                    amount = amountForTaxes
+                )
+            }
+
             Spacer(modifier = Modifier.height(25.dp))
 
             Row(
@@ -142,25 +176,7 @@ fun AddExpensesScreen(
                 Spacer(modifier = Modifier.width(10.dp))
                 AnalyticDistribution()
             }
-            Spacer(modifier = Modifier.height(25.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextFirstExpenses(stringResource(R.string.included_taxes))
-                Spacer(modifier = Modifier.width(10.dp))
-                IncludedTaxes(taxes = taxes)
-            }
-            Spacer(modifier = Modifier.height(25.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextFirstExpenses(stringResource(R.string.total))
-                Spacer(modifier = Modifier.width(10.dp))
-                TotalPriceExpenses()
-            }
             Spacer(modifier = Modifier.height(25.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),

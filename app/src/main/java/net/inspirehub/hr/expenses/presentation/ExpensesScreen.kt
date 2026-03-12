@@ -38,9 +38,7 @@ fun ExpensesScreen(
 
     val expenses = emptyList<ExpenseItem>()
     var showNoReportDialog by remember { mutableStateOf(false) }
-//    val expenses = listOf(
-//        ExpenseItem("" ,"" ,""),
-//    )
+
 
     Scaffold(
         containerColor = colors.onSecondaryColor,
@@ -65,7 +63,9 @@ fun ExpensesScreen(
                         }
                     },
                     onUpload = {},
-                    viewReport = {}
+                    viewReport = {
+                        navController.navigate("MyReportScreen")
+                    }
                 )
                 BottomBar(navController = navController)
             }

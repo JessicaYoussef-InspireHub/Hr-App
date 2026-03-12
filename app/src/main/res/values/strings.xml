@@ -112,9 +112,12 @@ Protection Method</string>
     <string name="you_are_checked_out">You are Checked Out</string>
     <string name="checked_in_message">You have successfully checked in at %1$s\nHave a blessed day</string>
     <string name="checked_out_message">You have successfully checked out on %1$s at %2$s .. Great job</string>
-<!--    <string name="checked_out_message">You have successfully checked out on %1$s at %2$s after %3$d h %4$d m .. Great job</string>-->
     <string name="attention">Attention</string>
-    <string name="check_out_confirmation">You have spent %1$d h %2$d m\n\nAre you sure you want to check out?</string>
+    <plurals name="check_out_confirmation">
+        <item quantity="one">Total worked time: %1$.2f hour\n\nAre you sure you want to check out?</item>
+        <item quantity="other">Total worked time: %1$.2f hours\n\nAre you sure you want to check out?</item>
+    </plurals>
+
     <string name="are_you_sure_you_want_to_check_out">Are you sure you want to check out?</string>
     <string name="check_out">Check Out</string>
     <string name="check_in">Check In</string>
@@ -203,7 +206,9 @@ You have</string>
     <string name="category">Category:</string>
     <string name="expense_date">Expense Date:</string>
     <string name="included_taxes">Included taxes:</string>
+    <string name="included_taxes_small">Included taxes?</string>
     <string name="analytic_distribution">Analytic Distribution:</string>
+    <string name="analytic_distribution_small">Analytic distribution?</string>
     <string name="paid_by">Paid By:</string>
     <string name="notes">Notes:</string>
     <string name="add_your_notes">Add your notes...</string>
@@ -214,7 +219,20 @@ You have</string>
     <string name="new_">New</string>
     <string name="upload">Upload</string>
     <string name="no_expenses_yet">No expenses yet</string>
+    <string name="no_reports_yet">No reports yet</string>
     <string name="you_have_no_expense_to_report">You have no expense to report</string>
     <string name="a_fake_location_was_detected_please_turn_off_fake_gps_to_continue">A fake location was detected.&#10;Please turn off Fake GPS to continue</string>
+    <string name="projects">Projects</string>
+    <string name="percentage">Percentage</string>
+    <string name="no_analytic_distribution_available">No analytic distribution available</string>
+    <string name="no_categories_available">No categories available</string>
+    <string name="no_taxes_available">No taxes available</string>
+    <string name="no_currencies_available">No currencies available</string>
+    <string name="my_reports">My Report</string>
+    <string name="add_a_line">Add a Line</string>
+    <string name="choose_the_category">choose the category</string>
+    <string name="choose_the_currency">choose the currency</string>
+    <string name="employee">Employee</string>
+    <string name="company">Company</string>
 
 </resources>

@@ -53,7 +53,8 @@ import java.time.YearMonth
 @Composable
 fun ExpenseCalendar(
     onDismiss: () -> Unit,
-    onDateSelected: (LocalDate) -> Unit
+    onDateSelected: (LocalDate) -> Unit,
+    initialDate: LocalDate? = null
 ) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val daysInMonth = currentMonth.lengthOfMonth()
@@ -61,7 +62,7 @@ fun ExpenseCalendar(
     val today = LocalDate.now()
     val colors = appColors()
     val yearText = currentMonth.year.toString()
-    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var selectedDate by remember { mutableStateOf(initialDate) }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(

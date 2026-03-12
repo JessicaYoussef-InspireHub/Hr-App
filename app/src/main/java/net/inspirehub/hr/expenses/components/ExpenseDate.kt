@@ -80,7 +80,8 @@ fun ExpenseDate() {
             onDismiss = { showCalendarDialog = false },
             onDateSelected = { date ->
                 selectedDateText = date.format(formatter)
-            }
+            },
+            initialDate = LocalDate.parse(selectedDateText, formatter)
         )
     }
 }

@@ -40,7 +40,7 @@ fun InputFields(
     val colors = appColors()
     val customTextSelectionColors = TextSelectionColors(
         handleColor = colors.tertiaryColor,
-        backgroundColor = colors.onBackgroundColor
+        backgroundColor = colors.tertiaryColor
     )
 
     val focusManager = LocalFocusManager.current

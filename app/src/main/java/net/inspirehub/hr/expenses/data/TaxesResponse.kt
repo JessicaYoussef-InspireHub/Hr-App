@@ -42,7 +42,7 @@ suspend fun fetchTaxes(
         }
 
         val response = ApiClient.httpClient.post(
-            "$baseUrl/api/expenses/taxes"  // لاحظ شيلت الشرطتين بعد baseUrl
+            "$baseUrl/api/expenses/taxes"
         ) {
             contentType(ContentType.Application.Json)
             setBody(body.toString())
@@ -53,7 +53,6 @@ suspend fun fetchTaxes(
 
         val json = Json.parseToJsonElement(responseText)
 
-        // الوصول للـ data جوه result
         val taxesJson = json.jsonObject["result"]?.jsonObject?.get("data")
         if (taxesJson == null) return emptyList()
 
