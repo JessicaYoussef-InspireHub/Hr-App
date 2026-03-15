@@ -11,19 +11,16 @@ import java.util.Date
 
 class SharedPrefManager(context: Context) {
 
-    fun saveCheckOutScheduledTime(triggerTimeMillis: Long) {
-        prefs.edit().putLong("check_out_scheduled_time", triggerTimeMillis).apply()
-        Log.d("SharedPrefManager", "💾 Check-Out time saved: $triggerTimeMillis")
+    fun saveEmployeeName(name: String) {
+        prefs.edit { putString("employee_name", name) }
     }
 
-    // 🔹 جلب وقت Check-Out
-    fun getCheckOutScheduledTime(): Long {
-        return prefs.getLong("check_out_scheduled_time", -1L)
+    fun getEmployeeName(): String? {
+        return prefs.getString("employee_name", null)
     }
 
-    // 🔹 مسح الوقت بعد ما ينفذ أو تم تسجيل الخروج
     fun clearCheckOutScheduledTime() {
-        prefs.edit().remove("check_out_scheduled_time").apply()
+        prefs.edit { remove("check_out_scheduled_time") }
         Log.d("SharedPrefManager", "🗑️ Check-Out time cleared")
     }
 

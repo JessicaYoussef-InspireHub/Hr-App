@@ -231,5 +231,10 @@
     <string name="choose_the_currency">اختر العملة</string>
     <string name="employee">الموظف</string>
     <string name="company">الشركة</string>
+    <string name="expense_created_successfully">"تم إنشاء النفقة بنجاح"</string>
+    <string name="please_select_a_category">"الرجاء اختيار فئة"</string>
+    <string name="please_enter_description">"يرجى إدخال الوصف"</string>
+    <string name="please_enter_amount">"الرجاء إدخال المبلغ"</string>
+    <string name="please_select_a_currency">"الرجاء اختيار عملة"</string>
 
 </resources>

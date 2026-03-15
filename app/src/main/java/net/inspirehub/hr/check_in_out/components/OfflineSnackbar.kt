@@ -64,7 +64,7 @@ fun OfflineSnackBar(
                 ) {
                     Text(
                         text = snackBarData.visuals.message,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }

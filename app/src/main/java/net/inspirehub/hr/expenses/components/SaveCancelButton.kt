@@ -21,6 +21,7 @@ import net.inspirehub.hr.appColors
 fun SaveCancelButton(
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
+    isLoading: Boolean
 ) {
     val colors = appColors()
     Row(
@@ -31,6 +32,7 @@ fun SaveCancelButton(
     ) {
         Button(
             onClick = { onConfirm() },
+            enabled = !isLoading,
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
                 contentColor = colors.onSecondaryColor,
@@ -46,6 +48,7 @@ fun SaveCancelButton(
 
         Button(
             onClick = { onCancel() },
+            enabled = !isLoading,
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colors.surfaceColor,

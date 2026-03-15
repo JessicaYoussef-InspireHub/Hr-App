@@ -50,7 +50,8 @@ fun TotalPriceExpenses(
     token: String,
     context: Context,
     onAmountChange: (Double) -> Unit,
-    onConvertedAmountChange: (Double?) -> Unit
+    onConvertedAmountChange: (Double?) -> Unit,
+    onCurrencySelected: (ExpenseCurrency?) -> Unit
 ) {
 
     val colors = appColors()
@@ -212,6 +213,7 @@ fun TotalPriceExpenses(
                                 },
                                 onClick = {
                                     selectedCurrency = currency
+                                    onCurrencySelected(currency)
                                     currencyExpanded = false
                                 }
                             )

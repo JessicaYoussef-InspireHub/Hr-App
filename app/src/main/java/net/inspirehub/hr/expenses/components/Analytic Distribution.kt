@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Percent
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -50,10 +53,11 @@ import net.inspirehub.hr.expenses.data.AnalyticAccount
 import net.inspirehub.hr.expenses.data.fetchAnalyticAccounts
 
 
-@SuppressLint("SuspiciousIndentation")
+@SuppressLint("SuspiciousIndentation", "MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyticDistribution(
+    onDistributionChange: (Map<Int, Int>) -> Unit
 ) {
     var showSheet by remember { mutableStateOf(false) }
     var lines by remember { mutableStateOf(listOf("100")) }
@@ -63,6 +67,9 @@ fun AnalyticDistribution(
     val sharedPref = SharedPrefManager(context)
     var isLoading by remember { mutableStateOf(true) }
     var selectedDistributions by remember { mutableStateOf(listOf<String>()) }
+    val allowedIds = sharedPref.getAllowedLocationsIds()
+    var tempDistributions by remember { mutableStateOf(selectedDistributions.toMutableList()) }
+    val totalPercentage = lines.mapNotNull { it.toFloatOrNull() }.sum()
 
     LaunchedEffect(Unit) {
         val token = sharedPref.getToken()
@@ -172,7 +179,6 @@ fun AnalyticDistribution(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val totalPercentage = lines.mapNotNull { it.toFloatOrNull() }.sum()
                         Text(
                             stringResource(R.string.projects) + " " + "(${totalPercentage.toInt()}%)",
                             color = colors.onBackgroundColor,
@@ -206,20 +212,22 @@ fun AnalyticDistribution(
                             )
                             {
                                 AnalyticDistributionTextField(
-                                    value = selectedDistributions.getOrNull(index) ?: "",
+                                    value = tempDistributions.getOrNull(index) ?: "",
                                     onValueChange = {
-                                        val newList = selectedDistributions.toMutableList()
+                                        val newList = tempDistributions.toMutableList()
                                         if (newList.size <= index) {
                                             repeat(index - newList.size + 1) { newList.add("") }
                                         }
                                         newList[index] = it
-                                        selectedDistributions = newList
+                                        tempDistributions = newList
                                     },
                                     placeholderText = " ",
                                     showIcon = true,
                                     loading = isLoading,
                                     modifier = Modifier.weight(1f),
-                                    dropdownItems = analyticAccounts.map { it.name })
+                                    dropdownItems = analyticAccounts
+                                        .filter { it.company_id != null && allowedIds.contains(it.company_id) }
+                                        .map { it.name })
 
                                 Row(
                                     modifier = Modifier.weight(1f),
@@ -277,18 +285,55 @@ fun AnalyticDistribution(
                         }
                     }
                     Spacer(modifier = Modifier.height(25.dp))
-                    Text(
-                        stringResource(R.string.add_a_line),
-                        color = colors.tertiaryColor,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                lines = lines + "100"
-                                selectedDistributions = selectedDistributions + ""
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(
+                            stringResource(R.string.add_a_line),
+                            color = colors.tertiaryColor,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .clickable {
+                                    lines = lines + "100"
+                                    selectedDistributions = selectedDistributions + ""
+                                }
+                        )
+                      Button(
+                          colors = ButtonDefaults.buttonColors(
+                              contentColor = colors.onSecondaryColor,
+                              containerColor = colors.tertiaryColor
+                          ),
+                          shape = RoundedCornerShape(10.dp),
+                            onClick = {
+                                selectedDistributions = tempDistributions.toList()
+
+                                val result = mutableMapOf<Int, Int>()
+
+                                selectedDistributions.forEachIndexed { index, name ->
+
+                                    val account = analyticAccounts.find { it.name == name }
+
+                                    val percentage = lines.getOrNull(index)?.toIntOrNull()
+
+                                    if (account != null && percentage != null) {
+                                        result[account.id] = percentage
+                                    }
+                                }
+                                onDistributionChange(result)
+
+                                showSheet = false
                             }
-                    )
+                        ) {
+                          Text(
+                              stringResource(R.string.apply),
+                              fontSize = 15.sp,
+                              fontWeight = FontWeight.SemiBold
+                          )
+                        }
+                    }
                 }
             }
         }

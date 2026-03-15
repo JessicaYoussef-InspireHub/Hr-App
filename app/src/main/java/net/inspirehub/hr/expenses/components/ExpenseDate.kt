@@ -23,13 +23,15 @@ import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ExpenseDate() {
+fun ExpenseDate(
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit
+) {
     val colors = appColors()
 
     val locale = Locale.getDefault()
     val formatter = DateTimeFormatter.ofPattern("d-M-yyyy", locale)
     var showCalendarDialog by remember { mutableStateOf(false) }
-    var selectedDateText by remember { mutableStateOf(LocalDate.now().format(formatter)) }
 
     fun convertToArabicDigits(input: String): String {
         val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
@@ -38,7 +40,10 @@ fun ExpenseDate() {
         }.joinToString("")
     }
 
-    val displayText = if(locale.language=="ar") convertToArabicDigits(selectedDateText) else selectedDateText
+    val selectedDateText = selectedDate.format(formatter)
+    val displayText =
+        if (locale.language == "ar") convertToArabicDigits(selectedDateText)
+        else selectedDateText
 
 
     Box (
@@ -79,9 +84,10 @@ fun ExpenseDate() {
         ExpenseCalendar(
             onDismiss = { showCalendarDialog = false },
             onDateSelected = { date ->
-                selectedDateText = date.format(formatter)
+                onDateSelected(date)
+                showCalendarDialog = false
             },
-            initialDate = LocalDate.parse(selectedDateText, formatter)
+            initialDate = selectedDate
         )
     }
 }
