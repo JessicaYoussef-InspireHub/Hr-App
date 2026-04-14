@@ -423,9 +423,9 @@ fun CheckInOutScreen(
             ) {
                 Text(
                     when (attendanceStatus) {
-                        "checked_in" -> "Welcome $employeeFirstName\n${stringResource(R.string.you_are_checked_in)}"
-                        "checked_out" -> "Welcome $employeeFirstName\n${stringResource(R.string.you_are_checked_out)}"
-                        else -> "Welcome $employeeFirstName\n..."
+                        "checked_in" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${stringResource(R.string.you_are_checked_in)}"
+                        "checked_out" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${stringResource(R.string.you_are_checked_out)}"
+                        else -> "${stringResource(R.string.welcome)} $employeeFirstName\n..."
                     },
                     color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,

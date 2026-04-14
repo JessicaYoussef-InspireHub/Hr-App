@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
 import net.inspirehub.hr.expenses.presentation.AddExpensesScreen
+import net.inspirehub.hr.expenses.presentation.EditExpenseScreen
 import net.inspirehub.hr.expenses.presentation.ExpensesScreen
 import net.inspirehub.hr.expenses.presentation.MyReportScreen
 import net.inspirehub.hr.lunch.presentation.LunchScreen
@@ -103,9 +104,17 @@ fun MyAppNavHost(
 
         composable("MyReportScreen") { MyReportScreen(navController) }
 
-        composable("ExpensesScreen") { ExpensesScreen(navController) }
+        composable("ExpensesScreen") { ExpensesScreen(navController , token = token ?: "") }
 
         composable("AddExpensesScreen") { AddExpensesScreen(navController) }
+
+        composable(
+            "EditExpenseScreen/{expenseId}",
+            arguments = listOf(navArgument("expenseId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val expenseId = backStackEntry.arguments?.getInt("expenseId") ?: 0
+            EditExpenseScreen(expenseId = expenseId , token = token ?: "" , navController = navController)
+        }
 
         composable("LunchScreen") {
             LunchScreen(

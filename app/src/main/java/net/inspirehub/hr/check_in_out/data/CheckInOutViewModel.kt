@@ -458,6 +458,10 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                         _lastCheckOut.value
                     )
 
+                    if (action == "check_out") {
+                        cancelCheckOutReminder(context)
+                    }
+
                     if (action == "check_in") {
                         result.todayScheduledHours?.let { hours ->
                             scheduleCheckOutReminder(context, hours)
@@ -525,23 +529,4 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
     }
-
-//    fun calculateWorkedHours() {
-//        val checkIn = _lastCheckIn.value
-//        val checkOut = _lastCheckOut.value
-//        if (checkIn != null && checkOut != null) {
-//            try {
-//                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-//                val checkInDate = formatter.parse(checkIn)
-//                val checkOutDate = formatter.parse(checkOut)
-//                if (checkInDate != null && checkOutDate != null) {
-//                    val diffMillis = checkOutDate.time - checkInDate.time
-//                    val diffHours = diffMillis / (1000.0 * 60.0 * 60.0)
-//                    _workedHours.value = diffHours
-//                }
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//            }
-//        }
-//    }
 }

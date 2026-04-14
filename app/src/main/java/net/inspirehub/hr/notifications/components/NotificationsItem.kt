@@ -29,6 +29,13 @@ import net.inspirehub.hr.notifications.data.NotificationEntity
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+fun String.replaceDigitsWithArabic(): String {
+    val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
+    return this.map { char ->
+        if (char.isDigit()) arabicDigits[char.digitToInt()] else char
+    }.joinToString("")
+}
+
 private fun formatTimestamp(timestamp: Long): Pair<String, String> {
     return try {
         val date = java.util.Date(timestamp)
@@ -48,7 +55,8 @@ private fun formatTimestamp(timestamp: Long): Pair<String, String> {
 
 @Composable
 fun NotificationItem(notification: NotificationEntity) {
-    val (_, timeStr) = formatTimestamp(notification.timestamp)
+    val (_, rawTime) = formatTimestamp(notification.timestamp)
+    val timeStr = rawTime.replaceDigitsWithArabic()
     val colors = appColors()
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("notif_prefs", Context.MODE_PRIVATE)

@@ -94,7 +94,6 @@ fun AddExpensesScreen(
     var currencyError by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-
         val token = sharedPref.getToken()
         if (!token.isNullOrEmpty()) {
             taxes = fetchTaxes(context, token)
@@ -105,7 +104,7 @@ fun AddExpensesScreen(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-    ) {
+    ){
         Scaffold(
             containerColor = colors.onSecondaryColor,
             snackbarHost = {
@@ -128,6 +127,7 @@ fun AddExpensesScreen(
             bottomBar = {
                 Column {
                     SaveCancelButton(
+                        stringResource(R.string.save),
                         isLoading = isLoading,
                         onCancel = {
                             navController.navigate("ExpensesScreen") {
@@ -184,7 +184,8 @@ fun AddExpensesScreen(
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-            ) {
+            )
+            {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -255,6 +256,7 @@ fun AddExpensesScreen(
                     TotalPriceExpenses(
                         token = sharedPref.getToken() ?: "",
                         context = context,
+                        initialAmount = totalAmount ,
                         onAmountChange = { totalAmount = it },
                         onConvertedAmountChange = { convertedAmount = it },
                         onCurrencySelected = { currency -> selectedCurrency = currency }
@@ -319,9 +321,8 @@ fun AddExpensesScreen(
                     TextFirstExpenses(stringResource(R.string.paid_by))
                     Spacer(modifier = Modifier.width(10.dp))
                     PaidBy(
-                        onPaymentModeChange = {
-                            paymentMode = it
-                        }
+                        initialPaidBy = paymentMode,
+                        onPaymentModeChange = { paymentMode = it }
                     )
                 }
                 Spacer(modifier = Modifier.height(25.dp))
@@ -349,6 +350,5 @@ fun AddExpensesScreen(
                 }
             }
         }
-
     }
 }

@@ -35,13 +35,14 @@ import net.inspirehub.hr.expenses.data.ExpenseCategory
 @Composable
 fun CategoryDropdown(
     categories: List<ExpenseCategory>,
+    initialSelectedCategory: ExpenseCategory? = null,
     description: String,
     onCategorySelected: (ExpenseCategory) -> Unit,
     onDescriptionChange: (String) -> Unit
 ) {
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf<ExpenseCategory?>(null) }
+    var selectedItem by remember { mutableStateOf(initialSelectedCategory) }
     val colors = appColors()
 
 

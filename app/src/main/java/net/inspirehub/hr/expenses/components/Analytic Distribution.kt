@@ -57,6 +57,7 @@ import net.inspirehub.hr.expenses.data.fetchAnalyticAccounts
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyticDistribution(
+    initialDistribution: Map<Int, Int> = emptyMap(),
     onDistributionChange: (Map<Int, Int>) -> Unit
 ) {
     var showSheet by remember { mutableStateOf(false) }
@@ -66,7 +67,13 @@ fun AnalyticDistribution(
     val context = LocalContext.current
     val sharedPref = SharedPrefManager(context)
     var isLoading by remember { mutableStateOf(true) }
-    var selectedDistributions by remember { mutableStateOf(listOf<String>()) }
+    var selectedDistributions by remember {
+        mutableStateOf(
+            initialDistribution.keys.map { id ->
+                analyticAccounts.find { it.id == id }?.name ?: id.toString()
+            }
+        )
+    }
     val allowedIds = sharedPref.getAllowedLocationsIds()
     var tempDistributions by remember { mutableStateOf(selectedDistributions.toMutableList()) }
     val totalPercentage = lines.mapNotNull { it.toFloatOrNull() }.sum()
@@ -78,6 +85,21 @@ fun AnalyticDistribution(
             analyticAccounts = accounts
         }
         isLoading = false
+    }
+
+    LaunchedEffect(analyticAccounts, initialDistribution) {
+        if (initialDistribution.isEmpty()) {
+            lines = listOf("100")
+            tempDistributions = mutableListOf("")
+            selectedDistributions = mutableListOf("")
+        } else {
+            lines = initialDistribution.values.map { it.toString() }
+            val names = initialDistribution.keys.map { id ->
+                analyticAccounts.find { it.id == id }?.name ?: id.toString()
+            }
+            tempDistributions = names.toMutableList()
+            selectedDistributions = names.toMutableList()
+        }
     }
 
     TextField(

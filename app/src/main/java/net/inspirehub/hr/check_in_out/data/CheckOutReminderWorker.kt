@@ -81,6 +81,15 @@ fun createNotificationChannel(context: Context) {
     }
 }
 
+fun cancelCheckOutReminder(context: Context) {
+
+    Log.d("CheckOutScheduler", "🛑 Cancelling Check-Out reminder")
+
+    WorkManager
+        .getInstance(context)
+        .cancelUniqueWork("check_out_reminder_work")
+}
+
 
 fun scheduleCheckOutReminder(
     context: Context,

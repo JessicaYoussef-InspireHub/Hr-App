@@ -49,13 +49,20 @@ import kotlin.math.roundToInt
 fun TotalPriceExpenses(
     token: String,
     context: Context,
+    initialAmount: Double?,
+    initialCurrencyCode: String? = null,
     onAmountChange: (Double) -> Unit,
     onConvertedAmountChange: (Double?) -> Unit,
     onCurrencySelected: (ExpenseCurrency?) -> Unit
 ) {
 
     val colors = appColors()
-    var amount by remember { mutableStateOf("") }
+    var amount by remember {
+        mutableStateOf(
+            if (initialAmount == null || initialAmount == 0.0) ""
+            else "%.2f".format(initialAmount)
+        )
+    }
     var currencyExpanded by remember { mutableStateOf(false) }
     var selectedCurrency by remember { mutableStateOf<ExpenseCurrency?>(null) }
     var currencies by remember { mutableStateOf(listOf<ExpenseCurrency>()) }
@@ -67,6 +74,7 @@ fun TotalPriceExpenses(
 
     LaunchedEffect(Unit) {
         currencies = fetchExpenseCurrencies(context, token)
+        selectedCurrency = currencies.find { it.currency_code == initialCurrencyCode }
     }
 
     val amountDouble = amount.toDoubleOrNull()

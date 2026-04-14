@@ -74,12 +74,22 @@ fun MyHistoryBottomSheet(
         yesterdayCal.add(Calendar.DAY_OF_YEAR, -1)
         val yesterday = sdf.format(yesterdayCal.time)
 
+        fun String.replaceDigitsWithArabic(): String {
+            val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
+            return map { char ->
+                if (char.isDigit()) arabicDigits[char.digitToInt()] else char
+            }.joinToString("")
+        }
+
         return when (orderDay) {
             today -> context.getString(R.string.Today)
             yesterday -> context.getString(R.string.Yesterday)
-            else -> SimpleDateFormat("d MMM yyyy").format(Date(orderDate))
+            else -> SimpleDateFormat("d MMM yyyy")
+                .format(Date(orderDate))
+                .replaceDigitsWithArabic()
         }
     }
+
 
 
 

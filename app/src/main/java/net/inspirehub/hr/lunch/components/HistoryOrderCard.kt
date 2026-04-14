@@ -37,16 +37,28 @@ fun HistoryOrderCard(
     val items = orderWithItems.items
     val colors = appColors()
 
+    fun String.replaceDigitsWithArabic(): String {
+        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
+        return this.map { char ->
+            if (char.isDigit()) arabicDigits[char.digitToInt()] else char
+        }.joinToString("")
+    }
+
+    fun Number.toArabicDigits(): String {
+        return this.toString().replaceDigitsWithArabic()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
     ) {
-        Card (
+        Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = colors.surfaceColor)
-        ){
+                containerColor = colors.surfaceColor
+            )
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -60,7 +72,7 @@ fun HistoryOrderCard(
                     items.filter { it.quantity > 0 }
                         .forEach { item ->
                             Text(
-                                "${item.quantity} x ${item.name}",
+                                "${item.quantity.toArabicDigits()} x ${item.name}",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = colors.onBackgroundColor
@@ -70,7 +82,9 @@ fun HistoryOrderCard(
                     Spacer(modifier = Modifier.height(15.dp))
 
                     Text(
-                        text = "${stringResource(R.string.total_price)} ${order.totalPrice}",
+                        text = "${stringResource(R.string.total_price)} ${
+                            order.totalPrice.toString().replaceDigitsWithArabic()
+                        }",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = colors.onBackgroundColor
@@ -84,9 +98,11 @@ fun HistoryOrderCard(
                     onClick = onReorderClick,
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(stringResource(R.string.re_order),
+                    Text(
+                        stringResource(R.string.re_order),
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold)
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }

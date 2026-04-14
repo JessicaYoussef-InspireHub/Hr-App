@@ -215,15 +215,16 @@ fun DateInfoDialog(
                     requestHourTo = toHourDouble
                 )
                 withContext(Dispatchers.Main) {
-                    permissionErrorMessage = if (response.result.status == "error") {
+                    permissionErrorMessage = (if (response.result.status == "error" || response.result.data?.hours == 0.0 ) {
                         if (currentLanguage == "ar") {
                             "راجع الوقت اللي كتبته.. الوقت لازم يكون في حدود ساعات العمل"
                         } else {
                             "Please check the time you entered. It must be within working hours."
                         }
                     } else {
-                        ""
-                    }
+                        permissionErrorMessage = ""
+                        leaveHours = response.result.data?.hours ?: 0.0
+                    }) as String
                 }
 
 
@@ -654,7 +655,7 @@ fun DateInfoDialog(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start = 50.dp),
+                                    .padding(start = 15.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 CustomHourDropDown(

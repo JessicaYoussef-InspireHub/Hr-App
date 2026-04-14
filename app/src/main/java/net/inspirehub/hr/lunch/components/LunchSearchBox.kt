@@ -3,9 +3,7 @@ package net.inspirehub.hr.lunch.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,15 +25,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.delay
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.graphics.Color
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LunchSearchBox(
     searchText: String,
@@ -66,56 +69,59 @@ fun LunchSearchBox(
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.75f)
-                .background(colors.surfaceContainerHigh, RoundedCornerShape(50.dp))
+                .background(colors.error, RoundedCornerShape(50.dp))
         )
         {
-            Row(
-                modifier = Modifier
-                    .background(
-                        color = colors.surfaceContainerHigh,
-                        shape = RoundedCornerShape(50.dp)
-                    )
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(R.string.search_your_meal),
-                    tint = iconAndCursorColor,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-
-                CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
-                    BasicTextField(
-                        value = localSearch,
-                        onValueChange = { value ->
-                            localSearch = value
-                        },
-                        textStyle = TextStyle(
-                            color = colors.tertiaryColor,
+            CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+                TextField(
+                    value = localSearch,
+                    onValueChange = { localSearch = it },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.search_your_meal),
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        cursorBrush = Brush.linearGradient(
-                            colors = listOf(iconAndCursorColor, iconAndCursorColor)
-                        ),
-                        decorationBox = { innerTextField ->
-                            if (searchText.isEmpty()) {
-                                Text(
-                                    text = stringResource(R.string.search_your_meal),
-                                    fontSize = 16.sp,
-                                    color = colors.onBackgroundColor
-                                )
-                            }
-                            innerTextField()
-                        },
+                            color = colors.onBackgroundColor
+                        )
+                    },
+                    textStyle = TextStyle(
+                        color = colors.tertiaryColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = stringResource(R.string.search_your_meal),
+                            tint = iconAndCursorColor,
+                        )
+                    },
+                    shape = RoundedCornerShape(50.dp),
+                    colors = TextFieldDefaults.colors(
+                        cursorColor = colors.tertiaryColor,
+                        focusedContainerColor = colors.surfaceContainerHigh,
+                        unfocusedContainerColor = colors.surfaceContainerHigh,
+                        disabledContainerColor = colors.surfaceContainerHigh,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            onSearchChanged(localSearch.trim())
+                        }
                     )
-                    LaunchedEffect(localSearch) {
-                        delay(500)
-                        onSearchChanged(localSearch.trim())
-                    }
-
+                )
+                LaunchedEffect(localSearch) {
+                    delay(100)
+                    onSearchChanged(localSearch.trim())
                 }
+
             }
         }
 

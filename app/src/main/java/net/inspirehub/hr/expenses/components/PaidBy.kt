@@ -22,6 +22,7 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun PaidBy(
+    initialPaidBy: String?,
     onPaymentModeChange: (String) -> Unit
 ) {
     val colors = appColors()
@@ -30,9 +31,11 @@ fun PaidBy(
     val employeeText = stringResource(R.string.employee)
     val companyText = stringResource(R.string.company)
 
-    LaunchedEffect(Unit) {
-        selectedOption = employeeText
-        onPaymentModeChange("employee")
+    LaunchedEffect(initialPaidBy) {
+        selectedOption = when (initialPaidBy) {
+            "company", "company_account" -> companyText
+            else -> employeeText
+        }
     }
 
 
@@ -74,7 +77,7 @@ fun PaidBy(
                 selected = selectedOption == companyText,
                 onClick = {
                     selectedOption = companyText
-                    onPaymentModeChange("company")
+                    onPaymentModeChange("company_account")
                 },
                 colors = RadioButtonDefaults.colors(
                     selectedColor = colors.tertiaryColor,

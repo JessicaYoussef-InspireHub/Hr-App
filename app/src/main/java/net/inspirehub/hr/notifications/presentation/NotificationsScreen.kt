@@ -227,6 +227,13 @@ private fun formatTimestamp(timestamp: Long): Pair<String, String> {
     }
 }
 
+fun String.replaceDigitsWithArabic(): String {
+    val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
+    return this.map { char ->
+        if (char.isDigit()) arabicDigits[char.digitToInt()] else char
+    }.joinToString("")
+}
+
 @SuppressLint("LocalContextConfigurationRead")
 @Composable
 private fun formatDateHeader(dateStr: String): String {
@@ -241,7 +248,7 @@ private fun formatDateHeader(dateStr: String): String {
 
     val dateCal = Calendar.getInstance().apply { time = date }
 
-    return when {
+    val result = when {
         dateCal.get(Calendar.YEAR) == todayCal.get(Calendar.YEAR) &&
                 dateCal.get(Calendar.DAY_OF_YEAR) == todayCal.get(Calendar.DAY_OF_YEAR) ->
             stringResource(R.string.Today)
@@ -254,4 +261,7 @@ private fun formatDateHeader(dateStr: String): String {
             SimpleDateFormat("d MMM yyyy", locale).format(date)
         }
     }
+
+// ✅ Convert numbers to Arabic
+  return result.replaceDigitsWithArabic()
 }

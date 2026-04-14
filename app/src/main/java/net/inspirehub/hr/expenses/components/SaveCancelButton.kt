@@ -19,6 +19,7 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun SaveCancelButton(
+    label: String ,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
     isLoading: Boolean
@@ -40,7 +41,7 @@ fun SaveCancelButton(
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(stringResource(R.string.save),
+            Text(label,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold)
         }
