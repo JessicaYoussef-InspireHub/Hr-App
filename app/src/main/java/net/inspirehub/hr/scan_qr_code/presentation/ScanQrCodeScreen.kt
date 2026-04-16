@@ -1,5 +1,6 @@
 package net.inspirehub.hr.scan_qr_code.presentation
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
@@ -62,8 +63,6 @@ fun ScanQrCodeScreen(
     var errorMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-
-
     val scanLauncher = rememberLauncherForActivityResult(
         contract = ScanContract()
     ) { result ->
@@ -97,7 +96,17 @@ fun ScanQrCodeScreen(
             return
         }
         try {
-            middleware = Middleware.initialize(str, forceUpdate = true)
+
+            Log.d("ScanQrCode", "📌 Raw Input: '$str'")
+            Log.d("ScanQrCode", "📌 Length: ${str.length}")
+
+            val cleanInput = str.trim()
+
+            Log.d("ScanQrCode", "📌 Clean Input: '$cleanInput'")
+            Log.d("ScanQrCode", "📌 Clean Length: ${cleanInput.length}")
+
+            Log.d("ScanQrCode", "📌 Input: $str")
+            middleware = Middleware.initialize(cleanInput, forceUpdate = true)
             println("Full decryption result: $middleware")
             println("Company ID: ${middleware!!.companyId}")
             println("API Key: ${middleware!!.apiKey}")
@@ -110,16 +119,19 @@ fun ScanQrCodeScreen(
 
             navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}")
         } catch (e: Exception) {
-            errorMessage = when {
-                e.message?.contains("decryption", ignoreCase = true) == true ||
-//                        e.message?.contains("Empty input", ignoreCase = true) == true ||
-                        e.message?.contains("decrypted", ignoreCase = true) == true ->
-                    "The company information you entered is invalid. Please check and try again."
-                else ->
-                    "An unexpected error occurred. Please try again."
-            }
+            e.printStackTrace()
+
+           Log.e("ScanQrCode", "❌ Error occurred", e)
+
+            errorMessage = """
+        Error: ${e.message}
+        
+        Type: ${e::class.java.simpleName}
+        
+        Cause: ${e.cause?.message ?: "No cause"}
+    """.trimIndent()
+
             showErrorDialog = true
-            println("ERROR: ${e.message}")
         }
     }
 
@@ -163,7 +175,7 @@ fun ScanQrCodeScreen(
             fontSize = 40.sp)
         Spacer(modifier = Modifier.weight(1f))
 
-        Text("Enter your company information" ,
+        Text(stringResource(R.string.enter_your_company_information),
             color = colors.onBackgroundColor,
             fontWeight = FontWeight.Medium ,
             fontSize = 15.sp)
@@ -175,25 +187,6 @@ fun ScanQrCodeScreen(
             label = stringResource(R.string.enter_your_company_information),
             imeAction = ImeAction.Done,
             onImeAction = { handleCompanyInput() }
-//            onImeAction = {
-//                if (str.isBlank()) {
-//                    println("test4 ERROR: Empty input")
-//                }
-//                try {
-//                    middleware = Middleware.initialize(str)
-//
-//                    println("Full decryption result: $middleware")
-//                    println("Company ID: ${middleware!!.companyId}")
-//                    println("API Key: ${middleware!!.apiKey}")
-//                    println("Base URL: ${middleware!!.baseUrl}")
-//
-//                    navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}")
-//                } catch (e: Exception) {
-//                    errorMessage = e.message ?: "Unknown decryption error."
-//                    showErrorDialog = true
-//                    println("test2 ERROR: ${e.message}")
-//                }
-//            }
         )
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -207,32 +200,6 @@ fun ScanQrCodeScreen(
             ),
             enabled = str.isNotBlank(),
             shape = RoundedCornerShape(8.dp),
-//            onClick = {
-//                try {
-//                    middleware = Middleware.initialize(str)
-//                    println("Full decryption result: $middleware")
-//                    println("Company ID: ${middleware!!.companyId}")
-//                    println("API Key: ${middleware!!.apiKey}")
-//                    println("Base URL: ${middleware!!.baseUrl}")
-//                    AppConfig.setBaseUrl(
-//                        middleware!!.baseUrl.replace("http://", "https://"),
-//                        context
-//                    )
-//
-//                    navController.navigate("SignInScreen/${middleware!!.companyId}/${middleware!!.apiKey}")
-//                } catch (e: Exception) {
-//                     errorMessage = when{
-//                         e.message?.contains("decryption", ignoreCase = true) == true ||
-//                                 e.message?.contains("Empty input", ignoreCase = true) == true ||
-//                                 e.message?.contains("decrypted", ignoreCase = true) == true ->
-//                             "The company information you entered is invalid. Please check and try again."
-//                         else ->
-//                             "An unexpected error occurred. Please try again."
-//                     }
-//                    showErrorDialog = true
-//                    println("test3 ERROR: ${e.message}")
-//                }
-//            }
             onClick = { handleCompanyInput() }
 
         ) {
@@ -246,6 +213,5 @@ fun ScanQrCodeScreen(
                 onDismiss = { showErrorDialog = false }
             )
         }
-
     }
 }

@@ -11,6 +11,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -42,12 +46,16 @@ fun ExpenseItemCard(
 ) {
 
     val colors = appColors()
+    var showDialog by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth()
             .clickable {
-                println("Clicked Expense ID: ${expense.id}")
-                navController.navigate("EditExpenseScreen/${expense.id}")
+                if (expense.status.equals("draft", ignoreCase = true)){
+                    navController.navigate("EditExpenseScreen/${expense.id}")
+                } else {
+                    showDialog = true
+                }
             },
         colors = CardDefaults.cardColors(
             containerColor = colors.surfaceContainerHigh
@@ -115,5 +123,11 @@ fun ExpenseItemCard(
                 fontWeight = FontWeight.Light
             )
         }
+    }
+
+    if (showDialog) {
+        CannotEditDialog(
+            onDismiss = { showDialog = false }
+        )
     }
 }

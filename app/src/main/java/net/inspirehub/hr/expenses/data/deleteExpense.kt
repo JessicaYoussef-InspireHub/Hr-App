@@ -12,7 +12,7 @@ import org.json.JSONObject
 
 data class DeleteExpenseResult(
     val success: Boolean,
-    val reason: String? = null
+    val message: String? = null,
 )
 
 suspend fun deleteExpense(
@@ -48,25 +48,26 @@ suspend fun deleteExpense(
         val json = JSONObject(responseText)
         val result = json.getJSONObject("result")
 
-        val failedArray = result.getJSONArray("failed")
+        val status = result.getString("status")
+        val message = result.optString("message")
+
 
         // ✅ If there is no "failed" message, then it has been deleted.
-        if (failedArray.length() == 0) {
-            DeleteExpenseResult(success = true)
-        } else {
-            val reason =
-                failedArray.getJSONObject(0).getString("reason")
-
-            DeleteExpenseResult(
-                success = false,
-                reason = reason
-            )
+            if (status == "success") {
+                DeleteExpenseResult(
+                    success = true,
+                    message = message
+                )
+            } else {
+                DeleteExpenseResult(
+                    success = false,
+                    message = message
+                )
         }
-
     } catch (e: Exception) {
         DeleteExpenseResult(
             success = false,
-            reason = e.message
+            message = e.message
         )
     }
 }

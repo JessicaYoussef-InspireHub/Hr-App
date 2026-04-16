@@ -151,13 +151,13 @@ fun AddExpensesScreen(
                                     token = token,
                                     name = description,
                                     productId = selectedCategory?.id ?: return@launch,
-                                    totalAmount = convertedAmount ?: totalAmount,
+                                    totalAmount = totalAmount,
                                     date = selectedDate.format(apiFormatter),
                                     description = notes,
                                     analyticDistribution = analyticMap,
                                     taxIds = selectedTaxes.map { it.id },
-                                    payment_mode = paymentMode
-
+                                    payment_mode = paymentMode,
+                                    currencyId = selectedCurrency!!.id
                                 )
 
                                 if (response.status == "success") {
@@ -177,15 +177,13 @@ fun AddExpensesScreen(
                     BottomBar(navController = navController)
                 }
             }
-
         ) { innerPadding ->
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-            )
-            {
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically

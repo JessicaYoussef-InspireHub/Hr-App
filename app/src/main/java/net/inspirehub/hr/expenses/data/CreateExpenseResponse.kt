@@ -33,6 +33,7 @@ suspend fun createExpense(
     analyticDistribution: Map<Int, Int>,
     taxIds: List<Int>,
     payment_mode: String,
+    currencyId: Int,
 ): CreateExpenseResponse {
     return try {
         val sharedPref = SharedPrefManager(context)
@@ -45,6 +46,7 @@ suspend fun createExpense(
                 put("name", name)
                 put("product_id", productId)
                 put("total_amount", totalAmount)
+                put("currency_id", currencyId)
                 put("date", date)
                 put("description", description)
                 put("analytic_distribution", JSONObject().apply {

@@ -51,9 +51,12 @@ import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.components.TotalPriceExpenses
 import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.ExpenseCategory
+import net.inspirehub.hr.expenses.data.ExpenseCurrency
 import net.inspirehub.hr.expenses.data.Tax
+import net.inspirehub.hr.expenses.data.editExpense
 import net.inspirehub.hr.expenses.data.fetchExpenseCategories
 import net.inspirehub.hr.expenses.data.fetchExpenses
+import net.inspirehub.hr.expenses.data.fetchTaxes
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -65,7 +68,6 @@ fun EditExpenseScreen(
 ) {
     val context = LocalContext.current
     var expense by remember { mutableStateOf<Expense?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val successUpdatedMessage = stringResource(R.string.expense_created_successfully)
     val colors = appColors()
@@ -75,48 +77,61 @@ fun EditExpenseScreen(
     var descriptionError by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<ExpenseCategory?>(null) }
     var categories by remember { mutableStateOf<List<ExpenseCategory>>(emptyList()) }
-    var selectedDate by remember { mutableStateOf(expense?.date?.let { LocalDate.parse(it) } ?: LocalDate.now()) }
+    var selectedDate by remember {
+        mutableStateOf(expense?.date?.let { LocalDate.parse(it) } ?: LocalDate.now())
+    }
     var amount by remember { mutableStateOf(expense?.total_amount) }
     var selectedTaxes by remember { mutableStateOf<List<Tax>>(emptyList()) }
     var analyticDistribution by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
     var paidBy by remember { mutableStateOf("employee") }
     var amountError by remember { mutableStateOf(false) }
+    var selectedCurrency by remember { mutableStateOf<ExpenseCurrency?>(null) }
+    var taxes by remember { mutableStateOf<List<Tax>>(emptyList()) }
+    var isFetching by remember { mutableStateOf(true) }
+    var isSubmitting by remember { mutableStateOf(false) }
 
     LaunchedEffect(expenseId) {
-        isLoading = true
+        isFetching = true
+
         val tokenFromPref = token
-        categories = fetchExpenseCategories(context, tokenFromPref)
 
-        val allExpenses = fetchExpenses(context, token)
+        val fetchedCategories = fetchExpenseCategories(context, tokenFromPref)
+        val fetchedTaxes = fetchTaxes(context, tokenFromPref)
+        val allExpenses = fetchExpenses(context, tokenFromPref)
+
         expense = allExpenses.find { it.id == expenseId }
-        descriptionText = expense?.name ?: ""
-        noteText = expense?.description ?: ""
-        paidBy = expense?.payment_mode ?: "employee"
 
-        expense?.analytic_distribution?.let { dist ->
-            analyticDistribution = dist.mapKeys { it.key.toIntOrNull() ?: 0 }
+        categories = fetchedCategories
+        taxes = fetchedTaxes
+
+        expense?.let { exp ->
+            descriptionText = exp.name
+            noteText = exp.description
+            paidBy = exp.payment_mode ?: "employee"
+            amount = exp.total_amount
+
+            selectedCategory = fetchedCategories.find { it.id == exp.product_id }
+
+            selectedDate = exp.date.let { LocalDate.parse(it) } ?: LocalDate.now()
+
+            analyticDistribution = exp.analytic_distribution
+                .mapKeys { it.key.toIntOrNull() ?: 0 }
                 .mapValues { it.value.toInt() }
+
+            selectedTaxes = exp.taxes.map { expTax ->
+                Tax(
+                    id = expTax.id,
+                    name = expTax.name,
+                    amount = expTax.amount,
+                    amount_type = expTax.amount_type,
+                    description = "",
+                    company_id = 0,
+                    company_name = ""
+                )
+            }
         }
 
-
-
-        selectedCategory = categories.find { it.id == expense?.product_id }
-        expense?.date?.let { selectedDate = LocalDate.parse(it) }
-        amount = expense?.draft_total_amount
-
-        selectedTaxes = expense?.taxes?.map { expTax ->
-            Tax(
-                id = expTax.id,
-                name = expTax.name,
-                amount = expTax.amount,
-                amount_type = expTax.amount_type,
-                description = "",
-                company_id = 0,
-                company_name = ""
-            )
-        } ?: emptyList()
-
-        isLoading = false
+        isFetching = false
     }
 
 
@@ -148,21 +163,45 @@ fun EditExpenseScreen(
                 Column {
                     SaveCancelButton(
                         stringResource(R.string.update),
-                        isLoading = isLoading,
+                        isLoading = isFetching || isSubmitting,
                         onCancel = {
                             navController.navigate("ExpensesScreen")
                         },
                         onConfirm = {
-                            if (isLoading) return@SaveCancelButton
+                            if (isFetching || isSubmitting) return@SaveCancelButton
                             descriptionError = descriptionText.isBlank()
                             amountError = amount == null || amount == 0.0
                             if (descriptionError || amountError) return@SaveCancelButton
-                            isLoading = true
+                            isSubmitting = true
+
                             scope.launch {
-                                snackBarHostState.showSnackbar(successUpdatedMessage)
-                                navController.navigate("ExpensesScreen") {
-                                    popUpTo("AddExpensesScreen") { inclusive = true }
+                                val success = editExpense(
+                                    context = context,
+                                    token = token,
+                                    expenseId = expenseId,
+                                    name = descriptionText,
+                                    totalAmount = amount ?: 0.0,
+                                    date = selectedDate.toString(),
+                                    productId = selectedCategory?.id ?: 0,
+                                    description = noteText,
+                                    currencyId = selectedCurrency?.id ?: expense?.currency_id ?: 1,
+                                    paymentMode = paidBy,
+                                    taxIds = selectedTaxes.map { it.id },
+                                    analyticDistribution = analyticDistribution.mapKeys { it.key.toString() }
+                                )
+
+                                if (success) {
+                                    snackBarHostState.showSnackbar(successUpdatedMessage)
+
+                                    navController.navigate("ExpensesScreen") {
+                                        popUpTo("ExpensesScreen") { inclusive = true }
+                                    }
+                                } else {
+                                    snackBarHostState.showSnackbar("Failed to update expense")
                                 }
+
+                                isSubmitting = false
+
                             }
                         },
                     )
@@ -240,10 +279,10 @@ fun EditExpenseScreen(
                         TotalPriceExpenses(
                             token = token,
                             context = context,
-                            initialAmount = expense?.draft_total_amount,
+                            initialAmount = expense?.total_amount,
                             onAmountChange = { newAmount -> amount = newAmount },
                             onConvertedAmountChange = { converted -> },
-                            onCurrencySelected = { selectedCurrency -> },
+                            onCurrencySelected = { currency -> selectedCurrency = currency },
                             initialCurrencyCode = expense?.currency,
                         )
                     }
@@ -266,17 +305,7 @@ fun EditExpenseScreen(
                         TextFirstExpenses(stringResource(R.string.included_taxes))
                         Spacer(modifier = Modifier.width(10.dp))
                         IncludedTaxes(
-                            taxes = expense?.taxes?.map { expTax ->
-                                Tax(
-                                    id = expTax.id,
-                                    name = expTax.name,
-                                    amount = expTax.amount,
-                                    amount_type = expTax.amount_type,
-                                    description = "",
-                                    company_id = 0,
-                                    company_name = ""
-                                )
-                            } ?: emptyList(),
+                            taxes = taxes,
                             selectedTaxes = selectedTaxes,
                             onTaxesChange = { newSelectedTaxes ->
                                 selectedTaxes = newSelectedTaxes
@@ -333,7 +362,7 @@ fun EditExpenseScreen(
                 }
             }
         }
-        if (isLoading) {
+        if (isFetching || isSubmitting) {
             Box(
                 modifier = Modifier
                     .clickable(enabled = false) {}

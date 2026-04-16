@@ -250,5 +250,8 @@ You have</string>
     <string name="cannot_delete">Cannot Delete</string>
     <string name="update">Update</string>
     <string name="welcome">Welcome</string>
+    <string name="choose_option">Choose Option</string>
+    <string name="cannot_edit">Cannot Edit</string>
+    <string name="this_expense_cannot_be_edited_because_it_is_not_in_draft_state">This expense cannot be edited because it is not in draft state</string>
 
 </resources>

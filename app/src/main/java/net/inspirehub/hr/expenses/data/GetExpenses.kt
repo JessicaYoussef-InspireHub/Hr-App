@@ -34,6 +34,7 @@ data class Expense(
     val product: String,
     val product_id: Int,
     val total_amount: Double,
+    val currency_id: Int?,
     val currency: String,
     val currency_symbol: String? = null,
     val currency_position: String? = null,
@@ -63,11 +64,14 @@ suspend fun fetchExpenses(
 
         val sharedPref = SharedPrefManager(context)
         val baseUrl = sharedPref.getCompanyUrl()
+        val pref = SharedPrefManager(context)
+        val savedToken = pref.getToken()
+        val finalToken = if (savedToken.isNullOrEmpty()) token else savedToken
 
         val body = JSONObject().apply {
             put("jsonrpc", "2.0")
             put("params", JSONObject().apply {
-                put("token", token)
+                put("token", finalToken)
             })
         }
 

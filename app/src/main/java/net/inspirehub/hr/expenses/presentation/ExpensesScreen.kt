@@ -24,10 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -45,6 +42,7 @@ import net.inspirehub.hr.expenses.data.fetchExpenses
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
+import net.inspirehub.hr.expenses.components.UploadBottomSheet
 import net.inspirehub.hr.expenses.data.deleteExpense
 
 @Composable
@@ -61,6 +59,7 @@ fun ExpensesScreen(
     val scope = rememberCoroutineScope()
     var deleteErrorMessage by remember { mutableStateOf<String?>(null) }
     val snackBarHostState = remember { SnackbarHostState() }
+    var showUploadSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         isLoading = true
@@ -114,7 +113,9 @@ fun ExpensesScreen(
                         } else {
                         }
                     },
-                    onUpload = {},
+                    onUpload = {
+                        showUploadSheet = true
+                    },
                     viewReport = {
                         navController.navigate("MyReportScreen")
                     }
@@ -154,45 +155,14 @@ fun ExpensesScreen(
             }
 
             else -> {
-                val draftExpenses = remember(expenses) { expenses.filter { it.state == "draft" } }
-                val totalDraftAmount = remember(draftExpenses) { draftExpenses.sumOf { it.total_amount } }
-                val totalDraftTaxes = remember(draftExpenses) { draftExpenses.sumOf { it.tax_amount ?: 0.0 } }
-                val totalDraftWithTaxes = totalDraftAmount + totalDraftTaxes
-                val firstExpense = expenses.firstOrNull()
-                val totalDraftText = formatAmount(
-                    amount = totalDraftWithTaxes,
-                    symbol = firstExpense?.currency_symbol,
-                    position = firstExpense?.currency_position
-                )
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(innerPadding)
                         .padding(16.dp)
                 ) {
+
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = buildAnnotatedString {
-                            append("${stringResource(R.string.you_have)} ")
-
-                            withStyle(
-                                style = SpanStyle(
-                                    color = colors.tertiaryColor,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append(totalDraftText)
-                            }
-
-                            append(" ${stringResource(R.string.in_drafts)}")
-                        },
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.onBackgroundColor
-                    )
-
-                    Spacer(modifier = Modifier.height(30.dp))
 
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth()
@@ -228,7 +198,7 @@ fun ExpensesScreen(
                                                 message = "Expense deleted successfully"
                                             )
                                         } else {
-                                            deleteErrorMessage = result.reason
+                                            deleteErrorMessage = result.message
                                         }
                                     }
                                 },
@@ -253,6 +223,14 @@ fun ExpensesScreen(
             NoReportDialog(
                 isLoading = false,
                 onCancel = { showNoReportDialog = false }
+            )
+        }
+
+        if (showUploadSheet) {
+            UploadBottomSheet(
+                onDismiss = { showUploadSheet = false },
+                onCameraClick = { },
+                onGalleryClick = { }
             )
         }
     }
