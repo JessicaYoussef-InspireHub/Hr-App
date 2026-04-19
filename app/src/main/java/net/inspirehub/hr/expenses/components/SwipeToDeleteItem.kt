@@ -24,7 +24,10 @@ import net.inspirehub.hr.appColors
 fun SwipeToDeleteItem(
     expense: ExpenseItem,
     onDelete: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onSelect: () -> Unit
 ) {
     val colors = appColors()
     var showDialog by remember { mutableStateOf(false) }
@@ -60,7 +63,12 @@ fun SwipeToDeleteItem(
             }
         },
         content = {
-            ExpenseItemCard(expense , navController)
+            ExpenseItemCard(
+                expense ,
+                navController ,
+                isSelectionMode,
+                isSelected,
+                onSelect)
         }
     )
 

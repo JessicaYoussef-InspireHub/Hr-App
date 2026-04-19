@@ -103,6 +103,8 @@ fun LunchScreen(
     var visibleCategories by remember { mutableStateOf<List<LunchCategory>>(emptyList()) }
     var selectedSupplierIds by remember { mutableStateOf<List<Int>>(emptyList()) }
     var filteredProducts by remember { mutableStateOf<List<LunchProduct>>(emptyList()) }
+    val reOrderMessage = stringResource(R.string.order_reordered_successfully)
+    val addedToCartText = stringResource(R.string.added_to_cart)
 
     LaunchedEffect(selectedSupplierIds) {
         Log.d("LunchScreen", "Selected suppliers = $selectedSupplierIds")
@@ -158,11 +160,11 @@ fun LunchScreen(
                 supplierName = selectedItem!!.supplier_name,
                 imageBase64 = selectedItem!!.imageBase64,
                 onDismiss = { showBottomSheet = false },
-                onAddToCart = {  productName, quantity ->
+                onAddToCart = { productName, quantity ->
+                    val message = "$quantity $productName $addedToCartText"
+
                     scope.launch {
-                        snackBarHostState.showSnackbar(
-                            "$quantity $productName added to cart"
-                        )
+                        snackBarHostState.showSnackbar(message)
                     }
                 }
             )
@@ -322,7 +324,7 @@ fun LunchScreen(
                                 onDismiss = { showHistorySheet = false },
                                 onReorderSuccess = {
                                     scope.launch {
-                                        snackBarHostState.showSnackbar("Order reordered successfully")
+                                        snackBarHostState.showSnackbar(reOrderMessage)
                                     }
                                 }
                             )

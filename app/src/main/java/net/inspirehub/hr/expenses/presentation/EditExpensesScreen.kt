@@ -89,6 +89,7 @@ fun EditExpenseScreen(
     var taxes by remember { mutableStateOf<List<Tax>>(emptyList()) }
     var isFetching by remember { mutableStateOf(true) }
     var isSubmitting by remember { mutableStateOf(false) }
+    val failedMessage = stringResource(R.string.failed_to_update_expense)
 
     LaunchedEffect(expenseId) {
         isFetching = true
@@ -197,7 +198,7 @@ fun EditExpenseScreen(
                                         popUpTo("ExpensesScreen") { inclusive = true }
                                     }
                                 } else {
-                                    snackBarHostState.showSnackbar("Failed to update expense")
+                                    snackBarHostState.showSnackbar(failedMessage)
                                 }
 
                                 isSubmitting = false

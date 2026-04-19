@@ -1,5 +1,6 @@
 package net.inspirehub.hr.expenses.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,12 +8,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,9 +50,11 @@ import net.inspirehub.hr.expenses.data.fetchExpenses
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
+import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
 import net.inspirehub.hr.expenses.components.UploadBottomSheet
 import net.inspirehub.hr.expenses.data.deleteExpense
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpensesScreen(
     navController: NavController,
@@ -60,6 +70,17 @@ fun ExpensesScreen(
     var deleteErrorMessage by remember { mutableStateOf<String?>(null) }
     val snackBarHostState = remember { SnackbarHostState() }
     var showUploadSheet by remember { mutableStateOf(false) }
+    var isSelectionMode by remember { mutableStateOf(false) }
+    var selectedItems by remember { mutableStateOf(setOf<Int>()) }
+    val oneDeletedMessage = stringResource(R.string.expense_deleted_successfully)
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    val successMessage = { count: Int ->
+        context.getString(R.string.deleted_successfully, count)
+    }
+
+    val failedMessage = { count: Int ->
+        context.getString(R.string.could_not_be_deleted, count)
+    }
 
     LaunchedEffect(Unit) {
         isLoading = true
@@ -85,41 +106,115 @@ fun ExpensesScreen(
 
     Scaffold(
         containerColor = colors.onSecondaryColor,
-        topBar = {
-            MyAppBar(
-                label = stringResource(R.string.expenses),
-                onBackClick = {
-                    val previousRoute =
-                        navController.previousBackStackEntry?.destination?.route
+        topBar = @Composable {
+            if (!isSelectionMode) {
+                MyAppBar(
+                    label = stringResource(R.string.expenses),
+                    onBackClick = {
+                        val previousRoute =
+                            navController.previousBackStackEntry?.destination?.route
 
-                    if (previousRoute == "ExpensesScreen") {
-                        navController.popBackStack()
-                        navController.popBackStack()
-                    } else {
-                        navController.popBackStack()
+                        if (previousRoute == "ExpensesScreen") {
+                            navController.popBackStack()
+                            navController.popBackStack()
+                        } else {
+                            navController.popBackStack()
+                        }
+                    },
+                    actions = {
+                        Icon(
+                            imageVector = Icons.Default.Checklist,
+                            contentDescription = "Select",
+                            tint = colors.onSecondaryColor,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .padding(horizontal = 8.dp)
+                                .clickable {
+                                    isSelectionMode = true
+                                }
+                        )
                     }
-                }
-            )
+                )
+            } else {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(
+                                R.string.item_selected,
+                                selectedItems.size
+                            ),
+                            color = colors.onBackgroundColor
+                        )
+                    },
+                    actions = {
+                        Text(
+                            text = if (selectedItems.size == expenses.size)
+                                stringResource(R.string.unselect_all)
+                            else
+                                stringResource(R.string.select_all),
+                            color = colors.tertiaryColor,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable {
+                                    selectedItems = if (selectedItems.size == expenses.size) {
+                                        emptySet()
+                                    } else {
+                                        expenses.map { it.id }.toSet()
+                                    }
+                                }
+                        )
+                        Text(
+                            text = stringResource(R.string.delete),
+                            color = if (selectedItems.isEmpty())
+                                colors.onBackgroundColor.copy(alpha = 0.4f)
+                            else
+                                colors.error,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable(enabled = selectedItems.isNotEmpty()) {
+                                    showDeleteConfirmDialog = true
+                                }
+                        )
+
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            color = colors.tertiaryColor,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable {
+                                    isSelectionMode = false
+                                    selectedItems = emptySet()
+                                }
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = colors.surfaceContainerHigh
+                    )
+                )
+            }
         },
         bottomBar = {
             Column {
-                NewAndReportButton(
-                    onNewExpenses = {
-                        navController.navigate("AddExpensesScreen")
-                    },
-                    onCreateReport = {
-                        if (expenses.isEmpty()) {
-                            showNoReportDialog = true
-                        } else {
-                        }
-                    },
-                    onUpload = {
-                        showUploadSheet = true
-                    },
-                    viewReport = {
-                        navController.navigate("MyReportScreen")
-                    }
-                )
+                if (!isSelectionMode) {
+                    NewAndReportButton(
+                        onNewExpenses = {
+                            navController.navigate("AddExpensesScreen")
+                        },
+                        onCreateReport = {
+                            if (expenses.isEmpty()) {
+                                showNoReportDialog = true
+                            } else {
+                                navController.navigate("MyReportScreen")
+                            }
+                        },
+                        onUpload = {
+                            showUploadSheet = true
+                        },
+                        viewReport = {
+                            navController.navigate("MyReportScreen")
+                        },
+                    )
+                }
                 BottomBar(navController = navController)
             }
 
@@ -195,14 +290,23 @@ fun ExpensesScreen(
                                         if (result.success) {
                                             expenses = expenses.filter { it.id != expense.id }
                                             snackBarHostState.showSnackbar(
-                                                message = "Expense deleted successfully"
+                                                message = oneDeletedMessage
                                             )
                                         } else {
                                             deleteErrorMessage = result.message
                                         }
                                     }
                                 },
-                                navController = navController
+                                navController = navController,
+                                isSelectionMode = isSelectionMode,
+                                isSelected = selectedItems.contains(expense.id),
+                                onSelect = {
+                                    selectedItems = if (selectedItems.contains(expense.id)) {
+                                        selectedItems - expense.id
+                                    } else {
+                                        selectedItems + expense.id
+                                    }
+                                }
                             )
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -216,6 +320,59 @@ fun ExpensesScreen(
             DeleteExpenseErrorDialog(
                 reason = reason,
                 onDismiss = { deleteErrorMessage = null }
+            )
+        }
+
+        if (showDeleteConfirmDialog) {
+            SelectedDeleteConfirmationDialog(
+                count = selectedItems.size,
+                onDismiss = {
+                    showDeleteConfirmDialog = false
+                },
+                onConfirm = {
+                    showDeleteConfirmDialog = false
+
+                    scope.launch {
+
+                        val toDelete = selectedItems.toList()
+
+                        val successfulIds = mutableSetOf<Int>()
+                        var failedCount = 0
+
+                        toDelete.forEach { id ->
+                            val result = deleteExpense(
+                                context = context,
+                                token = token,
+                                expenseId = id
+                            )
+
+                            if (result.success) {
+                                successfulIds.add(id)
+                            } else {
+                                failedCount++
+                            }
+                        }
+
+                        expenses = expenses.filter { it.id !in successfulIds }
+
+                        val successCount = successfulIds.size
+
+                        selectedItems = emptySet()
+                        isSelectionMode = false
+
+                        val message = when {
+                            successCount > 0 && failedCount > 0 ->
+                                "${successMessage(successCount)} - ${failedMessage(failedCount)}"
+
+                            successCount > 0 ->
+                                successMessage(successCount)
+
+                            else ->
+                                failedMessage(failedCount)
+                        }
+                        snackBarHostState.showSnackbar(message)
+                    }
+                }
             )
         }
 

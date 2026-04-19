@@ -85,3 +85,51 @@ suspend fun createExpense(
         CreateExpenseResponse(status = "error", message = e.message ?: "Unknown error")
     }
 }
+
+@Serializable
+data class SubmitExpenseResponse(
+    val status: String,
+    val message: String
+)
+
+suspend fun submitExpense(
+    context: Context,
+    token: String,
+    expenseId: Int
+): SubmitExpenseResponse {
+    return try {
+        val sharedPref = SharedPrefManager(context)
+        val baseUrl = sharedPref.getCompanyUrl()
+
+        val body = JSONObject().apply {
+            put("jsonrpc", "2.0")
+            put("params", JSONObject().apply {
+                put("token", token)
+                put("expense_id", expenseId)
+            })
+        }
+
+        println("Submit Expense Request Body: $body")
+
+        val response = ApiClient.httpClient.post("$baseUrl/api/expenses/send") {
+            contentType(ContentType.Application.Json)
+            setBody(body.toString())
+        }
+        println("FULL URL: $baseUrl/api/expenses/submit")
+
+        val responseText = response.bodyAsText()
+        println("Submit Expense Response: $responseText")
+
+        val json = Json.parseToJsonElement(responseText).jsonObject
+        val result = json["result"]?.jsonObject
+
+        SubmitExpenseResponse(
+            status = result?.get("status")?.jsonPrimitive?.content ?: "error",
+            message = result?.get("message")?.jsonPrimitive?.content ?: "Unknown error"
+        )
+
+    } catch (e: Exception) {
+        println("Error submitting expense: ${e.message}")
+        SubmitExpenseResponse("error", e.message ?: "Unknown error")
+    }
+}

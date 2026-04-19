@@ -1,6 +1,5 @@
 package net.inspirehub.hr
 
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -15,10 +14,10 @@ import androidx.compose.runtime.Composable
 @Composable
 fun MyAppBar(
     label: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    actions: @Composable () -> Unit = {}
 ) {
     val colors = appColors()
-    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -26,8 +25,6 @@ fun MyAppBar(
             titleContentColor = colors.onSecondaryColor,
         ),
         title = { Text(text = label) },
-
-
 
         navigationIcon = {
             IconButton(onClick = onBackClick) {
@@ -37,6 +34,9 @@ fun MyAppBar(
                     tint = colors.onSecondaryColor
                 )
             }
+        },
+        actions = {
+            actions()
         }
     )
 }
