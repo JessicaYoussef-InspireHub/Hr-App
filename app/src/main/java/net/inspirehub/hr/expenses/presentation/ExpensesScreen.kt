@@ -306,9 +306,19 @@ fun ExpensesScreen(
                                     } else {
                                         selectedItems + expense.id
                                     }
+                                },
+                                onSendSuccess = {
+                                    scope.launch {
+                                        isLoading = true
+                                        expenses = fetchExpenses(context, token)
+                                        isLoading = false
+
+                                        snackBarHostState.showSnackbar(
+                                            context.getString(R.string.expense_sent_successfully)
+                                        )
+                                    }
                                 }
                             )
-
                             Spacer(modifier = Modifier.height(10.dp))
                         }
                     }

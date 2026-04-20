@@ -115,13 +115,27 @@ suspend fun submitExpense(
             contentType(ContentType.Application.Json)
             setBody(body.toString())
         }
-        println("FULL URL: $baseUrl/api/expenses/submit")
+        println("FULL URL: $baseUrl/api/expenses/send")
 
         val responseText = response.bodyAsText()
         println("Submit Expense Response: $responseText")
 
         val json = Json.parseToJsonElement(responseText).jsonObject
         val result = json["result"]?.jsonObject
+        val error = json["error"]?.jsonObject
+
+        if (error != null) {
+            val errorMessage =
+                error["data"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                    ?: error["message"]?.jsonPrimitive?.content
+                    ?: "Unknown error"
+
+            return SubmitExpenseResponse(
+                status = "error",
+                message = errorMessage
+            )
+        }
+
 
         SubmitExpenseResponse(
             status = result?.get("status")?.jsonPrimitive?.content ?: "error",

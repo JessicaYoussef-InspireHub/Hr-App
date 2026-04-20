@@ -237,6 +237,7 @@ You have</string>
     <string name="company">Company</string>
     <string name="expense_created_successfully">"Expense created successfully"</string>
     <string name="expense_updated_successfully">"Expense updated successfully"</string>
+    <string name="expense_sent_successfully">"Expense sent successfully"</string>
     <string name="please_select_a_category">"Please select a category"</string>
     <string name="please_select_a_currency">"Please select a currency"</string>
     <string name="please_enter_description">"Please enter description"</string>

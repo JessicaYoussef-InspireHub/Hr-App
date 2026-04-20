@@ -27,7 +27,8 @@ fun SwipeToDeleteItem(
     navController: NavController,
     isSelectionMode: Boolean,
     isSelected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    onSendSuccess: () -> Unit
 ) {
     val colors = appColors()
     var showDialog by remember { mutableStateOf(false) }
@@ -68,7 +69,9 @@ fun SwipeToDeleteItem(
                 navController ,
                 isSelectionMode,
                 isSelected,
-                onSelect)
+                onSelect,
+                onSendSuccess
+            )
         }
     )
 

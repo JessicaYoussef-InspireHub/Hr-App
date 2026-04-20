@@ -62,7 +62,8 @@ fun ExpenseItemCard(
     navController: NavController,
     isSelectionMode: Boolean,
     isSelected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    onSendSuccess: () -> Unit
 ) {
 
     fun formatDate(input: String): String {
@@ -83,6 +84,8 @@ fun ExpenseItemCard(
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val isDraft = expense.status.equals("draft", ignoreCase = true)
 
     Card(
         modifier = Modifier
@@ -103,11 +106,11 @@ fun ExpenseItemCard(
         Column(
             modifier = Modifier.padding(12.dp)
         ) {
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
-            ){
+            ) {
                 Text(
                     text = expense.description,
                     fontWeight = FontWeight.Bold,
@@ -141,7 +144,7 @@ fun ExpenseItemCard(
                                     shape = RoundedCornerShape(50)
                                 ),
                             contentAlignment = Alignment.Center
-                        ){
+                        ) {
                             if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
@@ -205,29 +208,44 @@ fun ExpenseItemCard(
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    imageVector = if (isDraft)
+                        Icons.AutoMirrored.Filled.Send
+                    else
+                        Icons.Default.Check,
                     contentDescription = "Send",
                     modifier = Modifier
                         .size(22.dp)
-                        .rotate(-30f)
-                        .clickable {
-                        coroutineScope.launch {
-                            val sharedPref = SharedPrefManager(context)
-                            val token = sharedPref.getToken()
+                        .rotate(if (isDraft) -30f else 0f)
+                        .clickable(enabled = isDraft) {
+                            coroutineScope.launch {
+                                val sharedPref = SharedPrefManager(context)
+                                val token = sharedPref.getToken()
 
-                            val result = submitExpense(
-                                context = context,
-                                token = token ?: "",
-                                expenseId = expense.id
-                            )
+                                val result = submitExpense(
+                                    context = context,
+                                    token = token ?: "",
+                                    expenseId = expense.id
+                                )
 
-                            println("Submit result: ${result.message}")
-                        }
-                    },
+                                if (result.status == "success") {
+                                    onSendSuccess()
+                                } else {
+                                    errorMessage = result.message
+                                }
+                                println("Submit result: ${result.message}")
+                            }
+                        },
                     tint = colors.tertiaryColor
                 )
             }
         }
+    }
+
+    errorMessage?.let { message ->
+        ErrorSubmittedDialog(
+            message = message,
+            onDismiss = { errorMessage = null }
+        )
     }
 
     if (showDialog) {
