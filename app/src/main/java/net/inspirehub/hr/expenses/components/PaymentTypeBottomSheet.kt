@@ -12,10 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,19 +30,17 @@ import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UploadBottomSheet(
+fun PaymentTypeBottomSheet(
     onDismiss: () -> Unit,
-    onCameraClick: () -> Unit,
-    onGalleryClick: () -> Unit,
-    onFilesClick: () -> Unit
+    onSelectCompany: () -> Unit,
+    onSelectEmployee: () -> Unit
 ) {
     val colors = appColors()
 
     ModalBottomSheet(
-        onDismissRequest = { onDismiss() },
+        onDismissRequest = onDismiss,
         containerColor = colors.surfaceContainerHigh,
         windowInsets = WindowInsets(0),
     ) {
@@ -69,14 +66,23 @@ fun UploadBottomSheet(
                 }
             }
             Text(
-                text = stringResource(R.string.choose_option),
+                text = stringResource(R.string.choose_payment_type),
                 color = colors.tertiaryColor,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(start = 10.dp),
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(40.dp))
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.you_cannot_mix_different_payment_types_within_the_same_report_please_choose_one_payment_type),
+                color = colors.onBackgroundColor,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 10.dp)
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -87,42 +93,19 @@ fun UploadBottomSheet(
                     modifier = Modifier
                         .weight(1f)
                         .clickable {
-                            onDismiss()
-                            onGalleryClick()
+                            onSelectCompany()
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Photo,
-                        contentDescription = stringResource(R.string.filter_by_suppliers),
+                        imageVector = Icons.Default.Apartment,
+                        contentDescription = stringResource(R.string.company),
                         tint = colors.onBackgroundColor,
                         modifier = Modifier.size(40.dp)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = stringResource(R.string.gallery),
-                        fontSize = 16.sp,
-                        color = colors.onBackgroundColor
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            onDismiss()
-                            onCameraClick()
-                        },
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CameraAlt,
-                        contentDescription = stringResource(R.string.camera),
-                        tint = colors.onBackgroundColor,
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = stringResource(R.string.camera),
+                        text = stringResource(R.string.company),
                         fontSize = 16.sp,
                         color = colors.onBackgroundColor
                     )
@@ -132,28 +115,24 @@ fun UploadBottomSheet(
                     modifier = Modifier
                         .weight(1f)
                         .clickable {
-                            onDismiss()
-                            onFilesClick()
+                            onSelectEmployee()
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Folder,
-                        contentDescription = stringResource(R.string.files),
+                        imageVector = Icons.Default.Person,
+                        contentDescription = stringResource(R.string.employee),
                         tint = colors.onBackgroundColor,
                         modifier = Modifier.size(40.dp)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = stringResource(R.string.files),
+                        text = stringResource(R.string.employee),
                         fontSize = 16.sp,
                         color = colors.onBackgroundColor
                     )
                 }
             }
-
-
-
             Spacer(modifier = Modifier.height(20.dp))
         }
     }

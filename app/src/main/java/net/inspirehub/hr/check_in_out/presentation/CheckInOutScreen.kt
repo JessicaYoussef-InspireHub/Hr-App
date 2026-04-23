@@ -398,7 +398,6 @@ fun CheckInOutScreen(
                     Text(
                         text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                         modifier = Modifier
-//                            .align(Alignment.BottomCenter)
                             .padding(bottom = 12.dp),
                         color = colors.onBackgroundColor.copy(alpha = 0.6f),
                         fontSize = 12.sp,

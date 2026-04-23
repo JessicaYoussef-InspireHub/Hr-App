@@ -59,6 +59,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
+import net.inspirehub.hr.expenses.components.UploadImageOrFileBox
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -338,6 +339,7 @@ fun AddExpensesScreen(
                 }
                 Spacer(modifier = Modifier.height(25.dp))
 
+                UploadImageOrFileBox()
             }
             if (isLoading) {
                 Box(

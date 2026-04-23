@@ -1,5 +1,8 @@
 package net.inspirehub.hr.expenses.presentation
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,9 +53,11 @@ import net.inspirehub.hr.expenses.data.fetchExpenses
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
+import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
 import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
 import net.inspirehub.hr.expenses.components.UploadBottomSheet
 import net.inspirehub.hr.expenses.data.deleteExpense
+import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,18 +79,74 @@ fun ExpensesScreen(
     var selectedItems by remember { mutableStateOf(setOf<Int>()) }
     val oneDeletedMessage = stringResource(R.string.expense_deleted_successfully)
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
-    val successMessage = { count: Int ->
-        context.getString(R.string.deleted_successfully, count)
+    val successMessage = { count: Int -> context.getString(R.string.deleted_successfully, count) }
+    val failedMessage = { count: Int -> context.getString(R.string.could_not_be_deleted, count) }
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    var reportIds by remember { mutableStateOf(setOf<Int>()) }
+    var showPaymentSheet by remember { mutableStateOf(false) }
+    var is17Version by remember { mutableStateOf(true) }
+
+    val imageFile = remember {
+        java.io.File.createTempFile(
+            "IMG_${System.currentTimeMillis()}",
+            ".jpg",
+            context.cacheDir
+        )
     }
 
-    val failedMessage = { count: Int ->
-        context.getString(R.string.could_not_be_deleted, count)
+    val cameraUri = androidx.core.content.FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        imageFile
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            cameraImageUri = cameraUri
+            println("Camera Image URI: $cameraImageUri")
+        }
+    }
+
+    val cameraPermissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                cameraLauncher.launch(cameraUri)
+            } else {
+                println("Camera permission denied")
+            }
+        }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            println("Selected Image: $it")
+        }
+    }
+
+    val filesLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            println("Selected File: $it")
+        }
     }
 
     LaunchedEffect(Unit) {
         isLoading = true
-        expenses = fetchExpenses(context = context, token = token)
+        val allExpenses = fetchExpenses(context = context, token = token)
+        val reportExpenses = fetchExpensesForReport(context = context, token = token)
         println("Loaded ${expenses.size} expenses")
+
+        is17Version = allExpenses.firstOrNull()?.is_17_version == false
+
+        expenses = allExpenses
+        reportIds = reportExpenses.map { it.id }.toSet()
+
         isLoading = false
     }
 
@@ -201,10 +262,36 @@ fun ExpensesScreen(
                             navController.navigate("AddExpensesScreen")
                         },
                         onCreateReport = {
-                            if (expenses.isEmpty()) {
-                                showNoReportDialog = true
-                            } else {
-                                navController.navigate("MyReportScreen")
+
+                            scope.launch {
+                                isLoading = true
+                                val reportExpenses = fetchExpensesForReport(context, token)
+
+                                isLoading = false
+
+                                if (reportExpenses.isEmpty()) {
+                                    showNoReportDialog = true
+                                    return@launch
+                                }
+
+                                val paymentTypes = reportExpenses.map { it.payment_mode }.toSet()
+
+                                val type = when {
+                                    paymentTypes.size == 1 && paymentTypes.contains("company_account") -> "company"
+                                    paymentTypes.size == 1 && paymentTypes.contains("own_account") -> "employee"
+                                    else -> null
+                                }
+
+                                if (paymentTypes.size > 1) {
+                                    showPaymentSheet = true
+                                    return@launch
+                                }
+
+                                if (type != null) {
+                                    navController.navigate("CreateReportScreen?type=$type")
+                                } else {
+                                    showPaymentSheet = true
+                                }
                             }
                         },
                         onUpload = {
@@ -213,6 +300,7 @@ fun ExpensesScreen(
                         viewReport = {
                             navController.navigate("MyReportScreen")
                         },
+                        is17Version = is17Version
                     )
                 }
                 BottomBar(navController = navController)
@@ -256,14 +344,16 @@ fun ExpensesScreen(
                         .padding(innerPadding)
                         .padding(16.dp)
                 ) {
-
                     Spacer(modifier = Modifier.height(4.dp))
+
 
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth()
 
                     ) {
                         items(expenses) { expense ->
+                            val isDimmed = expense.id !in reportIds
+
                             SwipeToDeleteItem(
                                 expense = ExpenseItem(
                                     id = expense.id,
@@ -317,7 +407,9 @@ fun ExpensesScreen(
                                             context.getString(R.string.expense_sent_successfully)
                                         )
                                     }
-                                }
+                                },
+                                isDimmed = isDimmed,
+                                is17Version = is17Version
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                         }
@@ -325,6 +417,16 @@ fun ExpensesScreen(
                 }
             }
         }
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .clickable(enabled = false) {}
+            ) {
+                FullLoading()
+            }
+        }
+
+
 
         deleteErrorMessage?.let { reason ->
             DeleteExpenseErrorDialog(
@@ -393,11 +495,26 @@ fun ExpensesScreen(
             )
         }
 
+        if (showPaymentSheet) {
+            PaymentTypeBottomSheet(
+                onDismiss = { showPaymentSheet = false },
+                onSelectCompany = {
+                    showPaymentSheet = false
+                    navController.navigate("CreateReportScreen?type=company")
+                },
+                onSelectEmployee = {
+                    showPaymentSheet = false
+                    navController.navigate("CreateReportScreen?type=employee")
+                }
+            )
+        }
+
         if (showUploadSheet) {
             UploadBottomSheet(
                 onDismiss = { showUploadSheet = false },
-                onCameraClick = { },
-                onGalleryClick = { }
+                onCameraClick = { cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA) },
+                onGalleryClick = { galleryLauncher.launch("image/*") },
+                onFilesClick = { filesLauncher.launch(arrayOf("*/*")) }
             )
         }
     }

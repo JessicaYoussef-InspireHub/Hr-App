@@ -34,7 +34,7 @@ data class Expense(
     val product: String,
     val product_id: Int,
     val total_amount: Double,
-    val currency_id: Int?,
+    val currency_id: Int? = null,
     val currency: String,
     val currency_symbol: String? = null,
     val currency_position: String? = null,
@@ -49,6 +49,7 @@ data class Expense(
     val total_with_tax: Double? = null,
     val tax_amount: Double? = null,
     val tax_id: Int? = null,
+    val is_17_version: Boolean = false,
     val draft_total_amount: Double? = null,
     val analytic_distribution: Map<String, Double> = emptyMap()
 )
@@ -122,6 +123,54 @@ suspend fun fetchExpenses(
 
     } catch (e: Exception) {
         println("❌ Error fetching expenses: ${e.message}")
+        emptyList()
+    }
+}
+
+suspend fun fetchExpensesForReport(
+    context: Context,
+    token: String,
+): List<Expense> {
+
+    return try {
+        val sharedPref = SharedPrefManager(context)
+        val baseUrl = sharedPref.getCompanyUrl()
+
+        val finalToken = sharedPref.getToken() ?: token
+
+        val body = JSONObject().apply {
+            put("jsonrpc", "2.0")
+            put("params", JSONObject().apply {
+                put("token", finalToken)
+            })
+        }
+
+        val response = ApiClient.httpClient.post(
+            "$baseUrl/api/expenses/get_by_id"
+        ) {
+            contentType(ContentType.Application.Json)
+            setBody(body.toString())
+        }
+
+        val responseText = response.bodyAsText()
+        println("📦 Report Expenses Response: $responseText")
+
+        val json = Json.parseToJsonElement(responseText)
+
+        val resultObject = json.jsonObject["result"]?.jsonObject
+
+        val dataJson = resultObject?.get("data")
+
+        if (dataJson == null) {
+            println("❌ data is null")
+            return emptyList()
+        }
+
+        Json { ignoreUnknownKeys = true }
+            .decodeFromJsonElement<List<Expense>>(dataJson)
+
+    } catch (e: Exception) {
+        println("❌ Error fetching report expenses: ${e.message}")
         emptyList()
     }
 }

@@ -49,6 +49,7 @@ import net.inspirehub.hr.expenses.components.PaidBy
 import net.inspirehub.hr.expenses.components.SaveCancelButton
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.components.TotalPriceExpenses
+import net.inspirehub.hr.expenses.components.UploadImageOrFileBox
 import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.ExpenseCategory
 import net.inspirehub.hr.expenses.data.ExpenseCurrency
@@ -360,6 +361,8 @@ fun EditExpenseScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(25.dp))
+
+                    UploadImageOrFileBox()
                 }
             }
         }

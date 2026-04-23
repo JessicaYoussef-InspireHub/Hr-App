@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
 import net.inspirehub.hr.expenses.presentation.AddExpensesScreen
+import net.inspirehub.hr.expenses.presentation.CreateReportScreen
 import net.inspirehub.hr.expenses.presentation.EditExpenseScreen
 import net.inspirehub.hr.expenses.presentation.ExpensesScreen
 import net.inspirehub.hr.expenses.presentation.MyReportScreen
@@ -103,6 +104,23 @@ fun MyAppNavHost(
         composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
 
         composable("MyReportScreen") { MyReportScreen(navController) }
+
+        composable(
+            route = "CreateReportScreen?type={type}",
+            arguments = listOf(
+                navArgument("type") {
+                    type = NavType.StringType
+                    defaultValue = "company"
+                }
+            )
+        ) { backStackEntry ->
+            val type = backStackEntry.arguments?.getString("type") ?: "company"
+
+            CreateReportScreen(
+                navController = navController,
+                type = type
+            )
+        }
 
         composable("ExpensesScreen") { ExpensesScreen(navController , token = token ?: "") }
 

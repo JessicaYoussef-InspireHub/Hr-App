@@ -263,5 +263,16 @@ You have</string>
     <string name="deleted_successfully">%1$d deleted successfully</string>
     <string name="could_not_be_deleted">%1$d couldn\'t be deleted</string>
     <string name="delete_selected_items_message">Are you sure you want to delete %1$d selected items?</string>
+    <string name="tap_to_upload_image_or_file">Tap to upload image or file</string>
+    <string name="expense_report_summary">Expense report summary:</string>
+    <string name="please_enter_expense_report_summary">Please enter expense report summary</string>
+    <string name="add_report_summary">Add report summary</string>
+    <string name="choose_expenses">Choose expenses:</string>
+    <string name="choose_payment_type">Choose payment type</string>
+    <string name="files">Files</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="you_cannot_mix_different_payment_types_within_the_same_report_please_choose_one_payment_type">You cannot mix different payment types within the same report. Please choose one payment type</string>
+    <string name="please_add_at_least_one_expense_before_saving">Please add at least one expense before saving</string>
 
 </resources>

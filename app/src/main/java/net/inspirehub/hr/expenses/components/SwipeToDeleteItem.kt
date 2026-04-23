@@ -28,7 +28,9 @@ fun SwipeToDeleteItem(
     isSelectionMode: Boolean,
     isSelected: Boolean,
     onSelect: () -> Unit,
-    onSendSuccess: () -> Unit
+    onSendSuccess: () -> Unit,
+    isDimmed: Boolean,
+    is17Version: Boolean
 ) {
     val colors = appColors()
     var showDialog by remember { mutableStateOf(false) }
@@ -65,12 +67,14 @@ fun SwipeToDeleteItem(
         },
         content = {
             ExpenseItemCard(
-                expense ,
-                navController ,
+                expense,
+                navController,
                 isSelectionMode,
                 isSelected,
                 onSelect,
-                onSendSuccess
+                onSendSuccess,
+                isDimmed,
+                is17Version
             )
         }
     )

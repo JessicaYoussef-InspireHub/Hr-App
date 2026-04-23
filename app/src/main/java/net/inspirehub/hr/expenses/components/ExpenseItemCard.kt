@@ -63,7 +63,9 @@ fun ExpenseItemCard(
     isSelectionMode: Boolean,
     isSelected: Boolean,
     onSelect: () -> Unit,
-    onSendSuccess: () -> Unit
+    onSendSuccess: () -> Unit,
+    isDimmed: Boolean,
+    is17Version: Boolean
 ) {
 
     fun formatDate(input: String): String {
@@ -85,13 +87,13 @@ fun ExpenseItemCard(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    val isDraft = expense.status.equals("draft", ignoreCase = true)
+    val showSend = !isDimmed
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                if (expense.status.equals("draft", ignoreCase = true)) {
+                if (showSend) {
                     navController.navigate("EditExpenseScreen/${expense.id}")
                 } else {
                     showDialog = true
@@ -114,7 +116,10 @@ fun ExpenseItemCard(
                 Text(
                     text = expense.description,
                     fontWeight = FontWeight.Bold,
-                    color = colors.onBackgroundColor,
+                    color = if (isDimmed)
+                        colors.onBackgroundColor.copy(alpha = 0.7f)
+                    else
+                        colors.onBackgroundColor,
                     fontSize = 18.sp
                 )
 
@@ -169,7 +174,7 @@ fun ExpenseItemCard(
                         append(" ${stringResource(R.string.and_taxes)} $formattedTax")
                     }
                 },
-                color = colors.onBackgroundColor,
+                color = colors.onBackgroundColor.copy(alpha = 0.7f),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Light
             )
@@ -186,7 +191,11 @@ fun ExpenseItemCard(
 
                         withStyle(
                             style = SpanStyle(
-                                color = colors.tertiaryColor
+                                color =
+                                    if (isDimmed)
+                                        colors.onBackgroundColor.copy(alpha = 0.7f)
+                                    else
+                                        colors.tertiaryColor
                             )
                         ) {
                             append(formatDate(expense.date))
@@ -196,27 +205,32 @@ fun ExpenseItemCard(
 
                         withStyle(
                             style = SpanStyle(
-                                color = colors.tertiaryColor
+                                color = if (isDimmed)
+                                    colors.onBackgroundColor.copy(alpha = 0.7f)
+                                else
+                                    colors.tertiaryColor
                             )
                         ) {
                             append(expense.status)
                         }
                     },
-                    color = colors.onBackgroundColor,
+                    color = colors.onBackgroundColor.copy(alpha = 0.7f),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Light,
                     modifier = Modifier.weight(1f)
                 )
+
+                if (!is17Version) {
                 Icon(
-                    imageVector = if (isDraft)
+                    imageVector = if (showSend)
                         Icons.AutoMirrored.Filled.Send
                     else
                         Icons.Default.Check,
                     contentDescription = "Send",
                     modifier = Modifier
                         .size(22.dp)
-                        .rotate(if (isDraft) -30f else 0f)
-                        .clickable(enabled = isDraft) {
+                        .rotate(if (showSend) -30f else 0f)
+                        .clickable(enabled = showSend) {
                             coroutineScope.launch {
                                 val sharedPref = SharedPrefManager(context)
                                 val token = sharedPref.getToken()
@@ -236,7 +250,7 @@ fun ExpenseItemCard(
                             }
                         },
                     tint = colors.tertiaryColor
-                )
+                )}
             }
         }
     }

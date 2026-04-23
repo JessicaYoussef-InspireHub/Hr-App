@@ -32,6 +32,7 @@ fun NewAndReportButton(
     viewReport: () -> Unit,
     onNewExpenses: () -> Unit,
     onUpload: () -> Unit,
+    is17Version: Boolean
 ) {
     val colors = appColors()
     var expandedNew by remember { mutableStateOf(false) }
@@ -91,7 +92,7 @@ fun NewAndReportButton(
             )
         }
 
-
+        if (is17Version) {
         Button(
             onClick = { expandedReport = !expandedReport },
             modifier = Modifier.weight(1f),
@@ -106,7 +107,7 @@ fun NewAndReportButton(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
             )
-        }
+        }}
 
         DropdownMenu(
             expanded = expandedReport,
