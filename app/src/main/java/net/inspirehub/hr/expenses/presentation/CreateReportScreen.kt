@@ -77,7 +77,6 @@ fun CreateReportScreen(
     val context = LocalContext.current
     var isExpanded by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
-    var isSubmitLoading by remember { mutableStateOf(false) }
     var showEmptyExpensesDialog by remember { mutableStateOf(false) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
 
@@ -133,10 +132,9 @@ fun CreateReportScreen(
                             }
                         },
                         onConfirm = {
-                            if (isLoading || isSubmitLoading) return@SaveCancelButton
+                            if (isLoading) return@SaveCancelButton
 
                             summaryError = summary.isBlank()
-
                             if (summaryError) return@SaveCancelButton
 
                             if (expenses.isEmpty()) {
@@ -145,30 +143,35 @@ fun CreateReportScreen(
                             }
 
                             scope.launch {
-                                isSubmitLoading = true
+                                isLoading = true
 
                                 val token = SharedPrefManager(context).getToken() ?: ""
 
-                                var success = true
+                                val expenseIds = expenses.map { it.id }
 
-                                expenses.forEach { expense ->
-                                    val result = submitReport(
-                                        context = context,
-                                        token = token,
-                                        expenseId = expense.id
-                                    )
-                                    if (!result) success = false
-                                }
 
-                                isSubmitLoading = false
+                                val success = submitReport(
+                                    context = context,
+                                    token = token,
+                                    expenseIds = expenseIds,
+                                    name = summary
+                                )
+
 
                                 if (success) {
-                                    navController.navigate("ExpensesScreen") {
+                                    snackBarHostState.showSnackbar(
+                                        context.getString(R.string.report_created_successfully)
+                                    )
+
+                                    navController.navigate("MyReportScreen") {
                                         popUpTo("CreateReportScreen") { inclusive = true }
                                     }
+
                                 } else {
-                                    snackBarHostState.showSnackbar("Failed to submit some expenses")
+                                    println("Failed to submit report")
                                 }
+
+                                isLoading = false
                             }
                         }
                     )

@@ -31,7 +31,6 @@
     <string name="use_pin_code">استخدم رمز PIN</string>
     <string name="no_protection">لا حماية</string>
     <string name="do_not_show_this_again">لا تعرض هذا مرة أخرى</string>
-    <string name="generate_qr">إنشاء رمز الاستجابة السريعة</string>
     <string name="scan_a_qr_code">مسح رمز الاستجابة السريعة</string>
     <string name="or">أو</string>
     <string name="enter_your_company_information">أدخل معلومات شركتك</string>
@@ -58,9 +57,6 @@
     <string name="description">الوصف:</string>
     <string name="casual_leave">إجازة عرضية:</string>
     <string name="please_choose_the_time_off_type">الرجاء اختيار نوع الأجازة</string>
-    <string name="error_message_overlap">
-   لقد قمت بالفعل بحجز إجازة تتداخل مع هذه الفترة: من %1$s إلى %2$s - في انتظار الموافقة.
-</string>
     <string name="delete_confirmation">حذف التأكيد</string>
     <string name="are_you_sure_you_want_to_delete_this_request">هل أنت متأكد أنك تريد حذف هذا الطلب؟</string>
     <string name="are_you_sure_you_want_to_change_your_company">هل أنت متأكد أنك تريد تغيير شركتك؟</string>
@@ -77,16 +73,9 @@
     <string name="remove_pending">إلغاء الطلب المعلَّق</string>
     <string name="remaining_out_of">متبقي من أصل</string>
     <string name="select_leave_type">حدد نوع الأجازة</string>
-    <string name="validation_error">خطأ في التحقق</string>
-    <string name="attempting_to_double_book_your_time_off_wont_magically_make_your_vacation_2x_better">محاولة حجز إجازة مزدوجة مش هتخلي عطلتك أحلى مرتين!</string>
     <string name="close">إغلاق</string>
     <string name="half_day">نصف يوم</string>
     <string name="night">مسائي</string>
-    <string name="annual_leaves">الأجازات السنوية</string>
-    <string name="days_available">من الأيام المتاحة</string>
-    <string name="permissions">الاذونات</string>
-    <string name="hours_available">من الساعات المتاحة</string>
-    <string name="valid_until_end_of_month">(صالحة حتى %1$s)</string>
     <string name="sun">أح</string>
     <string name="mon">أث</string>
     <string name="tue">ثل</string>
@@ -124,24 +113,17 @@
     <string name="Today">اليوم</string>
     <string name="Yesterday">أمس</string>
     <string name="day">يوم</string>
-    <string name="day_two">يومين</string>
-    <string name="days_few">أيام</string>
-    <string name="days_many">يومًا</string>
     <string name="yesterday">أمس</string>
     <string name="home">الصفحة الرئيسية</string>
     <string name="time_off">الاجازات</string>
     <string name="settings">الإعدادات</string>
     <string name="switch_on">تشغيل</string>
     <string name="switch_off">إيقاف</string>
-    <string name="light_mode">الوضع الفاتح</string>
     <string name="custom_hours">ساعات مخصصة</string>
     <string name="from">من:</string>
     <string name="to">إلي:</string>
-    <string name="hour">ساعة</string>
     <string name="hours">ساعات</string>
     <string name="you_are_offline">أنت غير متصل بالإنترنت</string>
-    <string name="do_you_want_to_continue_offline_your_attendance_will_be_saved_and_sent_later_automatically">هل ترغب في الاستمرار دون اتصال بالإنترنت؟ سيتم حفظ حضورك وإرساله لاحقًا تلقائيًا.</string>
-    <string name="time_change">تم اكتشاف تغيير في إعدادات التاريخ أو الوقت في جهازك. يرجى تفعيل "التاريخ والوقت التلقائي" و"المنطقة الزمنية التلقائية".</string>
     <string name="are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available">هل انت متاكد في تسجيل الخروج الآن؟\n سيتم حفظ العملية وإرسالها عند توفر الإنترنت.</string>
     <string name="check_not_allowed">غير مسموح بالتحقق</string>
     <string name="you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online">لقد قمت بتغيير الوقت أثناء عدم الاتصال بالإنترنت.\nلا يمكنك إجراء عملية التحقق حتى تعود إلى الاتصال بالإنترنت.</string>
@@ -155,18 +137,13 @@
     <string name="please_enable_gps_so_the_app_can_accurately_detect_your_location">الرجاء تشغيل الـ GPS حتى يتمكن التطبيق من تحديد موقعك بشكل صحيح.</string>
     <string name="lunch">الغذاء</string>
     <string name="search_your_meal">ابحث عن وجبتك...</string>
-    <string name="your_account_is">حسابك</string>
-    <string name="the_last_time_to_order_is">آخر وقت للطلب هو</string>
     <string name="add">أضف</string>
-    <string name="categories">فئات</string>
     <string name="note_to_restaurant">ملاحظة للمطعم</string>
     <string name="filter_by_suppliers">تصفية حسب الموردين</string>
     <string name="outside_company_range">أنت خارج نطاق الشركة</string>
-    <string name="my_order_is_here">طلبي هنا</string>
     <string name="my_order">طلبي</string>
     <string name="my_order_history">طلباتي السابقة</string>
     <string name="my_favorite">مفضلتي</string>
-    <string name="you_have_items_in_your_list">لديك 3 عناصر في قائمتك</string>
     <string name="no_notifications_yet">لا توجد إخطارات حتى الآن</string>
     <string name="no_previous_orders_yet">لا توجد طلبات سابقة حتى الآن</string>
     <string name="no_favorites_yet">لا توجد عناصر مفضلة بعد</string>
@@ -178,10 +155,10 @@
     <string name="invalid_request">طلب غير صالح</string>
     <string name="apply">تأكيد</string>
     <string name="expenses">النفقات</string>
+    <string name="expenses_report">النفقات:</string>
     <string name="add_expenses">إضافة نفقات</string>
     <string name="edit_expense">تعديل النفقة</string>
     <string name="total_price">:السعر الإجمالي</string>
-    <string name="delivery">التوصيل</string>
     <string name="total">:المجموع</string>
     <string name="your_order_has_been_placed_successfully">تم تقديم طلبك بنجاح!</string>
     <string name="order_now">اطلب الآن</string>
@@ -199,7 +176,6 @@
     <string name="are_you_sure_you_want_to_clear_all_favorites">هل أنت متأكد من رغبتك في مسح جميع المفضلة؟</string>
     <string name="clear">مسح</string>
     <string name="select_all">تحديد الكل</string>
-    <string name="clear_all">مسح الكل</string>
     <string name="no_results_found">لا توجد نتائج</string>
     <string name="all">الكل</string>
     <string name="category">الفئة:</string>
@@ -215,7 +191,6 @@
     <string name="reports">التقارير</string>
     <string name="view_reports">عرض التقارير</string>
     <string name="new_expense">نفقة جديدة</string>
-    <string name="new_">إضافة</string>
     <string name="upload">رفع</string>
     <string name="no_expenses_yet">لا يوجد مصروفات بعد</string>
     <string name="no_reports_yet">لا يوجد تقارير بعد</string>
@@ -233,6 +208,7 @@
     <string name="employee">الموظف</string>
     <string name="company">الشركة</string>
     <string name="expense_created_successfully">"تم إنشاء النفقة بنجاح"</string>
+    <string name="report_created_successfully">"تم إنشاء التقرير بنجاح"</string>
     <string name="expense_updated_successfully">"تم تحديث النفقة بنجاح"</string>
     <string name="expense_sent_successfully">"تم إرسال النفقة بنجاح"</string>
     <string name="please_select_a_category">"الرجاء اختيار فئة"</string>
@@ -243,8 +219,6 @@
     <string name="you_added_this_expense_on">لقد أضفت هذة النفقة في</string>
     <string name="and_its_status_is">وحالته هي</string>
     <string name="are_you_sure_you_want_to_delete_this_expense">هل أنت متأكد أنك تريد حذف هذة النفقة؟</string>
-    <string name="you_have">لديك</string>
-    <string name="in_drafts">في المسودات</string>
     <string name="cannot_delete">لا يمكن الحذف</string>
     <string name="update">تحديث</string>
     <string name="welcome">مرحباً</string>
@@ -271,5 +245,6 @@
     <string name="gallery">المعرض</string>
     <string name="you_cannot_mix_different_payment_types_within_the_same_report_please_choose_one_payment_type">لا يمكن دمج طرق دفع مختلفة داخل نفس التقرير. يرجى اختيار طريقة دفع واحدة</string>
     <string name="please_add_at_least_one_expense_before_saving">من فضلك أضف على الأقل مصروف واحد قبل الحفظ</string>
+    <string name="status">الحالة:</string>
 
 </resources>

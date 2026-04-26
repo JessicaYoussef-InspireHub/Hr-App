@@ -55,7 +55,7 @@ fun NewAndReportButton(
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
-                stringResource(R.string.new_),
+                stringResource(R.string.is_new),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
             )

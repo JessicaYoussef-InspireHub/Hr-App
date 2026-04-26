@@ -1,6 +1,6 @@
 package net.inspirehub.hr.expenses.data
 
-
+import kotlinx.serialization.Serializable
 import android.content.Context
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -8,61 +8,74 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.lunch.data.ApiClient
 import org.json.JSONObject
-import org.json.JSONArray
 
-suspend fun submitReport(
+
+@Serializable
+data class ExpenseReport(
+    val sheet_id: Int,
+    val name: String,
+    val employee: String,
+    val state: String,
+    val total_amount: Double,
+    val expenses: List<ReportExpense>
+)
+
+@Serializable
+data class ReportExpense(
+    val id: Int,
+    val name: String,
+    val amount: Double,
+    val date: String
+)
+
+suspend fun fetchReports(
     context: Context,
-    token: String,
-    expenseIds: List<Int>,
-    name: String
-): Boolean {
+    token: String
+): List<ExpenseReport> {
 
     return try {
 
         val sharedPref = SharedPrefManager(context)
         val baseUrl = sharedPref.getCompanyUrl()
-        val jsonArray = JSONArray()
-        expenseIds.forEach { id ->
-            jsonArray.put(id)
-        }
+        val finalToken = sharedPref.getToken() ?: token
 
         val body = JSONObject().apply {
             put("jsonrpc", "2.0")
             put("params", JSONObject().apply {
-                put("token", token)
-                put("expense_id", jsonArray)
-                put("name", name)
+                put("token", finalToken)
             })
         }
-        println("📦 Request Body: $body")
 
         val response = ApiClient.httpClient.post(
-            "$baseUrl/api/expenses/submit"
+            "$baseUrl/api/expenses/report"
         ) {
             contentType(ContentType.Application.Json)
             setBody(body.toString())
         }
 
         val responseText = response.bodyAsText()
-        println("📤 Submit Report Response: $responseText")
+        println("📦 Get Reports Response: $responseText")
 
         val json = Json.parseToJsonElement(responseText)
         val resultObject = json.jsonObject["result"]?.jsonObject
 
-        val status = resultObject?.get("status")?.jsonPrimitive?.content
+        val dataJson = resultObject?.get("data")
 
-        val message = resultObject?.get("message")?.jsonPrimitive?.content
-        println("Message: $message")
+        if (dataJson == null) {
+            println("❌ Get reports data is null")
+            return emptyList()
+        }
 
-        status == "success"
+        Json { ignoreUnknownKeys = true }
+            .decodeFromJsonElement<List<ExpenseReport>>(dataJson)
 
     } catch (e: Exception) {
-        println("❌ Submit Report error: ${e.message}")
-        false
+        println("❌ Error fetching reports: ${e.message}")
+        emptyList()
     }
 }

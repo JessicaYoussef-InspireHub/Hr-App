@@ -117,9 +117,6 @@ fun CheckInOutScreen(
     val context = LocalContext.current
     val prefManager = remember { SharedPrefManager(context) }
     val token = prefManager.getToken() ?: ""
-    val latitude = prefManager.getLatitude()
-    val longitude = prefManager.getLongitude()
-    val allowedDistance = prefManager.getAllowedDistance()
     val currentLat by viewModel.currentLat.collectAsState()
     val currentLng by viewModel.currentLng.collectAsState()
     val isWithinDistance by viewModel.isWithinDistance.collectAsState()
@@ -424,7 +421,7 @@ fun CheckInOutScreen(
                     when (attendanceStatus) {
                         "checked_in" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${stringResource(R.string.you_are_checked_in)}"
                         "checked_out" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${stringResource(R.string.you_are_checked_out)}"
-                        else -> "${stringResource(R.string.welcome)} $employeeFirstName\n..."
+                        else -> "${stringResource(R.string.welcome)} $employeeFirstName\n${stringResource(R.string.loading)}"
                     },
                     color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,

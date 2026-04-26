@@ -70,7 +70,7 @@ fun EditExpenseScreen(
     val context = LocalContext.current
     var expense by remember { mutableStateOf<Expense?>(null) }
     val scope = rememberCoroutineScope()
-    val successUpdatedMessage = stringResource(R.string.expense_created_successfully)
+    val successUpdatedMessage = stringResource(R.string.expense_updated_successfully)
     val colors = appColors()
     val snackBarHostState = remember { SnackbarHostState() }
     var descriptionText by remember { mutableStateOf("") }

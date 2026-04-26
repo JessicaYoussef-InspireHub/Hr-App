@@ -33,7 +33,6 @@ Protection Method</string>
     <string name="use_pin_code">Use PIN Code</string>
     <string name="no_protection">No Protection</string>
     <string name="do_not_show_this_again">Don\'t show this again</string>
-    <string name="generate_qr">Generate QR Code</string>
     <string name="scan_a_qr_code">Scan a QR Code</string>
     <string name="or">OR</string>
     <string name="enter_your_company_information">Enter your Company Information</string>
@@ -60,9 +59,6 @@ Protection Method</string>
     <string name="description">Description:</string>
     <string name="casual_leave">Casual Leave:</string>
     <string name="please_choose_the_time_off_type">Please choose the time off type</string>
-    <string name="error_message_overlap">
-    You\'ve already booked time off which overlaps with this period: from %1$s to %2$s - To Approve.
-</string>
     <string name="delete_confirmation">Delete Confirmation</string>
     <string name="are_you_sure_you_want_to_delete_this_request">Are you sure you want to delete this request?</string>
     <string name="are_you_sure_you_want_to_change_your_company">Are you sure you want to change your company?</string>
@@ -79,16 +75,9 @@ Protection Method</string>
     <string name="remove_pending">Remove pending</string>
     <string name="remaining_out_of">remaining out of</string>
     <string name="select_leave_type">Select Leave Type</string>
-    <string name="validation_error">Validation Error</string>
-    <string name="attempting_to_double_book_your_time_off_wont_magically_make_your_vacation_2x_better">Attempting to double-book your time off won\'t magically make your vacation 2x better!</string>
     <string name="close">Close</string>
     <string name="half_day">Half Day</string>
     <string name="night">Night</string>
-    <string name="annual_leaves">Annual Leaves</string>
-    <string name="days_available">DAYS AVAILABLE</string>
-    <string name="permissions">Permissions</string>
-    <string name="hours_available">HOURS AVAILABLE</string>
-    <string name="valid_until_end_of_month">(VALID UNTIL %1$s)</string>
     <string name="sun">Sun</string>
     <string name="mon">Mon</string>
     <string name="tue">Tue</string>
@@ -117,15 +106,11 @@ Protection Method</string>
         <item quantity="one">Total worked time: %1$.2f hour\n\nAre you sure you want to check out?</item>
         <item quantity="other">Total worked time: %1$.2f hours\n\nAre you sure you want to check out?</item>
     </plurals>
-
     <string name="are_you_sure_you_want_to_check_out">Are you sure you want to check out?</string>
     <string name="check_out">Check Out</string>
     <string name="check_in">Check In</string>
     <string name="loading">Loading</string>
     <string name="day">day</string>
-    <string name="day_two">days</string>
-    <string name="days_few">days</string>
-    <string name="days_many">days</string>
     <string name="today">today</string>
     <string name="Today">Today</string>
     <string name="yesterday">yesterday</string>
@@ -135,15 +120,11 @@ Protection Method</string>
     <string name="settings">Settings</string>
     <string name="switch_on">ON</string>
     <string name="switch_off">OFF</string>
-    <string name="light_mode">Light Mode</string>
     <string name="custom_hours">Custom Hours</string>
     <string name="from">From:</string>
     <string name="to">To:</string>
-    <string name="hour">hour</string>
     <string name="hours">hours</string>
     <string name="you_are_offline">You are offline</string>
-    <string name="do_you_want_to_continue_offline_your_attendance_will_be_saved_and_sent_later_automatically">Do you want to continue offline? Your attendance will be saved and sent later automatically.</string>
-    <string name="time_change">A change in your device\'s date or time settings has been detected. Please enable automatic date, time, and time zone.</string>
     <string name="are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available">Are you sure you want to check out now?\nThe operation will be saved and sent when the internet is available.</string>
     <string name="check_not_allowed">Check Not Allowed</string>
     <string name="you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online">You have changed the time while offline.\nYou cannot perform a Check operation until you are back online.</string>
@@ -157,18 +138,13 @@ Protection Method</string>
     <string name="please_enable_gps_so_the_app_can_accurately_detect_your_location">Please enable GPS so the app can accurately detect your location.</string>
     <string name="lunch">Lunch</string>
     <string name="search_your_meal">Search your meal...</string>
-    <string name="your_account_is">Your account is</string>
-    <string name="the_last_time_to_order_is">The last time to order is</string>
     <string name="add">Add</string>
-    <string name="categories">Categories</string>
     <string name="note_to_restaurant">Note to restaurant</string>
     <string name="filter_by_suppliers">Filter by suppliers</string>
     <string name="outside_company_range">You are outside the company range</string>
-    <string name="my_order_is_here">My order is here</string>
     <string name="my_order">My order</string>
     <string name="my_order_history">My order History</string>
     <string name="my_favorite">My Favorite</string>
-    <string name="you_have_items_in_your_list">You have 3 items in your list</string>
     <string name="no_notifications_yet">No notifications yet</string>
     <string name="no_previous_orders_yet">No previous orders yet</string>
     <string name="no_favorites_yet">No favorites yet</string>
@@ -180,10 +156,10 @@ Protection Method</string>
     <string name="invalid_request">Invalid Request</string>
     <string name="apply">Apply</string>
     <string name="expenses">Expenses</string>
+    <string name="expenses_report">Expenses:</string>
     <string name="add_expenses">Add Expenses</string>
     <string name="edit_expense">Edit Expense</string>
     <string name="total_price">Total Price:</string>
-    <string name="delivery">Delivery</string>
     <string name="total">Total:</string>
     <string name="your_order_has_been_placed_successfully">Your order has been placed successfully!</string>
     <string name="order_now">Order Now</string>
@@ -201,7 +177,6 @@ You have</string>
     <string name="are_you_sure_you_want_to_clear_all_favorites">Are you sure you want to clear all favorites?</string>
     <string name="clear">Clear</string>
     <string name="select_all">Select All</string>
-    <string name="clear_all">Clear All</string>
     <string name="no_results_found">No results found</string>
     <string name="all">All</string>
     <string name="category">Category:</string>
@@ -217,7 +192,6 @@ You have</string>
     <string name="reports">Reports</string>
     <string name="view_reports">View Reports</string>
     <string name="new_expense">New Expense</string>
-    <string name="new_">New</string>
     <string name="upload">Upload</string>
     <string name="no_expenses_yet">No expenses yet</string>
     <string name="no_reports_yet">No reports yet</string>
@@ -236,6 +210,7 @@ You have</string>
     <string name="employee">Employee</string>
     <string name="company">Company</string>
     <string name="expense_created_successfully">"Expense created successfully"</string>
+    <string name="report_created_successfully">"Report created successfully"</string>
     <string name="expense_updated_successfully">"Expense updated successfully"</string>
     <string name="expense_sent_successfully">"Expense sent successfully"</string>
     <string name="please_select_a_category">"Please select a category"</string>
@@ -246,8 +221,6 @@ You have</string>
     <string name="you_added_this_expense_on">You added this expense on</string>
     <string name="and_its_status_is">and its status is</string>
     <string name="are_you_sure_you_want_to_delete_this_expense">Are you sure you want to delete this expense?</string>
-    <string name="you_have">You have</string>
-    <string name="in_drafts">in drafts</string>
     <string name="cannot_delete">Cannot Delete</string>
     <string name="update">Update</string>
     <string name="welcome">Welcome</string>
@@ -274,5 +247,6 @@ You have</string>
     <string name="gallery">Gallery</string>
     <string name="you_cannot_mix_different_payment_types_within_the_same_report_please_choose_one_payment_type">You cannot mix different payment types within the same report. Please choose one payment type</string>
     <string name="please_add_at_least_one_expense_before_saving">Please add at least one expense before saving</string>
+    <string name="status">Status:</string>
 
 </resources>

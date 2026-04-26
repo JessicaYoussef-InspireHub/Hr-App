@@ -46,15 +46,6 @@ fun MyAppNavHost(
     val apiKey = sharedPrefManager.getApiKey()
     val companyId = sharedPrefManager.getCompanyId()
 
-//    val nextDestination = when {
-//        !token.isNullOrEmpty() && fingerprintSuccess -> "FingerPrintScreen"
-//        !token.isNullOrEmpty() && !savedPin.isNullOrEmpty() -> "EnterPinScreen"
-//        protectionSkipped -> "CheckInOutScreen"
-////      !token.isNullOrEmpty() -> "SignInScreen/$companyId/$apiKey"
-//        token.isNullOrEmpty() -> "SignInScreen/Com0001/HKP0Pt4zTDVf3ZHcGNmM4yx6"
-//        else ->"ScanQrCodeScreen"
-//    }
-
     val nextDestination = when {
         openedFromNotification && token.isNullOrEmpty() ->
             "SignInScreen/$companyId/$apiKey"
