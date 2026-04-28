@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import net.inspirehub.hr.R
 import net.inspirehub.hr.lunch.data.CartItem
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 
 @Composable
@@ -88,7 +89,7 @@ fun FavoriteCard() {
                             fontSize = 14.sp
                         )
                         Text(
-                            text = item.price,
+                            text = convertToArabicDigits(item.price),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = colors.inverseOnSurface

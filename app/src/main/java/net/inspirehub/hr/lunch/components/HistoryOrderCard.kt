@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.OrderWithItems
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 
 @SuppressLint("SimpleDateFormat")
@@ -37,16 +38,6 @@ fun HistoryOrderCard(
     val items = orderWithItems.items
     val colors = appColors()
 
-    fun String.replaceDigitsWithArabic(): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return this.map { char ->
-            if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-        }.joinToString("")
-    }
-
-    fun Number.toArabicDigits(): String {
-        return this.toString().replaceDigitsWithArabic()
-    }
 
     Column(
         modifier = Modifier
@@ -72,7 +63,7 @@ fun HistoryOrderCard(
                     items.filter { it.quantity > 0 }
                         .forEach { item ->
                             Text(
-                                "${item.quantity.toArabicDigits()} x ${item.name}",
+                                "${convertToArabicDigits(item.quantity.toString())} x ${item.name}",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = colors.onBackgroundColor
@@ -83,7 +74,7 @@ fun HistoryOrderCard(
 
                     Text(
                         text = "${stringResource(R.string.total_price)} ${
-                            order.totalPrice.toString().replaceDigitsWithArabic()
+                            convertToArabicDigits(order.totalPrice.toString())
                         }",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,

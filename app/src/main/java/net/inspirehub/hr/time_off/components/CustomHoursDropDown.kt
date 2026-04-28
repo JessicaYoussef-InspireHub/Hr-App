@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,13 +40,6 @@ fun CustomHourDropDown(
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
 
-    fun convertToArabicNumbers(input: String): String {
-        val arabicNumbers = mapOf(
-            '0' to '٠', '1' to '١', '2' to '٢', '3' to '٣', '4' to '٤',
-            '5' to '٥', '6' to '٦', '7' to '٧', '8' to '٨', '9' to '٩'
-        )
-        return input.map { arabicNumbers[it] ?: it }.joinToString("")
-    }
 
     fun translateAmPm(amPm: String, language: String): String {
         return if (language == "ar") {
@@ -70,9 +64,9 @@ fun CustomHourDropDown(
             val hours = listOf(12) + (1..11)
 
             for (hour in hours) {
-                val hourStr = if (currentLanguage == "ar") convertToArabicNumbers(hour.toString()) else hour.toString()
-                val zeroStr = if (currentLanguage == "ar") convertToArabicNumbers("00") else "00"
-                val halfStr = if (currentLanguage == "ar") convertToArabicNumbers("30") else "30"
+                val hourStr = if (currentLanguage == "ar") convertToArabicDigits(hour.toString()) else hour.toString()
+                val zeroStr = if (currentLanguage == "ar") convertToArabicDigits("00") else "00"
+                val halfStr = if (currentLanguage == "ar") convertToArabicDigits("30") else "30"
 
                 times.add("$hourStr:$zeroStr $suffix")
                 times.add("$hourStr:$halfStr $suffix")

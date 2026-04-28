@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipPath
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -66,11 +67,6 @@ fun DailyAndHourlyDialog(
 
     val currentLanguage = Locale.getDefault().language
 
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
-            .joinToString("")
-    }
 
     fun getLocalizedDayText(
         context: Context,

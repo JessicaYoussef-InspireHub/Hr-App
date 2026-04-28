@@ -9,6 +9,7 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import java.text.NumberFormat
 import java.util.Locale
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @Composable
 fun DurationHours(
@@ -20,11 +21,6 @@ fun DurationHours(
     val currentLanguage = currentLocale.language
     val colors = appColors()
 
-
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }.joinToString("")
-    }
 
     fun getLocalizedHourText(language: String): String {
         return if (language == "ar") {

@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -41,16 +42,10 @@ fun Dates(
     var formattedStart = startDate.format(formatter)
     var formattedEnd = lastDate.format(formatter)
 
-    fun String.replaceDigitsWithArabic(): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
-        return this.map { char ->
-            if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-        }.joinToString("")
-    }
 
     if (locale.language == "ar") {
-        formattedStart = formattedStart.replaceDigitsWithArabic()
-        formattedEnd = formattedEnd.replaceDigitsWithArabic()
+        formattedStart = convertToArabicDigits(formattedStart)
+        formattedEnd = convertToArabicDigits(formattedEnd)
     }
 
     Row(

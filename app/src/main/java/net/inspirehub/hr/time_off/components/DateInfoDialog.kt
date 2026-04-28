@@ -47,6 +47,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import net.inspirehub.hr.time_off.data.LeaveDurationData
+import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -909,23 +910,6 @@ fun DateInfoDialog(
                                         if (response?.result?.status == "success") {
                                             onConfirm()
                                         } else {
-                                            fun String.replaceDigitsWithArabic(): String {
-                                                val arabicDigits = listOf(
-                                                    '٠',
-                                                    '١',
-                                                    '٢',
-                                                    '٣',
-                                                    '٤',
-                                                    '٥',
-                                                    '٦',
-                                                    '٧',
-                                                    '٨',
-                                                    '٩'
-                                                )
-                                                return this.map { char ->
-                                                    if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-                                                }.joinToString("")
-                                            }
 
                                             val locale = Locale.getDefault()
                                             val formatter =
@@ -940,9 +924,9 @@ fun DateInfoDialog(
 
                                             if (locale.language == "ar") {
                                                 startDateStrFormatted =
-                                                    startDateStrFormatted.replaceDigitsWithArabic()
+                                                    convertToArabicDigits(startDateStrFormatted)
                                                 endDateStrFormatted =
-                                                    endDateStrFormatted.replaceDigitsWithArabic()
+                                                    convertToArabicDigits(endDateStrFormatted)
                                             }
 
                                             errorMessage = apiMessage

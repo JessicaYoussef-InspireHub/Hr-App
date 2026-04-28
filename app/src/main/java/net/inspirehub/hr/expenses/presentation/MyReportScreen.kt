@@ -39,6 +39,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +54,7 @@ fun MyReportScreen(
     val token = sharedPref.getToken().orEmpty()
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedReports by remember { mutableStateOf(setOf<Int>()) }
+
 
     LaunchedEffect(Unit) {
         isLoading = true
@@ -85,10 +87,8 @@ fun MyReportScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = stringResource(
-                                R.string.item_selected,
-                                selectedReports.size
-                            ),
+                            text = convertToArabicDigits(
+                                stringResource(R.string.item_selected, selectedReports.size)),
                             color = colors.onBackgroundColor
                         )
                     },

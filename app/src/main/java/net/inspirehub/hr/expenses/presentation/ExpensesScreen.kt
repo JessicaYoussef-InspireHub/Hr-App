@@ -58,6 +58,7 @@ import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
 import net.inspirehub.hr.expenses.components.UploadBottomSheet
 import net.inspirehub.hr.expenses.data.deleteExpense
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -200,10 +201,7 @@ fun ExpensesScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = stringResource(
-                                R.string.item_selected,
-                                selectedItems.size
-                            ),
+                            text = convertToArabicDigits(stringResource(R.string.item_selected, selectedItems.size)),
                             color = colors.onBackgroundColor
                         )
                     },

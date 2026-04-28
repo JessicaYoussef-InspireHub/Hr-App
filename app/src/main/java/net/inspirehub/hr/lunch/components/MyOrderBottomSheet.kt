@@ -136,12 +136,21 @@ fun MyOrderBottomSheet(
                         ) {
                             items(cartItems.size) { index ->
                                 val item = cartItems[index]
-                                OrderRow(item = item) { updatedItem ->
-                                    coroutineScope.launch {
-                                        db.cartDao().insertItem(updatedItem)
-                                        cartItems = db.cartDao().getAllItems()
-                                    }
-                                }
+                                    OrderRow(
+                                        item = item,
+                                        onQuantityChange = { updatedItem ->
+                                            coroutineScope.launch {
+                                                db.cartDao().insertItem(updatedItem)
+                                                cartItems = db.cartDao().getAllItems()
+                                            }
+                                        },
+                                        onRemoveItem = { removedItem ->
+                                            coroutineScope.launch {
+                                                db.cartDao().deleteItem(removedItem)
+                                                cartItems = db.cartDao().getAllItems()
+                                            }
+                                        }
+                                    )
                                 if (index != cartItems.size - 1) {
                                     HorizontalDivider(
                                         thickness = 1.dp,

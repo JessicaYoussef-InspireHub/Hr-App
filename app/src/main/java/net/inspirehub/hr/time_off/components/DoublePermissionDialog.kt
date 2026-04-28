@@ -59,7 +59,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.ui.platform.LocalContext
-
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -91,12 +91,6 @@ fun DoublePermissionDialog(
 
 
     val currentLanguage = Locale.getDefault().language
-
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
-            .joinToString("")
-    }
 
     fun getLocalizedHourText(count: Double?, language: String): String {
         if (count == null) return ""

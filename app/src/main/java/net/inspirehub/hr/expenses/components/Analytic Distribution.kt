@@ -51,6 +51,7 @@ import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.AnalyticAccount
 import net.inspirehub.hr.expenses.data.fetchAnalyticAccounts
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 
 @SuppressLint("SuspiciousIndentation", "MutableCollectionMutableState")
@@ -202,7 +203,7 @@ fun AnalyticDistribution(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            stringResource(R.string.projects) + " " + "(${totalPercentage.toInt()}%)",
+                            stringResource(R.string.projects) + " " +  "(${convertToArabicDigits(totalPercentage.toInt().toString())}%)",
                             color = colors.onBackgroundColor,
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
@@ -249,7 +250,7 @@ fun AnalyticDistribution(
                                     modifier = Modifier.weight(1f),
                                     dropdownItems = analyticAccounts
                                         .filter { it.company_id != null && allowedIds.contains(it.company_id) }
-                                        .map { it.name })
+                                        .map { convertToArabicDigits(it.name) })
 
                                 Row(
                                     modifier = Modifier.weight(1f),
@@ -257,7 +258,7 @@ fun AnalyticDistribution(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     AnalyticDistributionTextField(
-                                        value = percentage,
+                                        value = convertToArabicDigits(percentage),
                                         onValueChange = {
                                             val newList = lines.toMutableList()
                                             newList[index] = it

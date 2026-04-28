@@ -47,7 +47,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.ceil
 import java.time.YearMonth
-
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -63,6 +63,7 @@ fun ExpenseCalendar(
     val colors = appColors()
     val yearText = currentMonth.year.toString()
     var selectedDate by remember { mutableStateOf(initialDate) }
+
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -98,7 +99,7 @@ fun ExpenseCalendar(
                             text = currentMonth.month.getDisplayName(
                                 TextStyle.FULL,
                                 Locale.getDefault()
-                            ) + " $yearText",
+                            ) + " " + convertToArabicDigits(yearText),
                             textAlign = TextAlign.Center,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -188,7 +189,7 @@ fun ExpenseCalendar(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = day.toString(),
+                                        text = convertToArabicDigits(day.toString()),
                                         textAlign = TextAlign.Center,
                                         fontWeight = FontWeight.Bold,
                                         color = if (isToday) colors.onSecondaryColor else colors.onBackgroundColor,

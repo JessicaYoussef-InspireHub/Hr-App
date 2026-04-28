@@ -39,6 +39,7 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.Tax
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +70,8 @@ fun IncludedTaxes(
         }
     }
 
-
+    val formattedTax = "%.2f".format(taxAmount)
+    val displayedTax = convertToArabicDigits(formattedTax)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -93,7 +95,7 @@ fun IncludedTaxes(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = tax.name,
+                            convertToArabicDigits(tax.name),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = colors.onBackgroundColor,
@@ -191,7 +193,7 @@ fun IncludedTaxes(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        tax.name,
+                                        convertToArabicDigits(tax.name),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold,
                                     )
@@ -218,9 +220,9 @@ fun IncludedTaxes(
 
         TextField(
             value = if (currencyPosition == "before") {
-                "$currencySymbol ${"%.2f".format(taxAmount)}"
+                "$currencySymbol $displayedTax"
             } else {
-                "${"%.2f".format(taxAmount)} $currencySymbol"
+                "$displayedTax $currencySymbol"
             },
             onValueChange = {},
             readOnly = true,

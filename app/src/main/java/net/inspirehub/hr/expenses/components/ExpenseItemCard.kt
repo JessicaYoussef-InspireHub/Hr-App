@@ -43,7 +43,7 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.submitExpense
-
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 data class ExpenseItem(
     val id: Int,
@@ -67,6 +67,7 @@ fun ExpenseItemCard(
     isDimmed: Boolean,
     is17Version: Boolean
 ) {
+
 
     fun formatDate(input: String): String {
         return try {
@@ -164,14 +165,14 @@ fun ExpenseItemCard(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = buildAnnotatedString {
-                    append(expense.totalAmount)
+                    append(convertToArabicDigits(expense.totalAmount))
                     expense.taxesAmount?.toDouble()?.takeIf { it != 0.0 }?.let { tax ->
                         val formattedTax = when (expense.currencyPosition) {
                             "before" -> "${expense.currencySymbol ?: ""} $tax"
                             "after" -> "$tax ${expense.currencySymbol ?: ""}"
                             else -> "$tax ${expense.currencySymbol ?: ""}"
                         }
-                        append(" ${stringResource(R.string.and_taxes)} $formattedTax")
+                        append(" ${stringResource(R.string.and_taxes)} ${convertToArabicDigits(formattedTax)}")
                     }
                 },
                 color = colors.onBackgroundColor.copy(alpha = 0.7f),
@@ -198,7 +199,7 @@ fun ExpenseItemCard(
                                         colors.tertiaryColor
                             )
                         ) {
-                            append(formatDate(expense.date))
+                            append(convertToArabicDigits(formatDate(expense.date)))
                         }
 
                         append(" ${stringResource(R.string.and_its_status_is)} ")

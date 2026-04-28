@@ -31,6 +31,7 @@ import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.Expense
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @Composable
 fun ExpensesSelectionCard(
@@ -116,10 +117,12 @@ fun ExpensesSelectionCard(
                                     val currency = expense.currency_symbol ?: ""
                                     val position = expense.currency_position ?: "after"
 
+                                    val formattedBaseAmount = convertToArabicDigits("%.2f".format(baseAmount))
+
                                     val formattedBase = when (position) {
-                                        "before" -> "$currency $baseAmount"
-                                        "after" -> "$baseAmount $currency"
-                                        else -> "$baseAmount $currency"
+                                        "before" -> "$currency $formattedBaseAmount"
+                                        "after" -> "$formattedBaseAmount $currency"
+                                        else -> "$formattedBaseAmount $currency"
                                     }
 
                                     append(formattedBase)
@@ -128,10 +131,12 @@ fun ExpensesSelectionCard(
 
                                     if (tax != null && tax != 0.0) {
 
+                                        val formattedTaxAmount = convertToArabicDigits("%.2f".format(tax))
+
                                         val formattedTax = when (position) {
-                                            "before" -> "$currency $tax"
-                                            "after" -> "$tax $currency"
-                                            else -> "$tax $currency"
+                                            "before" -> "$currency $formattedTaxAmount"
+                                            "after" -> "$formattedTaxAmount $currency"
+                                            else -> "$formattedTaxAmount $currency"
                                         }
                                         append(" ${stringResource(R.string.and_taxes)} $formattedTax")
                                     }
@@ -150,7 +155,7 @@ fun ExpensesSelectionCard(
                                             color = colors.tertiaryColor
                                         )
                                     ) {
-                                        append(formatDate(expense.date))
+                                        append(convertToArabicDigits(formatDate(expense.date)))
                                     }
 
                                     append(" ${stringResource(R.string.and_its_status_is)} ")

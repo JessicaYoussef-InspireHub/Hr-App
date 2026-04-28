@@ -248,5 +248,7 @@ You have</string>
     <string name="you_cannot_mix_different_payment_types_within_the_same_report_please_choose_one_payment_type">You cannot mix different payment types within the same report. Please choose one payment type</string>
     <string name="please_add_at_least_one_expense_before_saving">Please add at least one expense before saving</string>
     <string name="status">Status:</string>
+    <string name="wait_one_minute">Please wait 1 minute before performing the action again!</string>
+    <string name="offline_saved_message">You are offline! The operation has been saved and will be sent when the internet is available</string>
 
 </resources>

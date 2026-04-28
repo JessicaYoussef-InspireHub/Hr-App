@@ -37,6 +37,7 @@ import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.lunch.data.DatabaseProvider
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @Composable
 fun AddToCart(
@@ -52,13 +53,6 @@ fun AddToCart(
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
 
-
-
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
-            .joinToString("")
-    }
 
     val localizedQuantity =
         if (currentLanguage == "ar") convertToArabicDigits(quantity.toString())

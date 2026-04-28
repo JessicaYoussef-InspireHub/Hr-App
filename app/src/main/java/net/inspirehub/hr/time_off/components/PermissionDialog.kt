@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipPath
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -88,12 +89,6 @@ fun PermissionDialog(
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
     var showNewVacationDialog by remember { mutableStateOf(false) }
-
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
-            .joinToString("")
-    }
 
 
     val translatedLeaveType = record?.leave_type

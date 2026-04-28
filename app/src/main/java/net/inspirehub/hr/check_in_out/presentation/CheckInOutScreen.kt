@@ -82,6 +82,7 @@ import java.net.Socket
 import java.util.Date
 import java.util.TimeZone
 import net.inspirehub.hr.BuildConfig
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -150,13 +151,6 @@ fun CheckInOutScreen(
     val employeeFullName = prefManager.getEmployeeName() ?: "User"
     val employeeFirstName = employeeFullName.split(" ").firstOrNull() ?: employeeFullName
 
-    fun String.replaceDigitsWithArabic(): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return this.map { char ->
-            if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-        }.joinToString("")
-    }
-
 
     @Composable
     fun Modifier.noClickable(): Modifier = this.clickable(
@@ -184,10 +178,7 @@ fun CheckInOutScreen(
                 localTime.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
 
             if (currentLocale.language == "ar") {
-                val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-                formattedTime.map { c ->
-                    if (c.isDigit()) arabicDigits[c.digitToInt()] else c
-                }.joinToString("")
+                convertToArabicDigits(formattedTime)
             } else {
                 formattedTime
             }
@@ -222,7 +213,7 @@ fun CheckInOutScreen(
                         val formattedDate = checkOutDateLocal.format(formatter)
 
                         if (currentLocale.language == "ar") {
-                            formattedDate.replaceDigitsWithArabic()
+                            convertToArabicDigits(formattedDate)
                         } else {
                             formattedDate
                         }
@@ -493,18 +484,13 @@ fun CheckInOutScreen(
 
                                     if (isOffline) {
                                         val lastActionTime = prefManager.getLastOfflineActionTime()
-                                            ?: Date(0) // أو احصلي على آخر عملية offline
+                                            ?: Date(0) // Or get the latest offline transaction
                                         val diffMinutes =
-                                            ((now.time - lastActionTime.time) / 60000).toInt() // فرق بالدقائق
+                                            ((now.time - lastActionTime.time) / 60000).toInt() // Difference in minutes
 
                                         if (diffMinutes < 1) {
-                                            // لو الفرق أقل من دقيقة → امنع الضغط
-                                            offlineMessage =
-                                                if (Locale.getDefault().language == "ar") {
-                                                    "عليك الانتظار دقيقة واحدة قبل إعادة العملية!"
-                                                } else {
-                                                    "Please wait 1 minute before performing the action again!"
-                                                }
+                                            // If the difference is less than a minute → Prevent pressure
+                                            offlineMessage = context.getString(R.string.wait_one_minute)
                                             return@launch
                                         }
                                     }
@@ -584,25 +570,25 @@ fun CheckInOutScreen(
                                         return@launch
                                     }
 
-                                    // 🔹 إذا كانت العملية check_out، أظهر الـ OfflineCheckOutDialog
+                                    //  If the operation is check_out, show the OfflineCheckOutDialog
                                     if (isOffline) {
 
                                         val db = AppDatabase.getDatabase(context)
                                         val log = OfflineLog(
                                             action = nextAction,
-                                            lat = currentLat ?: 0.0,
-                                            lng = currentLng ?: 0.0,
+                                            lat = currentLat,
+                                            lng = currentLng,
                                             action_time = Date().toString(),
                                             action_tz = TimeZone.getDefault().id
                                         )
 
                                         if (nextAction == "check_in") {
                                             coroutineScope.launch {
-                                                // 🔹 تسجيل الـ offline log في الـ database
+                                                // Recording the offline log in the database
                                                 withContext(Dispatchers.IO) {
                                                     db.offlineLogDao().insertLog(log)
 
-                                                    // ✅ طباعة للتأكد
+                                                    // Print to confirm
                                                     val allLogs = db.offlineLogDao().getAllLogs()
                                                     allLogs.forEach { println("💾 Offline Log: $it") }
                                                 }
@@ -614,7 +600,7 @@ fun CheckInOutScreen(
                                             )
 
 
-                                            // 🔹 تحديث حالة الحضور مباشرة في UI
+                                            // Live attendance update in the UI
                                             viewModel.setAttendanceStatus(nextStatus)
                                             prefManager.saveLastOfflineActionTime(Date())
 
@@ -624,13 +610,8 @@ fun CheckInOutScreen(
                                                 "AttendanceStatus after setAttendanceStatus(): $attendanceStatus"
                                             )
 
-                                            // 🔹 رسالة للمستخدم
-                                            val currentLanguage = Locale.getDefault().language
-                                            offlineMessage = if (currentLanguage == "ar") {
-                                                "انت غير متصل بالانترنت! تم حفظ العملية، سيتم إرسالها عند توفر الإنترنت"
-                                            } else {
-                                                "You are offline! The operation has been saved and will be sent when the internet is available."
-                                            }
+                                            // Message to the user
+                                            offlineMessage = context.getString(R.string.offline_saved_message)
                                         } else {
 
 
@@ -642,7 +623,7 @@ fun CheckInOutScreen(
                                             }
                                         }
 
-                                        // 🔹 محاولة إعادة إرسال الـ offline logs لو الإنترنت متاح بعدين
+                                        // Try resending the offline logs if internet access is available later
                                         if (!isOffline) {
                                             val token = prefManager.getToken()
                                             if (token != null) {
@@ -860,12 +841,7 @@ fun CheckInOutScreen(
                     showErrorMessageDialog = false
                     viewModel.setAttendanceStatus("checked_out")
                     prefManager.saveLastOfflineActionTime(Date())
-                    val currentLanguage = Locale.getDefault().language
-                    offlineMessage = if (currentLanguage == "ar") {
-                        "انت غير متصل بالانترنت! تم حفظ العملية، سيتم إرسالها عند توفر الإنترنت"
-                    } else {
-                        "You are offline! The operation has been saved and will be sent when the internet is available."
-                    }
+                    offlineMessage = context.getString(R.string.offline_saved_message)
                 }
             },
             onCancel = { showErrorDialog = false }

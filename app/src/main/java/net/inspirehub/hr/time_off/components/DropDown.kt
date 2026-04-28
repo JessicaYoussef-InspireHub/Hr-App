@@ -32,6 +32,7 @@ import net.inspirehub.hr.SmallLoading
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.time_off.data.LeaveType
 import net.inspirehub.hr.time_off.data.getLeaveDuration
+import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -59,16 +60,6 @@ fun DropDown(
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage() // "ar" or "en"
 
-    fun convertToArabicNumbers(input: String): String {
-        val arabicNumbers = mapOf(
-            '0' to '٠', '1' to '١', '2' to '٢', '3' to '٣', '4' to '٤',
-            '5' to '٥', '6' to '٦', '7' to '٧', '8' to '٨', '9' to '٩'
-        )
-        return input.map { arabicNumbers[it] ?: it }.joinToString("")
-    }
-
-
-
 
     Column {
         if (isLoading) {
@@ -88,11 +79,11 @@ fun DropDown(
 
                         if (it.remaining_balance != null)
                             "$translatedName (${
-                                if (currentLanguage == "ar") convertToArabicNumbers(
+                                if (currentLanguage == "ar") convertToArabicDigits(
                                     remaining
                                 ) else remaining
                             } ${stringResource(R.string.remaining_out_of)} ${
-                                if (currentLanguage == "ar") convertToArabicNumbers(
+                                if (currentLanguage == "ar") convertToArabicDigits(
                                     original
                                 ) else original
                             })"
@@ -134,11 +125,11 @@ fun DropDown(
                                 Text(
                                     if (item.remaining_balance != null)
                                         "$translatedName (${
-                                            if (currentLanguage == "ar") convertToArabicNumbers(
+                                            if (currentLanguage == "ar") convertToArabicDigits(
                                                 remaining.toString()
                                             ) else remaining
                                         } ${stringResource(R.string.remaining_out_of)} ${
-                                            if (currentLanguage == "ar") convertToArabicNumbers(
+                                            if (currentLanguage == "ar") convertToArabicDigits(
                                                 original.toString()
                                             ) else original
                                         })"

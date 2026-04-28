@@ -53,6 +53,7 @@ import net.inspirehub.hr.time_off.data.TimeOffRequestForRequestEmployee
 import net.inspirehub.hr.time_off.data.sendApiForRequestTimeOff
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -90,11 +91,6 @@ fun TimeOffDetailsDialog(
     val colors = appColors()
     var apiErrorMessage by remember { mutableStateOf<String?>(null) }
 
-
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }.joinToString("")
-    }
 
 
     val dateText = if (sameDay) {

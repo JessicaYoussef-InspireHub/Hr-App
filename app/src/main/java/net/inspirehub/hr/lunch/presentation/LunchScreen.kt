@@ -63,6 +63,7 @@ import net.inspirehub.hr.lunch.data.fetchLunchProducts
 import androidx.core.graphics.scale
 import net.inspirehub.hr.lunch.components.MyHistoryBottomSheet
 import net.inspirehub.hr.lunch.components.MyOrderBottomSheet
+import net.inspirehub.hr.lunch.data.CustomSnackBarVisuals
 import net.inspirehub.hr.lunch.data.LunchCategory
 import net.inspirehub.hr.lunch.data.fetchLunchCategories
 
@@ -129,15 +130,13 @@ fun LunchScreen(
             SnackbarHost(
                 hostState = snackBarHostState
             ) { data ->
-                val showViewCart = data.visuals.message.contains("added to cart") ||
-                        data.visuals.message.contains("reorder")
+                val custom = data.visuals as? CustomSnackBarVisuals
 
                 OrderSnackBar(
                     snackBarData = data,
-                    onViewCart = {
-                        openCartSheet = true
-                    },
-                    showViewCart = showViewCart
+                    onViewCart = if (custom?.showViewCart == true) {
+                        { openCartSheet = true }
+                    } else null
                 )
             }
         },
@@ -164,7 +163,12 @@ fun LunchScreen(
                     val message = "$quantity $productName $addedToCartText"
 
                     scope.launch {
-                        snackBarHostState.showSnackbar(message)
+                        snackBarHostState.showSnackbar(
+                            CustomSnackBarVisuals(
+                                message = message,
+                                showViewCart = true
+                            )
+                        )
                     }
                 }
             )
@@ -315,16 +319,26 @@ fun LunchScreen(
                                 onDismiss = { openCartSheet = false },
                                 onOrderSuccess = {
                                     scope.launch {
-                                        snackBarHostState.showSnackbar(successMessage)
+                                        snackBarHostState.showSnackbar(
+                                            CustomSnackBarVisuals(
+                                                message = successMessage
+                                            )
+                                        )
                                     }
                                 }
                             )
+
                             MyHistoryBottomSheet(
                                 showSheet = showHistorySheet,
                                 onDismiss = { showHistorySheet = false },
                                 onReorderSuccess = {
                                     scope.launch {
-                                        snackBarHostState.showSnackbar(reOrderMessage)
+                                        snackBarHostState.showSnackbar(
+                                            CustomSnackBarVisuals(
+                                                message = reOrderMessage,
+                                                showViewCart = true
+                                            )
+                                        )
                                     }
                                 }
                             )
@@ -345,27 +359,28 @@ fun LunchScreen(
                             )
                         }
                     } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(bottom = 0.dp)
-                    ) {
-                        itemsIndexed(filteredProducts) { _, product ->
-                            Column {
-                                LunchCard(
-                                    productId = product.id,
-                                    supplierId = product.supplierId,
-                                    name = product.name,
-                                    supplierName = product.supplier_name,
-                                    price = "${product.price} ${product.currency}",
-                                    imageBase64 = product.imageBase64,
-                                    isNew = product.isNew,
-                                    onClick = {
-                                        selectedItem = product
-                                        showBottomSheet = true
-                                    }
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                            }}
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(bottom = 0.dp)
+                        ) {
+                            itemsIndexed(filteredProducts) { _, product ->
+                                Column {
+                                    LunchCard(
+                                        productId = product.id,
+                                        supplierId = product.supplierId,
+                                        name = product.name,
+                                        supplierName = product.supplier_name,
+                                        price = "${product.price} ${product.currency}",
+                                        imageBase64 = product.imageBase64,
+                                        isNew = product.isNew,
+                                        onClick = {
+                                            selectedItem = product
+                                            showBottomSheet = true
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                }
+                            }
                         }
                     }
                 }

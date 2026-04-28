@@ -57,7 +57,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @SuppressLint("NewApi")
 @Composable
@@ -88,11 +88,6 @@ fun DoubleStateDialog(
 
     val locale = if (currentLanguage == "ar") Locale("ar") else Locale.ENGLISH
 
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
-            .joinToString("")
-    }
 
     val formattedDateRaw = selectedDate.format(
         DateTimeFormatter.ofPattern("d MMMM yyyy", locale)

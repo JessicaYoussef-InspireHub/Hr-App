@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.ExpenseReport
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @Composable
 fun ReportCard(
@@ -133,7 +134,7 @@ fun ReportCard(
             }
 
             Text(
-                text = "${report.total_amount}",
+                text =   convertToArabicDigits(report.total_amount.toString()),
                 color = colors.onBackgroundColor.copy(alpha = 0.7f),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Light
@@ -213,8 +214,9 @@ fun ReportCard(
                                         it.name,
                                         color = colors.onBackgroundColor.copy(alpha = 0.7f)
                                     )
+
                                     Text(
-                                        "${it.amount}",
+                                        convertToArabicDigits(it.amount.toString()),
                                         color = colors.onBackgroundColor.copy(alpha = 0.7f)
                                     )
 
@@ -231,7 +233,7 @@ fun ReportCard(
                                                             colors.tertiaryColor
                                                 )
                                             ) {
-                                                append(formatDate(it.date))
+                                                append(convertToArabicDigits(formatDate(it.date)))
                                             }
                                         },
                                         color = colors.onBackgroundColor.copy(alpha = 0.7f),

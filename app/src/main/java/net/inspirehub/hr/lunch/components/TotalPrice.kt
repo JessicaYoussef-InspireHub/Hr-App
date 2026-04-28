@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @Composable
 fun TotalPrice(
@@ -32,7 +33,7 @@ fun TotalPrice(
         )
 
         Text(
-            itemsPrice.toString(),
+            convertToArabicDigits(itemsPrice.toString()),
             color = color.onBackgroundColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold)

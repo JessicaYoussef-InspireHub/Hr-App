@@ -9,6 +9,7 @@ import androidx.room.Query
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import android.content.Context
+import androidx.room.Delete
 import androidx.room.Room
 import kotlinx.coroutines.flow.Flow
 
@@ -53,6 +54,10 @@ interface CartDao {
 
     @Query("DELETE FROM cart_items")
     suspend fun clearCart()
+
+
+    @Delete
+    suspend fun deleteItem(item: CartItem)
 }
 
 @Database(

@@ -35,6 +35,7 @@ import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import net.inspirehub.hr.lunch.data.FavoriteLunch
 import net.inspirehub.hr.lunch.presentation.base64ToImageBitmap
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @Composable
 fun LunchCard(
@@ -59,13 +60,6 @@ fun LunchCard(
         .collectAsState(initial = null)
         .let { state -> remember { derivedStateOf { state.value != null } } }
 
-
-
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return input.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }
-            .joinToString("")
-    }
 
     val localizedPrice = if (currentLanguage == "ar") convertToArabicDigits(price) else price
 

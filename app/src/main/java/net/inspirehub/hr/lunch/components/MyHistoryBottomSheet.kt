@@ -38,6 +38,7 @@ import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import net.inspirehub.hr.lunch.data.OrderWithItems
+import net.inspirehub.hr.utils.convertToArabicDigits
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -74,19 +75,10 @@ fun MyHistoryBottomSheet(
         yesterdayCal.add(Calendar.DAY_OF_YEAR, -1)
         val yesterday = sdf.format(yesterdayCal.time)
 
-        fun String.replaceDigitsWithArabic(): String {
-            val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
-            return map { char ->
-                if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-            }.joinToString("")
-        }
-
         return when (orderDay) {
             today -> context.getString(R.string.Today)
             yesterday -> context.getString(R.string.Yesterday)
-            else -> SimpleDateFormat("d MMM yyyy")
-                .format(Date(orderDate))
-                .replaceDigitsWithArabic()
+            else -> convertToArabicDigits(SimpleDateFormat("d MMM yyyy").format(Date(orderDate)))
         }
     }
 

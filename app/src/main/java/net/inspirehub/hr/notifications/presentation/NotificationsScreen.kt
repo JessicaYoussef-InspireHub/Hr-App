@@ -52,6 +52,7 @@ import androidx.core.content.edit
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.notifications.components.NotificationPermissionDialog
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -227,13 +228,6 @@ private fun formatTimestamp(timestamp: Long): Pair<String, String> {
     }
 }
 
-fun String.replaceDigitsWithArabic(): String {
-    val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-    return this.map { char ->
-        if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-    }.joinToString("")
-}
-
 @SuppressLint("LocalContextConfigurationRead")
 @Composable
 private fun formatDateHeader(dateStr: String): String {
@@ -263,5 +257,5 @@ private fun formatDateHeader(dateStr: String): String {
     }
 
 // ✅ Convert numbers to Arabic
-  return result.replaceDigitsWithArabic()
+    return convertToArabicDigits(result)
 }

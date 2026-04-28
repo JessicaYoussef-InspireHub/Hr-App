@@ -19,14 +19,13 @@ import net.inspirehub.hr.appColors
 @Composable
 fun OrderSnackBar(
     snackBarData: SnackbarData,
-    onViewCart: () -> Unit,
-    showViewCart: Boolean
+    onViewCart: (() -> Unit)? = null
 ) {
     val colors = appColors()
 
     Snackbar(
-        action = if (showViewCart) {
-            {
+        action = {
+            if (onViewCart != null) {
                 Text(
                     text = stringResource(R.string.view_cart),
                     modifier = Modifier
@@ -38,8 +37,7 @@ fun OrderSnackBar(
                     color = colors.tertiaryColor,
                     fontWeight = FontWeight.Bold
                 )
-            }
-        } else null,
+        }} ,
         containerColor = colors.onSecondaryColor,
         contentColor = colors.tertiaryColor,
         modifier = Modifier

@@ -20,6 +20,7 @@ import net.inspirehub.hr.appColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import net.inspirehub.hr.utils.convertToArabicDigits
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -33,12 +34,6 @@ fun ExpenseDate(
     val formatter = DateTimeFormatter.ofPattern("d-M-yyyy", locale)
     var showCalendarDialog by remember { mutableStateOf(false) }
 
-    fun convertToArabicDigits(input: String): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return input.map {
-            if (it.isDigit()) arabicDigits[it.digitToInt()] else it
-        }.joinToString("")
-    }
 
     val selectedDateText = selectedDate.format(formatter)
     val displayText =

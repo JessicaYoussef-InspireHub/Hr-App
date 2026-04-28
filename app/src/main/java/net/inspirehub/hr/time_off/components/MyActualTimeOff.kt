@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.time_off.data.LeaveType
+import net.inspirehub.hr.utils.convertToArabicDigits
 import java.util.Locale
 
 
@@ -28,13 +29,6 @@ import java.util.Locale
 fun MyActualTimeOff(
     leaveTypes: List<LeaveType> ,
 ) {
-
-    fun String.replaceDigitsWithArabic(): String {
-        val arabicDigits = listOf('٠','١','٢','٣','٤','٥','٦','٧','٨','٩')
-        return this.map { char ->
-            if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-        }.joinToString("")
-    }
 
     val currentLocale = Locale.getDefault()
     val visibleLeaveTypes = leaveTypes.filter { it.requires_allocation == "yes" }
@@ -52,7 +46,8 @@ fun MyActualTimeOff(
         ) {
             itemsIndexed(visibleLeaveTypes) { index, leave ->
                  val balance = if (currentLocale.language == "ar") {
-                        (leave.remaining_balance ?: 0f).toString().replaceDigitsWithArabic()
+
+                     convertToArabicDigits((leave.remaining_balance ?: 0f).toString())
                     } else {
                         (leave.remaining_balance ?: 0f).toString()
                     }

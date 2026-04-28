@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.utils.convertToArabicDigits
 import kotlin.math.ceil
 
 
@@ -77,13 +78,6 @@ fun MyCalendarPicker(
     var doublePermissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
     val colors = appColors()
 
-    fun String.replaceDigitsWithArabic(): String {
-        val arabicDigits = listOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
-        return this.map { char ->
-            if (char.isDigit()) arabicDigits[char.digitToInt()] else char
-        }.joinToString("")
-    }
-
 
     val dateToStatesMap: Map<LocalDate, Set<String>> =
         dailyRecords.flatMap { record ->
@@ -96,7 +90,7 @@ fun MyCalendarPicker(
         }.groupBy({ it.first }, { it.second }).mapValues { it.value.toSet() }
 
     val yearText = if (Locale.getDefault().language == "ar") {
-        currentMonth.year.toString().replaceDigitsWithArabic()
+        convertToArabicDigits(currentMonth.year.toString())
     } else {
         currentMonth.year.toString()
     }
@@ -216,7 +210,7 @@ fun MyCalendarPicker(
 
                     val currentLocale = Locale.getDefault()
                     val dayText = if (currentLocale.language == "ar") {
-                        day.toString().replaceDigitsWithArabic()
+                        convertToArabicDigits(day.toString())
                     } else {
                         day.toString()
                     }

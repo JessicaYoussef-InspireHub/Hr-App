@@ -42,6 +42,7 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.ExpenseCurrency
 import net.inspirehub.hr.expenses.data.fetchExpenseCurrencies
+import net.inspirehub.hr.utils.convertToArabicDigits
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +56,9 @@ fun TotalPriceExpenses(
     onConvertedAmountChange: (Double?) -> Unit,
     onCurrencySelected: (ExpenseCurrency?) -> Unit
 ) {
+
+    val sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+    val isArabic = sharedPref.getString("lang", "en") == "ar"
 
     val colors = appColors()
     var amount by remember {
@@ -105,17 +109,18 @@ fun TotalPriceExpenses(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val displayAmount = convertToArabicDigits(amount)
 
             CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
                 TextField(
                     value = if (selectedCurrency != null && amount.isNotEmpty()) {
                         if (selectedCurrency!!.position == "before") {
-                            "${selectedCurrency!!.symbol} $amount"
+                            "${selectedCurrency!!.symbol} $displayAmount"
                         } else {
-                            "$amount ${selectedCurrency!!.symbol}"
+                            "$displayAmount ${selectedCurrency!!.symbol}"
                         }
                     } else {
-                        amount
+                        displayAmount
                     },
                     onValueChange = { input ->
                         val numericInput = input.filter { it.isDigit() || it == '.' }
@@ -127,7 +132,7 @@ fun TotalPriceExpenses(
                     },
                     placeholder = {
                         Text(
-                            "0.00",
+                            convertToArabicDigits("0.00"),
                             color = colors.onBackgroundColor,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold
@@ -248,10 +253,24 @@ fun TotalPriceExpenses(
                 val decimalPlaces = companyCurrency?.decimal_places
                 val formatString = "%.${decimalPlaces}f"
 
-                val convertedText = if (companyPosition == "before") {
-                    "$companySymbol ${formatString.format(roundedAmount)}"
+                val rawAmount = convertToArabicDigits(formatString.format(roundedAmount))
+
+                val rateText = if (isArabic) {
+                    convertToArabicDigits(selectedCurrency!!.rate.toString())
                 } else {
-                    "${formatString.format(roundedAmount)} $companySymbol"
+                    selectedCurrency!!.rate.toString()
+                }
+
+                val displayAmount = if (isArabic) {
+                    convertToArabicDigits(rawAmount)
+                } else {
+                    rawAmount
+                }
+
+                val convertedText = if (companyPosition == "before") {
+                    "$companySymbol $displayAmount"
+                } else {
+                    "$displayAmount $companySymbol"
                 }
 
                 Text(
@@ -264,7 +283,7 @@ fun TotalPriceExpenses(
                 )
 
                 Text(
-                    text = "1 ${selectedCurrency!!.name} = ${selectedCurrency!!.rate} ${companyCurrency?.currency_code}",
+                    text = "1 ${selectedCurrency!!.name} = $rateText ${companyCurrency?.currency_code}",
                     color = colors.onBackgroundColor,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
