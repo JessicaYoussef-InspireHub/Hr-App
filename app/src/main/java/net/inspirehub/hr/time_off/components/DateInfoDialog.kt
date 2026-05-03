@@ -105,8 +105,8 @@ fun DateInfoDialog(
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
 
-    var selectedFromHour by remember { mutableStateOf<String?>(null) }
-    var selectedToHour by remember { mutableStateOf<String?>(null) }
+    var selectedFromHour by remember { mutableStateOf("9:00") }
+    var selectedToHour by remember { mutableStateOf("17:00") }
 
     var errorMessage by remember { mutableStateOf("") }
 
@@ -121,31 +121,17 @@ fun DateInfoDialog(
 
 
     fun convertToDoubleHour(time: String): Double? {
-        try {
-            val formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)
-            val localTime = LocalTime.parse(time, formatter)
-            return localTime.hour + localTime.minute / 60.0
+        return try {
+            val cleanTime = time.trim()
+
+            val formatter = DateTimeFormatter.ofPattern("H:mm")
+            val localTime = LocalTime.parse(cleanTime, formatter)
+
+            localTime.hour + localTime.minute / 60.0
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("TIME_PARSE", "Failed parsing time: $time", e)
+            null
         }
-        return null
-    }
-
-
-    fun normalizeTimeForParsing(time: String, language: String): String {
-        var normalized = time
-
-        val arabicToEnglish = mapOf(
-            '٠' to '0', '١' to '1', '٢' to '2', '٣' to '3', '٤' to '4',
-            '٥' to '5', '٦' to '6', '٧' to '7', '٨' to '8', '٩' to '9'
-        )
-        normalized = normalized.map { arabicToEnglish[it] ?: it }.joinToString("")
-
-        if (language == "ar") {
-            normalized = normalized.replace("ص", "AM").replace("م", "PM")
-        }
-
-        return normalized
     }
 
     fun calculateLeaveDuration() {
@@ -177,26 +163,27 @@ fun DateInfoDialog(
     }
 
     fun calculatePermissionDuration() {
+        Log.d("TIME_DEBUG", "=== START CALC ===")
+        Log.d("TIME_DEBUG", "From raw = $selectedFromHour")
+        Log.d("TIME_DEBUG", "To raw = $selectedToHour")
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
                 val requestDateFrom = selectedStartDate.format(formatter)
                 val requestDateTo = selectedEndDate.format(formatter)
 
-                val fromHourDouble = selectedFromHour?.let {
-                    val normalized = normalizeTimeForParsing(it, currentLanguage)
-                    convertToDoubleHour(normalized)
-                }
-                var toHourDouble = selectedToHour?.let {
-                    val normalized = normalizeTimeForParsing(it, currentLanguage)
-                    convertToDoubleHour(normalized)
-                }
+                val fromHourDouble = convertToDoubleHour(selectedFromHour)
+                var toHourDouble = convertToDoubleHour(selectedToHour)
+
 
                 if (fromHourDouble != null && toHourDouble != null) {
                     if (toHourDouble < fromHourDouble) {
                         toHourDouble += 24
                     }
                 }
+
+                Log.d("TIME_DEBUG", "From after parse = $fromHourDouble")
+                Log.d("TIME_DEBUG", "To after parse = $toHourDouble")
 
                 if (fromHourDouble == null || toHourDouble == null) {
                     return@launch
@@ -216,8 +203,8 @@ fun DateInfoDialog(
                     requestHourTo = toHourDouble
                 )
                 withContext(Dispatchers.Main) {
-                    permissionErrorMessage = (if (response.result.status == "error" || response.result.data?.hours == 0.0 ) {
-                        if (currentLanguage == "ar") {
+                    if (response.result.status == "error" || response.result.data?.hours == 0.0) {
+                        permissionErrorMessage = if (currentLanguage == "ar") {
                             "راجع الوقت اللي كتبته.. الوقت لازم يكون في حدود ساعات العمل"
                         } else {
                             "Please check the time you entered. It must be within working hours."
@@ -225,7 +212,7 @@ fun DateInfoDialog(
                     } else {
                         permissionErrorMessage = ""
                         leaveHours = response.result.data?.hours ?: 0.0
-                    }) as String
+                    }
                 }
 
 
@@ -659,21 +646,47 @@ fun DateInfoDialog(
                                     .padding(start = 15.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                CustomHourDropDown(
-                                    stringResource(R.string.from),
-                                    selectedPermissionHour = selectedFromHour,
-                                    onPermissionHourSelected = { time ->
-                                        selectedFromHour = time
+                                TimePickerBox(
+                                    selectedHour = selectedFromHour.split(":").getOrNull(0),
+                                    selectedMinute = selectedFromHour.split(":").getOrNull(1),
+                                    onHourChange = { hour ->
+                                        val minute = selectedFromHour.split(":").getOrNull(1) ?: "00"
+                                        selectedFromHour = "$hour:$minute"
+
+                                        Log.d("TIME_DEBUG", "FROM hour changed: $selectedFromHour")
+
+                                        calculatePermissionDuration()
+                                    },
+
+                                    onMinuteChange = { minute ->
+                                        val hour = selectedFromHour.split(":").getOrNull(0) ?: "9"
+                                        selectedFromHour = "$hour:$minute"
+
+                                        Log.d("TIME_DEBUG", "FROM minute changed: $selectedFromHour")
+
                                         calculatePermissionDuration()
                                     }
                                 )
-                                CustomHourDropDown(
-                                    label = stringResource(R.string.to),
-                                    selectedPermissionHour = selectedToHour,
-                                    onPermissionHourSelected = { time ->
-                                        selectedToHour = time
+                                TimePickerBox(
+                                    selectedHour = selectedToHour.split(":").getOrNull(0),
+                                    selectedMinute = selectedToHour.split(":").getOrNull(1),
+                                    onHourChange = { hour ->
+                                        val minute = selectedToHour.split(":").getOrNull(1) ?: "00"
+                                        selectedToHour = "$hour:$minute"
+
+                                        Log.d("TIME_DEBUG", "TO hour changed: $selectedToHour")
+
                                         calculatePermissionDuration()
                                     },
+
+                                    onMinuteChange = { minute ->
+                                        val hour = selectedToHour.split(":").getOrNull(0) ?: "5"
+                                        selectedToHour = "$hour:$minute"
+
+                                        Log.d("TIME_DEBUG", "TO minute changed: $selectedToHour")
+
+                                        calculatePermissionDuration()
+                                    }
                                 )
                             }
                         }
@@ -778,18 +791,14 @@ fun DateInfoDialog(
                                     CoroutineScope(Dispatchers.IO).launch {
                                         val startDateStr = selectedStartDate.toString()
 
-                                        val fromHourForApi = selectedFromHour?.let {
-                                            convertSelectedTimeToHour24(
-                                                it,
-                                                currentLanguage
-                                            )
-                                        } ?: "0"
-                                        val toHourForApi = selectedToHour?.let {
-                                            convertSelectedTimeToHour24(
-                                                it,
-                                                currentLanguage
-                                            )
-                                        } ?: "0"
+                                        val fromHourForApi = convertSelectedTimeToHour24(
+                                            selectedFromHour,
+                                            currentLanguage
+                                        )
+                                        val toHourForApi = convertSelectedTimeToHour24(
+                                            selectedToHour,
+                                            currentLanguage
+                                        )
 
                                         val request = TimeOffRequestForRequestEmployee(
                                             employee_token = token,

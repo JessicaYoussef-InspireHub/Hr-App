@@ -28,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,7 +90,7 @@ fun TimeOffScreen(
 
     val leaveTypesState = remember { mutableStateOf<List<LeaveType>>(emptyList()) }
 
-    val coroutineScope = rememberCoroutineScope()
+
     val leaveTypes = leaveTypesState.value
     val leaveTypeColors = remember { mutableStateMapOf<String, Color>() }
     val isOffline = remember { mutableStateOf(false) }
@@ -117,7 +116,7 @@ fun TimeOffScreen(
                 leaveTypesState.value = it.result.leave_types
 
                 it.result.leave_types.forEach { leaveType ->
-                    val colorHex = if (leaveType.color.isNullOrBlank()) "#00000000" else leaveType.color // اللون الشفاف في هيئة hex
+                    val colorHex = if (leaveType.color.isNullOrBlank()) "#00000000" else leaveType.color
                     val safeColor = try {
                         android.graphics.Color.parseColor(colorHex)
                     } catch (e: IllegalArgumentException) {
