@@ -46,7 +46,7 @@ import net.inspirehub.hr.lunch.data.OrderEntity
 import net.inspirehub.hr.lunch.data.OrderItemEntity
 import net.inspirehub.hr.lunch.data.submitLunchOrder
 
-@SuppressLint("FrequentlyChangedStateReadInComposition")
+@SuppressLint("FrequentlyChangedStateReadInComposition", "SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyOrderBottomSheet(

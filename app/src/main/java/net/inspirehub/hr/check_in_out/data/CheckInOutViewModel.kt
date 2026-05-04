@@ -488,8 +488,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
     // ✨ I separated the WorkManager part into a special function so that the code would be cleaner.
     private fun enqueueWorkManager(token: String, action: String , actionTime: String) {
-        val sharedPrefManager = SharedPrefManager(context)
-        val diffMinutes = sharedPrefManager.getTimeDifference()
+        val sharedPref = SharedPrefManager(context)
+        val diffMinutes = sharedPref.getTimeDifference()
 
         val data = workDataOf(
             "token" to token,

@@ -6,18 +6,18 @@ import androidx.lifecycle.AndroidViewModel
 import net.inspirehub.hr.SharedPrefManager
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-    private val prefManager = SharedPrefManager(application)
+    private val sharedPref = SharedPrefManager(application)
 
     fun changeCompany() {
-        prefManager.clearAll()
+        sharedPref.clearAll()
     }
 
     fun changeProtectionMethod() {
-        prefManager.savePin("")
-        prefManager.setFingerprintAuthSuccess(false)
+        sharedPref.savePin("")
+        sharedPref.setFingerprintAuthSuccess(false)
     }
 
     fun logout() {
-        prefManager.saveToken("")
+        sharedPref.saveToken("")
     }
 }

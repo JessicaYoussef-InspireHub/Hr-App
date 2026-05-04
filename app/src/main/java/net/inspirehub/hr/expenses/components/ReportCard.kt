@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -36,22 +37,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.ExpenseReport
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 
 @Composable
 fun ReportCard(
     report: ExpenseReport,
     isSelectionMode: Boolean,
     isSelected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    navController: NavController
 ) {
 
     val colors = appColors()
     val isState = report.state != "draft" && report.state != "refused"
+    val canEdit = report.state == "draft" || report.state == "refused"
     var isExpanded by remember { mutableStateOf(true) }
+    val context = LocalContext.current
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
+    var showLockedDialog by remember { mutableStateOf(false) }
 
     fun formatDate(input: String): String {
         return try {
@@ -70,7 +79,17 @@ fun ReportCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {},
+            .clickable {
+                if (isSelectionMode) {
+                    onSelect()
+                } else {
+                    if (canEdit) {
+                        navController.navigate("EditReportScreen/${report.sheet_id}")
+                    } else {
+                        showLockedDialog = true
+                    }
+                }
+            },
         colors = CardDefaults.cardColors(
             containerColor = colors.surfaceContainerHigh
         ),
@@ -134,7 +153,7 @@ fun ReportCard(
             }
 
             Text(
-                text =   convertToArabicDigits(report.total_amount.toString()),
+                text =   formatNumber(report.total_amount.toString() , currentLanguage),
                 color = colors.onBackgroundColor.copy(alpha = 0.7f),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Light
@@ -216,7 +235,7 @@ fun ReportCard(
                                     )
 
                                     Text(
-                                        convertToArabicDigits(it.amount.toString()),
+                                        formatNumber(it.amount.toString() , currentLanguage),
                                         color = colors.onBackgroundColor.copy(alpha = 0.7f)
                                     )
 
@@ -233,7 +252,7 @@ fun ReportCard(
                                                             colors.tertiaryColor
                                                 )
                                             ) {
-                                                append(convertToArabicDigits(formatDate(it.date)))
+                                                append(formatNumber(formatDate(it.date) , currentLanguage))
                                             }
                                         },
                                         color = colors.onBackgroundColor.copy(alpha = 0.7f),
@@ -247,4 +266,12 @@ fun ReportCard(
             }
         }
     }
+
+    if (showLockedDialog) {
+        ReportCannotEditDialog(
+            state = report.state,
+            onDismiss = { showLockedDialog = false }
+        )
+    }
+
 }

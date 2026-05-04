@@ -25,6 +25,7 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun CannotEditDialog(
+    state: String,
     onDismiss: () -> Unit
 ) {
 
@@ -77,7 +78,7 @@ fun CannotEditDialog(
         },
         text = {
             Text(
-                stringResource(R.string.this_expense_cannot_be_edited_because_it_is_not_in_draft_state),
+                stringResource(R.string.this_expense_cannot_be_edited_because_it_is_status_is , state),
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Normal,
                 color = colors.onBackgroundColor

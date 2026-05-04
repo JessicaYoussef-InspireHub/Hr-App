@@ -39,7 +39,7 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.Tax
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +57,7 @@ fun IncludedTaxes(
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
     val allowedIds = sharedPref.getAllowedLocationsIds()
-
+    val currentLanguage = sharedPref.getLanguage()
     val colors = appColors()
 
     val taxAmount = remember(selectedTaxes, amount) {
@@ -71,7 +71,7 @@ fun IncludedTaxes(
     }
 
     val formattedTax = "%.2f".format(taxAmount)
-    val displayedTax = convertToArabicDigits(formattedTax)
+    val displayedTax = formatNumber(formattedTax , currentLanguage)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -95,7 +95,7 @@ fun IncludedTaxes(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            convertToArabicDigits(tax.name),
+                            formatNumber(tax.name , currentLanguage),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = colors.onBackgroundColor,
@@ -193,7 +193,7 @@ fun IncludedTaxes(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        convertToArabicDigits(tax.name),
+                                        formatNumber(tax.name , currentLanguage),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold,
                                     )

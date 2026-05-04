@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,10 +40,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.ExpenseCurrency
 import net.inspirehub.hr.expenses.data.fetchExpenseCurrencies
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +58,7 @@ fun TotalPriceExpenses(
     onConvertedAmountChange: (Double?) -> Unit,
     onCurrencySelected: (ExpenseCurrency?) -> Unit
 ) {
-
+    val sharedPrefManger = SharedPrefManager(context)
     val sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
     val isArabic = sharedPref.getString("lang", "en") == "ar"
 
@@ -70,6 +72,8 @@ fun TotalPriceExpenses(
     var currencyExpanded by remember { mutableStateOf(false) }
     var selectedCurrency by remember { mutableStateOf<ExpenseCurrency?>(null) }
     var currencies by remember { mutableStateOf(listOf<ExpenseCurrency>()) }
+    val context = LocalContext.current
+    val currentLanguage = sharedPrefManger.getLanguage()
 
     val customTextSelectionColors = TextSelectionColors(
         handleColor = colors.tertiaryColor,
@@ -109,7 +113,7 @@ fun TotalPriceExpenses(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val displayAmount = convertToArabicDigits(amount)
+            val displayAmount = formatNumber(amount , currentLanguage)
 
             CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
                 TextField(
@@ -132,7 +136,7 @@ fun TotalPriceExpenses(
                     },
                     placeholder = {
                         Text(
-                            convertToArabicDigits("0.00"),
+                            formatNumber("0.00" , currentLanguage),
                             color = colors.onBackgroundColor,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold
@@ -253,16 +257,16 @@ fun TotalPriceExpenses(
                 val decimalPlaces = companyCurrency?.decimal_places
                 val formatString = "%.${decimalPlaces}f"
 
-                val rawAmount = convertToArabicDigits(formatString.format(roundedAmount))
+                val rawAmount = formatNumber(formatString.format(roundedAmount) , currentLanguage)
 
                 val rateText = if (isArabic) {
-                    convertToArabicDigits(selectedCurrency!!.rate.toString())
+                    formatNumber(selectedCurrency!!.rate.toString() , currentLanguage)
                 } else {
                     selectedCurrency!!.rate.toString()
                 }
 
                 val displayAmount = if (isArabic) {
-                    convertToArabicDigits(rawAmount)
+                    formatNumber(rawAmount , currentLanguage)
                 } else {
                     rawAmount
                 }

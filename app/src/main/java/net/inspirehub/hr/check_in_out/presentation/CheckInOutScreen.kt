@@ -82,6 +82,7 @@ import java.net.Socket
 import java.util.Date
 import java.util.TimeZone
 import net.inspirehub.hr.BuildConfig
+import net.inspirehub.hr.check_in_out.data.checkLocationUpdatesRaw
 import net.inspirehub.hr.utils.convertToArabicDigits
 
 var timeChangeReceiver: BroadcastReceiver? = null
@@ -116,8 +117,8 @@ fun CheckInOutScreen(
 
 ) {
     val context = LocalContext.current
-    val prefManager = remember { SharedPrefManager(context) }
-    val token = prefManager.getToken() ?: ""
+    val sharedPref = remember { SharedPrefManager(context) }
+    val token = sharedPref.getToken() ?: ""
     val currentLat by viewModel.currentLat.collectAsState()
     val currentLng by viewModel.currentLng.collectAsState()
     val isWithinDistance by viewModel.isWithinDistance.collectAsState()
@@ -148,7 +149,7 @@ fun CheckInOutScreen(
     var errorMessage by remember { mutableStateOf("") }
     var isErrorDialogLoading by remember { mutableStateOf(false) }
     var showFakeLocationDialog by remember { mutableStateOf(isFakeLocation) }
-    val employeeFullName = prefManager.getEmployeeName() ?: "User"
+    val employeeFullName = sharedPref.getEmployeeName() ?: "User"
     val employeeFirstName = employeeFullName.split(" ").firstOrNull() ?: employeeFullName
 
 
@@ -228,7 +229,89 @@ fun CheckInOutScreen(
     }
 
 
+    LaunchedEffect(Unit) {
+        val response = checkLocationUpdatesRaw(context, token)
+        println("📍 FINAL RESPONSE Update location: $response")
 
+        if (response == null) return@LaunchedEffect
+
+        try {
+            val json = org.json.JSONObject(response)
+            val result = json.getJSONObject("result")
+
+            val changed = result.optBoolean("changed", false)
+
+            println("Update location: 📦 BEFORE UPDATE:")
+
+            println("Update location: Allowed IDs (old): ${sharedPref.getAllowedLocationsIds()}")
+            println("Update location: Companies (old): ${sharedPref.getCompaniesLatLng()}")
+
+
+            if (!changed) {
+                println("Update location:📍 No changes in locations")
+                return@LaunchedEffect
+            }
+
+            println("Update location:✅ Locations changed → updating...")
+
+            // ✅ 1. allowed_locations_ids
+            val idsJson = result.optJSONArray("allowed_locations_ids")
+            val idsList = mutableListOf<Int>()
+
+            if (idsJson != null) {
+                for (i in 0 until idsJson.length()) {
+                    idsList.add(idsJson.getInt(i))
+                }
+            }
+
+            sharedPref.saveAllowedLocationsIds(idsList)
+
+            // ✅ 2. company_locations
+            val companiesJson = result.getJSONArray("company_locations")
+
+            val companies = mutableListOf<net.inspirehub.hr.sign_in.data.Company>()
+
+            for (i in 0 until companiesJson.length()) {
+                val item = companiesJson.getJSONObject(i)
+                val name = item.getString("name")
+
+                val address = item.getJSONObject("address")
+
+                val company = net.inspirehub.hr.sign_in.data.Company(
+                    name = name,
+                    address = net.inspirehub.hr.sign_in.data.Address(
+                        id = address.getInt("id"),
+                        street = address.optString("street", ""),
+                        city = address.optString("city", ""),
+                        zip = address.optString("zip", ""),
+                        country = address.optString("country", ""),
+                        latitude = address.getDouble("latitude"),
+                        longitude = address.getDouble("longitude"),
+                        allowed_distance = address.getDouble("allowed_distance")
+                    )
+                )
+
+                companies.add(company)
+            }
+
+            sharedPref.saveCompaniesLatLng(companies)
+
+            println("Update location: 🆕 AFTER UPDATE:")
+
+            println("Update location: Allowed IDs (new): ${sharedPref.getAllowedLocationsIds()}")
+            println("Update location: Companies (new): ${sharedPref.getCompaniesLatLng()}")
+
+            println("Update location: ✅ Locations saved successfully")
+
+            viewModel.checkLocationAndDistanceAllCompanies(
+                companies = sharedPref.getCompaniesLatLng(),
+                allowedLocationIds = sharedPref.getAllowedLocationsIds()
+            )
+
+        } catch (e: Exception) {
+            println("Update location: 🔴 Error parsing update locations: ${e.message}")
+        }
+    }
 
 
     LaunchedEffect(Unit) {
@@ -263,8 +346,8 @@ fun CheckInOutScreen(
                     Log.d("GPS_STATUS", "🔄 Re-checking location and distance...")
 //                    viewModel.checkLocationAndDistance(latitude, longitude, allowedDistance)
 
-                    val companies = prefManager.getCompaniesLatLng()
-                    val allowedIds = prefManager.getAllowedLocationsIds()
+                    val companies = sharedPref.getCompaniesLatLng()
+                    val allowedIds = sharedPref.getAllowedLocationsIds()
 
                     if (!isOffline) {
                         viewModel.syncOfflineData(token)
@@ -342,8 +425,8 @@ fun CheckInOutScreen(
             Log.d("disable", "Calling checkLocationAndDistance()...")
 //            viewModel.checkLocationAndDistance(latitude, longitude, allowedDistance)
 
-            val companies = prefManager.getCompaniesLatLng()
-            val allowedIds = prefManager.getAllowedLocationsIds()
+            val companies = sharedPref.getCompaniesLatLng()
+            val allowedIds = sharedPref.getAllowedLocationsIds()
             viewModel.checkLocationAndDistanceAllCompanies(
                 companies = companies,
                 allowedLocationIds = allowedIds
@@ -356,8 +439,8 @@ fun CheckInOutScreen(
     }
 
     LaunchedEffect(Unit) {
-        val companies = prefManager.getCompaniesLatLng()
-        val allowedIds = prefManager.getAllowedLocationsIds()
+        val companies = sharedPref.getCompaniesLatLng()
+        val allowedIds = sharedPref.getAllowedLocationsIds()
 
         viewModel.startLocationChecking(
             companies = companies,
@@ -483,7 +566,7 @@ fun CheckInOutScreen(
                                     val now = Date()
 
                                     if (isOffline) {
-                                        val lastActionTime = prefManager.getLastOfflineActionTime()
+                                        val lastActionTime = sharedPref.getLastOfflineActionTime()
                                             ?: Date(0) // Or get the latest offline transaction
                                         val diffMinutes =
                                             ((now.time - lastActionTime.time) / 60000).toInt() // Difference in minutes
@@ -496,8 +579,8 @@ fun CheckInOutScreen(
                                     }
 
                                     // ️Perform an immediate re-check of the site.
-                                    val companies = prefManager.getCompaniesLatLng()
-                                    val allowedIds = prefManager.getAllowedLocationsIds()
+                                    val companies = sharedPref.getCompaniesLatLng()
+                                    val allowedIds = sharedPref.getAllowedLocationsIds()
 
                                     viewModel.checkLocationAndDistanceAllCompanies(
                                         companies = companies,
@@ -525,12 +608,12 @@ fun CheckInOutScreen(
                                     isButtonLoading = true
                                     isErrorDialogLoading = true
 
-                                    val sharedPrefManager = SharedPrefManager(context)
-                                    val token = sharedPrefManager.getToken()
+                                    val sharedPref = SharedPrefManager(context)
+                                    val token = sharedPref.getToken()
                                     val offline = viewModel.isOffline()
                                     val wasOfflineDuringChange =
-                                        sharedPrefManager.wasOfflineDuringTimeChange()
-                                    val diffMinutes = sharedPrefManager.getTimeDifference()
+                                        sharedPref.wasOfflineDuringTimeChange()
+                                    val diffMinutes = sharedPref.getTimeDifference()
                                     Log.d(
                                         "CheckInOut",
                                         "🌐 Online status: ${if (offline) "Offline" else "Online"}"
@@ -602,7 +685,7 @@ fun CheckInOutScreen(
 
                                             // Live attendance update in the UI
                                             viewModel.setAttendanceStatus(nextStatus)
-                                            prefManager.saveLastOfflineActionTime(Date())
+                                            sharedPref.saveLastOfflineActionTime(Date())
 
                                             isButtonLoading = false
                                             Log.d(
@@ -625,7 +708,7 @@ fun CheckInOutScreen(
 
                                         // Try resending the offline logs if internet access is available later
                                         if (!isOffline) {
-                                            val token = prefManager.getToken()
+                                            val token = sharedPref.getToken()
                                             if (token != null) {
                                                 viewModel.syncOfflineData(token)
                                             } else {
@@ -645,8 +728,8 @@ fun CheckInOutScreen(
                                             "🕒 Time difference with server (minutes): $diff"
                                         )
 
-                                        sharedPrefManager.saveTimeDifference(diff)
-                                        sharedPrefManager.setWasOfflineDuringTimeChange(false)
+                                        sharedPref.saveTimeDifference(diff)
+                                        sharedPref.setWasOfflineDuringTimeChange(false)
                                         Log.d(
                                             "CheckInOut",
                                             "🕒 New time difference with server: $diff min"
@@ -741,7 +824,7 @@ fun CheckInOutScreen(
                             db.offlineLogDao().insertLog(log)
                         }
                         viewModel.setAttendanceStatus("checked_out")
-                        prefManager.saveLastOfflineActionTime(Date())
+                        sharedPref.saveLastOfflineActionTime(Date())
                         isButtonLoading = false
                         isErrorDialogLoading = false
                     }
@@ -755,8 +838,8 @@ fun CheckInOutScreen(
             showDialog = showNotAllowedDialog,
             onDismiss = {
                 showNotAllowedDialog = false
-                val companies = prefManager.getCompaniesLatLng()
-                val allowedIds = prefManager.getAllowedLocationsIds()
+                val companies = sharedPref.getCompaniesLatLng()
+                val allowedIds = sharedPref.getAllowedLocationsIds()
 
                 viewModel.checkLocationAndDistanceAllCompanies(
                     companies = companies,
@@ -814,7 +897,7 @@ fun CheckInOutScreen(
             workedHours = workedHours,
             isLoading = isDialogLoading,
             onConfirm = {
-                prefManager.clearCheckOutScheduledTime()
+                sharedPref.clearCheckOutScheduledTime()
                 WorkManager.getInstance(context).cancelAllWorkByTag("check_out_reminder_work")
                 isDialogLoading = true
                 viewModel.sendAttendance(token, "check_out") { newStatus ->
@@ -840,7 +923,7 @@ fun CheckInOutScreen(
                     showErrorDialog = false
                     showErrorMessageDialog = false
                     viewModel.setAttendanceStatus("checked_out")
-                    prefManager.saveLastOfflineActionTime(Date())
+                    sharedPref.saveLastOfflineActionTime(Date())
                     offlineMessage = context.getString(R.string.offline_saved_message)
                 }
             },

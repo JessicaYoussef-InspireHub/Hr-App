@@ -15,16 +15,19 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.OrderWithItems
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 
 
 @SuppressLint("SimpleDateFormat")
@@ -37,7 +40,9 @@ fun HistoryOrderCard(
     val order = orderWithItems.order
     val items = orderWithItems.items
     val colors = appColors()
-
+    val context = LocalContext.current
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
 
     Column(
         modifier = Modifier
@@ -63,7 +68,7 @@ fun HistoryOrderCard(
                     items.filter { it.quantity > 0 }
                         .forEach { item ->
                             Text(
-                                "${convertToArabicDigits(item.quantity.toString())} x ${item.name}",
+                                "${formatNumber(item.quantity.toString() , currentLanguage)} x ${item.name}",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = colors.onBackgroundColor
@@ -74,7 +79,7 @@ fun HistoryOrderCard(
 
                     Text(
                         text = "${stringResource(R.string.total_price)} ${
-                            convertToArabicDigits(order.totalPrice.toString())
+                            formatNumber(order.totalPrice.toString() , currentLanguage)
                         }",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,

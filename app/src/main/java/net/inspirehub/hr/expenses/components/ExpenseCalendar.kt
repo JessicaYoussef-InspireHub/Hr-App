@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,13 +42,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.utils.formatNumber
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.ceil
 import java.time.YearMonth
-import net.inspirehub.hr.utils.convertToArabicDigits
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -63,7 +65,9 @@ fun ExpenseCalendar(
     val colors = appColors()
     val yearText = currentMonth.year.toString()
     var selectedDate by remember { mutableStateOf(initialDate) }
-
+    val context = LocalContext.current
+    val sharedPref = SharedPrefManager(context)
+    val currentLanguage = sharedPref.getLanguage()
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -99,7 +103,7 @@ fun ExpenseCalendar(
                             text = currentMonth.month.getDisplayName(
                                 TextStyle.FULL,
                                 Locale.getDefault()
-                            ) + " " + convertToArabicDigits(yearText),
+                            ) + " " + formatNumber(yearText, currentLanguage),
                             textAlign = TextAlign.Center,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -189,7 +193,7 @@ fun ExpenseCalendar(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = convertToArabicDigits(day.toString()),
+                                        text = formatNumber(day.toString(), currentLanguage),
                                         textAlign = TextAlign.Center,
                                         fontWeight = FontWeight.Bold,
                                         color = if (isToday) colors.onSecondaryColor else colors.onBackgroundColor,

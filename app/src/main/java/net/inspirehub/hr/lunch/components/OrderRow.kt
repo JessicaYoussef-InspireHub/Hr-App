@@ -17,15 +17,18 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 
 @Composable
 fun OrderRow(
@@ -34,6 +37,9 @@ fun OrderRow(
     onRemoveItem: (CartItem) -> Unit
 ) {
     val colors = appColors()
+    val context = LocalContext.current
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
 
     Row(
         modifier = Modifier
@@ -74,7 +80,7 @@ fun OrderRow(
             }
 
             Text(
-                convertToArabicDigits("${item.quantity}"),
+                formatNumber("${item.quantity}" , currentLanguage),
                 color = colors.onBackgroundColor,
                 fontWeight = FontWeight.Medium
             )
@@ -111,7 +117,7 @@ fun OrderRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                convertToArabicDigits(item.price.toString()),
+                formatNumber(item.price.toString() , currentLanguage),
                 color = colors.onBackgroundColor,
                 fontWeight = FontWeight.Medium
             )

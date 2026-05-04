@@ -51,8 +51,8 @@ fun GeneralSettingsCard(
 ) {
     val colors = appColors()
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    var locale by remember { mutableStateOf(Locale(sharedPrefManager.getLanguage())) }
+    val sharedPref = remember { SharedPrefManager(context) }
+    var locale by remember { mutableStateOf(Locale(sharedPref.getLanguage())) }
     var expanded by remember { mutableStateOf(false) }
     val darkModeState = LocalDarkMode.current
     var showDialog by remember { mutableStateOf(false) }
@@ -60,7 +60,7 @@ fun GeneralSettingsCard(
     @SuppressLint("LocalContextConfigurationRead")
     fun updateLocale(newLocale: Locale) {
         locale = newLocale
-        sharedPrefManager.saveLanguage(newLocale.language)
+        sharedPref.saveLanguage(newLocale.language)
 
         Locale.setDefault(newLocale)
         val resources = context.resources
@@ -114,7 +114,7 @@ fun GeneralSettingsCard(
                             showDialog = false
                             viewModel.changeCompany()
                             navController.navigate("ScanQrCodeScreen")
-                            sharedPrefManager.setProtectionSkipped(false)
+                            sharedPref.setProtectionSkipped(false)
                         },
                         onDismiss = { showDialog = false }
                     )
@@ -192,7 +192,7 @@ fun GeneralSettingsCard(
                     onClick = {
 //                        val newMode = !darkModeState.value
 //                        darkModeState.value = newMode
-//                        sharedPrefManager.setDarkModeEnabled(newMode)
+//                        sharedPref.setDarkModeEnabled(newMode)
                     },
                     trailingIcon = {
 //                        CustomSwitch(
@@ -201,7 +201,7 @@ fun GeneralSettingsCard(
 //                            onCheckedChange = {
 ////                                isChecked ->
 ////                                darkModeState.value = isChecked
-////                                sharedPrefManager.setDarkModeEnabled(isChecked)
+////                                sharedPref.setDarkModeEnabled(isChecked)
 //                            },
 //                        )
                     }

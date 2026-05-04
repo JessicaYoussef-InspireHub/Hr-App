@@ -51,16 +51,6 @@ import net.inspirehub.hr.appColors
 import net.inspirehub.hr.sign_in.components.InCorrectCompanyIdDialog
 import kotlin.system.exitProcess
 
-//fun extractErrorMessage(response: String): String {
-//    return try {
-//        val json = JSONObject(response)
-//        json.getJSONObject("result").getString("message")
-//    } catch (e: Exception) {
-//        "An unexpected error occurred"
-//    }
-//}
-
-
 @Composable
 fun SignInScreen(
     navController: NavController,
@@ -73,8 +63,8 @@ fun SignInScreen(
     val passwordState = remember { mutableStateOf("") }
 
     val uiState by viewModel.uiState.collectAsState()
-    val sharedPrefManager = SharedPrefManager(LocalContext.current)
-    val protectionSkipped = sharedPrefManager.isProtectionSkipped()
+    val sharedPref = SharedPrefManager(LocalContext.current)
+    val protectionSkipped = sharedPref.isProtectionSkipped()
 
     val isFormValid = emailState.value.isNotBlank() && passwordState.value.isNotBlank()
     val showDialog = remember { mutableStateOf(false) }
@@ -102,7 +92,7 @@ fun SignInScreen(
     } else null
 
 
-    val token = sharedPrefManager.getToken()
+    val token = sharedPref.getToken()
 
     BackHandler(enabled = true) {
         if (token.isNullOrEmpty()) {

@@ -143,9 +143,9 @@ fun ExpensesScreen(
         val reportExpenses = fetchExpensesForReport(context = context, token = token)
         println("Loaded ${expenses.size} expenses")
 
-        is17Version = allExpenses.firstOrNull()?.is_17_version == false
+        expenses = allExpenses.expenses
+        is17Version = allExpenses.is17Version
 
-        expenses = allExpenses
         reportIds = reportExpenses.map { it.id }.toSet()
 
         isLoading = false
@@ -398,7 +398,11 @@ fun ExpensesScreen(
                                 onSendSuccess = {
                                     scope.launch {
                                         isLoading = true
-                                        expenses = fetchExpenses(context, token)
+                                        val response = fetchExpenses(context, token)
+
+                                        expenses = response.expenses
+                                        is17Version = response.is17Version
+
                                         isLoading = false
 
                                         snackBarHostState.showSnackbar(

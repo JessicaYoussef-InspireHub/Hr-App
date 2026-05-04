@@ -43,7 +43,7 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.submitExpense
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 
 data class ExpenseItem(
     val id: Int,
@@ -89,6 +89,8 @@ fun ExpenseItemCard(
     val coroutineScope = rememberCoroutineScope()
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val showSend = !isDimmed
+    val sharedPref = SharedPrefManager(context)
+    val currentLanguage = sharedPref.getLanguage()
 
     Card(
         modifier = Modifier
@@ -165,14 +167,14 @@ fun ExpenseItemCard(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = buildAnnotatedString {
-                    append(convertToArabicDigits(expense.totalAmount))
+                    append(formatNumber(expense.totalAmount , currentLanguage))
                     expense.taxesAmount?.toDouble()?.takeIf { it != 0.0 }?.let { tax ->
                         val formattedTax = when (expense.currencyPosition) {
                             "before" -> "${expense.currencySymbol ?: ""} $tax"
                             "after" -> "$tax ${expense.currencySymbol ?: ""}"
                             else -> "$tax ${expense.currencySymbol ?: ""}"
                         }
-                        append(" ${stringResource(R.string.and_taxes)} ${convertToArabicDigits(formattedTax)}")
+                        append(" ${stringResource(R.string.and_taxes)} ${formatNumber(formattedTax , currentLanguage)}")
                     }
                 },
                 color = colors.onBackgroundColor.copy(alpha = 0.7f),
@@ -199,7 +201,7 @@ fun ExpenseItemCard(
                                         colors.tertiaryColor
                             )
                         ) {
-                            append(convertToArabicDigits(formatDate(expense.date)))
+                            append(formatNumber(formatDate(expense.date) , currentLanguage))
                         }
 
                         append(" ${stringResource(R.string.and_its_status_is)} ")
@@ -265,6 +267,7 @@ fun ExpenseItemCard(
 
     if (showDialog) {
         CannotEditDialog(
+            state = expense.status,
             onDismiss = { showDialog = false }
         )
     }

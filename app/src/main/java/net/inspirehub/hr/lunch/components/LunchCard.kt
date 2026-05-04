@@ -51,8 +51,8 @@ fun LunchCard(
     val colors = appColors()
     val context = LocalContext.current
     val db = DatabaseProvider.getDatabase(context)
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val currentLanguage = sharedPrefManager.getLanguage()
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
     val scope = rememberCoroutineScope()
 
     val isFavorite by db.favoriteLunchDao()

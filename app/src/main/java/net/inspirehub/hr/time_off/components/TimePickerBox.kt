@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 
 @Composable
 fun TimePickerBox(
@@ -37,13 +37,6 @@ fun TimePickerBox(
     val hours = (0..23).map { it.toString() }
     val minutes = (0..59).map { it.toString().padStart(2, '0') }
 
-    fun formatNumberByLanguage(value: String): String {
-        return if (currentLanguage == "ar") {
-            convertToArabicDigits(value)
-        } else {
-            value
-        }
-    }
 
     fun formatHourTo12(hour: String): String {
         val h = hour.toIntOrNull() ?: return hour
@@ -66,7 +59,7 @@ fun TimePickerBox(
             var expandedHour by remember { mutableStateOf(false) }
 
             Text(
-                text = formatNumberByLanguage(formatHourTo12(selectedHour ?: "9")),
+                text = formatNumber(formatHourTo12(selectedHour ?: "9") , currentLanguage),
                 color = colors.onBackgroundColor,
                 modifier = Modifier
                     .clickable { expandedHour = true }
@@ -83,7 +76,7 @@ fun TimePickerBox(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                formatNumberByLanguage(hour),
+                                formatNumber(hour , currentLanguage),
                                 color = colors.onBackgroundColor,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold
@@ -109,7 +102,7 @@ fun TimePickerBox(
             var expandedMinute by remember { mutableStateOf(false) }
 
             Text(
-                text = formatNumberByLanguage(selectedMinute ?: "00"),
+                text = formatNumber(selectedMinute ?: "00" , currentLanguage),
                 color = colors.onBackgroundColor,
                 modifier = Modifier
                     .clickable { expandedMinute = true }
@@ -126,7 +119,7 @@ fun TimePickerBox(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                formatNumberByLanguage(minute),
+                                formatNumber(minute , currentLanguage),
                                 color = colors.onBackgroundColor,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold

@@ -67,8 +67,8 @@ fun LunchBottomSheet(
 
 
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val currentLanguage = sharedPrefManager.getLanguage()
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
 
     val localizedPrice = if (currentLanguage == "ar") {
         convertToArabicDigits(price)

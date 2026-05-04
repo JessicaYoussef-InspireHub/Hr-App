@@ -96,8 +96,8 @@ fun HrTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val isDarkMode = sharedPrefManager.isDarkModeEnabled()
+    val sharedPref = remember { SharedPrefManager(context) }
+    val isDarkMode = sharedPref.isDarkModeEnabled()
     val darkModeState = LocalDarkMode.current
 
     val colorScheme = if (darkModeState.value) DarkColorScheme else LightColorScheme

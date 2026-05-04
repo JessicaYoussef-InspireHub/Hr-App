@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -31,7 +32,8 @@ import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.Expense
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.utils.formatNumber
 
 @Composable
 fun ExpensesSelectionCard(
@@ -43,6 +45,9 @@ fun ExpensesSelectionCard(
     val expenseList = remember(expenses) {
         mutableStateListOf<Expense>().apply { addAll(expenses) }
     }
+    val context = LocalContext.current
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
 
     fun formatDate(input: String): String {
         return try {
@@ -117,7 +122,7 @@ fun ExpensesSelectionCard(
                                     val currency = expense.currency_symbol ?: ""
                                     val position = expense.currency_position ?: "after"
 
-                                    val formattedBaseAmount = convertToArabicDigits("%.2f".format(baseAmount))
+                                    val formattedBaseAmount = formatNumber("%.2f".format(baseAmount) , currentLanguage)
 
                                     val formattedBase = when (position) {
                                         "before" -> "$currency $formattedBaseAmount"
@@ -131,7 +136,7 @@ fun ExpensesSelectionCard(
 
                                     if (tax != null && tax != 0.0) {
 
-                                        val formattedTaxAmount = convertToArabicDigits("%.2f".format(tax))
+                                        val formattedTaxAmount = formatNumber("%.2f".format(tax) , currentLanguage)
 
                                         val formattedTax = when (position) {
                                             "before" -> "$currency $formattedTaxAmount"
@@ -155,7 +160,7 @@ fun ExpensesSelectionCard(
                                             color = colors.tertiaryColor
                                         )
                                     ) {
-                                        append(convertToArabicDigits(formatDate(expense.date)))
+                                        append(formatNumber(formatDate(expense.date) , currentLanguage))
                                     }
 
                                     append(" ${stringResource(R.string.and_its_status_is)} ")

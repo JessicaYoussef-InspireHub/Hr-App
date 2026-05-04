@@ -101,7 +101,7 @@ fun EditExpenseScreen(
         val fetchedTaxes = fetchTaxes(context, tokenFromPref)
         val allExpenses = fetchExpenses(context, tokenFromPref)
 
-        expense = allExpenses.find { it.id == expenseId }
+        expense = allExpenses.expenses.find { it.id == expenseId }
 
         categories = fetchedCategories
         taxes = fetchedTaxes

@@ -125,9 +125,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             val context = LocalContext.current
-            val sharedPrefManager = SharedPrefManager(context)
+            val sharedPref = SharedPrefManager(context)
             val darkModeState =
-                rememberSaveable { mutableStateOf(sharedPrefManager.isDarkModeEnabled()) }
+                rememberSaveable { mutableStateOf(sharedPref.isDarkModeEnabled()) }
 
             CompositionLocalProvider(
                 LocalDarkMode provides darkModeState

@@ -8,6 +8,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -23,6 +24,13 @@ data class ExpenseTax(
     val amount: Double,
     val amount_type: String
 )
+
+data class ExpensesResponse(
+    val expenses: List<Expense>,
+    val is17Version: Boolean
+)
+
+
 @Serializable
 data class Expense(
     val id: Int,
@@ -49,7 +57,6 @@ data class Expense(
     val total_with_tax: Double? = null,
     val tax_amount: Double? = null,
     val tax_id: Int? = null,
-    val is_17_version: Boolean = false,
     val draft_total_amount: Double? = null,
     val analytic_distribution: Map<String, Double> = emptyMap()
 )
@@ -59,14 +66,13 @@ suspend fun fetchExpenses(
     context: Context,
     token: String,
     isRetry: Boolean = false
-): List<Expense> {
+): ExpensesResponse {
 
     return try {
 
         val sharedPref = SharedPrefManager(context)
         val baseUrl = sharedPref.getCompanyUrl()
-        val pref = SharedPrefManager(context)
-        val savedToken = pref.getToken()
+        val savedToken = sharedPref.getToken()
         val finalToken = if (savedToken.isNullOrEmpty()) token else savedToken
 
         val body = JSONObject().apply {
@@ -89,6 +95,7 @@ suspend fun fetchExpenses(
         val json = Json.parseToJsonElement(responseText)
         val resultObject = json.jsonObject["result"]?.jsonObject
 
+
         // ✅ CHECK TOKEN ERROR
         val errorCode =
             resultObject?.get("error_code")?.jsonPrimitive?.content
@@ -107,23 +114,33 @@ suspend fun fetchExpenses(
                 )
             } else {
                 println("❌ Unable to renew token")
-                return emptyList()
+                return ExpensesResponse(emptyList(), false)
             }
         }
+
+        val is17Version =
+            resultObject?.get("is_17_version")
+                ?.jsonPrimitive
+                ?.booleanOrNull ?: false
 
         val dataJson = resultObject?.get("data")
 
         if (dataJson == null) {
             println("❌ data is null")
-            return emptyList()
+            return ExpensesResponse(emptyList(), is17Version)
         }
 
-        Json { ignoreUnknownKeys = true }
+        val expenses = Json { ignoreUnknownKeys = true }
             .decodeFromJsonElement<List<Expense>>(dataJson)
+
+        ExpensesResponse(
+            expenses = expenses,
+            is17Version = is17Version
+        )
 
     } catch (e: Exception) {
         println("❌ Error fetching expenses: ${e.message}")
-        emptyList()
+        ExpensesResponse(emptyList(), false)
     }
 }
 

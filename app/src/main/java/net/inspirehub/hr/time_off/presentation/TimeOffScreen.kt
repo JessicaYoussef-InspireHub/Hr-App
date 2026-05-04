@@ -63,8 +63,8 @@ fun TimeOffScreen(
     var selectedDates by remember { mutableStateOf(setOf<LocalDate>()) }
 
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val token = remember { sharedPrefManager.getToken() ?: "No token found" }
+    val sharedPref = remember { SharedPrefManager(context) }
+    val token = remember { sharedPref.getToken() ?: "No token found" }
 
     var remainingLeavesData by remember { mutableStateOf<RemainingLeavesResponse?>(null) }
     var annualLeaveRemaining by remember { mutableStateOf("0") }

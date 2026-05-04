@@ -224,7 +224,8 @@
     <string name="welcome">مرحباً</string>
     <string name="choose_option">اختر خيارًا</string>
     <string name="cannot_edit">لا يمكن التعديل</string>
-    <string name="this_expense_cannot_be_edited_because_it_is_not_in_draft_state">لا يمكن تعديل هذة النفقة لأنه ليس في حالة مسودة</string>
+    <string name="this_expense_cannot_be_edited_because_it_is_status_is">لا يمكن تعديل هذه النتفقه لأن حالتها هي "%1$s"</string>
+    <string name="this_report_cannot_be_edited_because_it_is_status_is">لا يمكن تعديل هذا التقرير لأن حالته هي "%1$s"</string>
     <string name="item_selected">%1$d عنصر محدد</string>
     <string name="unselect_all">إلغاء تحديد الكل</string>
     <string name="expense_deleted_successfully">تم حذف النفقة بنجاح</string>

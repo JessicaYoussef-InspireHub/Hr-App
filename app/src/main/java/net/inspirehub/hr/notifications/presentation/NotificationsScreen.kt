@@ -61,12 +61,12 @@ fun NotificationsScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val token = sharedPrefManager.getToken()
+    val sharedPref = remember { SharedPrefManager(context) }
+    val token = sharedPref.getToken()
 
     LaunchedEffect(token) {
         if (token.isNullOrEmpty()) {
-            navController.navigate("SignInScreen/${sharedPrefManager.getCompanyId()}/${sharedPrefManager.getApiKey()}") {
+            navController.navigate("SignInScreen/${sharedPref.getCompanyId()}/${sharedPref.getApiKey()}") {
                 popUpTo("SplashScreen") { inclusive = true }             }
         }
     }

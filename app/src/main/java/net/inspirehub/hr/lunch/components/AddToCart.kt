@@ -50,8 +50,8 @@ fun AddToCart(
     var quantity by remember { mutableIntStateOf(1) }
     val totalPrice = quantity * price
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val currentLanguage = sharedPrefManager.getLanguage()
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
 
 
     val localizedQuantity =

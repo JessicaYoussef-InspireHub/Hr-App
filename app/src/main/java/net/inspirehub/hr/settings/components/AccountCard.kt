@@ -37,7 +37,7 @@ fun AccountCard(
 ) {
     val colors = appColors()
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
+    val sharedPref = remember { SharedPrefManager(context) }
     var showDialog by remember { mutableStateOf(false) }
 
 
@@ -79,9 +79,9 @@ fun AccountCard(
                         onConfirm = {
                             showDialog = false
                             viewModel.logout()
-                            val companyId = sharedPrefManager.getCompanyId() ?: ""
-                            val apiKey = sharedPrefManager.getApiKey() ?: ""
-                            sharedPrefManager.setProtectionSkipped(false)
+                            val companyId = sharedPref.getCompanyId() ?: ""
+                            val apiKey = sharedPref.getApiKey() ?: ""
+                            sharedPref.setProtectionSkipped(false)
                             navController.navigate("SignInScreen/$companyId/$apiKey")
                         },
                         onDismiss = { showDialog = false }

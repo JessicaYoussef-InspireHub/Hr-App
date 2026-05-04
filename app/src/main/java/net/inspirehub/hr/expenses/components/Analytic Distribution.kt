@@ -51,7 +51,7 @@ import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.AnalyticAccount
 import net.inspirehub.hr.expenses.data.fetchAnalyticAccounts
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 
 
 @SuppressLint("SuspiciousIndentation", "MutableCollectionMutableState")
@@ -67,6 +67,7 @@ fun AnalyticDistribution(
     var analyticAccounts by remember { mutableStateOf(listOf<AnalyticAccount>()) }
     val context = LocalContext.current
     val sharedPref = SharedPrefManager(context)
+    val currentLanguage = sharedPref.getLanguage()
     var isLoading by remember { mutableStateOf(true) }
     var selectedDistributions by remember {
         mutableStateOf(
@@ -203,7 +204,7 @@ fun AnalyticDistribution(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            stringResource(R.string.projects) + " " +  "(${convertToArabicDigits(totalPercentage.toInt().toString())}%)",
+                            stringResource(R.string.projects) + " " +  "(${formatNumber(totalPercentage.toInt().toString() , currentLanguage)}%)",
                             color = colors.onBackgroundColor,
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
@@ -250,7 +251,7 @@ fun AnalyticDistribution(
                                     modifier = Modifier.weight(1f),
                                     dropdownItems = analyticAccounts
                                         .filter { it.company_id != null && allowedIds.contains(it.company_id) }
-                                        .map { convertToArabicDigits(it.name) })
+                                        .map { formatNumber(it.name , currentLanguage) })
 
                                 Row(
                                     modifier = Modifier.weight(1f),
@@ -258,7 +259,7 @@ fun AnalyticDistribution(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     AnalyticDistributionTextField(
-                                        value = convertToArabicDigits(percentage),
+                                        value = formatNumber(percentage , currentLanguage),
                                         onValueChange = {
                                             val newList = lines.toMutableList()
                                             newList[index] = it

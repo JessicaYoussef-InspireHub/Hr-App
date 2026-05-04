@@ -13,6 +13,7 @@ import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
 import net.inspirehub.hr.expenses.presentation.AddExpensesScreen
 import net.inspirehub.hr.expenses.presentation.CreateReportScreen
 import net.inspirehub.hr.expenses.presentation.EditExpenseScreen
+import net.inspirehub.hr.expenses.presentation.EditReportScreen
 import net.inspirehub.hr.expenses.presentation.ExpensesScreen
 import net.inspirehub.hr.expenses.presentation.MyReportScreen
 import net.inspirehub.hr.lunch.presentation.LunchScreen
@@ -38,13 +39,13 @@ fun MyAppNavHost(
     openedFromNotification: Boolean = false
 ) {
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val savedPin = sharedPrefManager.getPin()
-    val fingerprintSuccess = sharedPrefManager.isFingerprintAuthSuccess()
-    val protectionSkipped = sharedPrefManager.isProtectionSkipped()
-    val token = sharedPrefManager.getToken()
-    val apiKey = sharedPrefManager.getApiKey()
-    val companyId = sharedPrefManager.getCompanyId()
+    val sharedPref = remember { SharedPrefManager(context) }
+    val savedPin = sharedPref.getPin()
+    val fingerprintSuccess = sharedPref.isFingerprintAuthSuccess()
+    val protectionSkipped = sharedPref.isProtectionSkipped()
+    val token = sharedPref.getToken()
+    val apiKey = sharedPref.getApiKey()
+    val companyId = sharedPref.getCompanyId()
 
     val nextDestination = when {
         openedFromNotification && token.isNullOrEmpty() ->
@@ -111,6 +112,17 @@ fun MyAppNavHost(
                 navController = navController,
                 type = type
             )
+        }
+
+        composable("EditReportScreen/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+
+            if (id != null) {
+                EditReportScreen(
+                    navController = navController,
+                    reportId = id,
+                )
+            }
         }
 
         composable("ExpensesScreen") { ExpensesScreen(navController , token = token ?: "") }

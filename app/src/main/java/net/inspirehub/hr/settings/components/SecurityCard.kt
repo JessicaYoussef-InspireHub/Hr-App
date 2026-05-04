@@ -37,8 +37,8 @@ fun SecurityCard(
 ) {
     val colors = appColors()
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val protectionMethod = sharedPrefManager.getProtectionMethod()
+    val sharedPref = remember { SharedPrefManager(context) }
+    val protectionMethod = sharedPref.getProtectionMethod()
     var showDialog by remember { mutableStateOf(false) }
 
 

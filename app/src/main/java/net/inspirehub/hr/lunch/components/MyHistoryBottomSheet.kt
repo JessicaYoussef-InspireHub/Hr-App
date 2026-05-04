@@ -34,11 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import net.inspirehub.hr.lunch.data.OrderWithItems
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -56,7 +57,8 @@ fun MyHistoryBottomSheet(
     val db = DatabaseProvider.getDatabase(context)
     val colors = appColors()
     val scope = rememberCoroutineScope()
-
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
     var orders by remember { mutableStateOf(emptyList<OrderWithItems>()) }
 
     LaunchedEffect(Unit) {
@@ -78,7 +80,7 @@ fun MyHistoryBottomSheet(
         return when (orderDay) {
             today -> context.getString(R.string.Today)
             yesterday -> context.getString(R.string.Yesterday)
-            else -> convertToArabicDigits(SimpleDateFormat("d MMM yyyy").format(Date(orderDate)))
+            else -> formatNumber(SimpleDateFormat("d MMM yyyy").format(Date(orderDate)), currentLanguage)
         }
     }
 

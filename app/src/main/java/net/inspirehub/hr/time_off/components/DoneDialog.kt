@@ -82,8 +82,8 @@ fun TimeOffDetailsDialog(
     var showNewVacationDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val sharedPrefManager = remember { SharedPrefManager(context) }
-    val currentLanguage = sharedPrefManager.getLanguage() // "ar" أو "en"
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage() // "ar" أو "en"
     val currentLocale = if (currentLanguage == "ar") Locale("ar") else Locale.ENGLISH
 
     val sameDay = startDate == endDate

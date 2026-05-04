@@ -106,7 +106,7 @@ fun DateInfoDialog(
     val currentLanguage = sharedPrefManager.getLanguage()
 
     var selectedFromHour by remember { mutableStateOf("9:00") }
-    var selectedToHour by remember { mutableStateOf("17:00") }
+    var selectedToHour by remember { mutableStateOf("9:00") }
 
     var errorMessage by remember { mutableStateOf("") }
 

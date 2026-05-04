@@ -179,7 +179,8 @@ fun MyReportScreen(
                                 } else {
                                     selectedReports + report.sheet_id
                                 }
-                            }
+                            },
+                            navController = navController
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                     }
