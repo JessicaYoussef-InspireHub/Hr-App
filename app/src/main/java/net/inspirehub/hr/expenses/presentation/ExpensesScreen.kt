@@ -51,6 +51,7 @@ import net.inspirehub.hr.expenses.components.SwipeToDeleteItem
 import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.fetchExpenses
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
 import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
@@ -58,7 +59,7 @@ import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
 import net.inspirehub.hr.expenses.components.UploadBottomSheet
 import net.inspirehub.hr.expenses.data.deleteExpense
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
-import net.inspirehub.hr.utils.convertToArabicDigits
+import net.inspirehub.hr.utils.formatNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,6 +87,8 @@ fun ExpensesScreen(
     var reportIds by remember { mutableStateOf(setOf<Int>()) }
     var showPaymentSheet by remember { mutableStateOf(false) }
     var is17Version by remember { mutableStateOf(true) }
+    val sharedPref = SharedPrefManager(context)
+    val currentLanguage = sharedPref.getLanguage()
 
     val imageFile = remember {
         java.io.File.createTempFile(
@@ -172,17 +175,7 @@ fun ExpensesScreen(
             if (!isSelectionMode) {
                 MyAppBar(
                     label = stringResource(R.string.expenses),
-                    onBackClick = {
-                        val previousRoute =
-                            navController.previousBackStackEntry?.destination?.route
-
-                        if (previousRoute == "ExpensesScreen") {
-                            navController.popBackStack()
-                            navController.popBackStack()
-                        } else {
-                            navController.popBackStack()
-                        }
-                    },
+                    onBackClick = { navController.popBackStack() },
                     actions = {
                         Icon(
                             imageVector = Icons.Default.Checklist,
@@ -201,7 +194,7 @@ fun ExpensesScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = convertToArabicDigits(stringResource(R.string.item_selected, selectedItems.size)),
+                            text = formatNumber(stringResource(R.string.item_selected, selectedItems.size) , currentLanguage),
                             color = colors.onBackgroundColor
                         )
                     },

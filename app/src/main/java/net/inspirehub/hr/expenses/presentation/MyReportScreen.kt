@@ -2,6 +2,7 @@ package net.inspirehub.hr.expenses.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -37,9 +38,19 @@ import net.inspirehub.hr.expenses.data.ExpenseReport
 import net.inspirehub.hr.expenses.data.fetchReports
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import net.inspirehub.hr.utils.convertToArabicDigits
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import net.inspirehub.hr.expenses.components.CreateAnotherReport
+import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
+import net.inspirehub.hr.expenses.components.ExpensesSnackBar
+import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
+import net.inspirehub.hr.expenses.components.SwipeToDeleteReportItem
+import net.inspirehub.hr.expenses.data.deleteReport
+import net.inspirehub.hr.utils.formatNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +65,19 @@ fun MyReportScreen(
     val token = sharedPref.getToken().orEmpty()
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedReports by remember { mutableStateOf(setOf<Int>()) }
+    val scope = rememberCoroutineScope()
+    val currentLanguage = sharedPref.getLanguage()
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    val snackBarHostState = remember { SnackbarHostState() }
+    var deleteErrorMessage by remember { mutableStateOf<String?>(null) }
+    val oneDeletedMessage = stringResource(R.string.report_deleted_successfully)
 
+    val successMessage = { count: Int ->
+        context.getString(R.string.deleted_successfully, count)
+    }
+    val failedMessage = { count: Int ->
+        context.getString(R.string.could_not_be_deleted, count)
+    }
 
     LaunchedEffect(Unit) {
         isLoading = true
@@ -64,31 +87,41 @@ fun MyReportScreen(
 
     Scaffold(
         containerColor = colors.onSecondaryColor,
-        topBar = @Composable {
-            if (!isSelectionMode) {
-            MyAppBar(
-                label = stringResource(R.string.my_reports),
-                onBackClick = {
-                    navController.popBackStack()
-                },
-                actions = {
-                    Icon(
-                        imageVector = Icons.Default.Checklist,
-                        contentDescription = "Select",
-                        tint = colors.onSecondaryColor,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(horizontal = 8.dp)
-                            .clickable { isSelectionMode = !isSelectionMode }
-                    )
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackBarHostState,
+                snackbar = { data ->
+                    ExpensesSnackBar(snackBarData = data)
                 }
             )
-        } else {
+        },
+        topBar = @Composable {
+            if (!isSelectionMode) {
+                MyAppBar(
+                    label = stringResource(R.string.my_reports),
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    actions = {
+                        Icon(
+                            imageVector = Icons.Default.Checklist,
+                            contentDescription = "Select",
+                            tint = colors.onSecondaryColor,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .padding(horizontal = 8.dp)
+                                .clickable { isSelectionMode = !isSelectionMode }
+                        )
+                    }
+                )
+            } else {
                 TopAppBar(
                     title = {
                         Text(
-                            text = convertToArabicDigits(
-                                stringResource(R.string.item_selected, selectedReports.size)),
+                            text = formatNumber(
+                                stringResource(R.string.item_selected, selectedReports.size),
+                                currentLanguage
+                            ),
                             color = colors.onBackgroundColor
                         )
                     },
@@ -117,7 +150,10 @@ fun MyReportScreen(
                                 colors.error,
                             modifier = Modifier
                                 .padding(horizontal = 8.dp)
-                                .clickable(enabled = selectedReports.isNotEmpty()) {}
+                                .clickable(enabled = selectedReports.isNotEmpty()) {
+
+                                    showDeleteConfirmDialog = true
+                                }
                         )
 
                         Text(
@@ -137,7 +173,16 @@ fun MyReportScreen(
                 )
             }
         },
-        bottomBar = { BottomBar(navController = navController) },
+        bottomBar = {
+            Column {
+                CreateAnotherReport(
+                    isLoading = isLoading,
+                    onConfirm = {navController.navigate("CreateReportScreen")},
+                )
+                BottomBar(navController = navController)
+
+            }
+        },
     ) { innerPadding ->
         when {
             isLoading -> {
@@ -169,24 +214,91 @@ fun MyReportScreen(
                 ) {
                     items(reports) { report ->
 
-                        ReportCard(
-                            report = report,
-                            isSelectionMode = isSelectionMode,
-                            isSelected = selectedReports.contains(report.sheet_id),
-                            onSelect = {
-                                selectedReports = if (selectedReports.contains(report.sheet_id)) {
-                                    selectedReports - report.sheet_id
-                                } else {
-                                    selectedReports + report.sheet_id
+                        SwipeToDeleteReportItem(
+                            onDelete = {
+                                scope.launch {
+
+                                    val result = deleteReport(context, token, listOf(report.sheet_id))
+
+                                    if (result.success) {
+                                        reports = reports.filter { it.sheet_id != report.sheet_id }
+                                        snackBarHostState.showSnackbar(
+                                            message = oneDeletedMessage
+                                        )
+                                    } else {
+                                        deleteErrorMessage = result.message
+                                    }
                                 }
-                            },
-                            navController = navController
-                        )
+                            }
+                        ) {
+                            ReportCard(
+                                report = report,
+                                isSelectionMode = isSelectionMode,
+                                isSelected = selectedReports.contains(report.sheet_id),
+                                onSelect = {
+                                    selectedReports = if (selectedReports.contains(report.sheet_id)) {
+                                        selectedReports - report.sheet_id
+                                    } else {
+                                        selectedReports + report.sheet_id
+                                    }
+                                },
+                                navController = navController
+                            )
+                        }
                         Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
             }
         }
+
+        if (showDeleteConfirmDialog) {
+            SelectedDeleteConfirmationDialog(
+                count = selectedReports.size,
+                onDismiss = {
+                    showDeleteConfirmDialog = false
+                },
+                onConfirm = {
+                    showDeleteConfirmDialog = false
+
+                    scope.launch {
+                        val idsToDelete = selectedReports.toList()
+
+                        val result = deleteReport(context, token, idsToDelete)
+
+                        val successIds = result.deleted?.map { it.id } ?: emptyList()
+                        val failedCount = result.failed?.size ?: 0
+
+                        reports = reports.filter { it.sheet_id !in successIds }
+
+                        val successCount = successIds.size
+
+                        selectedReports = emptySet()
+                        isSelectionMode = false
+
+                        val message = when {
+                            successCount > 0 && failedCount > 0 ->
+                                "${successMessage(successCount)} - ${failedMessage(failedCount)}"
+
+                            successCount > 0 ->
+                                successMessage(successCount)
+
+                            else ->
+                                failedMessage(failedCount)
+                        }
+
+                        snackBarHostState.showSnackbar(message)
+                    }
+                }
+            )
+        }
+
+        deleteErrorMessage?.let { message ->
+            DeleteExpenseErrorDialog(
+                reason = message,
+                onDismiss = { deleteErrorMessage = null }
+            )
+        }
+
         if (isLoading) {
             Box(
                 modifier = Modifier

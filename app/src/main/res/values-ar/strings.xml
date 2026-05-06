@@ -219,6 +219,7 @@
     <string name="you_added_this_expense_on">لقد أضفت هذة النفقة في</string>
     <string name="and_its_status_is">وحالته هي</string>
     <string name="are_you_sure_you_want_to_delete_this_expense">هل أنت متأكد أنك تريد حذف هذة النفقة؟</string>
+    <string name="are_you_sure_you_want_to_delete_this_report">هل أنت متأكد أنك تريد حذف هذا التقرير؟</string>
     <string name="cannot_delete">لا يمكن الحذف</string>
     <string name="update">تحديث</string>
     <string name="welcome">مرحباً</string>
@@ -249,5 +250,7 @@
     <string name="status">الحالة:</string>
     <string name="wait_one_minute">عليك الانتظار دقيقة واحدة قبل إعادة العملية!</string>
     <string name="offline_saved_message">أنت غير متصل بالإنترنت! تم حفظ العملية، وسيتم إرسالها عند توفر الإنترنت</string>
+    <string name="create_another_report">إنشاء تقرير آخر</string>
+    <string name="report_deleted_successfully">تم حذف التقرير بنجاح</string>
 
 </resources>
