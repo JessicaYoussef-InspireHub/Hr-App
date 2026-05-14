@@ -158,6 +158,7 @@
     <string name="expenses_report">النفقات:</string>
     <string name="add_expenses">إضافة نفقات</string>
     <string name="edit_expense">تعديل النفقة</string>
+    <string name="edit_report">تعديل التقرير</string>
     <string name="total_price">السعر الإجمالي:</string>
     <string name="total">المجموع:</string>
     <string name="your_order_has_been_placed_successfully">تم تقديم طلبك بنجاح!</string>
@@ -201,7 +202,8 @@
     <string name="no_analytic_distribution_available">لا توجد بيانات توزيع تحليلي متاحة</string>
     <string name="no_categories_available">لا توجد فئات متاحة</string>
     <string name="no_taxes_available">لا توجد ضرائب متاحة</string>
-    <string name="no_currencies_available">لا توجد عملات متاحة</string>    <string name="my_reports">تقاريري</string>
+    <string name="no_currencies_available">لا توجد عملات متاحة</string>
+    <string name="my_reports">تقاريري</string>
     <string name="add_a_line">أضف سطرًا</string>
     <string name="choose_the_category">اختر الفئة</string>
     <string name="choose_the_currency">اختر العملة</string>
@@ -252,5 +254,9 @@
     <string name="offline_saved_message">أنت غير متصل بالإنترنت! تم حفظ العملية، وسيتم إرسالها عند توفر الإنترنت</string>
     <string name="create_another_report">إنشاء تقرير آخر</string>
     <string name="report_deleted_successfully">تم حذف التقرير بنجاح</string>
+    <string name="your_expenses">نفقاتك</string>
+    <string name="report_updated_successfully">"تم تحديث التقرير بنجاح"</string>
+    <string name="failed_to_update_report">فشل تحديث التقرير</string>
+    <string name="add_more_expenses">أضف المزيد من النفقات</string>
 
 </resources>

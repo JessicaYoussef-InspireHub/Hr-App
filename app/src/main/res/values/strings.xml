@@ -159,6 +159,7 @@ Protection Method</string>
     <string name="expenses_report">Expenses:</string>
     <string name="add_expenses">Add Expenses</string>
     <string name="edit_expense">Edit Expense</string>
+    <string name="edit_report">Edit Report</string>
     <string name="total_price">Total Price:</string>
     <string name="total">Total:</string>
     <string name="your_order_has_been_placed_successfully">Your order has been placed successfully!</string>
@@ -203,7 +204,7 @@ You have</string>
     <string name="no_categories_available">No categories available</string>
     <string name="no_taxes_available">No taxes available</string>
     <string name="no_currencies_available">No currencies available</string>
-    <string name="my_reports">My Report</string>
+    <string name="my_reports">My Reports</string>
     <string name="add_a_line">Add a Line</string>
     <string name="choose_the_category">choose the category</string>
     <string name="choose_the_currency">choose the currency</string>
@@ -254,5 +255,9 @@ You have</string>
     <string name="offline_saved_message">You are offline! The operation has been saved and will be sent when the internet is available</string>
     <string name="create_another_report">Create another report</string>
     <string name="report_deleted_successfully">Report deleted successfully</string>
+    <string name="your_expenses">Your expenses</string>
+    <string name="report_updated_successfully">"Report updated successfully"</string>
+    <string name="failed_to_update_report">Failed to update report</string>
+    <string name="add_more_expenses">Add more expenses</string>
 
 </resources>

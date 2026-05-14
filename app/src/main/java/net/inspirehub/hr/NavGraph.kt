@@ -114,20 +114,48 @@ fun MyAppNavHost(
             )
         }
 
-        composable("EditReportScreen/{id}") { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+        composable(
+            route = "EditReportScreen/{reportId}?expenseId={expenseId}",
+            arguments = listOf(
+                navArgument("reportId") { type = NavType.IntType },
+                navArgument("expenseId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val reportId = backStackEntry.arguments?.getInt("reportId")!!
+            val expenseId = backStackEntry.arguments?.getInt("expenseId") ?: -1
 
-            if (id != null) {
-                EditReportScreen(
-                    navController = navController,
-                    reportId = id,
-                )
-            }
+            EditReportScreen(
+                navController = navController,
+                reportId = reportId,
+                newExpenseId = expenseId
+            )
         }
 
         composable("ExpensesScreen") { ExpensesScreen(navController , token = token ?: "") }
 
-        composable("AddExpensesScreen") { AddExpensesScreen(navController) }
+        composable(
+            route = "AddExpensesScreen?fromEditReport={fromEditReport}&reportId={reportId}&paymentMode={paymentMode}",
+            arguments = listOf(
+                navArgument("fromEditReport") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                },
+                navArgument("reportId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                },
+                navArgument("paymentMode") {
+                    type = NavType.StringType
+                    defaultValue = "employee"
+                }
+            )
+        ) {
+            AddExpensesScreen(navController)
+        }
+
 
         composable(
             "EditExpenseScreen/{expenseId}",

@@ -22,9 +22,10 @@ fun SaveCancelButton(
     label: String ,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
-    isLoading: Boolean
+    isLoading: Boolean = false
 ) {
     val colors = appColors()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -41,9 +42,11 @@ fun SaveCancelButton(
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(label,
+            Text(
+                label,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold)
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
 

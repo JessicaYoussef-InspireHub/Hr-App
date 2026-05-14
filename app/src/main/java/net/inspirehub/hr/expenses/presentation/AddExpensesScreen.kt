@@ -66,7 +66,8 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AddExpensesScreen(
-    navController: NavController
+    navController: NavController,
+    reportId: Int? = null
 ) {
     val colors = appColors()
     val context = LocalContext.current
@@ -84,8 +85,6 @@ fun AddExpensesScreen(
     var selectedCategory by remember { mutableStateOf<ExpenseCategory?>(null) }
     var selectedTaxes by remember { mutableStateOf<List<Tax>>(emptyList()) }
     var analyticMap by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
-    var paymentMode by remember { mutableStateOf("employee") }
-    val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val successMessage = stringResource(R.string.expense_created_successfully)
     var isLoading by remember { mutableStateOf(false) }
@@ -93,6 +92,24 @@ fun AddExpensesScreen(
     var descriptionError by remember { mutableStateOf(false) }
     var amountError by remember { mutableStateOf(false) }
     var currencyError by remember { mutableStateOf(false) }
+
+    val paymentModeFromReport =
+        navController.currentBackStackEntry
+            ?.arguments
+            ?.getString("paymentMode")
+            ?: "employee"
+
+    var paymentMode by remember { mutableStateOf(paymentModeFromReport) }
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
+
+    val fromEditReport =
+        navController.currentBackStackEntry
+            ?.arguments
+            ?.getBoolean("fromEditReport") ?: false
+
+    val isPaymentModeLocked = fromEditReport
 
     LaunchedEffect(Unit) {
         val token = sharedPref.getToken()
@@ -131,8 +148,14 @@ fun AddExpensesScreen(
                         stringResource(R.string.save),
                         isLoading = isLoading,
                         onCancel = {
-                            navController.navigate("ExpensesScreen") {
-                                popUpTo("AddExpensesScreen") { inclusive = true }
+                            if (fromEditReport) {
+                                reportId?.let {
+                                    navController.navigate("EditReportScreen/$it")
+                                }
+                            } else {
+                                navController.navigate("ExpensesScreen") {
+                                    popUpTo("AddExpensesScreen") { inclusive = true }
+                                }
                             }
                         },
                         onConfirm = {
@@ -164,9 +187,16 @@ fun AddExpensesScreen(
                                 if (response.status == "success") {
                                     scope.launch {
                                         snackBarHostState.showSnackbar(successMessage)
+                                        val newExpenseId = response.expense_id
+
+                                        if (fromEditReport) {
+                                            reportId?.let {
+                                                navController.navigate("EditReportScreen/$it?expenseId=$newExpenseId")
+                                            }
+                                        } else {
                                         navController.navigate("ExpensesScreen") {
                                             popUpTo("AddExpensesScreen") { inclusive = true }
-                                        }
+                                        }}
                                     }
                                     println("Expense created with id: ${response.expense_id}")
                                 } else {
@@ -321,7 +351,11 @@ fun AddExpensesScreen(
                     Spacer(modifier = Modifier.width(10.dp))
                     PaidBy(
                         initialPaidBy = paymentMode,
-                        onPaymentModeChange = { paymentMode = it }
+                        onPaymentModeChange = {
+                            if (!isPaymentModeLocked) {
+                                paymentMode = it
+                            }
+                        }
                     )
                 }
                 Spacer(modifier = Modifier.height(25.dp))

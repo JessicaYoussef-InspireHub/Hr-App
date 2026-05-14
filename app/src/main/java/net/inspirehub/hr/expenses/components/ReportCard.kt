@@ -54,8 +54,8 @@ fun ReportCard(
 ) {
 
     val colors = appColors()
-    val isState = report.state != "draft" && report.state != "refused"
-    val canEdit = report.state == "draft" || report.state == "refused"
+    val isState = report.state != "draft" && report.state != "cancel"
+    val canEdit = report.state == "draft" || report.state == "cancel"
     var isExpanded by remember { mutableStateOf(true) }
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }

@@ -2,9 +2,11 @@ package net.inspirehub.hr.expenses.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -69,12 +71,18 @@ fun ExpensesSelectionCard(
         }
 
         expenseList.isEmpty() -> {
-            Text(
-                stringResource(R.string.no_expenses_yet),
-                color = colors.onBackgroundColor,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            Box (
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ){
+                Text(
+                    stringResource(R.string.no_expenses_yet),
+                    color = colors.onBackgroundColor,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
 
         else -> {

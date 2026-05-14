@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -65,7 +67,9 @@ fun ExpenseItemCard(
     onSelect: () -> Unit,
     onSendSuccess: () -> Unit,
     isDimmed: Boolean,
-    is17Version: Boolean
+    is17Version: Boolean,
+    isClickable: Boolean = true,
+    isAddMode: Boolean = false
 ) {
 
 
@@ -95,7 +99,7 @@ fun ExpenseItemCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
+            .clickable(enabled = isClickable) {
                 if (showSend) {
                     navController.navigate("EditExpenseScreen/${expense.id}")
                 } else {
@@ -103,7 +107,9 @@ fun ExpenseItemCard(
                 }
             },
         colors = CardDefaults.cardColors(
-            containerColor = colors.surfaceContainerHigh
+            containerColor =
+                if (isClickable) colors.surfaceContainerHigh
+                else colors.surfaceColor
         ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -123,7 +129,8 @@ fun ExpenseItemCard(
                         colors.onBackgroundColor.copy(alpha = 0.7f)
                     else
                         colors.onBackgroundColor,
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
+                    modifier = Modifier.weight(1f)
                 )
 
                 if (isSelectionMode) {
@@ -163,18 +170,41 @@ fun ExpenseItemCard(
                         }
                     }
                 }
+
+                if (isAddMode) {
+                    Button(
+                        onClick = { onSelect() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.tertiaryColor
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.add),
+                            color = colors.onSecondaryColor,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = buildAnnotatedString {
-                    append(formatNumber(expense.totalAmount , currentLanguage))
+                    append(formatNumber(expense.totalAmount, currentLanguage))
                     expense.taxesAmount?.toDouble()?.takeIf { it != 0.0 }?.let { tax ->
                         val formattedTax = when (expense.currencyPosition) {
                             "before" -> "${expense.currencySymbol ?: ""} $tax"
                             "after" -> "$tax ${expense.currencySymbol ?: ""}"
                             else -> "$tax ${expense.currencySymbol ?: ""}"
                         }
-                        append(" ${stringResource(R.string.and_taxes)} ${formatNumber(formattedTax , currentLanguage)}")
+                        append(
+                            " ${stringResource(R.string.and_taxes)} ${
+                                formatNumber(
+                                    formattedTax,
+                                    currentLanguage
+                                )
+                            }"
+                        )
                     }
                 },
                 color = colors.onBackgroundColor.copy(alpha = 0.7f),
@@ -201,7 +231,7 @@ fun ExpenseItemCard(
                                         colors.tertiaryColor
                             )
                         ) {
-                            append(formatNumber(formatDate(expense.date) , currentLanguage))
+                            append(formatNumber(formatDate(expense.date), currentLanguage))
                         }
 
                         append(" ${stringResource(R.string.and_its_status_is)} ")
@@ -224,36 +254,37 @@ fun ExpenseItemCard(
                 )
 
                 if (!is17Version) {
-                Icon(
-                    imageVector = if (showSend)
-                        Icons.AutoMirrored.Filled.Send
-                    else
-                        Icons.Default.Check,
-                    contentDescription = "Send",
-                    modifier = Modifier
-                        .size(22.dp)
-                        .rotate(if (showSend) -30f else 0f)
-                        .clickable(enabled = showSend) {
-                            coroutineScope.launch {
-                                val sharedPref = SharedPrefManager(context)
-                                val token = sharedPref.getToken()
+                    Icon(
+                        imageVector = if (showSend)
+                            Icons.AutoMirrored.Filled.Send
+                        else
+                            Icons.Default.Check,
+                        contentDescription = "Send",
+                        modifier = Modifier
+                            .size(22.dp)
+                            .rotate(if (showSend) -30f else 0f)
+                            .clickable(enabled = showSend) {
+                                coroutineScope.launch {
+                                    val sharedPref = SharedPrefManager(context)
+                                    val token = sharedPref.getToken()
 
-                                val result = submitExpense(
-                                    context = context,
-                                    token = token ?: "",
-                                    expenseId = expense.id
-                                )
+                                    val result = submitExpense(
+                                        context = context,
+                                        token = token ?: "",
+                                        expenseId = expense.id
+                                    )
 
-                                if (result.status == "success") {
-                                    onSendSuccess()
-                                } else {
-                                    errorMessage = result.message
+                                    if (result.status == "success") {
+                                        onSendSuccess()
+                                    } else {
+                                        errorMessage = result.message
+                                    }
+                                    println("Submit result: ${result.message}")
                                 }
-                                println("Submit result: ${result.message}")
-                            }
-                        },
-                    tint = colors.tertiaryColor
-                )}
+                            },
+                        tint = colors.tertiaryColor
+                    )
+                }
             }
         }
     }
