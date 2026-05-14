@@ -22,7 +22,7 @@ fun SaveCancelButton(
     label: String ,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean
 ) {
     val colors = appColors()
 

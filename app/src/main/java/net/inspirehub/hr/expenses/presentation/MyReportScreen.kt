@@ -47,9 +47,12 @@ import kotlinx.coroutines.launch
 import net.inspirehub.hr.expenses.components.CreateAnotherReport
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
+import net.inspirehub.hr.expenses.components.NoReportDialog
+import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
 import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
 import net.inspirehub.hr.expenses.components.SwipeToDeleteReportItem
 import net.inspirehub.hr.expenses.data.deleteReport
+import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 import net.inspirehub.hr.utils.formatNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,6 +74,9 @@ fun MyReportScreen(
     val snackBarHostState = remember { SnackbarHostState() }
     var deleteErrorMessage by remember { mutableStateOf<String?>(null) }
     val oneDeletedMessage = stringResource(R.string.report_deleted_successfully)
+    var showPaymentSheet by remember { mutableStateOf(false) }
+    var showNoReportDialog by remember { mutableStateOf(false) }
+    var isLoadingReports by remember { mutableStateOf(false) }
 
     val successMessage = { count: Int ->
         context.getString(R.string.deleted_successfully, count)
@@ -100,7 +106,7 @@ fun MyReportScreen(
                 MyAppBar(
                     label = stringResource(R.string.my_reports),
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.navigate("ExpensesScreen")
                     },
                     actions = {
                         Icon(
@@ -177,7 +183,35 @@ fun MyReportScreen(
             Column {
                 CreateAnotherReport(
                     isLoading = isLoading,
-                    onConfirm = {navController.navigate("CreateReportScreen")},
+                    onConfirm = {
+                        scope.launch {
+
+                            isLoadingReports = true
+
+                            val reportExpenses = fetchExpensesForReport(context, token)
+
+                            isLoadingReports = false
+
+                            if (reportExpenses.isEmpty()) {
+                                showNoReportDialog = true
+                                return@launch
+                            }
+
+                            val paymentTypes = reportExpenses.map { it.payment_mode }.toSet()
+
+                            val type = when {
+                                paymentTypes.size == 1 && paymentTypes.contains("company_account") -> "company"
+                                paymentTypes.size == 1 && paymentTypes.contains("own_account") -> "employee"
+                                else -> null
+                            }
+
+                            if (type != null) {
+                                navController.navigate("CreateReportScreen?type=$type")
+                            } else {
+                                showPaymentSheet = true
+                            }
+                        }
+                    },
                 )
                 BottomBar(navController = navController)
 
@@ -299,7 +333,28 @@ fun MyReportScreen(
             )
         }
 
-        if (isLoading) {
+        if (showNoReportDialog) {
+            NoReportDialog(
+                isLoading = false,
+                onCancel = { showNoReportDialog = false }
+            )
+        }
+
+        if (showPaymentSheet) {
+            PaymentTypeBottomSheet(
+                onDismiss = { showPaymentSheet = false },
+                onSelectCompany = {
+                    showPaymentSheet = false
+                    navController.navigate("CreateReportScreen?type=company")
+                },
+                onSelectEmployee = {
+                    showPaymentSheet = false
+                    navController.navigate("CreateReportScreen?type=employee")
+                }
+            )
+        }
+
+        if (isLoading || isLoadingReports) {
             Box(
                 modifier = Modifier
                     .clickable(enabled = false) {}

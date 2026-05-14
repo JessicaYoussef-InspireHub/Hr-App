@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -56,6 +57,8 @@ import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.expenses.components.AddExpensesButton
+import net.inspirehub.hr.expenses.components.EditReportBottomSheet
 import net.inspirehub.hr.expenses.components.EmptyExpensesDialog
 import net.inspirehub.hr.expenses.data.submitReport
 
@@ -72,13 +75,17 @@ fun CreateReportScreen(
     var isLoading by remember { mutableStateOf(false) }
     var summary by remember { mutableStateOf("") }
     var summaryError by remember { mutableStateOf(false) }
-    var expenses by remember { mutableStateOf<List<Expense>>(emptyList()) }
     var isExpensesLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var isExpanded by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     var showEmptyExpensesDialog by remember { mutableStateOf(false) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var availableExpenses by remember { mutableStateOf<List<Expense>>(emptyList()) }
+    var isBottomSheetLoading by remember { mutableStateOf(false) }
+    var removedExpenses by remember { mutableStateOf<List<Expense>>(emptyList()) }
+    var selectedExpenses by remember { mutableStateOf<List<Expense>>(emptyList()) }
 
     LaunchedEffect(refreshTrigger) {
 
@@ -86,7 +93,7 @@ fun CreateReportScreen(
         val token = SharedPrefManager(context).getToken() ?: ""
         val allExpenses = fetchExpensesForReport(context, token)
 
-        expenses = allExpenses.filter {
+        selectedExpenses = allExpenses.filter {
             when (type) {
                 "company" -> it.payment_mode == "company_account"
                 "employee" -> it.payment_mode == "own_account"
@@ -137,7 +144,7 @@ fun CreateReportScreen(
                             summaryError = summary.isBlank()
                             if (summaryError) return@SaveCancelButton
 
-                            if (expenses.isEmpty()) {
+                            if (selectedExpenses.isEmpty()) {
                                 showEmptyExpensesDialog = true
                                 return@SaveCancelButton
                             }
@@ -147,7 +154,7 @@ fun CreateReportScreen(
 
                                 val token = SharedPrefManager(context).getToken() ?: ""
 
-                                val expenseIds = expenses.map { it.id }
+                                val expenseIds = selectedExpenses.map { it.id }
 
 
                                 val success = submitReport(
@@ -182,76 +189,116 @@ fun CreateReportScreen(
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
+                    .padding(horizontal = 5.dp)
+                    .fillMaxSize()
             ) {
-
-                TextFirstExpenses(stringResource(R.string.expense_report_summary))
-                ExpenseReportSummary(
-                    summary = summary,
-                    onSummaryChange = {
-                        summary = it
-                        summaryError = false
-                    }
-                )
-                if (summaryError) {
-                    Text(
-                        text = stringResource(R.string.please_enter_expense_report_summary),
-                        color = colors.error,
-                        fontSize = 15.sp,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(25.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
                 ) {
-                    TextFirstExpenses(stringResource(R.string.paid_by))
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = if (type == "company")
-                            stringResource(R.string.company)
-                        else
-                            stringResource(R.string.employee),
-                        color = colors.onBackgroundColor.copy(alpha = 0.6f),
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
 
-                Spacer(modifier = Modifier.height(25.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-
-                ) {
-                    TextFirstExpenses(stringResource(R.string.choose_expenses))
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        tint = colors.onBackgroundColor,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .rotate(if (isExpanded) 0f else 180f)
-                            .clickable {
-                                isExpanded = !isExpanded
-                            }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                AnimatedVisibility(visible = isExpanded) {
-                    ExpensesSelectionCard(
-                        expenses = expenses,
-                        isLoading = isExpensesLoading,
-                        onRemove = { removedExpense ->
-                            expenses = expenses.filter { it.id != removedExpense.id }
+                    TextFirstExpenses(stringResource(R.string.expense_report_summary))
+                    ExpenseReportSummary(
+                        summary = summary,
+                        onSummaryChange = {
+                            summary = it
+                            summaryError = false
                         }
                     )
+                    if (summaryError) {
+                        Text(
+                            text = stringResource(R.string.please_enter_expense_report_summary),
+                            color = colors.error,
+                            fontSize = 15.sp,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(25.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextFirstExpenses(stringResource(R.string.paid_by))
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = if (type == "company")
+                                stringResource(R.string.company)
+                            else
+                                stringResource(R.string.employee),
+                            color = colors.onBackgroundColor.copy(alpha = 0.6f),
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(25.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+
+                    ) {
+                        TextFirstExpenses(stringResource(R.string.choose_expenses))
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = null,
+                            tint = colors.onBackgroundColor,
+                            modifier = Modifier
+                                .size(28.dp)
+                                .rotate(if (isExpanded) 0f else 180f)
+                                .clickable {
+                                    isExpanded = !isExpanded
+                                }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    AnimatedVisibility(visible = isExpanded) {
+                        ExpensesSelectionCard(
+                            expenses = selectedExpenses,
+                            isLoading = isExpensesLoading,
+                            onRemove = { removedExpense ->
+
+                                selectedExpenses =
+                                    selectedExpenses.filter { it.id != removedExpense.id }
+
+                                removedExpenses = removedExpenses + removedExpense
+
+                                availableExpenses = availableExpenses + removedExpense
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
+
+                AddExpensesButton(
+                    onClick = {
+                        scope.launch {
+                            isBottomSheetLoading = true
+
+                            val token = SharedPrefManager(context).getToken() ?: ""
+                            val allExpenses = fetchExpensesForReport(context, token)
+
+                            val requiredPaymentMode =
+                                if (selectedExpenses.isNotEmpty())
+                                    selectedExpenses.first().payment_mode
+                                else
+                                    null
+
+                            availableExpenses = allExpenses.filter { expense ->
+                                selectedExpenses.none { it.id == expense.id } &&
+                                        (requiredPaymentMode == null || expense.payment_mode == requiredPaymentMode)
+                            }
+
+                            isBottomSheetLoading = false
+                            showBottomSheet = true
+                        }
+                    },
+                    label = stringResource(R.string.add_more_expenses)
+                )
             }
             if (isLoading) {
                 Box(
@@ -272,6 +319,39 @@ fun CreateReportScreen(
                     showEmptyExpensesDialog = false
                     refreshTrigger++
                 }
+            )
+        }
+
+        if (showBottomSheet) {
+            EditReportBottomSheet(
+                showBottomSheet = true,
+                isBottomSheetLoading = isBottomSheetLoading,
+                removedExpenses = removedExpenses,
+                availableExpenses = availableExpenses,
+
+                onDismiss = { showBottomSheet = false },
+
+                onAddExpense = { expense ->
+
+                    selectedExpenses = selectedExpenses + expense
+
+                    availableExpenses = availableExpenses.filter { it.id != expense.id }
+
+                    removedExpenses = removedExpenses.filter { it.id != expense.id }
+                },
+
+                onRestoreExpense = { expense ->
+
+                    selectedExpenses = selectedExpenses + expense
+
+                    removedExpenses = removedExpenses.filter { it.id != expense.id }
+
+                    availableExpenses = availableExpenses.filter { it.id != expense.id }
+                },
+
+                navController = navController,
+                reportId = -1,
+                paymentMode = type
             )
         }
     }

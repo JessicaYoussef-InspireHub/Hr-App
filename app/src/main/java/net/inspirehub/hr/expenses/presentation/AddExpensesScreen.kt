@@ -184,6 +184,7 @@ fun AddExpensesScreen(
                                     currencyId = selectedCurrency!!.id
                                 )
 
+
                                 if (response.status == "success") {
                                     scope.launch {
                                         snackBarHostState.showSnackbar(successMessage)
@@ -192,6 +193,9 @@ fun AddExpensesScreen(
                                         if (fromEditReport) {
                                             reportId?.let {
                                                 navController.navigate("EditReportScreen/$it?expenseId=$newExpenseId")
+                                                {
+                                                    popUpTo("AddExpensesScreen") { inclusive = true }
+                                                }
                                             }
                                         } else {
                                         navController.navigate("ExpensesScreen") {

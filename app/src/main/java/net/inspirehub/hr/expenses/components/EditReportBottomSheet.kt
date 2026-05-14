@@ -201,6 +201,7 @@ fun EditReportBottomSheet(
             SaveCancelButton(
                 stringResource(R.string.new_expense),
                 onCancel = { onDismiss() },
+                isLoading = false,
                 onConfirm = {
                     onDismiss()
                     navController.navigate("AddExpensesScreen?fromEditReport=true&reportId=$reportId&paymentMode=$requiredPaymentMode")

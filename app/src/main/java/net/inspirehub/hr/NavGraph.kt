@@ -152,8 +152,12 @@ fun MyAppNavHost(
                     defaultValue = "employee"
                 }
             )
-        ) {
-            AddExpensesScreen(navController)
+        ) { backStackEntry ->
+
+            AddExpensesScreen(
+                navController = navController,
+                reportId = backStackEntry.arguments?.getInt("reportId")
+            )
         }
 
 
