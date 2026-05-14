@@ -137,11 +137,11 @@ fun MyAppNavHost(
         composable("ExpensesScreen") { ExpensesScreen(navController , token = token ?: "") }
 
         composable(
-            route = "AddExpensesScreen?fromEditReport={fromEditReport}&reportId={reportId}&paymentMode={paymentMode}",
+            route = "AddExpensesScreen?source={source}&reportId={reportId}&paymentMode={paymentMode}",
             arguments = listOf(
-                navArgument("fromEditReport") {
-                    type = NavType.BoolType
-                    defaultValue = false
+                navArgument("source") {
+                    type = NavType.StringType
+                    defaultValue = "expenses"
                 },
                 navArgument("reportId") {
                     type = NavType.IntType
@@ -154,9 +154,13 @@ fun MyAppNavHost(
             )
         ) { backStackEntry ->
 
+            val source = backStackEntry.arguments?.getString("source") ?: "expenses"
+            val reportId = backStackEntry.arguments?.getInt("reportId") ?: -1
+
             AddExpensesScreen(
                 navController = navController,
-                reportId = backStackEntry.arguments?.getInt("reportId")
+                reportId = reportId,
+                source = source
             )
         }
 

@@ -351,7 +351,8 @@ fun CreateReportScreen(
 
                 navController = navController,
                 reportId = -1,
-                paymentMode = type
+                paymentMode = type,
+                editScreen = false
             )
         }
     }

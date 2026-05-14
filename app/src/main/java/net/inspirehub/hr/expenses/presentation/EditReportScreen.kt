@@ -393,7 +393,8 @@ fun EditReportScreen(
                 },
                 navController = navController,
                 reportId = reportId,
-                paymentMode = firstMatchedExpense?.payment_mode ?: "employee"
+                paymentMode = firstMatchedExpense?.payment_mode ?: "employee",
+                editScreen = true
             )
         }
     }

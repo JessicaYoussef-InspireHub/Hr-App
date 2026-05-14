@@ -47,6 +47,7 @@ fun EditReportBottomSheet(
     navController: NavController,
     reportId: Int,
     paymentMode: String,
+    editScreen: Boolean
 ) {
 
     val colors = appColors()
@@ -204,8 +205,12 @@ fun EditReportBottomSheet(
                 isLoading = false,
                 onConfirm = {
                     onDismiss()
-                    navController.navigate("AddExpensesScreen?fromEditReport=true&reportId=$reportId&paymentMode=$requiredPaymentMode")
-                },
+                    if (editScreen){
+                        navController.navigate("AddExpensesScreen?source=edit_report&reportId=$reportId&paymentMode=$requiredPaymentMode")
+                    }
+                    else
+                        navController.navigate("AddExpensesScreen?source=create_report&reportId=$reportId&paymentMode=$requiredPaymentMode")
+                }
             )
         }
     }

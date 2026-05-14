@@ -67,7 +67,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun AddExpensesScreen(
     navController: NavController,
-    reportId: Int? = null
+    reportId: Int? = null,
+    source: String = "expenses"
 ) {
     val colors = appColors()
     val context = LocalContext.current
@@ -190,17 +191,29 @@ fun AddExpensesScreen(
                                         snackBarHostState.showSnackbar(successMessage)
                                         val newExpenseId = response.expense_id
 
-                                        if (fromEditReport) {
-                                            reportId?.let {
-                                                navController.navigate("EditReportScreen/$it?expenseId=$newExpenseId")
+                                        when (source) {
+                                            "create_report" -> {
+
+                                                navController.navigate("CreateReportScreen") {
+                                                    popUpTo("CreateReportScreen") { inclusive = true }
+                                                }
+
+                                            }
+                                            "edit_report" -> {
+
+                                                navController.navigate("EditReportScreen/$reportId?expenseId=$newExpenseId")
                                                 {
+                                                    popUpTo("EditReportScreen") { inclusive = true }
+                                                }
+
+                                            }
+                                            else -> {
+
+                                                navController.navigate("ExpensesScreen") {
                                                     popUpTo("AddExpensesScreen") { inclusive = true }
                                                 }
                                             }
-                                        } else {
-                                        navController.navigate("ExpensesScreen") {
-                                            popUpTo("AddExpensesScreen") { inclusive = true }
-                                        }}
+                                        }
                                     }
                                     println("Expense created with id: ${response.expense_id}")
                                 } else {
