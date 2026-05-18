@@ -35,8 +35,6 @@ fun DialogActionsRow(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-
         Button(
             onClick = { onConfirm() },
             enabled = !isLoading,

@@ -70,8 +70,7 @@ fun LunchSearchBox(
             modifier = Modifier
                 .fillMaxWidth(0.75f)
                 .background(colors.error, RoundedCornerShape(50.dp))
-        )
-        {
+        ) {
             CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
                 TextField(
                     value = localSearch,

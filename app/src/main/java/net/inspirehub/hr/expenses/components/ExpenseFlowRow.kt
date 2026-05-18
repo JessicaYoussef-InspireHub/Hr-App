@@ -1,0 +1,69 @@
+package net.inspirehub.hr.expenses.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import net.inspirehub.hr.R
+import net.inspirehub.hr.appColors
+import androidx.compose.material3.*
+
+@Composable
+fun ExpenseFlowRow(
+    selectedStatuses: Set<String>,
+    onStatusChange: (Set<String>) -> Unit,
+) {
+    val colors = appColors()
+
+    val statusItems = listOf(
+        "all" to stringResource(R.string.all),
+        "draft" to stringResource(R.string.draft),
+        "refused" to stringResource(R.string.refused),
+        "reported" to stringResource(R.string.reported),
+        "approved" to stringResource(R.string.approved)
+    )
+
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        statusItems.forEach { (key, label) ->
+
+            FilterChip(
+                selected = selectedStatuses.contains(key),
+                onClick = {
+                    onStatusChange(
+                        when {
+                            key == "all" -> setOf("all")
+
+                            selectedStatuses.contains(key) -> {
+                                selectedStatuses - key
+                            }
+
+                            else -> {
+                                (selectedStatuses + key) - "all"
+                            }
+                        }
+                    )
+                },
+                label = {
+                    Text(label)
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = colors.tertiaryColor,
+                    containerColor = colors.transparent,
+                    selectedLabelColor = colors.onSecondaryColor,
+                    labelColor = colors.onBackgroundColor
+                )
+            )
+        }
+    }
+}

@@ -94,8 +94,7 @@ fun SuppliersFilterBottomSheet(
                 onDismissRequest = { showSheet = false },
                 containerColor = colors.surfaceContainerHigh,
                 windowInsets = WindowInsets(0)
-            )
-            {
+            ) {
                 val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier

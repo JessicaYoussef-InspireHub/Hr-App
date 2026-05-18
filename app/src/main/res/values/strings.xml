@@ -141,6 +141,7 @@ Protection Method</string>
     <string name="add">Add</string>
     <string name="note_to_restaurant">Note to restaurant</string>
     <string name="filter_by_suppliers">Filter by suppliers</string>
+    <string name="filter_by_date">Filter by date</string>
     <string name="outside_company_range">You are outside the company range</string>
     <string name="my_order">My order</string>
     <string name="my_order_history">My order History</string>
@@ -259,5 +260,12 @@ You have</string>
     <string name="report_updated_successfully">"Report updated successfully"</string>
     <string name="failed_to_update_report">Failed to update report</string>
     <string name="add_more_expenses">Add more expenses</string>
+    <string name="search_expenses_by_name">Search expenses by name...</string>
+    <string name="please_check_the_date_you_entered">Please check the date you entered</string>
+    <string name="filter_by_status">Filter by status</string>
+    <string name="draft">Draft</string>
+    <string name="reported">Reported</string>
+    <string name="approved">Approved</string>
+    <string name="reset">Reset</string>
 
 </resources>

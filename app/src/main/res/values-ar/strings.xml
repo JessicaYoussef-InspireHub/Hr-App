@@ -140,6 +140,7 @@
     <string name="add">أضف</string>
     <string name="note_to_restaurant">ملاحظة للمطعم</string>
     <string name="filter_by_suppliers">تصفية حسب الموردين</string>
+    <string name="filter_by_date">تصفية حسب التاريخ</string>
     <string name="outside_company_range">أنت خارج نطاق الشركة</string>
     <string name="my_order">طلبي</string>
     <string name="my_order_history">طلباتي السابقة</string>
@@ -258,5 +259,13 @@
     <string name="report_updated_successfully">"تم تحديث التقرير بنجاح"</string>
     <string name="failed_to_update_report">فشل تحديث التقرير</string>
     <string name="add_more_expenses">أضف المزيد من النفقات</string>
+    <string name="search_expenses_by_name">ابحث عن النفقات بالاسم...</string>
+    <string name="please_check_the_date_you_entered">يرجى التحقق من التاريخ الذي أدخلته</string>
+    <string name="filter_by_status">تصفية حسب الحالة</string>
+    <string name="draft">مسودة</string>
+    <string name="reported">تم الإبلاغ</string>
+    <string name="approved">تمت الموافقة</string>
+    <string name="reset">إعادة ضبط</string>
 
 </resources>
+
