@@ -266,6 +266,8 @@
     <string name="reported">تم الإبلاغ</string>
     <string name="approved">تمت الموافقة</string>
     <string name="reset">إعادة ضبط</string>
+    <string name="search_report_by_name">ابحث عن التقرير بالاسم...</string>
+    <string name="submitted">تم الإرسال</string>
 
 </resources>
 

@@ -377,6 +377,7 @@ fun ExpensesScreen(
                 .padding(vertical = 16.dp, horizontal = 10.dp)
         ) {
             ExpensesSearchBar(
+                label = stringResource(R.string.search_expenses_by_name),
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
                 onFilterClick = {

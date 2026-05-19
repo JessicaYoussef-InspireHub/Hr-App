@@ -48,6 +48,7 @@ fun ExpensesFilterBottomSheet(
     onDismiss: () -> Unit,
     onDateReset: () -> Unit,
     onStatusReset: () -> Unit,
+    expenses: Boolean = true
 ) {
     val colors = appColors()
 
@@ -92,60 +93,63 @@ fun ExpensesFilterBottomSheet(
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = showDateSection,
-                    onCheckedChange = {
-                        showDateSection = it
-                        if (!it) {
-                            onDateReset()
-                        }
-                    },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = colors.tertiaryColor,
-                        checkmarkColor = colors.onSecondaryColor,
-                        uncheckedColor = colors.onBackgroundColor
+            if (expenses) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = showDateSection,
+                        onCheckedChange = {
+                            showDateSection = it
+                            if (!it) {
+                                onDateReset()
+                            }
+                        },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = colors.tertiaryColor,
+                            checkmarkColor = colors.onSecondaryColor,
+                            uncheckedColor = colors.onBackgroundColor
+                        )
                     )
-                )
 
-                Text(
-                    text = stringResource(R.string.filter_by_date),
-                    color = colors.onBackgroundColor,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                    Text(
+                        text = stringResource(R.string.filter_by_date),
+                        color = colors.onBackgroundColor,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                if (showDateSection) {
+                    ExpensesDateRangeRow(
+                        fromDate = tempFromDate,
+                        toDate = tempToDate,
+                        onFromDateClick = {
+                            onFromDateClick()
+                            dateError = false
+                        },
+                        onToDateClick = {
+                            onToDateClick()
+                            dateError = false
+                        }
+                    )
+                }
+
+
+                if (dateError) {
+                    Text(
+                        text = stringResource(R.string.please_check_the_date_you_entered),
+                        color = colors.error,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(start = 12.dp, top = 8.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(35.dp))
             }
-
-            if (showDateSection) {
-                ExpensesDateRangeRow(
-                    fromDate = tempFromDate,
-                    toDate = tempToDate,
-                    onFromDateClick = {
-                        onFromDateClick()
-                        dateError = false
-                    },
-                    onToDateClick = {
-                        onToDateClick()
-                        dateError = false
-                    }
-                )
-            }
-
-            if (dateError) {
-                Text(
-                    text = stringResource(R.string.please_check_the_date_you_entered),
-                    color = colors.error,
-                    fontSize = 15.sp,
-                    modifier = Modifier.padding(start = 12.dp, top = 8.dp)
-                )
-            }
-
-            Spacer(Modifier.height(35.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
@@ -177,7 +181,8 @@ fun ExpensesFilterBottomSheet(
             if (showStatusSection) {
                 ExpenseFlowRow(
                     selectedStatuses = selectedStatuses,
-                    onStatusChange = onStatusChange
+                    onStatusChange = onStatusChange,
+                    expenses = expenses
                 )
             }
 

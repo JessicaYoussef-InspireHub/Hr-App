@@ -17,16 +17,26 @@ import androidx.compose.material3.*
 fun ExpenseFlowRow(
     selectedStatuses: Set<String>,
     onStatusChange: (Set<String>) -> Unit,
+    expenses: Boolean = true
 ) {
     val colors = appColors()
 
-    val statusItems = listOf(
+    val statusItems = if (expenses) {
+        listOf(
         "all" to stringResource(R.string.all),
         "draft" to stringResource(R.string.draft),
-        "refused" to stringResource(R.string.refused),
         "reported" to stringResource(R.string.reported),
-        "approved" to stringResource(R.string.approved)
-    )
+        "approved" to stringResource(R.string.approved),
+        "refused" to stringResource(R.string.refused)
+    ) } else {
+        listOf(
+            "all" to stringResource(R.string.all),
+            "draft" to stringResource(R.string.draft),
+            "submit" to stringResource(R.string.submitted),
+            "approve" to stringResource(R.string.approved),
+            "cancel" to stringResource(R.string.refused)
+        )
+    }
 
     FlowRow(
         modifier = Modifier

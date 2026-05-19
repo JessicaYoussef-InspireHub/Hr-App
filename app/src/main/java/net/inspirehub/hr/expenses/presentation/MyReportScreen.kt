@@ -1,10 +1,13 @@
 package net.inspirehub.hr.expenses.presentation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -46,6 +49,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.expenses.components.CreateAnotherReport
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
+import net.inspirehub.hr.expenses.components.ExpensesFilterBottomSheet
+import net.inspirehub.hr.expenses.components.ExpensesSearchBar
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
 import net.inspirehub.hr.expenses.components.NoReportDialog
 import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
@@ -55,6 +60,7 @@ import net.inspirehub.hr.expenses.data.deleteReport
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 import net.inspirehub.hr.utils.formatNumber
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyReportScreen(
@@ -77,6 +83,23 @@ fun MyReportScreen(
     var showPaymentSheet by remember { mutableStateOf(false) }
     var showNoReportDialog by remember { mutableStateOf(false) }
     var isLoadingReports by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showFilterSheet by remember { mutableStateOf(false) }
+    var selectedStatuses by remember { mutableStateOf(setOf<String>()) }
+    var tempSelectedStatuses by remember { mutableStateOf(setOf<String>()) }
+
+    val filteredReports = reports.filter { report ->
+
+        val matchesSearch =
+            report.name.contains(searchQuery, ignoreCase = true)
+
+        val matchesStatus =
+            selectedStatuses.isEmpty()
+                    || selectedStatuses.contains("all")
+                    || selectedStatuses.contains(report.state)
+
+        matchesSearch && matchesStatus
+    }
 
     val successMessage = { count: Int ->
         context.getString(R.string.deleted_successfully, count)
@@ -218,6 +241,21 @@ fun MyReportScreen(
             }
         },
     ) { innerPadding ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(innerPadding)
+                .padding(vertical = 16.dp, horizontal = 10.dp)
+        ) {
+            ExpensesSearchBar(
+                label = stringResource(R.string.search_report_by_name),
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                onFilterClick = { showFilterSheet = true },
+                isFilterActive = selectedStatuses.isNotEmpty()
+            )
+
         when {
             isLoading -> {
                 FullLoading()
@@ -239,47 +277,68 @@ fun MyReportScreen(
                 }
             }
 
-            else -> {
-                LazyColumn(
+            filteredReports.isEmpty() -> {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(16.dp)
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
                 ) {
-                    items(reports) { report ->
+                    Text(
+                        stringResource(R.string.no_expenses_yet),
+                        color = colors.onBackgroundColor,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
 
-                        SwipeToDeleteReportItem(
-                            onDelete = {
-                                scope.launch {
+            else -> {
+                Spacer(modifier = Modifier.height(30.dp))
 
-                                    val result = deleteReport(context, token, listOf(report.sheet_id))
+                LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(6.dp)
+                    ) {
+                        items(filteredReports) { report ->
 
-                                    if (result.success) {
-                                        reports = reports.filter { it.sheet_id != report.sheet_id }
-                                        snackBarHostState.showSnackbar(
-                                            message = oneDeletedMessage
-                                        )
-                                    } else {
-                                        deleteErrorMessage = result.message
+                            SwipeToDeleteReportItem(
+                                onDelete = {
+                                    scope.launch {
+
+                                        val result =
+                                            deleteReport(context, token, listOf(report.sheet_id))
+
+                                        if (result.success) {
+                                            reports =
+                                                reports.filter { it.sheet_id != report.sheet_id }
+                                            snackBarHostState.showSnackbar(
+                                                message = oneDeletedMessage
+                                            )
+                                        } else {
+                                            deleteErrorMessage = result.message
+                                        }
                                     }
                                 }
+                            ) {
+                                ReportCard(
+                                    report = report,
+                                    isSelectionMode = isSelectionMode,
+                                    isSelected = selectedReports.contains(report.sheet_id),
+                                    onSelect = {
+                                        selectedReports =
+                                            if (selectedReports.contains(report.sheet_id)) {
+                                                selectedReports - report.sheet_id
+                                            } else {
+                                                selectedReports + report.sheet_id
+                                            }
+                                    },
+                                    navController = navController
+                                )
                             }
-                        ) {
-                            ReportCard(
-                                report = report,
-                                isSelectionMode = isSelectionMode,
-                                isSelected = selectedReports.contains(report.sheet_id),
-                                onSelect = {
-                                    selectedReports = if (selectedReports.contains(report.sheet_id)) {
-                                        selectedReports - report.sheet_id
-                                    } else {
-                                        selectedReports + report.sheet_id
-                                    }
-                                },
-                                navController = navController
-                            )
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
             }
@@ -351,6 +410,33 @@ fun MyReportScreen(
                     showPaymentSheet = false
                     navController.navigate("CreateReportScreen?type=employee")
                 }
+            )
+        }
+
+        if (showFilterSheet) {
+
+            ExpensesFilterBottomSheet(
+
+                tempFromDate = null,
+                tempToDate = null,
+                selectedStatuses = tempSelectedStatuses,
+                onFromDateClick = {},
+                onToDateClick = {},
+                onStatusChange = { updatedSet ->
+                    tempSelectedStatuses = updatedSet
+                },
+                onReset = { tempSelectedStatuses = emptySet() },
+                onApply = {
+                    selectedStatuses = tempSelectedStatuses
+                    showFilterSheet = false
+                },
+                onDismiss = { showFilterSheet = false },
+                onDateReset = {},
+                onStatusReset = {
+                    tempSelectedStatuses = emptySet()
+                    selectedStatuses = emptySet()
+                },
+                expenses = false
             )
         }
 

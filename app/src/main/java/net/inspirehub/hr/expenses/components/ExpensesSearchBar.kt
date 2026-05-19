@@ -25,6 +25,7 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun ExpensesSearchBar(
+    label: String,
     query: String,
     onQueryChange: (String) -> Unit,
     onFilterClick: () -> Unit,
@@ -59,7 +60,7 @@ fun ExpensesSearchBar(
                 singleLine = true,
                 placeholder = {
                     Text(
-                        text = stringResource(R.string.search_expenses_by_name),
+                        text = label,
                         fontSize = 16.sp,
                         color = colors.onBackgroundColor
                     )
