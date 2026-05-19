@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
@@ -45,6 +46,16 @@ fun AnalyticDistributionTextField(
     dropdownItems: List<String> = emptyList(),
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredItems = remember(searchQuery, dropdownItems) {
+        if (searchQuery.isBlank()) {
+            dropdownItems
+        } else {
+            dropdownItems.filter {
+                it.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
     val colors = appColors()
     val customTextSelectionColors = TextSelectionColors(
         handleColor = colors.tertiaryColor,
@@ -118,28 +129,41 @@ fun AnalyticDistributionTextField(
 
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
+                onDismissRequest = {
+                    expanded = false
+                    searchQuery = ""
+                },
                 modifier = Modifier.background(colors.onSecondaryColor)
             ) {
-                if (dropdownItems.isEmpty()) {
+                ComponentsSearchTextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                    }
+                )
+
+                if (filteredItems.isEmpty()) {
                     DropdownMenuItem(
                         text = {
                             Text(
                                 stringResource(R.string.no_analytic_distribution_available),
                                 fontSize = 15.sp,
                                 color = colors.onBackgroundColor,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center
+
                             )
                         },
                         onClick = { expanded = false }
                     )
                 } else {
-                    dropdownItems.forEach { item ->
+                    filteredItems.forEach { item ->
                         DropdownMenuItem(
                             text = {
                                 Text(
                                     item,
                                     fontSize = 15.sp,
+                                    color = colors.onBackgroundColor,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             },

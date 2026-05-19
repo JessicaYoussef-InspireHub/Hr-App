@@ -56,6 +56,7 @@ import kotlinx.coroutines.launch
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
 import net.inspirehub.hr.expenses.components.ExpenseCalendar
+import net.inspirehub.hr.expenses.components.ExpensesAndReportSearchBar
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
 import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
 import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
@@ -64,7 +65,6 @@ import net.inspirehub.hr.expenses.data.deleteExpense
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 import net.inspirehub.hr.utils.formatNumber
 import net.inspirehub.hr.expenses.components.ExpensesFilterBottomSheet
-import net.inspirehub.hr.expenses.components.ExpensesSearchBar
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -376,7 +376,7 @@ fun ExpensesScreen(
                 .padding(innerPadding)
                 .padding(vertical = 16.dp, horizontal = 10.dp)
         ) {
-            ExpensesSearchBar(
+            ExpensesAndReportSearchBar(
                 label = stringResource(R.string.search_expenses_by_name),
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },

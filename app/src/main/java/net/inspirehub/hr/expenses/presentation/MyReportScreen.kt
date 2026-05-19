@@ -49,8 +49,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.expenses.components.CreateAnotherReport
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
+import net.inspirehub.hr.expenses.components.ExpensesAndReportSearchBar
 import net.inspirehub.hr.expenses.components.ExpensesFilterBottomSheet
-import net.inspirehub.hr.expenses.components.ExpensesSearchBar
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
 import net.inspirehub.hr.expenses.components.NoReportDialog
 import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
@@ -248,7 +248,7 @@ fun MyReportScreen(
                 .padding(innerPadding)
                 .padding(vertical = 16.dp, horizontal = 10.dp)
         ) {
-            ExpensesSearchBar(
+            ExpensesAndReportSearchBar(
                 label = stringResource(R.string.search_report_by_name),
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },

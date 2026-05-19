@@ -15,16 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
-fun ExpensesSearchBar(
+fun ExpensesAndReportSearchBar(
     label: String,
     query: String,
     onQueryChange: (String) -> Unit,
@@ -57,7 +55,6 @@ fun ExpensesSearchBar(
                 value = query,
                 onValueChange = onQueryChange,
                 modifier = Modifier.fillMaxWidth(0.85f),
-                singleLine = true,
                 placeholder = {
                     Text(
                         text = label,

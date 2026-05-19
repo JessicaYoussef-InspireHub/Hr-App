@@ -269,5 +269,6 @@ You have</string>
     <string name="reset">Reset</string>
     <string name="search_report_by_name">Search report by name...</string>
     <string name="submitted">Submitted</string>
+    <string name="search_here">Search here...</string>
 
 </resources>
