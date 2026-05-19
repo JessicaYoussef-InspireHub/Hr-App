@@ -25,6 +25,7 @@ import net.inspirehub.hr.appColors
 fun ComponentsSearchTextField(
     value: String,
     onValueChange: (String) -> Unit,
+    containerColor: Color
 ) {
 
     val colors = appColors()
@@ -63,9 +64,9 @@ fun ComponentsSearchTextField(
             shape = RoundedCornerShape(10.dp),
             colors = TextFieldDefaults.colors(
                 cursorColor = colors.tertiaryColor,
-                focusedContainerColor = colors.surfaceContainerHigh,
-                unfocusedContainerColor = colors.surfaceContainerHigh,
-                disabledContainerColor = colors.surfaceContainerHigh,
+                focusedContainerColor = containerColor,
+                unfocusedContainerColor = containerColor,
+                disabledContainerColor = containerColor,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent

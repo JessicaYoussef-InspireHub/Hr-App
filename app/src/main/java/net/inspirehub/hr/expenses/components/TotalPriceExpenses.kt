@@ -74,6 +74,14 @@ fun TotalPriceExpenses(
     var currencies by remember { mutableStateOf(listOf<ExpenseCurrency>()) }
     val context = LocalContext.current
     val currentLanguage = sharedPrefManger.getLanguage()
+    var currencySearch by remember { mutableStateOf("") }
+
+    val filteredCurrencies = currencies
+        .filter { it.active }
+        .filter {
+            it.currency_code.contains(currencySearch, ignoreCase = true) ||
+                    it.name.contains(currencySearch, ignoreCase = true)
+        }
 
     val customTextSelectionColors = TextSelectionColors(
         handleColor = colors.tertiaryColor,
@@ -113,7 +121,7 @@ fun TotalPriceExpenses(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val displayAmount = formatNumber(amount , currentLanguage)
+            val displayAmount = formatNumber(amount, currentLanguage)
 
             CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
                 TextField(
@@ -136,7 +144,7 @@ fun TotalPriceExpenses(
                     },
                     placeholder = {
                         Text(
-                            formatNumber("0.00" , currentLanguage),
+                            formatNumber("0.00", currentLanguage),
                             color = colors.onBackgroundColor,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold
@@ -214,24 +222,42 @@ fun TotalPriceExpenses(
                 )
                 ExposedDropdownMenu(
                     expanded = currencyExpanded,
-                    onDismissRequest = { currencyExpanded = false },
+                    onDismissRequest = {
+                        currencyExpanded = false
+                        currencySearch = ""
+                    },
                     modifier = Modifier.background(colors.surfaceContainerHigh)
                 ) {
-                    if (currencies.isEmpty()) {
+                    ComponentsSearchTextField(
+                        value = currencySearch,
+                        onValueChange = { currencySearch = it },
+                        containerColor = colors.surfaceColor
+                    )
+
+                    if (filteredCurrencies.isEmpty()) {
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.no_currencies_available)) },
+                            text = {
+                                Text(
+                                    stringResource(R.string.no_currencies_available),
+                                    color = colors.onBackgroundColor
+                                )
+                            },
                             onClick = { currencyExpanded = false }
                         )
                     } else {
-                        currencies.filter { it.active }.forEach { currency ->
+                        filteredCurrencies.forEach { currency ->
                             DropdownMenuItem(
                                 text = {
-                                    Text(currency.currency_code)
+                                    Text(
+                                        currency.currency_code,
+                                        color = colors.onBackgroundColor
+                                    )
                                 },
                                 onClick = {
                                     selectedCurrency = currency
                                     onCurrencySelected(currency)
                                     currencyExpanded = false
+                                    currencySearch = ""
                                 }
                             )
                         }
@@ -257,16 +283,16 @@ fun TotalPriceExpenses(
                 val decimalPlaces = companyCurrency?.decimal_places
                 val formatString = "%.${decimalPlaces}f"
 
-                val rawAmount = formatNumber(formatString.format(roundedAmount) , currentLanguage)
+                val rawAmount = formatNumber(formatString.format(roundedAmount), currentLanguage)
 
                 val rateText = if (isArabic) {
-                    formatNumber(selectedCurrency!!.rate.toString() , currentLanguage)
+                    formatNumber(selectedCurrency!!.rate.toString(), currentLanguage)
                 } else {
                     selectedCurrency!!.rate.toString()
                 }
 
                 val displayAmount = if (isArabic) {
-                    formatNumber(rawAmount , currentLanguage)
+                    formatNumber(rawAmount, currentLanguage)
                 } else {
                     rawAmount
                 }
@@ -282,7 +308,8 @@ fun TotalPriceExpenses(
                     color = colors.onBackgroundColor,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 15.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 15.dp)
                         .weight(0.6f)
                 )
 
@@ -291,7 +318,8 @@ fun TotalPriceExpenses(
                     color = colors.onBackgroundColor,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier
+                        .padding(start = 8.dp)
                         .weight(1f)
                 )
             }

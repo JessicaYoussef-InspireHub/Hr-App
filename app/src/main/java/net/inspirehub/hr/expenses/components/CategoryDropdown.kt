@@ -44,7 +44,27 @@ fun CategoryDropdown(
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf(initialSelectedCategory) }
     val colors = appColors()
+    var searchQuery by remember { mutableStateOf("") }
 
+    val filteredCategories = remember(searchQuery, categories) {
+        if (searchQuery.isBlank()) {
+            categories
+        } else {
+            categories.filter { category ->
+
+                val fullText =
+                    buildString {
+                        category.default_code
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { append("[$it] ") }
+
+                        append(category.name)
+                    }
+
+                fullText.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
 
     Column {
         ExposedDropdownMenuBox(
@@ -98,22 +118,40 @@ fun CategoryDropdown(
 
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
+                onDismissRequest = {
+                    expanded = false
+                    searchQuery = ""
+                },
                 modifier = Modifier.background(colors.surfaceContainerHigh)
             ) {
-                if (categories.isEmpty()) {
+                ComponentsSearchTextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                    },
+                    containerColor = colors.surfaceColor
+                )
+
+                if (filteredCategories.isEmpty()) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.no_categories_available)) },
+                        text = {
+                            Text(
+                                stringResource(R.string.no_categories_available),
+                                color = colors.onBackgroundColor
+                            )
+                        },
                         onClick = { expanded = false }
                     )
                 } else {
-                    categories.forEach { category ->
+                    filteredCategories.forEach { category ->
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = category.default_code?.takeIf { it.isNotBlank() }?.let { "[$it] ${category.name}" } ?: category.name,
+                                    text = category.default_code?.takeIf { it.isNotBlank() }
+                                        ?.let { "[$it] ${category.name}" } ?: category.name,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
+                                    color = colors.onBackgroundColor
                                 )
                             },
                             onClick = {
@@ -122,9 +160,12 @@ fun CategoryDropdown(
                                 onCategorySelected(category)
 
                                 if (description.isBlank()) {
-                                    val defaultText = category.default_code?.takeIf { it.isNotBlank() }?.let { "[$it] ${category.name}" } ?: category.name
+                                    val defaultText =
+                                        category.default_code?.takeIf { it.isNotBlank() }
+                                            ?.let { "[$it] ${category.name}" } ?: category.name
                                     onDescriptionChange(defaultText)
                                 }
+                                searchQuery = ""
                             }
                         )
                     }

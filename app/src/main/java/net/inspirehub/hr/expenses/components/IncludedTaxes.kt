@@ -59,6 +59,15 @@ fun IncludedTaxes(
     val allowedIds = sharedPref.getAllowedLocationsIds()
     val currentLanguage = sharedPref.getLanguage()
     val colors = appColors()
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredTaxes = remember(searchQuery, taxes) {
+        taxes
+            .filter { allowedIds.contains(it.company_id) }
+            .filter {
+                it.name.contains(searchQuery, ignoreCase = true)
+            }
+    }
 
     val taxAmount = remember(selectedTaxes, amount) {
         selectedTaxes.sumOf { tax ->
@@ -71,7 +80,7 @@ fun IncludedTaxes(
     }
 
     val formattedTax = "%.2f".format(taxAmount)
-    val displayedTax = formatNumber(formattedTax , currentLanguage)
+    val displayedTax = formatNumber(formattedTax, currentLanguage)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -95,7 +104,7 @@ fun IncludedTaxes(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            formatNumber(tax.name , currentLanguage),
+                            formatNumber(tax.name, currentLanguage),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = colors.onBackgroundColor,
@@ -170,10 +179,19 @@ fun IncludedTaxes(
 
                 ExposedDropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false },
+                    onDismissRequest = {
+                        expanded = false
+                        searchQuery = ""
+                    },
                     modifier = Modifier.background(colors.surfaceContainerHigh)
                 ) {
-                    val filteredTaxes = taxes.filter { allowedIds.contains(it.company_id) }
+                    ComponentsSearchTextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                        },
+                        containerColor = colors.surfaceColor
+                    )
 
                     if (filteredTaxes.isEmpty()) {
                         DropdownMenuItem(
@@ -182,6 +200,7 @@ fun IncludedTaxes(
                                     stringResource(R.string.no_taxes_available),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
+                                    color = colors.onBackgroundColor
 
                                     )
                             },
@@ -193,9 +212,10 @@ fun IncludedTaxes(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        formatNumber(tax.name , currentLanguage),
+                                        formatNumber(tax.name, currentLanguage),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold,
+                                        color = colors.onBackgroundColor
                                     )
                                 },
                                 onClick = {
@@ -206,6 +226,7 @@ fun IncludedTaxes(
                                             selectedTaxes + tax
                                         }
                                     )
+                                    searchQuery = ""
                                     expanded = false
                                 }
                             )

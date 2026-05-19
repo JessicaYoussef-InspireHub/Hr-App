@@ -139,7 +139,8 @@ fun AnalyticDistributionTextField(
                     value = searchQuery,
                     onValueChange = {
                         searchQuery = it
-                    }
+                    },
+                    containerColor = colors.surfaceContainerHigh
                 )
 
                 if (filteredItems.isEmpty()) {
@@ -169,6 +170,7 @@ fun AnalyticDistributionTextField(
                             },
                             onClick = {
                                 onValueChange(item)
+                                searchQuery = ""
                                 expanded = false
                             }
                         )
