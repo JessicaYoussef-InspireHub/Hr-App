@@ -347,9 +347,6 @@ fun ExpensesScreen(
                                 }
                             }
                         },
-                        onUpload = {
-                            showUploadSheet = true
-                        },
                         viewReport = {
                             navController.navigate("MyReportScreen")
                         },

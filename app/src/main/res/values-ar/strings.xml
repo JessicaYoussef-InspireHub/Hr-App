@@ -193,7 +193,6 @@
     <string name="reports">التقارير</string>
     <string name="view_reports">عرض التقارير</string>
     <string name="new_expense">نفقة جديدة</string>
-    <string name="upload">رفع</string>
     <string name="no_expenses_yet">لا يوجد مصروفات بعد</string>
     <string name="no_reports_yet">لا يوجد تقارير بعد</string>
     <string name="you_have_no_expense_to_report">ليس لديك أي نفقات يجب الإبلاغ عنها</string>

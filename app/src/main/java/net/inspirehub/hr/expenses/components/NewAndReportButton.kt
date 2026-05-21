@@ -31,11 +31,9 @@ fun NewAndReportButton(
     onCreateReport: () -> Unit,
     viewReport: () -> Unit,
     onNewExpenses: () -> Unit,
-    onUpload: () -> Unit,
     is17Version: Boolean
 ) {
     val colors = appColors()
-    var expandedNew by remember { mutableStateOf(false) }
     var expandedReport by remember { mutableStateOf(false) }
 
     Row(
@@ -46,7 +44,7 @@ fun NewAndReportButton(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Button(
-            onClick = { expandedNew = !expandedNew },
+            onClick = { onNewExpenses() },
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
                 contentColor = colors.onSecondaryColor,
@@ -55,40 +53,9 @@ fun NewAndReportButton(
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
-                stringResource(R.string.is_new),
+                stringResource(R.string.new_expense),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        DropdownMenu(
-            expanded = expandedNew,
-            onDismissRequest = { expandedNew = false },
-            modifier = Modifier.background(colors.surfaceContainerHigh)
-        ) {
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        stringResource(R.string.upload),
-                        color = colors.onBackgroundColor
-                    )
-                },
-                onClick = {
-                    expandedNew = false
-                    onUpload()
-                }
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        stringResource(R.string.new_expense),
-                        color = colors.onBackgroundColor
-                    )
-                },
-                onClick = {
-                    expandedNew = false
-                    onNewExpenses()
-                }
             )
         }
 

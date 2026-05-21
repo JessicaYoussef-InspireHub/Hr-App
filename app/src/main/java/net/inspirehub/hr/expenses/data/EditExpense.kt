@@ -12,6 +12,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.lunch.data.ApiClient
 import org.json.JSONObject
+import org.json.JSONArray
 
 suspend fun editExpense(
     context: Context,
@@ -26,7 +27,9 @@ suspend fun editExpense(
     paymentMode: String,
     taxIds: List<Int>,
     analyticDistribution: Map<String, Int>,
-    isRetry: Boolean = false
+    isRetry: Boolean = false,
+    attachments: List<ExpenseAttachment> = emptyList(),
+    deleteAttachmentIds: List<Int> = emptyList(),
 ): Boolean {
 
     return try {
@@ -49,6 +52,17 @@ suspend fun editExpense(
                 put("payment_mode", paymentMode)
                 put("tax_ids", taxIds)
                 put("analytic_distribution", JSONObject(analyticDistribution))
+                put("delete_attachment_ids", deleteAttachmentIds)
+
+                put("attachments", JSONArray().apply {
+                    attachments.forEach { attachment ->
+                        put(JSONObject().apply {
+                            put("name", attachment.name)
+                            put("data", attachment.data)
+                            put("mimetype", attachment.mimetype)
+                        })
+                    }
+                })
             })
         }
 
@@ -84,7 +98,9 @@ suspend fun editExpense(
                     paymentMode,
                     taxIds,
                     analyticDistribution,
-                    true
+                    true,
+                    attachments,
+                    deleteAttachmentIds
                 )
             } else false
         }

@@ -31,7 +31,9 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
-fun UploadImageOrFileBox(){
+fun UploadImageOrFileBox(
+    onFilesSelected: (List<Uri>) -> Unit
+){
 
     val colors = appColors()
     var showUploadSheet by remember { mutableStateOf(false) }
@@ -57,7 +59,8 @@ fun UploadImageOrFileBox(){
     ) { success ->
         if (success) {
             cameraImageUri = cameraUri
-            println("Camera Image URI: $cameraImageUri")
+            println("maria Camera Image URI: $cameraImageUri")
+            onFilesSelected(listOf(cameraUri))
         }
     }
 
@@ -68,7 +71,7 @@ fun UploadImageOrFileBox(){
             if (isGranted) {
                 cameraLauncher.launch(cameraUri)
             } else {
-                println("Camera permission denied")
+                println("maria Camera permission denied")
             }
         }
 
@@ -76,7 +79,8 @@ fun UploadImageOrFileBox(){
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            println("Selected Image: $it")
+            println("maria Selected Image: $it")
+            onFilesSelected(listOf(it))
         }
     }
 
@@ -84,7 +88,8 @@ fun UploadImageOrFileBox(){
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
-            println("Selected File: $it")
+            println("maria Selected File: $it")
+            onFilesSelected(listOf(it))
         }
     }
 
@@ -93,7 +98,6 @@ fun UploadImageOrFileBox(){
         modifier = Modifier
             .fillMaxWidth()
             .clickable { showUploadSheet = true }
-            .padding(4.dp)
             .border(
                 width = 1.dp,
                 color = colors.tertiaryColor,
@@ -104,7 +108,7 @@ fun UploadImageOrFileBox(){
     ) {
         Icon(
             imageVector = Icons.Default.Photo,
-            contentDescription = stringResource(R.string.upload),
+            contentDescription = "upload",
             tint = colors.tertiaryColor,
             modifier = Modifier.size(50.dp)
         )
@@ -126,5 +130,4 @@ fun UploadImageOrFileBox(){
             onFilesClick = { filesLauncher.launch(arrayOf("*/*")) }
         )
     }
-
 }

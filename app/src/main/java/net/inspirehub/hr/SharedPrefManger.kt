@@ -11,12 +11,15 @@ import java.util.Date
 
 class SharedPrefManager(context: Context) {
 
-    fun saveEmployeeName(name: String) {
-        prefs.edit { putString("employee_name", name) }
+    fun saveEmployeeName(name: String?) {
+        if (!name.isNullOrBlank()) {
+            prefs.edit { putString("employee_name", name) }
+        }
     }
 
     fun getEmployeeName(): String? {
-        return prefs.getString("employee_name", null)
+        val name = prefs.getString("employee_name", null)
+        return if (name.isNullOrBlank()) null else name
     }
 
     fun clearCheckOutScheduledTime() {
@@ -123,26 +126,6 @@ class SharedPrefManager(context: Context) {
         return prefs.getString("base_url", null)
     }
 
-    fun saveServerExitTime(time: String) {
-        prefs.edit { putString("server_exit_time", time) }
-    }
-
-    fun getServerExitTime(): String? {
-        return prefs.getString("server_exit_time", null)
-    }
-
-    fun setNotificationsEnabled(enabled: Boolean) {
-        prefs.edit { putBoolean("notifications_enabled", enabled) }
-    }
-
-    fun isNotificationsEnabled(): Boolean {
-        return prefs.getBoolean("notifications_enabled", true) // default is ON
-    }
-
-    fun setDarkModeEnabled(enabled: Boolean) {
-        prefs.edit { putBoolean("dark_mode", enabled) }
-    }
-
     fun isDarkModeEnabled(): Boolean {
         return prefs.getBoolean("dark_mode", false)
     }
@@ -213,27 +196,13 @@ class SharedPrefManager(context: Context) {
         prefs.edit { putString("latitude", lat.toString()) }
     }
 
-//    fun saveLatitude(lat: Double) {
-//        prefs.edit().putString("latitude", "27.190936").apply()
-//    }
-
-    fun getLatitude(): Double = prefs.getString("latitude", "0.0")?.toDoubleOrNull() ?: 0.0
-
     fun saveLongitude(lng: Double) {
         prefs.edit { putString("longitude", lng.toString()) }
     }
 
-//    fun saveLongitude(lng: Double) {
-//        prefs.edit().putString("longitude", "31.187951").apply()
-//    }
-
-    fun getLongitude(): Double = prefs.getString("longitude", "0.0")?.toDoubleOrNull() ?: 0.0
-
     fun saveAllowedDistance(distance: Double) {
         prefs.edit { putString("allowedDistance", distance.toString()) }
     }
-
-    fun getAllowedDistance(): Double = prefs.getString("allowedDistance", "0.0")?.toDoubleOrNull() ?: 0.0
 
     fun setFingerprintAuthSuccess(success: Boolean) {
         prefs.edit { putBoolean("fingerprint_success", success) }

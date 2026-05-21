@@ -1,5 +1,6 @@
 package net.inspirehub.hr.expenses.presentation
 
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
@@ -59,9 +60,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
-import net.inspirehub.hr.expenses.components.UploadImageOrFileBox
+import net.inspirehub.hr.expenses.data.ExpenseAttachment
+import net.inspirehub.hr.utils.getFileName
+import net.inspirehub.hr.utils.getMimeType
+import net.inspirehub.hr.utils.uriToBase64
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import net.inspirehub.hr.expenses.components.AttachmentsSection
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -93,6 +98,7 @@ fun AddExpensesScreen(
     var descriptionError by remember { mutableStateOf(false) }
     var amountError by remember { mutableStateOf(false) }
     var currencyError by remember { mutableStateOf(false) }
+    var selectedFiles by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     val paymentModeFromReport =
         navController.currentBackStackEntry
@@ -123,7 +129,7 @@ fun AddExpensesScreen(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-    ){
+    ) {
         Scaffold(
             containerColor = colors.onSecondaryColor,
             snackbarHost = {
@@ -165,6 +171,13 @@ fun AddExpensesScreen(
                             descriptionError = description.isBlank()
                             amountError = totalAmount <= 0.0
                             currencyError = selectedCurrency == null
+                            val attachmentsList = selectedFiles.map { uri ->
+                                ExpenseAttachment(
+                                    name = getFileName(context, uri),
+                                    data = uriToBase64(context, uri),
+                                    mimetype = getMimeType(context, uri)
+                                )
+                            }
 
                             if (categoryError || descriptionError || amountError || currencyError) return@SaveCancelButton
                             isLoading = true
@@ -182,7 +195,8 @@ fun AddExpensesScreen(
                                     analyticDistribution = analyticMap,
                                     taxIds = selectedTaxes.map { it.id },
                                     payment_mode = paymentMode,
-                                    currencyId = selectedCurrency!!.id
+                                    currencyId = selectedCurrency!!.id,
+                                    attachments = attachmentsList
                                 )
 
 
@@ -195,10 +209,13 @@ fun AddExpensesScreen(
                                             "create_report" -> {
 
                                                 navController.navigate("CreateReportScreen") {
-                                                    popUpTo("CreateReportScreen") { inclusive = true }
+                                                    popUpTo("CreateReportScreen") {
+                                                        inclusive = true
+                                                    }
                                                 }
 
                                             }
+
                                             "edit_report" -> {
 
                                                 navController.navigate("EditReportScreen/$reportId?expenseId=$newExpenseId")
@@ -207,10 +224,13 @@ fun AddExpensesScreen(
                                                 }
 
                                             }
+
                                             else -> {
 
                                                 navController.navigate("ExpensesScreen") {
-                                                    popUpTo("AddExpensesScreen") { inclusive = true }
+                                                    popUpTo("AddExpensesScreen") {
+                                                        inclusive = true
+                                                    }
                                                 }
                                             }
                                         }
@@ -302,7 +322,7 @@ fun AddExpensesScreen(
                     TotalPriceExpenses(
                         token = sharedPref.getToken() ?: "",
                         context = context,
-                        initialAmount = totalAmount ,
+                        initialAmount = totalAmount,
                         onAmountChange = { totalAmount = it },
                         onConvertedAmountChange = { convertedAmount = it },
                         onCurrencySelected = { currency -> selectedCurrency = currency }
@@ -388,9 +408,13 @@ fun AddExpensesScreen(
                         onNotesChange = { notes = it }
                     )
                 }
+
                 Spacer(modifier = Modifier.height(25.dp))
 
-                UploadImageOrFileBox()
+                AttachmentsSection(
+                    selectedFiles = selectedFiles,
+                    onFilesChange = { selectedFiles = it }
+                )
             }
             if (isLoading) {
                 Box(

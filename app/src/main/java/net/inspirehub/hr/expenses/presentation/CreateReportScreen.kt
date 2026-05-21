@@ -240,7 +240,7 @@ fun CreateReportScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
 
                     ) {
-                        TextFirstExpenses(stringResource(R.string.choose_expenses))
+                        TextFirstExpenses(stringResource(R.string.your_expenses))
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
                             contentDescription = null,

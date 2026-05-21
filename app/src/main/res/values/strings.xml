@@ -194,7 +194,6 @@ You have</string>
     <string name="reports">Reports</string>
     <string name="view_reports">View Reports</string>
     <string name="new_expense">New Expense</string>
-    <string name="upload">Upload</string>
     <string name="no_expenses_yet">No expenses yet</string>
     <string name="no_reports_yet">No reports yet</string>
     <string name="you_have_no_expense_to_report">You have no expense to report</string>
@@ -244,7 +243,6 @@ You have</string>
     <string name="expense_report_summary">Expense report summary:</string>
     <string name="please_enter_expense_report_summary">Please enter expense report summary</string>
     <string name="add_report_summary">Add report summary</string>
-    <string name="choose_expenses">Choose expenses:</string>
     <string name="choose_payment_type">Choose payment type</string>
     <string name="files">Files</string>
     <string name="camera">Camera</string>

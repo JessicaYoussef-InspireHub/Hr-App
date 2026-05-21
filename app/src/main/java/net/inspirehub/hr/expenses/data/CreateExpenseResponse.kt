@@ -14,12 +14,18 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.lunch.data.ApiClient
 import org.json.JSONObject
-
+import org.json.JSONArray
 @Serializable
 data class CreateExpenseResponse(
     val status: String,
     val message: String,
     val expense_id: Int? = null
+)
+
+data class ExpenseAttachment(
+    val name: String,
+    val data: String,
+    val mimetype: String
 )
 
 suspend fun createExpense(
@@ -34,6 +40,7 @@ suspend fun createExpense(
     taxIds: List<Int>,
     payment_mode: String,
     currencyId: Int,
+    attachments: List<ExpenseAttachment> = emptyList()
 ): CreateExpenseResponse {
     return try {
         val sharedPref = SharedPrefManager(context)
@@ -56,6 +63,15 @@ suspend fun createExpense(
                 })
                 put("tax_ids", taxIds)
                 put("payment_mode", payment_mode)
+                put("attachments", JSONArray().apply {
+                    attachments.forEach { attachment ->
+                        put(JSONObject().apply {
+                            put("name", attachment.name)
+                            put("data", attachment.data)
+                            put("mimetype", attachment.mimetype)
+                        })
+                    }
+                })
             })
         }
 

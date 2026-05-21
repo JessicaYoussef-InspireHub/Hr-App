@@ -16,8 +16,8 @@ android {
         applicationId = "net.inspirehub.hr"
         minSdk = 24
         targetSdk = 36
-        versionCode = 18
-        versionName = "1.0.9"
+        versionCode = 19
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -109,8 +109,9 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
 
     implementation (libs.androidx.room.runtime)
-//    kapt ("androidx.room:room-compiler:2.6.1")
     implementation (libs.androidx.room.ktx)
+    implementation(libs.coil.compose)
+
     kapt(libs.androidx.room.compiler)
 
 }

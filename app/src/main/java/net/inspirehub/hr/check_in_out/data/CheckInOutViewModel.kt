@@ -72,6 +72,11 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                     _lastCheckIn.value = result.checkInTime ?: result.lastCheckIn
                     _lastCheckOut.value = result.lastCheckOut ?: result.lastCheckOut
                     _workedHours.value = result.worked_hours
+                    cache.saveStatus(
+                        _attendanceStatus.value,
+                        _lastCheckIn.value,
+                        _lastCheckOut.value
+                    )
                 }
                 delay(3000)
             }

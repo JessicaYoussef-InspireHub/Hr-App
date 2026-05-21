@@ -59,6 +59,11 @@ import net.inspirehub.hr.expenses.data.fetchExpenseCategories
 import net.inspirehub.hr.expenses.data.fetchExpenses
 import net.inspirehub.hr.expenses.data.fetchTaxes
 import java.time.LocalDate
+import android.net.Uri
+import net.inspirehub.hr.expenses.data.ExpenseAttachment
+import net.inspirehub.hr.utils.getFileName
+import net.inspirehub.hr.utils.getMimeType
+import net.inspirehub.hr.utils.uriToBase64
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -91,6 +96,8 @@ fun EditExpenseScreen(
     var isFetching by remember { mutableStateOf(true) }
     var isSubmitting by remember { mutableStateOf(false) }
     val failedMessage = stringResource(R.string.failed_to_update_expense)
+    var selectedFiles by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var deleteAttachmentIds by remember { mutableStateOf<List<Int>>(emptyList()) }
 
     LaunchedEffect(expenseId) {
         isFetching = true
@@ -176,6 +183,14 @@ fun EditExpenseScreen(
                             if (descriptionError || amountError) return@SaveCancelButton
                             isSubmitting = true
 
+                            val attachmentsList = selectedFiles.map { uri ->
+                                ExpenseAttachment(
+                                    name = getFileName(context, uri),
+                                    data = uriToBase64(context, uri),
+                                    mimetype = getMimeType(context, uri)
+                                )
+                            }
+
                             scope.launch {
                                 val success = editExpense(
                                     context = context,
@@ -189,7 +204,9 @@ fun EditExpenseScreen(
                                     currencyId = selectedCurrency?.id ?: expense?.currency_id ?: 1,
                                     paymentMode = paidBy,
                                     taxIds = selectedTaxes.map { it.id },
-                                    analyticDistribution = analyticDistribution.mapKeys { it.key.toString() }
+                                    analyticDistribution = analyticDistribution.mapKeys { it.key.toString() },
+                                    attachments = attachmentsList,
+                                    deleteAttachmentIds = deleteAttachmentIds
                                 )
 
                                 if (success) {
@@ -362,7 +379,11 @@ fun EditExpenseScreen(
                     }
                     Spacer(modifier = Modifier.height(25.dp))
 
-                    UploadImageOrFileBox()
+                    UploadImageOrFileBox(
+                        onFilesSelected = {
+                            selectedFiles = it
+                        }
+                    )
                 }
             }
         }
