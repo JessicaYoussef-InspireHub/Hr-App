@@ -222,6 +222,7 @@
     <string name="and_its_status_is">وحالته هي</string>
     <string name="are_you_sure_you_want_to_delete_this_expense">هل أنت متأكد أنك تريد حذف هذة النفقة؟</string>
     <string name="are_you_sure_you_want_to_delete_this_report">هل أنت متأكد أنك تريد حذف هذا التقرير؟</string>
+    <string name="are_you_sure_you_want_to_delete_this_item">هل أنت متأكد من رغبتك في حذف هذا العنصر؟</string>
     <string name="cannot_delete">لا يمكن الحذف</string>
     <string name="update">تحديث</string>
     <string name="welcome">مرحباً</string>

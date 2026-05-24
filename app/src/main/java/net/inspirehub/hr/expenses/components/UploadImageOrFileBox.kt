@@ -99,7 +99,7 @@ fun UploadImageOrFileBox(
             .fillMaxWidth()
             .clickable { showUploadSheet = true }
             .border(
-                width = 1.dp,
+                width = 2.dp,
                 color = colors.tertiaryColor,
                 shape = RoundedCornerShape(12.dp)
             )

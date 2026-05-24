@@ -18,6 +18,13 @@ import net.inspirehub.hr.sign_in.data.SignInApiService
 import org.json.JSONObject
 
 @Serializable
+data class ExpenseAttachmentResponse(
+    val id: Int,
+    val name: String,
+    val mimetype: String
+)
+
+@Serializable
 data class ExpenseTax(
     val id: Int,
     val name: String,
@@ -58,7 +65,8 @@ data class Expense(
     val tax_amount: Double? = null,
     val tax_id: Int? = null,
     val draft_total_amount: Double? = null,
-    val analytic_distribution: Map<String, Double> = emptyMap()
+    val analytic_distribution: Map<String, Double> = emptyMap(),
+    val attachments: List<ExpenseAttachmentResponse> = emptyList()
 )
 
 

@@ -413,7 +413,9 @@ fun AddExpensesScreen(
 
                 AttachmentsSection(
                     selectedFiles = selectedFiles,
-                    onFilesChange = { selectedFiles = it }
+                    onFilesChange = { selectedFiles = it },
+                    existingFiles = emptyList(),
+                    onDeleteExisting = { }
                 )
             }
             if (isLoading) {

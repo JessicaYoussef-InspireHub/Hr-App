@@ -63,6 +63,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     private val _isFakeLocation = MutableStateFlow(false)
     val isFakeLocation: StateFlow<Boolean> = _isFakeLocation
 
+    private var hasPrintedDistanceLog = false
+
     fun startPollingAttendance(token: String) {
         viewModelScope.launch {
             while(true) {
@@ -249,6 +251,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             null
         ).addOnSuccessListener { location ->
 
+
             if (location == null) {
                 Log.e("Location", "❌ Location is null")
                 _isWithinDistance.value = false
@@ -273,7 +276,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
             _currentLat.value = location.latitude
             _currentLng.value = location.longitude
-            Log.d("Location", "📍 Current location: ${location.latitude}, ${location.longitude}")
+//            Log.d("Location", "📍 Current location: ${location.latitude}, ${location.longitude}")
 
             var matchedCompany: CompanyLocation? = null
 
@@ -288,22 +291,23 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 )
                 val distance = results[0]
 
-//                if (_isAllowedLocation.value) {
-//                    Log.d("DistanceCheck", "✅ Company ID ${matchedCompany!!.id} is allowed")
-//                } else {
-//                    Log.d("DistanceCheck", "❌ Company ID ${matchedCompany!!.id} is NOT allowed")
-//                }
-
-                Log.d(
-                    "DistanceCheck",
-                    "Company: ${company.name} | Lat: ${company.lat}, Lng: ${company.lng} | " +
-                            "Distance: $distance meters | AllowedDistance: ${company.allowedDistance} meters"
-                )
+                if (!hasPrintedDistanceLog) {
+                    Log.d(
+                        "DistanceCheck",
+                        "Company: ${company.name} | Lat: ${company.lat}, Lng: ${company.lng} | " +
+                                "Distance: $distance meters | AllowedDistance: ${company.allowedDistance} meters"
+                    )
+                }
 
                 if (distance <=  company.allowedDistance) {
                     matchedCompany = company
+                    if (!hasPrintedDistanceLog) {
                     Log.d("DistanceCheck", "${company.name} is within allowed distance ✅")
-                }
+                }}
+            }
+
+            if (!hasPrintedDistanceLog) {
+                hasPrintedDistanceLog = true
             }
 
             if (matchedCompany != null) {
@@ -312,19 +316,20 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                 // 🔥 تحقق من صلاحية الموقع
                 _isAllowedLocation.value = allowedLocationIds.contains(matchedCompany!!.id)
-
+                if (!hasPrintedDistanceLog) {
                 Log.d(
                     "DistanceCheck",
                     "Employee is within allowed distance for company: ${matchedCompany!!.name} | " +
                             "ID: ${matchedCompany!!.id} | Allowed: ${_isAllowedLocation.value}"
-                )
+                )}
 
             } else {
                 _isWithinDistance.value = false
                 _currentCompanyId.value = null
                 _isAllowedLocation.value = true
+                if (!hasPrintedDistanceLog) {
                 Log.d("DistanceCheck", "User is not within any allowed company distance")
-            }
+            }}
         }
     }
 

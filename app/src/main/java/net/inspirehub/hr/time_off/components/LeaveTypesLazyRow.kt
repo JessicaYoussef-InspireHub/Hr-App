@@ -26,7 +26,7 @@ fun LeaveTypesLazyRow(
         horizontalArrangement = Arrangement.spacedBy(35.dp)
     ) {
         items(leaveTypes) { leaveType ->
-            val colorHex = leaveType.color?.ifEmpty { "#FFFFFF" } ?: "#FFFFFF"
+            val colorHex = leaveType.color?.ifEmpty { "0xFFb7f73e" } ?: "0xFFb7f73e"
             val color = try {
                 Color(colorHex.toColorInt())
             } catch (e: Exception) {

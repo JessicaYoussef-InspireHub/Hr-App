@@ -52,18 +52,28 @@ suspend fun editExpense(
                 put("payment_mode", paymentMode)
                 put("tax_ids", taxIds)
                 put("analytic_distribution", JSONObject(analyticDistribution))
-                put("delete_attachment_ids", deleteAttachmentIds)
+                put("delete_attachment_ids", JSONArray(deleteAttachmentIds))
 
-                put("attachments", JSONArray().apply {
-                    attachments.forEach { attachment ->
-                        put(JSONObject().apply {
-                            put("name", attachment.name)
-                            put("data", attachment.data)
-                            put("mimetype", attachment.mimetype)
-                        })
-                    }
-                })
+                if (attachments.isNotEmpty()) {
+                    put("attachments", JSONArray().apply {
+                        attachments.forEach { attachment ->
+                            put(JSONObject().apply {
+                                put("name", attachment.name)
+                                put("data", attachment.data)
+                                put("mimetype", attachment.mimetype)
+                            })
+                        }
+                    })
+                }
             })
+        }
+
+        println("📤 test EDIT REQUEST BODY = ${body.toString(2)}")
+
+        println("🟢 test DELETE IDS = $deleteAttachmentIds")
+
+        attachments.forEach {
+            println("🟢 test ATTACHMENT = ${it.name}")
         }
 
         val response = ApiClient.httpClient.post(

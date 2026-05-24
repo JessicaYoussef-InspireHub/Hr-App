@@ -153,6 +153,11 @@ fun CheckInOutScreen(
     val employeeFirstName = employeeFullName.split(" ").firstOrNull() ?: employeeFullName
 
 
+    DisposableEffect(isWithinDistance) {
+        Log.d("disable", "changed -> $isWithinDistance")
+        onDispose { }
+    }
+
     @Composable
     fun Modifier.noClickable(): Modifier = this.clickable(
         interactionSource = remember { MutableInteractionSource() },
@@ -161,10 +166,6 @@ fun CheckInOutScreen(
         // no click effect
     }
 
-
-    println("jessica youssef $attendanceStatus")
-    println("jessica youssef $lastCheckIn")
-    println("jessica youssef $lastCheckOut")
 
     fun formatUtcToLocal(dateTimeString: String): String {
         return try {
@@ -518,7 +519,6 @@ fun CheckInOutScreen(
                 } else {
                     Text(
                         if (attendanceStatus == "checked_in") {
-                            println("jessica youssef $checkInTime")
                             stringResource(
                                 R.string.checked_in_message,
                                 checkInTime
@@ -535,7 +535,7 @@ fun CheckInOutScreen(
                         fontWeight = FontWeight.Medium,
                     )
                 }
-                Log.d("disable", "isWithinDistance from state: $isWithinDistance")
+//                Log.d("disable", "isWithinDistance from state: $isWithinDistance")
 
                 if (isWithinDistance == false) {
                     Text(

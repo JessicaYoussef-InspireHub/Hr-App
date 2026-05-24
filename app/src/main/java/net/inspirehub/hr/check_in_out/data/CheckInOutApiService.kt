@@ -26,6 +26,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 
+private var hasPrintedServerResponse = false
+
 @Serializable
 data class AttendanceStatusResponseWrapper(
     val result: AttendanceStatusResult
@@ -216,7 +218,11 @@ suspend fun sendAttendanceAction(
         }
 
         val responseText = response.bodyAsText()
-        println("🟢 Server Response: $responseText")
+
+        if (!hasPrintedServerResponse) {
+            println("🟢 Server Response: $responseText")
+            hasPrintedServerResponse = true
+        }
 
         val json = Json.parseToJsonElement(responseText).jsonObject
         val resultObj = json["result"]?.jsonObject
@@ -317,7 +323,10 @@ suspend fun fetchAttendanceStatus(
             }
 
         val responseText = response.bodyAsText()
-        println("🟢 Server Response: $responseText")
+        if (!hasPrintedServerResponse) {
+            println("🟢 Server Response: $responseText")
+            hasPrintedServerResponse = true
+        }
 
         val json = Json.parseToJsonElement(responseText).jsonObject
         val resultObj = json["result"]?.jsonObject

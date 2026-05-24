@@ -49,7 +49,6 @@ import net.inspirehub.hr.expenses.components.PaidBy
 import net.inspirehub.hr.expenses.components.SaveCancelButton
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.components.TotalPriceExpenses
-import net.inspirehub.hr.expenses.components.UploadImageOrFileBox
 import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.ExpenseCategory
 import net.inspirehub.hr.expenses.data.ExpenseCurrency
@@ -60,7 +59,9 @@ import net.inspirehub.hr.expenses.data.fetchExpenses
 import net.inspirehub.hr.expenses.data.fetchTaxes
 import java.time.LocalDate
 import android.net.Uri
+import net.inspirehub.hr.expenses.components.AttachmentsSection
 import net.inspirehub.hr.expenses.data.ExpenseAttachment
+import net.inspirehub.hr.expenses.data.ExpenseAttachmentResponse
 import net.inspirehub.hr.utils.getFileName
 import net.inspirehub.hr.utils.getMimeType
 import net.inspirehub.hr.utils.uriToBase64
@@ -98,6 +99,7 @@ fun EditExpenseScreen(
     val failedMessage = stringResource(R.string.failed_to_update_expense)
     var selectedFiles by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var deleteAttachmentIds by remember { mutableStateOf<List<Int>>(emptyList()) }
+    var existingAttachments by remember { mutableStateOf<List<ExpenseAttachmentResponse>>(emptyList()) }
 
     LaunchedEffect(expenseId) {
         isFetching = true
@@ -137,6 +139,10 @@ fun EditExpenseScreen(
                     company_id = 0,
                     company_name = ""
                 )
+            }
+
+            expense?.let {
+                existingAttachments = it.attachments
             }
         }
 
@@ -190,7 +196,6 @@ fun EditExpenseScreen(
                                     mimetype = getMimeType(context, uri)
                                 )
                             }
-
                             scope.launch {
                                 val success = editExpense(
                                     context = context,
@@ -379,9 +384,14 @@ fun EditExpenseScreen(
                     }
                     Spacer(modifier = Modifier.height(25.dp))
 
-                    UploadImageOrFileBox(
-                        onFilesSelected = {
-                            selectedFiles = it
+                    AttachmentsSection(
+                        existingFiles = existingAttachments,
+                        selectedFiles = selectedFiles,
+                        onFilesChange = { selectedFiles = it },
+                        onDeleteExisting = { id ->
+                            deleteAttachmentIds = deleteAttachmentIds + id
+                            existingAttachments =
+                                existingAttachments.filter { it.id != id }
                         }
                     )
                 }
