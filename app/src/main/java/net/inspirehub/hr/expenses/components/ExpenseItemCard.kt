@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -46,6 +47,7 @@ import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.submitExpense
 import net.inspirehub.hr.utils.formatNumber
+import androidx.compose.material.icons.filled.AttachFile
 
 data class ExpenseItem(
     val id: Int,
@@ -55,7 +57,8 @@ data class ExpenseItem(
     val status: String,
     val taxesAmount: Int?,
     val currencySymbol: String?,
-    val currencyPosition: String?
+    val currencyPosition: String?,
+    val hasAttachments: Boolean = false
 )
 
 @Composable
@@ -133,7 +136,18 @@ fun ExpenseItemCard(
                     modifier = Modifier.weight(1f)
                 )
 
+                if (expense.hasAttachments) {
+                    Icon(
+                        imageVector = Icons.Default.AttachFile,
+                        contentDescription = "Attachments",
+                        tint = colors.tertiaryColor,
+                        modifier = Modifier
+                            .size(18.dp)
+                    )
+                }
+
                 if (isSelectionMode) {
+                    Spacer(modifier = Modifier.width(6.dp))
                     Box(
                         modifier = Modifier
                             .size(24.dp)
@@ -172,6 +186,7 @@ fun ExpenseItemCard(
                 }
 
                 if (isAddMode) {
+                    Spacer(modifier = Modifier.width(6.dp))
                     Button(
                         onClick = { onSelect() },
                         colors = ButtonDefaults.buttonColors(

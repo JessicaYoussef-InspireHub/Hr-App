@@ -269,6 +269,10 @@
     <string name="search_report_by_name">ابحث عن التقرير بالاسم...</string>
     <string name="submitted">تم الإرسال</string>
     <string name="search_here">ابحث هنا...</string>
+    <string name="filter_by_attachment">تصفية حسب المرفق</string>
+    <string name="has_attachment">يحتوي على مرفق</string>
+    <string name="no_attachment">لا يحتوي على مرفق</string>
+    <string name="report_sent_to_your_manger_successfully">تم إرسال التقرير إلى مديرك بنجاح</string>
 
 </resources>
 

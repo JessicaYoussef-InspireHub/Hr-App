@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
@@ -25,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,10 +41,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.ExpenseReport
+import net.inspirehub.hr.expenses.data.submitSheet
 import net.inspirehub.hr.utils.formatNumber
 
 @Composable
@@ -50,7 +55,8 @@ fun ReportCard(
     isSelectionMode: Boolean,
     isSelected: Boolean,
     onSelect: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    onSendSuccess: suspend () -> Unit
 ) {
 
     val colors = appColors()
@@ -61,6 +67,12 @@ fun ReportCard(
     val sharedPref = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPref.getLanguage()
     var showLockedDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val icon = if (canEdit)
+        Icons.AutoMirrored.Filled.Send
+    else
+        Icons.Default.Check
+
 
     fun formatDate(input: String): String {
         return try {
@@ -113,39 +125,72 @@ fun ReportCard(
                         colors.onBackgroundColor,
                     fontSize = 18.sp
                 )
-                if (isSelectionMode) {
-                    Box(
+
+                Row {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = if (canEdit) "Send Report" else "Already Submitted",
+                        tint = colors.tertiaryColor,
                         modifier = Modifier
-                            .size(24.dp)
-                            .clickable { onSelect() },
-                        contentAlignment = Alignment.Center
-                    ) {
+                            .size(22.dp)
+                            .rotate(if (canEdit) -30f else 0f)
+                            .clickable(enabled = canEdit) {
+                                if (canEdit) {
+                                    scope.launch {
+                                        val token = sharedPref.getToken().orEmpty()
+
+                                        val success = submitSheet(
+                                            context = context,
+                                            token = token,
+                                            sheetId = report.sheet_id
+                                        )
+
+                                        if (success) {
+                                            onSendSuccess()
+                                        } else {
+                                            println("❌ Failed to submit")
+                                        }
+                                    }
+                                }
+                            }
+                    )
+
+
+                    if (isSelectionMode) {
+                        Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .size(20.dp)
-                                .background(
-                                    color = if (isSelected)
-                                        colors.tertiaryColor
-                                    else
-                                        colors.transparent,
-                                    shape = RoundedCornerShape(50)
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = if (isSelected)
-                                        colors.tertiaryColor
-                                    else
-                                        colors.onBackgroundColor,
-                                    shape = RoundedCornerShape(50)
-                                ),
+                                .size(24.dp)
+                                .clickable { onSelect() },
                             contentAlignment = Alignment.Center
                         ) {
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Select",
-                                    tint = colors.onSecondaryColor,
-                                )
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .background(
+                                        color = if (isSelected)
+                                            colors.tertiaryColor
+                                        else
+                                            colors.transparent,
+                                        shape = RoundedCornerShape(50)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isSelected)
+                                            colors.tertiaryColor
+                                        else
+                                            colors.onBackgroundColor,
+                                        shape = RoundedCornerShape(50)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Select",
+                                        tint = colors.onSecondaryColor,
+                                    )
+                                }
                             }
                         }
                     }
@@ -153,7 +198,7 @@ fun ReportCard(
             }
 
             Text(
-                text =   formatNumber(report.total_amount.toString() , currentLanguage),
+                text = formatNumber(report.total_amount.toString(), currentLanguage),
                 color = colors.onBackgroundColor.copy(alpha = 0.7f),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Light
@@ -235,7 +280,7 @@ fun ReportCard(
                                     )
 
                                     Text(
-                                        formatNumber(it.amount.toString() , currentLanguage),
+                                        formatNumber(it.amount.toString(), currentLanguage),
                                         color = colors.onBackgroundColor.copy(alpha = 0.7f)
                                     )
 
@@ -252,7 +297,12 @@ fun ReportCard(
                                                             colors.tertiaryColor
                                                 )
                                             ) {
-                                                append(formatNumber(formatDate(it.date) , currentLanguage))
+                                                append(
+                                                    formatNumber(
+                                                        formatDate(it.date),
+                                                        currentLanguage
+                                                    )
+                                                )
                                             }
                                         },
                                         color = colors.onBackgroundColor.copy(alpha = 0.7f),

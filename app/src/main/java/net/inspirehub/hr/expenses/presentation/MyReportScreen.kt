@@ -334,7 +334,22 @@ fun MyReportScreen(
                                                 selectedReports + report.sheet_id
                                             }
                                     },
-                                    navController = navController
+                                    navController = navController,
+                                    onSendSuccess = {
+                                        scope.launch {
+                                            isLoading = true
+
+                                            val updatedReports = fetchReports(context, token)
+
+                                            reports = updatedReports
+
+                                            isLoading = false
+
+                                            snackBarHostState.showSnackbar(
+                                                context.getString(R.string.report_sent_to_your_manger_successfully)
+                                            )
+                                        }
+                                    }
                                 )
                             }
                             Spacer(modifier = Modifier.height(10.dp))

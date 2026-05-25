@@ -60,7 +60,7 @@ import kotlinx.coroutines.launch
 import net.inspirehub.hr.expenses.components.AddExpensesButton
 import net.inspirehub.hr.expenses.components.EditReportBottomSheet
 import net.inspirehub.hr.expenses.components.EmptyExpensesDialog
-import net.inspirehub.hr.expenses.data.submitReport
+import net.inspirehub.hr.expenses.data.sendReport
 
 @SuppressLint("AutoboxingStateCreation")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -157,7 +157,7 @@ fun CreateReportScreen(
                                 val expenseIds = selectedExpenses.map { it.id }
 
 
-                                val success = submitReport(
+                                val success = sendReport(
                                     context = context,
                                     token = token,
                                     expenseIds = expenseIds,

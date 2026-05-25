@@ -48,21 +48,16 @@ fun ExpensesFilterBottomSheet(
     onDismiss: () -> Unit,
     onDateReset: () -> Unit,
     onStatusReset: () -> Unit,
-    expenses: Boolean = true
+    expenses: Boolean = true,
+    attachmentFilter: Boolean? = null,
+    onAttachmentFilterChange: (Boolean?) -> Unit = {}
 ) {
     val colors = appColors()
 
     var dateError by remember { mutableStateOf(false) }
-    var showDateSection by remember {
-        mutableStateOf(
-            tempFromDate != null || tempToDate != null
-        )
-    }
-
-    var showStatusSection by remember {
-        mutableStateOf(selectedStatuses.isNotEmpty())
-    }
-
+    var showDateSection by remember { mutableStateOf(tempFromDate != null || tempToDate != null) }
+    var showAttachmentSection by remember { mutableStateOf(attachmentFilter != null) }
+    var showStatusSection by remember { mutableStateOf(selectedStatuses.isNotEmpty()) }
 
 
     ModalBottomSheet(
@@ -183,6 +178,46 @@ fun ExpensesFilterBottomSheet(
                     selectedStatuses = selectedStatuses,
                     onStatusChange = onStatusChange,
                     expenses = expenses
+                )
+            }
+
+            if (expenses) {
+                Spacer(Modifier.height(35.dp))
+
+                Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = showAttachmentSection,
+                    onCheckedChange = {
+                        showAttachmentSection = it
+                        if (!it) {
+                            onAttachmentFilterChange(null)
+                        }
+                    },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = colors.tertiaryColor,
+                        checkmarkColor = colors.onSecondaryColor,
+                        uncheckedColor = colors.onBackgroundColor
+                    )
+                )
+
+                Text(
+                    text = stringResource(R.string.filter_by_attachment),
+                    color = colors.onBackgroundColor,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }}
+
+            if (showAttachmentSection) {
+                AttachmentFlowRow(
+                    selected = attachmentFilter,
+                    onChange = {
+                        onAttachmentFilterChange(it)
+                    }
                 )
             }
 

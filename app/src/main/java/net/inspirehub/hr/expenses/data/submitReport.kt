@@ -15,7 +15,7 @@ import net.inspirehub.hr.lunch.data.ApiClient
 import org.json.JSONObject
 import org.json.JSONArray
 
-suspend fun submitReport(
+suspend fun sendReport(
     context: Context,
     token: String,
     expenseIds: List<Int>,
@@ -63,6 +63,46 @@ suspend fun submitReport(
 
     } catch (e: Exception) {
         println("❌ Submit Report error: ${e.message}")
+        false
+    }
+}
+
+suspend fun submitSheet(
+    context: Context,
+    token: String,
+    sheetId: Int
+): Boolean {
+    return try {
+
+        val sharedPref = SharedPrefManager(context)
+        val baseUrl = sharedPref.getCompanyUrl()
+
+        val body = JSONObject().apply {
+            put("jsonrpc", "2.0")
+            put("params", JSONObject().apply {
+                put("token", token)
+                put("sheet_id", sheetId)
+            })
+        }
+
+        val response = ApiClient.httpClient.post(
+            "$baseUrl/api/expenses/sheet/action_submit"
+        ) {
+            contentType(ContentType.Application.Json)
+            setBody(body.toString())
+        }
+
+        val responseText = response.bodyAsText()
+        println("📤 Submit Sheet Response: $responseText")
+
+        val json = Json.parseToJsonElement(responseText)
+        val result = json.jsonObject["result"]?.jsonObject
+        val status = result?.get("status")?.jsonPrimitive?.content
+
+        status == "success"
+
+    } catch (e: Exception) {
+        println("❌ submitSheet error: ${e.message}")
         false
     }
 }

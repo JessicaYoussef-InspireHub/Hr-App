@@ -265,8 +265,8 @@ fun MyCalendarPicker(
                                 when {
                                     isWeekendHoliday || publicHolidayDates.contains(date) -> if (isDialogMode) colors.surfaceColor else colors.surfaceVariant
                                     firstState == "refuse" -> colors.transparent
-                                    firstState == "draft" || firstState == "confirm" -> colors.tertiaryColor
-                                    firstState == "validate" -> leaveTypeColors[firstLeaveType] ?: colors.tertiaryColor
+                                    firstState == "draft" || firstState == "confirm" -> colors.transparent
+                                    firstState == "validate" -> leaveTypeColors[firstLeaveType] ?: colors.transparent
                                     firstState == null && isToday -> colors.tertiaryColor
                                     else -> leaveTypeColors[firstLeaveType] ?: colors.transparent
                                 },

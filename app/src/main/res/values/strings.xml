@@ -269,5 +269,9 @@ You have</string>
     <string name="search_report_by_name">Search report by name...</string>
     <string name="submitted">Submitted</string>
     <string name="search_here">Search here...</string>
+    <string name="filter_by_attachment">Filter by attachment</string>
+    <string name="has_attachment">Has attachment</string>
+    <string name="no_attachment">No attachment</string>
+    <string name="report_sent_to_your_manger_successfully">Report sent to your manger successfully</string>
 
 </resources>

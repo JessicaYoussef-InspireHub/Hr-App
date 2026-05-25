@@ -112,6 +112,9 @@ fun ExpensesScreen(
     var tempFromDate by remember { mutableStateOf(fromDate) }
     var tempToDate by remember { mutableStateOf(toDate) }
 
+    var filterByAttachment by remember { mutableStateOf<Boolean?>(null) }
+    var tempFilterByAttachment by remember { mutableStateOf<Boolean?>(null) }
+
     val filteredExpenses = expenses.filter { expense ->
 
         val matchesSearch = expense.name.contains(searchQuery, ignoreCase = true)
@@ -143,7 +146,13 @@ fun ExpensesScreen(
             }
         }
 
-        matchesSearch && matchesStatus && matchesDate
+        val matchesAttachment = when (filterByAttachment) {
+            true -> expense.attachments.isNotEmpty()
+            false -> expense.attachments.isEmpty()
+            null -> true
+        }
+
+        matchesSearch && matchesStatus && matchesDate && matchesAttachment
     }
 
 
@@ -446,7 +455,8 @@ fun ExpensesScreen(
                                     status = expense.state,
                                     taxesAmount = expense.tax_amount?.toInt(),
                                     currencySymbol = expense.currency_symbol,
-                                    currencyPosition = expense.currency_position
+                                    currencyPosition = expense.currency_position,
+                                    hasAttachments = expense.attachments.isNotEmpty()
                                 ),
                                 onDelete = {
                                     scope.launch {
@@ -618,6 +628,8 @@ fun ExpensesScreen(
                     tempFromDate = null
                     tempToDate = null
                     tempSelectedStatuses = emptySet()
+                    tempFilterByAttachment = null
+                    filterByAttachment = null
                 },
 
 
@@ -626,6 +638,7 @@ fun ExpensesScreen(
                     fromDate = tempFromDate
                     toDate = tempToDate
                     selectedStatuses = tempSelectedStatuses
+                    filterByAttachment = tempFilterByAttachment
                     showFilterSheet = false
                 },
 
@@ -641,7 +654,13 @@ fun ExpensesScreen(
                 onStatusReset = {
                     tempSelectedStatuses = emptySet()
                     selectedStatuses = emptySet()
-                }
+                },
+
+                attachmentFilter = tempFilterByAttachment,
+                onAttachmentFilterChange = {
+                    tempFilterByAttachment = it
+                },
+
             )
         }
 
