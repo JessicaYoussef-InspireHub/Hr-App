@@ -112,6 +112,9 @@ dependencies {
     implementation (libs.androidx.room.ktx)
     implementation(libs.coil.compose)
 
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
+
     kapt(libs.androidx.room.compiler)
 
 }

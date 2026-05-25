@@ -273,5 +273,8 @@ You have</string>
     <string name="has_attachment">Has attachment</string>
     <string name="no_attachment">No attachment</string>
     <string name="report_sent_to_your_manger_successfully">Report sent to your manger successfully</string>
+    <string name="later">Later</string>
+    <string name="update_available">Update Available</string>
+    <string name="a_new_version_is_available_You_can_update_now_or_continue_using_the_app">A new version is available. You can update now or continue using the app.</string>
 
 </resources>
