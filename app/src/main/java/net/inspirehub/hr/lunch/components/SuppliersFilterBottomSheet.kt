@@ -62,7 +62,7 @@ fun SuppliersFilterBottomSheet(
     var suppliers by remember { mutableStateOf<List<Supplier>>(emptyList()) }
     var selectedSuppliers by remember { mutableStateOf<List<Boolean>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
-    val isAllSelected = selectedSuppliers.all { it }
+    val isAllSelected = suppliers.isNotEmpty() && selectedSuppliers.all { it }
 
 
     LaunchedEffect(showSheet) {
@@ -132,7 +132,7 @@ fun SuppliersFilterBottomSheet(
                         )
 
 
-                        if (!isLoading)
+                        if (!isLoading && suppliers.isNotEmpty()) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -153,7 +153,7 @@ fun SuppliersFilterBottomSheet(
                                     fontWeight = FontWeight.Medium,
                                     color = colors.onBackgroundColor,
                                 )
-                            }
+                            }}
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -170,7 +170,24 @@ fun SuppliersFilterBottomSheet(
                         ) {
                     if (isLoading) {
                         SmallLoading()
-                    } else {
+                    }  else if (suppliers.isEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Text(
+                                text = stringResource(R.string.no_suppliers_yet),
+                                color = colors.tertiaryColor,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
+                    }
+                    else {
 
                         suppliers.forEachIndexed { index, supplier ->
                             Column {
@@ -280,7 +297,7 @@ fun SuppliersFilterBottomSheet(
                                             horizontal = 16.dp,
                                             vertical = 8.dp
                                         ),
-                                        color = colors.surfaceColor
+                                        color = colors.surfaceTint
                                     )
                                 }
                             }

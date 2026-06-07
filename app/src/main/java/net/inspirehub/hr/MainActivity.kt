@@ -11,24 +11,18 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.notifications.data.NotificationDatabase
 import net.inspirehub.hr.notifications.data.NotificationEntity
 import net.inspirehub.hr.scan_qr_code.data.ScanQrCodeViewModel
-import net.inspirehub.hr.ui.theme.LocalDarkMode
 import net.inspirehub.hr.ui.theme.HrTheme
 import java.util.Locale
 import com.google.firebase.messaging.FirebaseMessaging
@@ -38,12 +32,7 @@ import net.inspirehub.hr.scan_qr_code.data.AppConfig
 
 
 class MainActivity : AppCompatActivity() {
-
-
-
-
     private lateinit var broadcastReceiver: BroadcastReceiver
-    private lateinit var navController: NavController
     private var notificationIntent: Intent? = null
 
 
@@ -111,7 +100,6 @@ class MainActivity : AppCompatActivity() {
         setContent {
 
             val navController = rememberNavController()
-            val intentState = rememberSaveable { mutableStateOf(notificationIntent) }
                 val openedFromNotification =
                 notificationIntent?.getStringExtra("navigateTo") == "NotificationsScreen"
 
@@ -124,46 +112,32 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            val context = LocalContext.current
-            val sharedPref = SharedPrefManager(context)
-            val darkModeState =
-                rememberSaveable { mutableStateOf(sharedPref.isDarkModeEnabled()) }
 
-            CompositionLocalProvider(
-                LocalDarkMode provides darkModeState
-            ) {
-                HrTheme {
-                    val viewModell: ScanQrCodeViewModel = viewModel()
+            val sharedPref = SharedPrefManager(this)
+            val darkMode = sharedPref.isDarkModeEnabled()
+
+            CompositionLocalProvider {
+
+                HrTheme (
+                    darkMode = darkMode
+                ) {
+                    val anotherViewModel: ScanQrCodeViewModel = viewModel()
 
                     val openedFromNotification =
                         intent.getStringExtra("navigateTo") == "NotificationsScreen"
 
                     MyAppNavHost(
-                        viewModel = viewModell,
+                        viewModel = anotherViewModel,
                         navController = navController,
                         openedFromNotification = openedFromNotification)
 
 
 
                 }
-
-//                handleIntent(intent)
-
             }
         }
     }
 
-
-
-
-//    private fun handleIntent(intent: Intent?) {
-//        val navigateTo = intent?.getStringExtra("navigateTo")
-//        if (navigateTo == "NotificationsScreen" && ::navController.isInitialized) {
-//            navController.navigate("NotificationsScreen") {
-//                launchSingleTop = true
-//            }
-//        }
-//    }
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
@@ -194,12 +168,6 @@ class MainActivity : AppCompatActivity() {
             db.notificationDao().insert(notification)
         }
     }
-
-
-//    override fun onNewIntent(intent: Intent) {
-//        super.onNewIntent(intent)
-//        setIntent(intent)
-//    }
 
 
 
@@ -242,12 +210,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-//    override fun onResume() {
-//        super.onResume()
-//        loadAllNotifications()
-//    }
-
     private fun loadAllNotifications() {
         lifecycleScope.launch {
             val db = NotificationDatabase.getDatabase(this@MainActivity)
@@ -262,33 +224,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-//    private fun loadAllNotifications() {
-//        lifecycleScope.launch {
-//            try {
-//                val notifications = withContext(Dispatchers.IO) {
-//                    NotificationDatabase.getDatabase(this@MainActivity)
-//                        .notificationDao()
-//                        .getAllNotifications()
-//                }
-//                notifications.collect { notificationsList ->
-//                    Log.d("NOTIFICATIONS", "📋 Loaded ${notificationsList.size} notifications")
-//                }
-//            } catch (e: Exception) {
-//                Log.e("NOTIFICATIONS", "Error loading notifications: ${e.message}")
-//            }
-//        }
-//    }
-
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
     }
 
-}
-
-
-
-class NavViewModel : ViewModel() {
-    var navController: NavController? = null
 }

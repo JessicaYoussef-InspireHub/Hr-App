@@ -3,37 +3,17 @@ import androidx.compose.ui.graphics.Color
 
 
 
-val Main_color = Color(0xFFb7f73e)
-val Disabled_color = Color(0xFFCCC1C9)
-val Discard_color = Color(0xFFD3D3D3)
+val Dark_Main_color = Color(0xFFb7f73e)
+val Light_Main_color = Color(0xFF4b644a)
 val Dark_grey = Color(0xFF5E5D5D)
-val Lunch_card = Color(0xFF2D2C2C)
+val Medium_grey = Color(0xFF9E9E9E)
+val Dark_Lunch_card = Color(0xFF2D2C2C)
 
-//val Light_green = Color(0xFFC8E6C9)
+val Light_Lunch_card = Color(0xFFF2F2F2)
 val Light_green = Color(0xFFDFF4D9)
 val Dark_green = Color(0xFF2E7D32)
 val Light_yellow = Color(0xFFFFF3CD)
 val Dark_yellow = Color(0xFFF0AD4E)
-
-
-val Delete_color = Color(0xFF3F3F4D)
-val Close_color = Color(0xFFA6A4A4)
-val Validate_color = Color(0xFF4CAF50)
-val Lines_color = Color(0xFFF7F7F7)
-val dark_background_color = Color(0xFF121212)
-
-val weekendAndPublicColor = Color(0xFF1C1C1C)
-
-
-
-
-//val Main_color_dark = Color(0xFF222222)
-//val Disabled_color_dark = Color(0xFF4E4E4E)
-//val Discard_color_dark = Color(0xFF616161)
-//val Dark_grey_dark = Color(0xFFB0B0B0)
-//val Light_green_dark = Color(0xFF81C784)
-//val Delete_color_dark = Color(0xFFE57373)
-//val Close_color_dark = Color(0xFF9E9E9E)
-//val Validate_color_dark = Color(0xFF66BB6A)
-//val Lines_color_dark = Color(0xFF2C2C2C)
-
+val darkWeekendAndPublicColor = Color(0xFF1C1C1C)
+val lightWeekendAndPublicColor = Color(0xFFF5F5F5)
+val lightBottomSheetGray = Color(0xFFE0E0E0)

@@ -130,6 +130,10 @@ class SharedPrefManager(context: Context) {
         return prefs.getBoolean("dark_mode", false)
     }
 
+    fun setDarkModeEnabled(enabled: Boolean) {
+        prefs.edit { putBoolean("dark_mode", enabled) }
+    }
+
     fun saveTimeDifference(diffMinutes: Long) {
         prefs.edit { putLong("time_difference", diffMinutes) }
     }

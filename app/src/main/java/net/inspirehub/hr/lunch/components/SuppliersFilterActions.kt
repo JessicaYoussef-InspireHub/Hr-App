@@ -63,7 +63,7 @@ fun SuppliersFilterActions(
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colors.inverseOnSurface,
-                contentColor = colors.onSecondaryColor
+                contentColor = colors.onSecondaryContainer
             ),
             shape = RoundedCornerShape(8.dp),
         ) {

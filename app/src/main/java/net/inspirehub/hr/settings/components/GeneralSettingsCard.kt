@@ -38,9 +38,10 @@ import androidx.navigation.NavController
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.settings.data.SettingsViewModel
-import net.inspirehub.hr.ui.theme.LocalDarkMode
 import java.util.Locale
 import android.content.res.Configuration
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import net.inspirehub.hr.appColors
 
 
@@ -54,8 +55,8 @@ fun GeneralSettingsCard(
     val sharedPref = remember { SharedPrefManager(context) }
     var locale by remember { mutableStateOf(Locale(sharedPref.getLanguage())) }
     var expanded by remember { mutableStateOf(false) }
-    val darkModeState = LocalDarkMode.current
     var showDialog by remember { mutableStateOf(false) }
+    var isDarkMode by remember { mutableStateOf(sharedPref.isDarkModeEnabled()) }
 
     @SuppressLint("LocalContextConfigurationRead")
     fun updateLocale(newLocale: Locale) {
@@ -187,23 +188,24 @@ fun GeneralSettingsCard(
                 )
 
                 SettingsItem(
-                    label = stringResource(R.string.dark_mode),
+                    label =stringResource(R.string.dark_mode),
                     icon = Icons.Default.DarkMode,
-                    onClick = {
-//                        val newMode = !darkModeState.value
-//                        darkModeState.value = newMode
-//                        sharedPref.setDarkModeEnabled(newMode)
-                    },
+                    onClick = {},
                     trailingIcon = {
-//                        CustomSwitch(
-////                            checked = darkModeState.value,
-//                            checked = true,
-//                            onCheckedChange = {
-////                                isChecked ->
-////                                darkModeState.value = isChecked
-////                                sharedPref.setDarkModeEnabled(isChecked)
-//                            },
-//                        )
+                        Switch(
+                            checked = isDarkMode,
+                            onCheckedChange = { enabled ->
+                                isDarkMode = enabled
+                                sharedPref.setDarkModeEnabled(enabled)
+                                (context as Activity).recreate()
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = colors.onSecondaryColor,
+                                checkedTrackColor = colors.tertiaryColor,
+                                uncheckedThumbColor = colors.onSecondaryColor,
+                                uncheckedTrackColor = colors.onBackgroundColor
+                            )
+                        )
                     }
                 )
             }

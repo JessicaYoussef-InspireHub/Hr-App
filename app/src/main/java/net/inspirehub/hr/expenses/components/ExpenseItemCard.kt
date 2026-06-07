@@ -112,7 +112,7 @@ fun ExpenseItemCard(
         colors = CardDefaults.cardColors(
             containerColor =
                 if (isClickable) colors.surfaceContainerHigh
-                else colors.surfaceColor
+                else colors.surfaceDim
         ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -243,7 +243,8 @@ fun ExpenseItemCard(
                                     if (isDimmed)
                                         colors.onBackgroundColor.copy(alpha = 0.7f)
                                     else
-                                        colors.tertiaryColor
+                                        colors.tertiaryColor,
+                                fontWeight = FontWeight.Bold
                             )
                         ) {
                             append(formatNumber(formatDate(expense.date), currentLanguage))
@@ -256,7 +257,8 @@ fun ExpenseItemCard(
                                 color = if (isDimmed)
                                     colors.onBackgroundColor.copy(alpha = 0.7f)
                                 else
-                                    colors.tertiaryColor
+                                    colors.tertiaryColor,
+                                fontWeight = FontWeight.Bold
                             )
                         ) {
                             append(expense.status)

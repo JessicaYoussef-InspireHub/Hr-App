@@ -18,7 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -172,7 +172,7 @@ fun LunchBottomSheet(
                             }
 
                             Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                                 contentDescription = "Favourite Icon",
                                 tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
                                 modifier = Modifier
@@ -203,9 +203,9 @@ fun LunchBottomSheet(
                     if (!description.isNullOrEmpty()) {
                         Text(
                             text = description,
-                            color = colors.inverseOnSurface,
+                            color = colors.surfaceTint,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
+                            fontSize = 18.sp,
                             maxLines = 4,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -213,15 +213,15 @@ fun LunchBottomSheet(
                     }
                     Text(
                         text = supplierName,
-                        color = colors.inverseOnSurface,
+                        color = colors.surfaceTint,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
+                        fontSize = 18.sp
                     )
                     Text(
                         text = localizedPrice,
-                        color = colors.inverseOnSurface,
+                        color = colors.surfaceTint,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
+                        fontSize = 18.sp
                     )
                 }
             }

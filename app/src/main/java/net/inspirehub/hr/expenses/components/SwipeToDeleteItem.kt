@@ -59,7 +59,7 @@ fun SwipeToDeleteItem(
             ) {
                 Text(
                     text = stringResource(R.string.delete),
-                    color = colors.onBackgroundColor,
+                    color = colors.onTertiaryContainer,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -147,7 +147,7 @@ fun SwipeToDeleteItem(
                     Button(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colors.inverseOnSurface,
-                            contentColor = colors.onSecondaryColor
+                            contentColor = colors.onSecondaryContainer
                         ),
                         shape = RoundedCornerShape(10.dp),
                         onClick = {

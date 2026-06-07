@@ -80,7 +80,7 @@ fun OrderRow(
             }
 
             Text(
-                formatNumber("${item.quantity}" , currentLanguage),
+                formatNumber("${item.quantity}", currentLanguage),
                 color = colors.onBackgroundColor,
                 fontWeight = FontWeight.Medium
             )
@@ -117,7 +117,7 @@ fun OrderRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                formatNumber(item.price.toString() , currentLanguage),
+                formatNumber(item.price.toString(), currentLanguage),
                 color = colors.onBackgroundColor,
                 fontWeight = FontWeight.Medium
             )
@@ -131,7 +131,6 @@ fun OrderRow(
                         onRemoveItem(item)
                     }
             )
-
         }
     }
 }

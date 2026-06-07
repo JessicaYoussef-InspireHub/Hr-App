@@ -114,7 +114,7 @@ fun CheckOutDialog(
                 Button(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colors.inverseOnSurface,
-                        contentColor = colors.onSecondaryColor
+                        contentColor = colors.onSecondaryContainer
                     ),
                     shape = RoundedCornerShape(10.dp),
                     onClick = { onCancel() }

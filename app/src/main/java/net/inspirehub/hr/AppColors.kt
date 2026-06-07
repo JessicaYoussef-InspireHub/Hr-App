@@ -4,9 +4,6 @@ package net.inspirehub.hr
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import net.inspirehub.hr.ui.theme.Dark_yellow
-import net.inspirehub.hr.ui.theme.Light_yellow
-
 data class AppColors(
     val tertiaryColor: Color,
     val onBackgroundColor: Color,
@@ -21,6 +18,10 @@ data class AppColors(
     val scrim: Color,
     val onErrorContainer : Color,
     val errorContainer : Color,
+    val onSecondaryContainer : Color,
+    val surfaceDim : Color,
+    val onTertiaryContainer : Color,
+    val surfaceTint : Color
 
 )
 
@@ -39,6 +40,10 @@ fun appColors(): AppColors {
         inversePrimary = MaterialTheme.colorScheme.inversePrimary,
         scrim = MaterialTheme.colorScheme.scrim,
         onErrorContainer = MaterialTheme.colorScheme.onErrorContainer,
-        errorContainer = MaterialTheme.colorScheme.errorContainer
+        errorContainer = MaterialTheme.colorScheme.errorContainer,
+        onSecondaryContainer = MaterialTheme.colorScheme.onSecondaryContainer,
+        surfaceDim = MaterialTheme.colorScheme.surfaceDim,
+        onTertiaryContainer = MaterialTheme.colorScheme.onTertiaryContainer,
+        surfaceTint = MaterialTheme.colorScheme.surfaceTint
     )
 }

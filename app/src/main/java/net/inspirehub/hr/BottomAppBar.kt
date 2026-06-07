@@ -142,8 +142,6 @@ fun BottomBar(
                 offset = DpOffset(x = (-1).dp, y = (-3).dp),
                 modifier = Modifier.background(colors.surfaceContainerHigh)
             ) {
-
-
                 DropdownMenuItem(
                     text =
                         {

@@ -212,7 +212,8 @@ fun ReportCard(
                             color = if (isState)
                                 colors.onBackgroundColor.copy(alpha = 0.7f)
                             else
-                                colors.tertiaryColor
+                                colors.tertiaryColor,
+                            fontWeight = if (!isState) FontWeight.Bold else FontWeight.Light
                         )
                     ) {
                         append(report.state)
@@ -294,7 +295,8 @@ fun ReportCard(
                                                         if (isState)
                                                             colors.onBackgroundColor.copy(alpha = 0.7f)
                                                         else
-                                                            colors.tertiaryColor
+                                                            colors.tertiaryColor,
+                                                    fontWeight = if (!isState) FontWeight.Bold else FontWeight.Light
                                                 )
                                             ) {
                                                 append(

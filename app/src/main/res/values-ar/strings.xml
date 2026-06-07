@@ -278,6 +278,7 @@
     <string name="a_new_version_is_available_You_can_update_now_or_continue_using_the_app">
 يتوفر إصدار جديد. يمكنك التحديث الآن أو الاستمرار في استخدام التطبيق.
 </string>
+    <string name="no_suppliers_yet">لا يوجد موردون حتى الآن</string>
 
 </resources>
 

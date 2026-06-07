@@ -510,16 +510,6 @@ fun ExpensesScreen(
                 }
             }
         }
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .clickable(enabled = false) {}
-            ) {
-                FullLoading()
-            }
-        }
-
-
 
         deleteErrorMessage?.let { reason ->
             DeleteExpenseErrorDialog(

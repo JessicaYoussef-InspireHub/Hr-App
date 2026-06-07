@@ -47,7 +47,7 @@ fun SwipeToDeleteReportItem(
             ) {
                 Text(
                     text = stringResource(R.string.delete),
-                    color = colors.onBackgroundColor,
+                    color = colors.onTertiaryContainer,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )

@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import net.inspirehub.hr.R
 import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.utils.convertToArabicDigits
+import java.util.Locale
 
 
 @Composable
@@ -53,7 +54,12 @@ fun FavoriteCard() {
     val cartItems by db.cartDao().getAllItemsFlow().collectAsState(initial = emptyList())
 
 
+
     favorites.forEachIndexed { index, item ->
+
+        val currentLocale = Locale.getDefault()
+
+
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -84,15 +90,20 @@ fun FavoriteCard() {
                         )
                         Text(
                             text = item.supplierName,
-                            color = colors.inverseOnSurface,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp
+                            color = colors.surfaceTint,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
                         )
                         Text(
-                            text = convertToArabicDigits(item.price),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = colors.inverseOnSurface
+                            text =
+                                if (currentLocale.language == "ar") {
+                                    convertToArabicDigits(item.price)
+                                } else {
+                                    item.price
+                                },
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.surfaceTint
                         )
                     }
                 }
@@ -154,7 +165,7 @@ fun FavoriteCard() {
             HorizontalDivider(
                 thickness = 1.dp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                color = colors.surfaceColor
+                color = colors.surfaceTint
 
             )}
         }

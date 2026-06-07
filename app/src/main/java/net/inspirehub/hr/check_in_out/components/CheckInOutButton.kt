@@ -29,7 +29,6 @@ fun CheckInOutButton(
     val colors = appColors()
 
     Button(
-//        enabled = isWithinDistance ,
         enabled = isWithinDistance && !isLoading,
         onClick = onClick,
         modifier = Modifier

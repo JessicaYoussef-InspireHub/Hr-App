@@ -257,7 +257,7 @@ fun MyReportScreen(
             )
 
         when {
-            isLoading -> {
+            isLoading || isLoadingReports -> {
                 FullLoading()
             }
 
@@ -455,13 +455,13 @@ fun MyReportScreen(
             )
         }
 
-        if (isLoading || isLoadingReports) {
-            Box(
-                modifier = Modifier
-                    .clickable(enabled = false) {}
-            ) {
-                FullLoading()
-            }
-        }
+//        if (isLoading || isLoadingReports) {
+//            Box(
+//                modifier = Modifier
+//                    .clickable(enabled = false) {}
+//            ) {
+//                FullLoading()
+//            }
+//        }
     }
 }

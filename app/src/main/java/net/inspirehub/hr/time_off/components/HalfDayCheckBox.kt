@@ -31,7 +31,8 @@ fun HalfDayCheckbox(
             checked = isChecked,
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
-                checkedColor = colors.onSecondaryColor,
+                checkmarkColor = colors.onSecondaryColor,
+                checkedColor = colors.onBackgroundColor,
                 uncheckedColor = colors.onBackgroundColor
             )
         )

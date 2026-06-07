@@ -97,7 +97,7 @@ fun ConfirmDeleteDialog(
                     onClick = { onDismiss() },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colors.inverseOnSurface,
-                        contentColor = colors.onSecondaryColor
+                        contentColor = colors.onSecondaryContainer
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {

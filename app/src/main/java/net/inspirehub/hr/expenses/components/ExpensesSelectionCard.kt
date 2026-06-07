@@ -165,7 +165,8 @@ fun ExpensesSelectionCard(
 
                                     withStyle(
                                         style = SpanStyle(
-                                            color = colors.tertiaryColor
+                                            color = colors.tertiaryColor,
+                                            fontWeight = FontWeight.Bold
                                         )
                                     ) {
                                         append(formatNumber(formatDate(expense.date) , currentLanguage))
@@ -175,7 +176,8 @@ fun ExpensesSelectionCard(
 
                                     withStyle(
                                         style = SpanStyle(
-                                            color = colors.tertiaryColor
+                                            color = colors.tertiaryColor,
+                                            fontWeight = FontWeight.Bold
                                         )
                                     ) {
                                         append(expense.state)

@@ -1,6 +1,5 @@
 package net.inspirehub.hr.lunch.components
 
-
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,7 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -103,7 +102,7 @@ fun LunchCard(
                 }
 
                 Icon(
-                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                     contentDescription = "Favourite Icon",
                     tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
                     modifier = Modifier
@@ -160,15 +159,15 @@ fun LunchCard(
                     )
                     Text(
                         text = supplierName,
-                        color = colors.inverseOnSurface,
+                        color = colors.surfaceTint,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp
+                        fontSize = 16.sp
                     )
                     Text(
                         text = localizedPrice,
-                        fontSize = 14.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
-                        color = colors.inverseOnSurface
+                        color = colors.surfaceTint
                     )
                 }
             }

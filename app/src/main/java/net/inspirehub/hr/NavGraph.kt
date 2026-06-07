@@ -134,7 +134,7 @@ fun MyAppNavHost(
             )
         }
 
-        composable("ExpensesScreen") { ExpensesScreen(navController , token = token ?: "") }
+        composable("ExpensesScreen") { ExpensesScreen(navController, token = token ?: "") }
 
         composable(
             route = "AddExpensesScreen?source={source}&reportId={reportId}&paymentMode={paymentMode}",
@@ -170,7 +170,11 @@ fun MyAppNavHost(
             arguments = listOf(navArgument("expenseId") { type = NavType.IntType })
         ) { backStackEntry ->
             val expenseId = backStackEntry.arguments?.getInt("expenseId") ?: 0
-            EditExpenseScreen(expenseId = expenseId , token = token ?: "" , navController = navController)
+            EditExpenseScreen(
+                expenseId = expenseId,
+                token = token ?: "",
+                navController = navController
+            )
         }
 
         composable("LunchScreen") {

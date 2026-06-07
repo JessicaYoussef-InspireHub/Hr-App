@@ -2,6 +2,7 @@ package net.inspirehub.hr.expenses.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
@@ -23,6 +24,7 @@ fun ExpensesSnackBar(
         contentColor = colors.tertiaryColor,
         modifier = Modifier
             .offset(y = 12.dp)
+            .padding(horizontal = 10.dp)
             .border(
                 width = 2.dp,
                 color = colors.tertiaryColor,
