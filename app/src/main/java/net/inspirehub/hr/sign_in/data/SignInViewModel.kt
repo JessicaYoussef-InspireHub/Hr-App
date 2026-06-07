@@ -134,58 +134,6 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
     }
 
-
-//    fun signIn(email: String, password: String, companyId: String, apiKey: String) {
-//        viewModelScope.launch {
-//
-//            val response = SignInApiService.signIn(email, password, companyId, apiKey)
-//
-//
-//            if (response.result.status != "error") {
-//                Log.d("STATUS", "done jessica done")
-//
-//                // Send the dynamic device tokenي
-//                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        val fcmToken = task.result
-//                        viewModelScope.launch {
-//                            SignInApiService.sendDeviceToken(
-//                                response.result.message.employee_data.employee_token,
-//                                fcmToken
-//                            )
-//                        }
-//                        Log.d("FCM", "FCM Token: $fcmToken")
-//                    } else {
-//                        Log.e("FCM", "Failed to get FCM token")
-//                    }
-//                }
-//            }
-//
-//
-//
-//            _uiState.value = SignInUiState.Loading
-//            try {
-//                val response = SignInApiService.signIn(email, password, companyId, apiKey)
-//                _uiState.value = SignInUiState.Success(response)
-//
-//                val employeeData = response.result.message.employee_data
-//                checkAndRenewToken(
-//                    currentToken = employeeData.employee_token,
-//                    expiry = employeeData.token_expiry,
-//                    apiKey = apiKey,
-//                    companyId = companyId
-//                )
-//
-//            } catch (e: Exception) {
-//                Log.e("ViewModel", "Sign-in failed", e)
-//
-//                val message = e.message ?: "Unknown error"
-//                _uiState.value = SignInUiState.Error(message)
-//            }
-//
-//        }
-//    }
-
     fun resetState() {
         _uiState.value = SignInUiState.Idle
     }

@@ -83,7 +83,9 @@ import java.util.Date
 import java.util.TimeZone
 import net.inspirehub.hr.BuildConfig
 import net.inspirehub.hr.check_in_out.data.checkLocationUpdatesRaw
+import net.inspirehub.hr.sign_in.data.SignInApiService
 import net.inspirehub.hr.utils.convertToArabicDigits
+import com.google.firebase.messaging.FirebaseMessaging
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -151,7 +153,7 @@ fun CheckInOutScreen(
     var showFakeLocationDialog by remember { mutableStateOf(isFakeLocation) }
     val employeeFullName = sharedPref.getEmployeeName() ?: "User"
     val employeeFirstName = employeeFullName.split(" ").firstOrNull() ?: employeeFullName
-
+    val scope = rememberCoroutineScope()
 
     DisposableEffect(isWithinDistance) {
         Log.d("disable", "changed -> $isWithinDistance")
@@ -231,6 +233,16 @@ fun CheckInOutScreen(
 
 
     LaunchedEffect(Unit) {
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { fcmToken ->
+
+            scope.launch {
+                SignInApiService.sendDeviceToken(
+                    employeeToken = token,
+                    mobileToken = fcmToken
+                )
+            }
+        }
+
         val response = checkLocationUpdatesRaw(context, token)
         println("📍 FINAL RESPONSE Update location: $response")
 
