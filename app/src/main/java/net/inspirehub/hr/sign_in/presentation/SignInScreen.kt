@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.sign_in.components.InputFields
-import net.inspirehub.hr.sign_in.components.SignInButton
 import net.inspirehub.hr.sign_in.data.SignInViewModel
 import net.inspirehub.hr.sign_in.data.SignInUiState
 import androidx.compose.ui.text.input.ImeAction
@@ -42,9 +41,9 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
@@ -116,20 +115,21 @@ fun SignInScreen(
     )
     {
         Box(modifier = Modifier.fillMaxWidth()) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .size(32.dp)
-                        .clickable {navController.navigate("ScanQrCodeScreen")},
-                    tint = colors.tertiaryColor
-                )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .size(32.dp)
+                    .clickable { navController.navigate("ScanQrCodeScreen") },
+                tint = colors.tertiaryColor
+            )
         }
         Image(
             painter = painterResource(id = R.drawable.sign_in),
             contentDescription = stringResource(R.string.sign_in),
-            modifier = Modifier.size(130.dp)
+            modifier = Modifier
+                .size(130.dp)
                 .statusBarsPadding()
 
         )
@@ -213,7 +213,7 @@ fun SignInScreen(
         Spacer(modifier = Modifier.weight(1f))
 
 
-        SignInButton(
+        FullButton(
             onClick = {
                 val trimmedEmail = emailState.value.trim()
                 val trimmedPassword = passwordState.value.trim()
@@ -223,8 +223,13 @@ fun SignInScreen(
                         trimmedPassword,
                         companyId,
                         apiKey
-                            )}},
-            enabled = isFormValid
+                    )
+                }
+            },
+            enabled = isFormValid,
+            modifier = Modifier.fillMaxWidth()
+                .height(56.dp),
+            label = stringResource(R.string.sign_in)
         )
         if (showDialog.value) {
             InCorrectCompanyIdDialog(
@@ -254,6 +259,7 @@ fun SignInScreen(
                     viewModel.resetState()
                 }
             }
+
             else -> {}
         }
     }

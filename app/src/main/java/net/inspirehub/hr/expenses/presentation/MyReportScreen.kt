@@ -47,7 +47,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import net.inspirehub.hr.expenses.components.CreateAnotherReport
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
 import net.inspirehub.hr.expenses.components.ExpensesAndReportSearchBar
 import net.inspirehub.hr.expenses.components.ExpensesFilterBottomSheet
@@ -204,9 +204,12 @@ fun MyReportScreen(
         },
         bottomBar = {
             Column {
-                CreateAnotherReport(
+                FullButton(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(vertical = 16.dp , horizontal = 5.dp),
+                    label = stringResource(R.string.create_another_report),
                     isLoading = isLoading,
-                    onConfirm = {
+                    onClick = {
                         scope.launch {
 
                             isLoadingReports = true
@@ -454,14 +457,5 @@ fun MyReportScreen(
                 expenses = false
             )
         }
-
-//        if (isLoading || isLoadingReports) {
-//            Box(
-//                modifier = Modifier
-//                    .clickable(enabled = false) {}
-//            ) {
-//                FullLoading()
-//            }
-//        }
     }
 }

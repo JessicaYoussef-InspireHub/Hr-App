@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -40,6 +39,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.appColors
 
 
@@ -90,13 +90,6 @@ fun EnterPinScreen(
             exitProcess(0)
         }
     }
-
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(colors.onSecondaryColor)
-//            .verticalScroll(rememberScrollState())
-//    ) {
         Column(
             modifier = Modifier
             .fillMaxSize()
@@ -234,18 +227,12 @@ fun EnterPinScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
+            FullButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
+                label = stringResource(R.string.submit),
                 enabled = viewModel.isPinComplete,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.tertiaryColor,
-                    contentColor = colors.onSecondaryColor,
-                    disabledContainerColor = colors.tertiaryColor.copy(alpha = 0.4f),
-                    disabledContentColor = colors.onSecondaryColor.copy(alpha = 0.5f)
-                ),
-                shape = RoundedCornerShape(8.dp),
                 onClick = {
                     viewModel.checkPin(
                         onSuccess = {
@@ -264,12 +251,7 @@ fun EnterPinScreen(
                         onFailure = {}
                     )
                 }
-            ) {
-                Text(
-                    stringResource(R.string.submit),
-                    fontSize = 20.sp, fontWeight = FontWeight.Bold
-                )
-            }
+            )
 
 
             if (!isChangingMethod)

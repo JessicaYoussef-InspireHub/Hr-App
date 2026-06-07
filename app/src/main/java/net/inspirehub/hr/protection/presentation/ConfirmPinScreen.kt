@@ -3,7 +3,6 @@ package net.inspirehub.hr.protection.presentation
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -45,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.appColors
 
 @Composable
@@ -220,18 +220,12 @@ fun ConfirmPinScreen(
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
-            Button(
+            FullButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
+                label = stringResource(R.string.confirm),
                 enabled = viewModel.getPin().length == viewModel.pinLength,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.tertiaryColor,
-                    contentColor = colors.onSecondaryColor,
-                    disabledContainerColor = colors.tertiaryColor.copy(alpha = 0.4f),
-                    disabledContentColor = colors.onSecondaryColor.copy(alpha = 0.5f)
-                ),
-                shape = RoundedCornerShape(8.dp),
                 onClick = {
                     if (viewModel.validatePin(pin)) {
                         val prefManager = SharedPrefManager(context)
@@ -240,14 +234,7 @@ fun ConfirmPinScreen(
                         prefManager.saveProtectionMethod(2)
                     }
                 }
-            ) {
-                Text(
-                    stringResource(R.string.confirm),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
     }

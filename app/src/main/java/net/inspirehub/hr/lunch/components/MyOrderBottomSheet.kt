@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
@@ -175,7 +176,10 @@ fun MyOrderBottomSheet(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        OrderNowButton(
+                        FullButton(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
                             onClick = {
                                 coroutineScope.launch {
                                     isLoading = true
@@ -217,7 +221,8 @@ fun MyOrderBottomSheet(
                                     }
                                 }
                             },
-                            isLoading = isLoading
+                            isLoading = isLoading,
+                            label = stringResource(R.string.order_now)
                         )
                     }
                 }

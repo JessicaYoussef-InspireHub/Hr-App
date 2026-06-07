@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -27,8 +26,6 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -60,6 +57,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.appColors
 
 
@@ -151,7 +149,8 @@ fun PinCodeScreen(
             ) {
 
                 Row(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 5.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -226,29 +225,18 @@ fun PinCodeScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
+            FullButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 enabled = viewModel.isPinComplete(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.tertiaryColor,
-                    contentColor = colors.onSecondaryColor,
-                    disabledContainerColor = colors.tertiaryColor.copy(alpha = 0.4f),
-                    disabledContentColor = colors.onSecondaryColor.copy(alpha = 0.5f)
-                ),
-                shape = RoundedCornerShape(8.dp),
+                label = stringResource(R.string.next),
                 onClick = {
                     if (viewModel.isPinComplete()) {
                         navController.navigate("confirm_pin/${viewModel.getPin()}")
                     }
-                }) {
-                Text(
-                    stringResource(R.string.next),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                }
+            )
         }
 
 

@@ -21,8 +21,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import androidx.navigation.NavController
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.scan_qr_code.components.ErrorCompanyInformationDialog
@@ -190,21 +189,14 @@ fun ScanQrCodeScreen(
         )
         Spacer(modifier = Modifier.height(10.dp))
 
-        Button(
+        FullButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colors.tertiaryColor,
-                contentColor = colors.onSecondaryColor
-            ),
             enabled = str.isNotBlank(),
-            shape = RoundedCornerShape(8.dp),
-            onClick = { handleCompanyInput() }
-
-        ) {
-            Text(stringResource(R.string.done))
-        }
+            onClick = { handleCompanyInput() },
+            label = stringResource(R.string.next)
+        )
 
 
         if (showErrorDialog) {

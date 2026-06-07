@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import net.inspirehub.hr.BottomBar
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
@@ -48,7 +49,6 @@ import net.inspirehub.hr.check_in_out.data.NetworkUtils
 import net.inspirehub.hr.time_off.components.LeaveTypesLazyRow
 import net.inspirehub.hr.time_off.components.MyCalendarPicker
 import net.inspirehub.hr.time_off.components.MyActualTimeOff
-import net.inspirehub.hr.time_off.components.RetryButton
 import net.inspirehub.hr.time_off.components.Shapes
 import net.inspirehub.hr.time_off.data.LeaveType
 import net.inspirehub.hr.time_off.data.fetchAndPrintHolidays
@@ -289,9 +289,14 @@ fun TimeOffScreen(
                             fontSize = 25.sp
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        RetryButton {
-                            triggerRefresh()
-                        }
+                        FullButton(
+                            modifier = Modifier
+                                .fillMaxWidth().height(60.dp),
+                            label = stringResource(R.string.retry),
+                            onClick = {
+                                triggerRefresh()
+                            }
+                        )
                     }
                 }
             } else if (isLoading.value) {
@@ -304,110 +309,7 @@ fun TimeOffScreen(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-//                LeaveTypesList(leaveTypes = leaveTypesState.value)
-//                if (holidayText.isNotEmpty()) {
-//                    Text(
-//                        text = holidayText,
-//                        modifier = Modifier.padding(16.dp),
-//                        color = Color(0xFF333333)
-//                    )
-//                }
-//                if (officialHolidayText.isNotEmpty()) {
-//                    Text(
-//                        text = officialHolidayText,
-//                        modifier = Modifier.padding(horizontal = 16.dp),
-//                        color = Color(0xFF555555)
-//                    )
-//                }
 
-
-//                Button(
-//                    onClick = {
-//                        coroutineScope.launch {
-//                            fetchAndPrintHolidays(token)
-//                        }
-//                    },
-//                    modifier = Modifier.padding(16.dp)
-//                ) {
-//                    Text("Weekend")
-//                }
-
-//
-//            Button(
-//                onClick = {
-//                    coroutineScope.launch {
-//                        SendApiForTimeOff(
-//                            timeOffRequest = TimeOffRequest(
-//                                employee_token = token,
-//                                action = "this_month_time_off"
-//                            ),
-//                        )
-//                    }
-//                }
-//            ) {
-//                Text("this_month_time_off")
-//            }
-
-//
-//            Button(
-//                onClick = {
-//                    coroutineScope.launch {
-//                        SendApiForTimeOff(
-//                            timeOffRequest = TimeOffRequest(
-//                                employee_token = token,
-//                                action = "this_year_time_off"
-//                            )
-//                        )
-//                    }
-//                }
-//            ) {
-//                Text("this_year_time_off")
-//            }
-//
-//
-//            Button(
-//                onClick = {
-//                    coroutineScope.launch {
-//                        val result = SendApiForTimeOff(
-//                            timeOffRequest = TimeOffRequest(
-//                                employee_token = token,
-//                                action = "remaining_leaves"
-//                            )
-//                        )
-//
-//                        if (result is RemainingLeavesResponse) {
-//                            remainingLeavesData = result
-//
-//                            val annual = result.leave_summary.find {
-//                                it.leave_type.equals("annual leave", ignoreCase = true)
-//                            }
-//                            annualLeaveRemaining = annual?.remaining_days?.toString() ?: "0"
-//
-//                            val permission = result.permission_summary.find {
-//                                it.leave_type.equals("permission", ignoreCase = true)
-//                            }
-//                            permissionRemainingHours =
-//                                permission?.remaining_hours?.toString() ?: "0"
-//
-//                            println("📋 Remaining Leaves Summary:")
-//                            result.leave_summary.forEach { summary ->
-//                                println("🔹 ${summary.leave_type}: Allocated = ${summary.allocated_days}, Used = ${summary.used_days}, Remaining = ${summary.remaining_days}")
-//                            }
-//
-//                            println("📋 Permission Summary:")
-//                            result.permission_summary.forEach { permission ->
-//                                println("🔸 ${permission.leave_type}: Allocated = ${permission.allocated_hours}, Used = ${permission.used_hours}, Remaining = ${permission.remaining_hours}")
-//                            }
-//
-//                            println("📅 Year: ${result.year}")
-//                            println("📊 Total Days - Allocated: ${result.total_allocated_days}, Used: ${result.total_used_days}, Remaining: ${result.total_remaining_days}")
-//                            println("🕐 Total Hours - Allocated: ${result.total_allocated_hours}, Used: ${result.total_used_hours}, Remaining: ${result.total_remaining_hours}")
-//                        }
-//                    }
-//                }
-//            ) {
-//                Text("remaining_leaves")
-//            }
                 MyActualTimeOff(
                     leaveTypes = leaveTypesState.value
                 )

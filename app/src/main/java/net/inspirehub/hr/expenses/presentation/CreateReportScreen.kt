@@ -57,7 +57,7 @@ import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import net.inspirehub.hr.expenses.components.AddExpensesButton
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.expenses.components.EditReportBottomSheet
 import net.inspirehub.hr.expenses.components.EmptyExpensesDialog
 import net.inspirehub.hr.expenses.data.sendReport
@@ -274,7 +274,7 @@ fun CreateReportScreen(
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                AddExpensesButton(
+                FullButton(
                     onClick = {
                         scope.launch {
                             isBottomSheetLoading = true
