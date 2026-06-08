@@ -36,8 +36,8 @@ data class TimeOffRequestForRequestEmployee(
     val request_date_to: String? = null,
     val request_date_from_period: String? = null,
     val request_unit_half: Boolean? = null,
-    val request_hour_from: String? = null,
-    val request_hour_to: String? = null,
+    val request_hour_from: Double? = null,
+    val request_hour_to: Double? = null,
     val request_unit_hours: Boolean? = null
 
 )

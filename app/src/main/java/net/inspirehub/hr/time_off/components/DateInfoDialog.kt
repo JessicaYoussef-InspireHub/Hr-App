@@ -245,28 +245,19 @@ fun DateInfoDialog(
     val warningMessage = leaveDurationData?.casualWarningMessage()
 
 
-    fun convertSelectedTimeToHour24(time: String, language: String): String {
+    fun convertSelectedTimeToHour24(time: String, language: String): Double {
         val arabicToEnglish = mapOf(
-            '٠' to '0', '١' to '1', '٢' to '2', '٣' to '3', '٤' to '4',
-            '٥' to '5', '٦' to '6', '٧' to '7', '٨' to '8', '٩' to '9'
+            '٠' to '0','١' to '1','٢' to '2','٣' to '3','٤' to '4',
+            '٥' to '5','٦' to '6','٧' to '7','٨' to '8','٩' to '9'
         )
-        var normalized = time.map { arabicToEnglish[it] ?: it }.joinToString("")
 
-        val isPM = if (language == "ar") normalized.contains("م") else normalized.contains("PM")
-        val isAM = if (language == "ar") normalized.contains("ص") else normalized.contains("AM")
-
-        normalized = normalized.replace("AM", "").replace("PM", "")
-            .replace("ص", "").replace("م", "")
-            .trim()
+        val normalized = time.map { arabicToEnglish[it] ?: it }.joinToString("")
 
         val parts = normalized.split(":")
-        var hour = parts[0].toIntOrNull() ?: 0
+        val hour = parts.getOrNull(0)?.toIntOrNull() ?: 0
         val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
 
-        if (isPM && hour < 12) hour += 12
-        if (isAM && hour == 12) hour = 0
-
-        return if (minute == 30) "${hour}.5" else "$hour"
+        return hour + (minute / 60.0)
     }
 
     LaunchedEffect(token) {
@@ -295,7 +286,7 @@ fun DateInfoDialog(
     }
 
     Dialog(
-        onDismissRequest = { }
+        onDismissRequest = { onDiscard() }
     ) {
         Surface(
             shape = RoundedCornerShape(12.dp),
