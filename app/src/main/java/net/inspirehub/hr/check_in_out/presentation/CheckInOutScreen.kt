@@ -38,7 +38,6 @@ import androidx.navigation.NavController
 import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.check_in_out.components.CheckInOutButton
-import net.inspirehub.hr.check_in_out.components.CheckOutDialog
 import net.inspirehub.hr.check_in_out.data.CheckInOutViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -66,15 +65,10 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.work.WorkManager
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.check_in_out.components.GpsDialog
-import net.inspirehub.hr.check_in_out.components.InternetRequiredDialog
-import net.inspirehub.hr.check_in_out.components.OfflineCheckOutDialog
 import net.inspirehub.hr.check_in_out.components.OfflineSnackBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.inspirehub.hr.FullLoading
-import net.inspirehub.hr.check_in_out.components.CheckInOutErrorDialog
-import net.inspirehub.hr.check_in_out.components.NotAllowedLocationDialog
 import net.inspirehub.hr.check_in_out.data.AppDatabase
 import net.inspirehub.hr.check_in_out.data.OfflineLog
 import java.net.InetSocketAddress
@@ -86,6 +80,7 @@ import net.inspirehub.hr.check_in_out.data.checkLocationUpdatesRaw
 import net.inspirehub.hr.sign_in.data.SignInApiService
 import net.inspirehub.hr.utils.convertToArabicDigits
 import com.google.firebase.messaging.FirebaseMessaging
+import net.inspirehub.hr.MyDialog
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -812,15 +807,22 @@ fun CheckInOutScreen(
 
 
         if (showFakeLocationDialog) {
-            CheckInOutErrorDialog(
-                message = stringResource(R.string.a_fake_location_was_detected_please_turn_off_fake_gps_to_continue),
-                onDismiss = { showFakeLocationDialog = false }
+            MyDialog(
+                title = stringResource(R.string.invalid_request),
+                subtitle = stringResource(R.string.a_fake_location_was_detected_please_turn_off_fake_gps_to_continue),
+                confirmButtonText = stringResource(R.string.ok),
+                onConfirm = { showFakeLocationDialog = false },
+                onDismiss = { showFakeLocationDialog = false },
             )
         }
 
         if (showOfflineCheckOutDialog) {
-            OfflineCheckOutDialog(
+            MyDialog(
+                title = stringResource(R.string.attention),
+                subtitle =  stringResource(R.string.are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available),
                 onDismiss = { showOfflineCheckOutDialog = false },
+                dismissButtonText = stringResource(R.string.cancel),
+                confirmButtonText = stringResource(R.string.ok),
                 onConfirm = {
                     showOfflineCheckOutDialog = false
                     coroutineScope.launch {
@@ -844,21 +846,24 @@ fun CheckInOutScreen(
             )
         }
 
+        if (showNotAllowedDialog) {
+            MyDialog(
+                title =  stringResource(R.string.attention) ,
+                subtitle = stringResource(R.string.you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed ),
+                confirmButtonText = stringResource(R.string.ok),
+                onConfirm = {
+                    showNotAllowedDialog = false
+                    val companies = sharedPref.getCompaniesLatLng()
+                    val allowedIds = sharedPref.getAllowedLocationsIds()
 
-
-        NotAllowedLocationDialog(
-            showDialog = showNotAllowedDialog,
-            onDismiss = {
-                showNotAllowedDialog = false
-                val companies = sharedPref.getCompaniesLatLng()
-                val allowedIds = sharedPref.getAllowedLocationsIds()
-
-                viewModel.checkLocationAndDistanceAllCompanies(
-                    companies = companies,
-                    allowedLocationIds = allowedIds
-                )
-            }
-        )
+                    viewModel.checkLocationAndDistanceAllCompanies(
+                        companies = companies,
+                        allowedLocationIds = allowedIds
+                    )
+                },
+                onDismiss = { showNotAllowedDialog = false },
+            )
+        }
 
         if (isInitialLoading && !isOffline) {
             FullLoading()
@@ -866,8 +871,13 @@ fun CheckInOutScreen(
 
 
         if (showInternetRequiredDialog) {
-            InternetRequiredDialog(
-                onDismiss = { showInternetRequiredDialog = false }
+
+            MyDialog(
+                title = stringResource(R.string.check_not_allowed) ,
+                subtitle =   stringResource(R.string.you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online),
+                confirmButtonText = stringResource(R.string.ok),
+                onConfirm = { showInternetRequiredDialog = false },
+                onDismiss = { showInternetRequiredDialog = false },
             )
         }
 
@@ -879,24 +889,32 @@ fun CheckInOutScreen(
         }
     }
 
-
-    GpsDialog(
-        showDialog = showGpsDialog,
-        onDismiss = { showGpsDialog = false },
-        onConfirm = {
-            showGpsDialog = false
-            val intent =
-                android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-            context.startActivity(intent)
-        }
-    )
+    if (showGpsDialog) {
+        MyDialog(
+            title = stringResource(R.string.enable_location) ,
+            subtitle = stringResource(R.string.please_enable_gps_so_the_app_can_accurately_detect_your_location),
+            confirmButtonText = stringResource(R.string.enable_now),
+            dismissButtonText = stringResource(R.string.cancel),
+            onConfirm = {
+                showGpsDialog = false
+                val intent =
+                    android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                context.startActivity(intent)
+            },
+            onDismiss = { showGpsDialog = false },
+        )
+    }
 
 
 
     if (showErrorMessageDialog) {
-        CheckInOutErrorDialog(
-            message = errorMessage,
-            onDismiss = { showErrorMessageDialog = false }
+
+        MyDialog(
+            title = stringResource(R.string.invalid_request),
+            subtitle = errorMessage,
+            confirmButtonText = stringResource(R.string.ok),
+            onConfirm = { showErrorMessageDialog = false },
+            onDismiss = { showErrorMessageDialog = false },
         )
     }
 
@@ -904,10 +922,22 @@ fun CheckInOutScreen(
 
 
     if (showErrorDialog) {
-        CheckOutDialog(
-            isOffline = isOffline,
-            workedHours = workedHours,
+
+        MyDialog(
+            title = stringResource(R.string.attention),
+            subtitle = if (!isOffline) {
+                val hoursInt = (workedHours ?: 0.0).toInt()
+                LocalContext.current.resources.getQuantityString(
+                    R.plurals.check_out_confirmation,
+                    hoursInt,
+                    workedHours ?: 0.0
+                )
+            } else {
+                stringResource(R.string.are_you_sure_you_want_to_check_out)
+            },
             isLoading = isDialogLoading,
+            confirmButtonText = stringResource(R.string.ok),
+            dismissButtonText = stringResource(R.string.cancel),
             onConfirm = {
                 sharedPref.clearCheckOutScheduledTime()
                 WorkManager.getInstance(context).cancelAllWorkByTag("check_out_reminder_work")
@@ -939,7 +969,7 @@ fun CheckInOutScreen(
                     offlineMessage = context.getString(R.string.offline_saved_message)
                 }
             },
-            onCancel = { showErrorDialog = false }
+            onDismiss = { showErrorDialog = false }
         )
     }
 }

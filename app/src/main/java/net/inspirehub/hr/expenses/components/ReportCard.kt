@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
@@ -320,10 +321,12 @@ fun ReportCard(
     }
 
     if (showLockedDialog) {
-        ReportCannotEditDialog(
-            state = report.state,
-            onDismiss = { showLockedDialog = false }
+        MyDialog(
+            onConfirm = { showLockedDialog = false },
+            onDismiss = { showLockedDialog = false },
+            title = stringResource(R.string.cannot_edit),
+            subtitle = stringResource(R.string.this_report_cannot_be_edited_because_it_is_status_is , report.state),
+            confirmButtonText = stringResource(R.string.ok)
         )
     }
-
 }

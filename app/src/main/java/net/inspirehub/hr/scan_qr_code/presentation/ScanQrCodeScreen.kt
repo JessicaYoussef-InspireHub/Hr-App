@@ -40,9 +40,9 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import androidx.navigation.NavController
 import net.inspirehub.hr.FullButton
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.scan_qr_code.components.ErrorCompanyInformationDialog
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import net.inspirehub.hr.scan_qr_code.data.Middleware
 import net.inspirehub.hr.scan_qr_code.data.PortraitCaptureActivity
@@ -200,9 +200,12 @@ fun ScanQrCodeScreen(
 
 
         if (showErrorDialog) {
-            ErrorCompanyInformationDialog(
-                message = errorMessage,
-                onDismiss = { showErrorDialog = false }
+            MyDialog(
+                onConfirm = { showErrorDialog = false },
+                onDismiss = { showErrorDialog = false },
+                title =  stringResource(R.string.invalid_request) ,
+                subtitle = errorMessage,
+                confirmButtonText = stringResource(R.string.ok)
             )
         }
     }

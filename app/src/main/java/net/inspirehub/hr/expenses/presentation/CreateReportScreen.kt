@@ -58,8 +58,8 @@ import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.FullButton
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.expenses.components.EditReportBottomSheet
-import net.inspirehub.hr.expenses.components.EmptyExpensesDialog
 import net.inspirehub.hr.expenses.data.sendReport
 
 @SuppressLint("AutoboxingStateCreation")
@@ -311,14 +311,16 @@ fun CreateReportScreen(
         }
 
         if (showEmptyExpensesDialog) {
-            EmptyExpensesDialog(
-                onDismiss = {
-                    showEmptyExpensesDialog = false
-                },
-                onAddExpenses = {
+            MyDialog(
+                onConfirm = {
                     showEmptyExpensesDialog = false
                     refreshTrigger++
-                }
+                            },
+                onDismiss = { showEmptyExpensesDialog = false },
+                dismissButtonText = stringResource(R.string.cancel),
+                confirmButtonText = stringResource(R.string.add_expenses),
+                title = stringResource(R.string.invalid_request),
+                subtitle = stringResource(R.string.please_add_at_least_one_expense_before_saving),
             )
         }
 

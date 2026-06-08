@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
@@ -59,8 +60,7 @@ fun SwipeToDeleteReportItem(
     )
 
     if (showDialog) {
-        ReportSelectedDeleteConfirmationDialog(
-            count = 1,
+        MyDialog(
             onConfirm = {
                 onDelete()
                 showDialog = false
@@ -68,7 +68,11 @@ fun SwipeToDeleteReportItem(
             onDismiss = {
                 showDialog = false
                 scope.launch { dismissState.reset() }
-            }
+            },
+            title = stringResource(R.string.delete_confirmation),
+            subtitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_report),
+            confirmButtonText = stringResource(R.string.delete),
+            dismissButtonText = stringResource(R.string.cancel)
         )
     }
 }

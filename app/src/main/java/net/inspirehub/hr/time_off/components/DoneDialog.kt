@@ -46,13 +46,16 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.time_off.data.TimeOffRequestForRequestEmployee
 import net.inspirehub.hr.time_off.data.sendApiForRequestTimeOff
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -319,33 +322,39 @@ fun TimeOffDetailsDialog(
                     }
                 }
                 if (showDeleteConfirmation) {
-                    DeleteConfirmationDialog(
+                    MyDialog(
                         onDismiss = { showDeleteConfirmation = false },
-                        onConfirmDelete = {
-                            val request = TimeOffRequestForRequestEmployee(
-                                employee_token = token,
-                                action = "unlink_draft_annual_leaves",
-                                leave_type_id = record.leave_id,
-                                request_date_from = record.start_date,
-                                request_date_to = record.end_date,
-                                leave_id = record.leave_id
-                            )
+                        onConfirm = {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val request = TimeOffRequestForRequestEmployee(
+                                    employee_token = token,
+                                    action = "unlink_draft_annual_leaves",
+                                    leave_type_id = record.leave_id,
+                                    request_date_from = record.start_date,
+                                    request_date_to = record.end_date,
+                                    leave_id = record.leave_id
+                                )
 
-                            Log.d("REQUEST_BODY", request.toString())
+                                Log.d("REQUEST_BODY", request.toString())
 
-                            val response = sendApiForRequestTimeOff(context, request)
-                            Log.d("API_RESPONSE", response.toString())
+                                val response = sendApiForRequestTimeOff(context, request)
+                                Log.d("API_RESPONSE", response.toString())
 
-                            withContext(Dispatchers.Main) {
+                                withContext(Dispatchers.Main) {
 
-                                if (response?.result?.status == "error") {
-                                    apiErrorMessage = response.result.message ?: "Unknown error"
-                                } else {
-                                showDeleteConfirmation = false
-                                onDismiss()
-                                onRefreshRequest()}
+                                    if (response?.result?.status == "error") {
+                                        apiErrorMessage = response.result.message ?: "Unknown error"
+                                    } else {
+                                        showDeleteConfirmation = false
+                                        onDismiss()
+                                        onRefreshRequest()}
+                                }
                             }
-                        }
+                        },
+                        title = stringResource(R.string.delete_confirmation),
+                        subtitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_request),
+                        confirmButtonText = stringResource(R.string.yes_delete),
+                        dismissButtonText = stringResource(R.string.cancel)
                     )
                 }
 
@@ -372,13 +381,15 @@ fun TimeOffDetailsDialog(
                 }
 
                 if (apiErrorMessage != null) {
-                    DeleteErrorDialog (
-                        message = apiErrorMessage!!,
+                    MyDialog(
                         onDismiss = { apiErrorMessage = null },
                         onConfirm = {
                             onRefreshRequest()
                             apiErrorMessage = null
-                        }
+                        },
+                        title = stringResource(R.string.invalid_request),
+                        subtitle = apiErrorMessage!!,
+                        confirmButtonText = stringResource(R.string.ok)
                     )
                 }
             }

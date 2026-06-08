@@ -42,6 +42,7 @@ import java.util.Locale
 import android.content.res.Configuration
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.appColors
 
 
@@ -108,16 +109,19 @@ fun GeneralSettingsCard(
 
 
                 if (showDialog) {
-                    ConfirmDialog(
-                        message = stringResource(R.string.change_company),
-                        confirmText = stringResource(R.string.are_you_sure_you_want_to_change_your_company),
+                    MyDialog(
                         onConfirm = {
                             showDialog = false
                             viewModel.changeCompany()
                             navController.navigate("ScanQrCodeScreen")
                             sharedPref.setProtectionSkipped(false)
                         },
-                        onDismiss = { showDialog = false }
+                        onDismiss = { showDialog = false },
+                        title = stringResource(R.string.change_company),
+                        subtitle = stringResource(R.string.are_you_sure_you_want_to_change_your_company),
+                        confirmButtonText = stringResource(R.string.ok),
+                        dismissButtonText = stringResource(R.string.cancel)
+
                     )
                 }
 
@@ -188,7 +192,7 @@ fun GeneralSettingsCard(
                 )
 
                 SettingsItem(
-                    label =stringResource(R.string.dark_mode),
+                    label = stringResource(R.string.dark_mode),
                     icon = Icons.Default.DarkMode,
                     onClick = {},
                     trailingIcon = {

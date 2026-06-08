@@ -1,4 +1,4 @@
-package net.inspirehub.hr.notifications.components
+package net.inspirehub.hr
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,26 +22,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.inspirehub.hr.R
-import net.inspirehub.hr.appColors
 
 @Composable
-fun NotificationPermissionDialog(
-    onDismiss: () -> Unit,
-    onGoToSettings: () -> Unit
+fun MyDialog(
+    onConfirm: () -> Unit,
+    onDismiss: (() -> Unit),
+    title: String,
+    subtitle: String,
+    confirmButtonText: String,
+    dismissButtonText: String? = null,
+    isLoading: Boolean = false
 ) {
+
     val colors = appColors()
 
     AlertDialog(
         containerColor = colors.surfaceVariant,
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onDismiss() },
         title = {
-            Column (
+            Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
-
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -55,54 +58,63 @@ fun NotificationPermissionDialog(
                     )
                 }
                 Text(
-                    stringResource(R.string.enable_notifications) ,
+                    title,
                     color = colors.tertiaryColor,
                     fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold,)
+                    fontWeight = FontWeight.Bold,
+                )
             }
         },
         text = {
-            Text(
-            stringResource(R.string.please_enable_notification_permission_to_receive_notifications),
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Normal,
-            color = colors.onBackgroundColor ) },
-
+            if (isLoading) {
+                SmallLoading()
+            } else {
+                Text(
+                    subtitle,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = colors.onBackgroundColor
+                )
+            }
+        },
         confirmButton = {
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
-            ){
-
+            ) {
                 Button(
+                    onClick = { onConfirm() },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = colors.onSecondaryColor,
                         containerColor = colors.tertiaryColor
                     ),
-                    shape = RoundedCornerShape(10.dp),
-                    onClick = { onGoToSettings() }
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
-                        stringResource(R.string.enable_now),
+                        confirmButtonText,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
 
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.inverseOnSurface,
-                        contentColor = colors.onSecondaryContainer
-                    ),
-                    shape = RoundedCornerShape(10.dp),
-                    onClick = { onDismiss() }
-                ) {
-                    Text(stringResource(R.string.cancel),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold)
+                if (dismissButtonText != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = { onDismiss() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.inverseOnSurface,
+                            contentColor = colors.onSecondaryContainer
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            dismissButtonText,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
-        },
+        }
     )
 }

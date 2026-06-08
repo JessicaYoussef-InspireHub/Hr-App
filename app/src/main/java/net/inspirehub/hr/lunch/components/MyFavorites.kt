@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -147,17 +148,20 @@ fun MyFavorite() {
                 }
             }
             if (showClearDialog) {
-                ClearFavoritesDialog(
-                    onDismiss = { showClearDialog = false },
+                MyDialog(
                     onConfirm = {
                         coroutineScope.launch {
                             db.favoriteLunchDao().deleteAllFavorites()
                         }
                         showClearDialog = false
-                    }
+                    },
+                    onDismiss = { showClearDialog = false },
+                    title = stringResource(R.string.clear_favorites),
+                    subtitle = stringResource(R.string.are_you_sure_you_want_to_clear_all_favorites),
+                    confirmButtonText = stringResource(R.string.clear),
+                    dismissButtonText = stringResource(R.string.cancel)
                 )
             }
-
         }
     }
 }

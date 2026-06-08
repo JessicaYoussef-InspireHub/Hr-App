@@ -54,6 +54,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.inspirehub.hr.MyDialog
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -281,10 +282,9 @@ fun DoubleStateDialog(
                             val draftRecord =
                                 leaveRecords.find { it.state == "draft" || it.state == "confirm" }
                             if (draftRecord != null) {
-
-                                DeleteConfirmationDialog(
+                                MyDialog(
                                     onDismiss = { showDeleteConfirmation = false },
-                                    onConfirmDelete = {
+                                    onConfirm ={
                                         CoroutineScope(Dispatchers.IO).launch {
                                             val request = TimeOffRequestForRequestEmployee(
                                                 employee_token = token,
@@ -311,20 +311,26 @@ fun DoubleStateDialog(
                                                 }
                                             }
                                         }
-                                    }
+                                    },
+                                    title = stringResource(R.string.delete_confirmation),
+                                    subtitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_request),
+                                    confirmButtonText = stringResource(R.string.yes_delete),
+                                    dismissButtonText = stringResource(R.string.cancel)
+
                                 )
 
                                 if (apiErrorMessage != null) {
-                                    DeleteErrorDialog (
-                                        message = apiErrorMessage!!,
+                                    MyDialog(
                                         onDismiss = { apiErrorMessage = null },
                                         onConfirm = {
                                             onRefreshRequest()
                                             apiErrorMessage = null
-                                        }
+                                        },
+                                        title = stringResource(R.string.invalid_request),
+                                        subtitle = apiErrorMessage!!,
+                                        confirmButtonText = stringResource(R.string.ok)
                                     )
                                 }
-
                             }
                         }
 

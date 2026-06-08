@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
@@ -73,9 +74,7 @@ fun AccountCard(
                 )
 
                 if (showDialog) {
-                    ConfirmDialog(
-                        message = stringResource(R.string.logout),
-                        confirmText = stringResource(R.string.are_you_sure_you_want_to_log_out),
+                    MyDialog(
                         onConfirm = {
                             showDialog = false
                             viewModel.logout()
@@ -84,7 +83,11 @@ fun AccountCard(
                             sharedPref.setProtectionSkipped(false)
                             navController.navigate("SignInScreen/$companyId/$apiKey")
                         },
-                        onDismiss = { showDialog = false }
+                        onDismiss = { showDialog = false },
+                        title = stringResource(R.string.logout),
+                        subtitle = stringResource(R.string.are_you_sure_you_want_to_log_out),
+                        confirmButtonText = stringResource(R.string.ok),
+                        dismissButtonText = stringResource(R.string.cancel),
                     )
                 }
             }

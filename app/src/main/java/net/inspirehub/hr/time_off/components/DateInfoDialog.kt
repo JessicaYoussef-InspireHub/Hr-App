@@ -46,6 +46,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.time_off.data.LeaveDurationData
 import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
@@ -954,18 +955,23 @@ fun DateInfoDialog(
                     }
 
                     if (showErrorDialog) {
-                        ErrorDialog(
-                            message = errorMessage,
-                            onDismiss = {
-                                showErrorDialog = false
-                            }
+                        MyDialog(
+                            onConfirm = { showErrorDialog = false },
+                            onDismiss = { showErrorDialog = false },
+                            confirmButtonText = stringResource(R.string.ok),
+                            subtitle = "$errorMessage \n " ,
+                            title = stringResource(R.string.invalid_request)
                         )
                     }
 
                     if (showPermissionErrorDialog) {
-                        ErrorPermissionDialog(
-                            message = errorMessage,
-                            onDismiss = { showPermissionErrorDialog = false }
+
+                        MyDialog(
+                            onConfirm = { showPermissionErrorDialog = false },
+                            onDismiss = { showPermissionErrorDialog = false },
+                            confirmButtonText = stringResource(R.string.ok),
+                            subtitle = errorMessage ,
+                            title = stringResource(R.string.invalid_request)
                         )
                     }
                 }

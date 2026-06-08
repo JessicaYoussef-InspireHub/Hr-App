@@ -59,6 +59,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.ui.platform.LocalContext
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.utils.convertToArabicDigits
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -353,9 +354,9 @@ fun DoublePermissionDialog(
                         }
 
                         if (recordToDelete != null) {
-                            DeleteConfirmationDialog(
+                            MyDialog(
                                 onDismiss = { recordToDelete = null },
-                                onConfirmDelete = {
+                                onConfirm = {
                                     CoroutineScope(Dispatchers.IO).launch {
                                         val request = TimeOffRequestForRequestEmployee(
                                             employee_token = token,
@@ -384,18 +385,25 @@ fun DoublePermissionDialog(
                                             }
                                         }
                                     }
-                                }
+                                },
+                                title = stringResource(R.string.delete_confirmation),
+                                subtitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_request),
+                                confirmButtonText = stringResource(R.string.yes_delete),
+                                dismissButtonText = stringResource(R.string.cancel)
                             )
                         }
 
                         if (apiErrorMessage != null) {
-                            DeleteErrorDialog(
-                                message = apiErrorMessage!!,
+
+                            MyDialog(
                                 onDismiss = { apiErrorMessage = null },
                                 onConfirm = {
                                     onRefreshRequest()
                                     apiErrorMessage = null
-                                }
+                                },
+                                title = stringResource(R.string.invalid_request),
+                                subtitle = apiErrorMessage!!,
+                                confirmButtonText = stringResource(R.string.ok)
                             )
                         }
 

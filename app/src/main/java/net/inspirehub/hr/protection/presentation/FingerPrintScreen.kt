@@ -225,7 +225,7 @@ fun FingerPrintScreen(
 
             biometricStatus == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
                 Text(
-                    text = errorMessage ?: "",
+                    text = errorMessage ,
                     fontWeight = FontWeight.Normal,
                     color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,
@@ -252,7 +252,7 @@ fun FingerPrintScreen(
             }
             else -> {
                 Text(
-                    text = errorMessage ?: "",
+                    text = errorMessage ,
                     color = colors.tertiaryColor)
             }
 

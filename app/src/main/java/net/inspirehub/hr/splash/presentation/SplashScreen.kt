@@ -1,5 +1,6 @@
 package net.inspirehub.hr.splash.presentation
 
+import android.content.Intent
 import android.widget.ImageView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,13 +16,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.target.ImageViewTarget
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.splash.components.UpdateDialog
 
 @Composable
 fun SplashScreen(
@@ -88,10 +91,23 @@ fun SplashScreen(
             modifier = Modifier.fillMaxSize()
         )
     }
-    UpdateDialog(
-        show = showUpdateDialog,
-        onDismiss = {
-            showUpdateDialog = false
-        }
-    )
+
+    if (showUpdateDialog) {
+        MyDialog(
+            onConfirm = {
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    "market://details?id=${context.packageName}".toUri()
+                )
+                context.startActivity(intent)
+            },
+            onDismiss = {
+                showUpdateDialog = false
+            },
+            title = stringResource(R.string.update_available),
+            subtitle = stringResource(R.string.a_new_version_is_available_You_can_update_now_or_continue_using_the_app),
+            confirmButtonText = stringResource(R.string.update),
+            dismissButtonText = stringResource(R.string.later)
+        )
+    }
 }

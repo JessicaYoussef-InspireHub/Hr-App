@@ -45,9 +45,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.FullLoading
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.sign_in.components.InCorrectCompanyIdDialog
 import kotlin.system.exitProcess
 
 @Composable
@@ -85,7 +85,6 @@ fun SignInScreen(
 
             else -> {
                 (uiState as SignInUiState.Error).message
-//                "Another unexpected error occurred, try again later."
             }
         }
     } else null
@@ -232,13 +231,18 @@ fun SignInScreen(
             label = stringResource(R.string.sign_in)
         )
         if (showDialog.value) {
-            InCorrectCompanyIdDialog(
-                message = dialogMessage.value,
-                onDismiss = {
+            MyDialog(
+                onConfirm = {
                     showDialog.value = false
                     viewModel.resetState()
+                    navController.navigate("ScanQrCodeScreen")
                 },
-                navController = navController
+                onDismiss = {
+                    showDialog.value = false
+                },
+                title =  stringResource(R.string.attention),
+                subtitle = dialogMessage.value,
+                confirmButtonText = stringResource(R.string.scan_qr_code_again)
             )
         }
 

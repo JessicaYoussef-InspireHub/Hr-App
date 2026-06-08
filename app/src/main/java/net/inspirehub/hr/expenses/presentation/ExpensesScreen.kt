@@ -48,18 +48,16 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.components.ExpenseItem
 import net.inspirehub.hr.expenses.components.NewAndReportButton
-import net.inspirehub.hr.expenses.components.NoReportDialog
 import net.inspirehub.hr.expenses.components.SwipeToDeleteItem
 import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.fetchExpenses
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.SharedPrefManager
-import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
 import net.inspirehub.hr.expenses.components.ExpenseCalendar
 import net.inspirehub.hr.expenses.components.ExpensesAndReportSearchBar
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
 import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
-import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
 import net.inspirehub.hr.expenses.components.UploadBottomSheet
 import net.inspirehub.hr.expenses.data.deleteExpense
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
@@ -512,18 +510,17 @@ fun ExpensesScreen(
         }
 
         deleteErrorMessage?.let { reason ->
-            DeleteExpenseErrorDialog(
-                reason = reason,
-                onDismiss = { deleteErrorMessage = null }
+            MyDialog(
+                onConfirm = { deleteErrorMessage = null },
+                onDismiss = { deleteErrorMessage = null },
+                confirmButtonText = stringResource(R.string.ok),
+                title = stringResource(R.string.cannot_delete),
+                subtitle = reason,
             )
         }
 
         if (showDeleteConfirmDialog) {
-            SelectedDeleteConfirmationDialog(
-                count = selectedItems.size,
-                onDismiss = {
-                    showDeleteConfirmDialog = false
-                },
+            MyDialog(
                 onConfirm = {
                     showDeleteConfirmDialog = false
 
@@ -567,15 +564,32 @@ fun ExpensesScreen(
                         }
                         snackBarHostState.showSnackbar(message)
                     }
-                }
+                },
+                onDismiss = {
+                    showDeleteConfirmDialog = false
+                },
+                title = stringResource(R.string.delete_confirmation),
+                subtitle = if (selectedItems.size == 1)
+                    stringResource(R.string.are_you_sure_you_want_to_delete_this_expense)
+                else
+                    stringResource(
+                        R.string.delete_selected_items_message,
+                        selectedItems.size,
+                    ),
+                confirmButtonText = stringResource(R.string.delete),
+                dismissButtonText = stringResource(R.string.cancel)
             )
         }
 
         if (showNoReportDialog) {
-            NoReportDialog(
-                isLoading = false,
-                onCancel = { showNoReportDialog = false }
-            )
+                MyDialog(
+                    onConfirm = { showNoReportDialog = false },
+                    onDismiss = { showNoReportDialog = false },
+                    title = stringResource(R.string.invalid_request),
+                    subtitle = stringResource(R.string.you_have_no_expense_to_report),
+                    confirmButtonText = stringResource(R.string.ok),
+                    isLoading = false
+                )
         }
 
         if (showPaymentSheet) {

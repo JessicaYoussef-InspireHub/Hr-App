@@ -57,6 +57,7 @@ import kotlinx.coroutines.launch
 import net.inspirehub.hr.expenses.data.editReport
 import androidx.compose.material3.ExperimentalMaterial3Api
 import net.inspirehub.hr.FullButton
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.expenses.components.EditReportBottomSheet
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 
@@ -69,7 +70,7 @@ fun EditReportScreen(
 ) {
     val colors = appColors()
     val context = LocalContext.current
-    val sharedPref = remember { net.inspirehub.hr.SharedPrefManager(context) }
+    val sharedPref = remember { SharedPrefManager(context) }
     val token = sharedPref.getToken().orEmpty()
     var isLoading by remember { mutableStateOf(false) }
     var report by remember { mutableStateOf<ExpenseReport?>(null) }

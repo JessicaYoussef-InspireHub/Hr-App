@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
@@ -75,9 +76,7 @@ fun SecurityCard(
                 )
 
                 if (showDialog) {
-                    ConfirmDialog(
-                        message = stringResource(R.string.change_protection_method),
-                        confirmText = stringResource(R.string.are_you_sure_you_want_to_change_protection_method),
+                    MyDialog(
                         onConfirm = {
                             showDialog = false
                             when (protectionMethod) {
@@ -87,7 +86,11 @@ fun SecurityCard(
                                 else -> navController.navigate("ProtectionScreen/1")
                             }
                         },
-                        onDismiss = { showDialog = false }
+                        onDismiss = { showDialog = false },
+                        title = stringResource(R.string.change_protection_method),
+                        subtitle = stringResource(R.string.are_you_sure_you_want_to_change_protection_method),
+                        confirmButtonText = stringResource(R.string.ok),
+                        dismissButtonText = stringResource(R.string.cancel)
                     )
                 }
                 HorizontalDivider(

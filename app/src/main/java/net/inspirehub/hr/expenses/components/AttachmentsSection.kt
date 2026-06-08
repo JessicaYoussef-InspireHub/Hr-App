@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 import net.inspirehub.hr.expenses.data.ExpenseAttachmentResponse
 
@@ -206,7 +207,11 @@ fun AttachmentsSection(
     }
 
     if (showConfirmDialog) {
-        ConfirmDeleteDialog(
+        MyDialog(
+            title = stringResource(R.string.delete_confirmation),
+            subtitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_item),
+            confirmButtonText = stringResource(R.string.delete),
+            dismissButtonText = stringResource(R.string.cancel),
             onDismiss = {
                 showConfirmDialog = false
                 fileToDelete = null

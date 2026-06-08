@@ -50,8 +50,8 @@ import java.util.Calendar
 import java.util.Locale
 import androidx.core.content.edit
 import net.inspirehub.hr.FullLoading
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.SharedPrefManager
-import net.inspirehub.hr.notifications.components.NotificationPermissionDialog
 import net.inspirehub.hr.utils.convertToArabicDigits
 
 
@@ -99,9 +99,8 @@ fun NotificationsScreen(
     }
 
     if (showPermissionDialog.value) {
-        NotificationPermissionDialog(
-            onDismiss = { showPermissionDialog.value = false },
-            onGoToSettings = {
+        MyDialog(
+            onConfirm = {
                 val intent =Intent(
                     android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
                 ).apply {
@@ -109,7 +108,12 @@ fun NotificationsScreen(
                 }
                 context.startActivity(intent)
                 showPermissionDialog.value = false
-            }
+            },
+            onDismiss = { showPermissionDialog.value = false },
+            title = stringResource(R.string.enable_notifications),
+            subtitle = stringResource(R.string.please_enable_notification_permission_to_receive_notifications),
+            confirmButtonText = stringResource(R.string.enable_now),
+            dismissButtonText = stringResource(R.string.cancel),
         )
     }
 

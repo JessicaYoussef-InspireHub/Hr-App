@@ -48,6 +48,7 @@ import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.submitExpense
 import net.inspirehub.hr.utils.formatNumber
 import androidx.compose.material.icons.filled.AttachFile
+import net.inspirehub.hr.MyDialog
 
 data class ExpenseItem(
     val id: Int,
@@ -307,16 +308,22 @@ fun ExpenseItemCard(
     }
 
     errorMessage?.let { message ->
-        ErrorSubmittedDialog(
-            message = message,
-            onDismiss = { errorMessage = null }
+        MyDialog(
+            onConfirm = { errorMessage = null },
+            onDismiss = { errorMessage = null },
+            title = stringResource(R.string.error_dialog),
+            subtitle = message,
+            confirmButtonText = stringResource(R.string.ok)
         )
     }
 
     if (showDialog) {
-        CannotEditDialog(
-            state = expense.status,
-            onDismiss = { showDialog = false }
+        MyDialog(
+            onConfirm = { showDialog = false },
+            onDismiss = { showDialog = false },
+            title = stringResource(R.string.cannot_edit),
+            subtitle = stringResource(R.string.this_expense_cannot_be_edited_because_it_is_status_is ,  expense.status),
+            confirmButtonText = stringResource(R.string.ok)
         )
     }
 }

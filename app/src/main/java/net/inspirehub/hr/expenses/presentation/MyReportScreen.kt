@@ -48,13 +48,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.FullButton
-import net.inspirehub.hr.expenses.components.DeleteExpenseErrorDialog
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.expenses.components.ExpensesAndReportSearchBar
 import net.inspirehub.hr.expenses.components.ExpensesFilterBottomSheet
 import net.inspirehub.hr.expenses.components.ExpensesSnackBar
-import net.inspirehub.hr.expenses.components.NoReportDialog
 import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
-import net.inspirehub.hr.expenses.components.SelectedDeleteConfirmationDialog
 import net.inspirehub.hr.expenses.components.SwipeToDeleteReportItem
 import net.inspirehub.hr.expenses.data.deleteReport
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
@@ -363,11 +361,8 @@ fun MyReportScreen(
         }
 
         if (showDeleteConfirmDialog) {
-            SelectedDeleteConfirmationDialog(
-                count = selectedReports.size,
-                onDismiss = {
-                    showDeleteConfirmDialog = false
-                },
+
+            MyDialog(
                 onConfirm = {
                     showDeleteConfirmDialog = false
 
@@ -399,21 +394,41 @@ fun MyReportScreen(
 
                         snackBarHostState.showSnackbar(message)
                     }
-                }
+                },
+                onDismiss = {
+                    showDeleteConfirmDialog = false
+                },
+                title = stringResource(R.string.delete_confirmation),
+                subtitle = if (selectedReports.size == 1)
+                    stringResource(R.string.are_you_sure_you_want_to_delete_this_report)
+                else
+                    stringResource(
+                        R.string.delete_selected_items_message,
+                        selectedReports.size,
+                    ),
+                confirmButtonText = stringResource(R.string.delete),
+                dismissButtonText = stringResource(R.string.cancel)
             )
         }
 
         deleteErrorMessage?.let { message ->
-            DeleteExpenseErrorDialog(
-                reason = message,
-                onDismiss = { deleteErrorMessage = null }
+            MyDialog(
+                onConfirm = { deleteErrorMessage = null },
+                onDismiss = { deleteErrorMessage = null },
+                confirmButtonText = stringResource(R.string.ok),
+                title = stringResource(R.string.cannot_delete),
+                subtitle = message,
             )
         }
 
         if (showNoReportDialog) {
-            NoReportDialog(
-                isLoading = false,
-                onCancel = { showNoReportDialog = false }
+            MyDialog(
+                onConfirm = { showNoReportDialog = false },
+                onDismiss = { showNoReportDialog = false },
+                title = stringResource(R.string.invalid_request),
+                subtitle = stringResource(R.string.you_have_no_expense_to_report),
+                confirmButtonText = stringResource(R.string.ok),
+                isLoading = false
             )
         }
 
