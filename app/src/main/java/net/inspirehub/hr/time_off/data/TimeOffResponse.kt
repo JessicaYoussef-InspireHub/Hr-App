@@ -16,7 +16,6 @@ import io.ktor.http.contentType
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.inspirehub.hr.SharedPrefManager
-import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import net.inspirehub.hr.sign_in.data.SignInApiService
 
 
@@ -192,7 +191,6 @@ suspend fun sendApiForTimeOff(
 
                     sharedPref.saveToken(newToken)
 
-                    // إعادة إرسال نفس الطلب بتوكن جديد
                     val updatedRequest = timeOffRequest.copy(employee_token = newToken)
                     return sendApiForTimeOff(context , updatedRequest, retry = false)
                 }

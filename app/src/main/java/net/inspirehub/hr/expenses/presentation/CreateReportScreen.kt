@@ -50,7 +50,6 @@ import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.expenses.components.ExpenseReportSummary
 import net.inspirehub.hr.expenses.components.ExpensesSelectionCard
-import net.inspirehub.hr.expenses.components.ExpensesSnackBar
 import net.inspirehub.hr.expenses.components.SaveCancelButton
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.data.Expense
@@ -59,6 +58,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.expenses.components.EditReportBottomSheet
 import net.inspirehub.hr.expenses.data.sendReport
 
@@ -115,8 +115,9 @@ fun CreateReportScreen(
                 SnackbarHost(
                     hostState = snackBarHostState
                 ) { data ->
-                    ExpensesSnackBar(
-                        snackBarData = data
+                   MySnackBar(
+                        snackBarData = data,
+                       useOffset = false
                     )
                 }
             },

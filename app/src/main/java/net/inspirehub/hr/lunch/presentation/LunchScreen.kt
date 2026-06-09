@@ -57,10 +57,10 @@ import net.inspirehub.hr.lunch.components.LunchBottomSheet
 import net.inspirehub.hr.lunch.components.LunchCard
 import net.inspirehub.hr.lunch.components.LunchCategoryRow
 import net.inspirehub.hr.lunch.components.LunchSearchBox
-import net.inspirehub.hr.lunch.components.OrderSnackBar
 import net.inspirehub.hr.lunch.data.LunchProduct
 import net.inspirehub.hr.lunch.data.fetchLunchProducts
 import androidx.core.graphics.scale
+import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.lunch.components.MyHistoryBottomSheet
 import net.inspirehub.hr.lunch.components.MyOrderBottomSheet
 import net.inspirehub.hr.lunch.data.CustomSnackBarVisuals
@@ -130,13 +130,13 @@ fun LunchScreen(
             SnackbarHost(
                 hostState = snackBarHostState
             ) { data ->
-                val custom = data.visuals as? CustomSnackBarVisuals
 
-                OrderSnackBar(
+                MySnackBar(
                     snackBarData = data,
-                    onViewCart = if (custom?.showViewCart == true) {
-                        { openCartSheet = true }
-                    } else null
+                    onViewCart = {
+                        openCartSheet = true
+                    },
+                    useOffset = true
                 )
             }
         },

@@ -51,7 +51,7 @@ import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.expenses.components.ExpensesAndReportSearchBar
 import net.inspirehub.hr.expenses.components.ExpensesFilterBottomSheet
-import net.inspirehub.hr.expenses.components.ExpensesSnackBar
+import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
 import net.inspirehub.hr.expenses.components.SwipeToDeleteReportItem
 import net.inspirehub.hr.expenses.data.deleteReport
@@ -118,7 +118,10 @@ fun MyReportScreen(
             SnackbarHost(
                 hostState = snackBarHostState,
                 snackbar = { data ->
-                    ExpensesSnackBar(snackBarData = data)
+                    MySnackBar(
+                        snackBarData = data,
+                        useOffset = false
+                    )
                 }
             )
         },

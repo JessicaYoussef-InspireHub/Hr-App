@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     id ("com.google.gms.google-services")
     kotlin("kapt")
-//    id("com.google.gms.google-services")
 }
 
 android {
@@ -16,8 +15,8 @@ android {
         applicationId = "net.inspirehub.hr"
         minSdk = 24
         targetSdk = 36
-        versionCode = 20
-        versionName = "1.1.1"
+        versionCode = 21
+        versionName = "1.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -53,10 +53,10 @@ import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.fetchExpenses
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.expenses.components.ExpenseCalendar
 import net.inspirehub.hr.expenses.components.ExpensesAndReportSearchBar
-import net.inspirehub.hr.expenses.components.ExpensesSnackBar
 import net.inspirehub.hr.expenses.components.PaymentTypeBottomSheet
 import net.inspirehub.hr.expenses.components.UploadBottomSheet
 import net.inspirehub.hr.expenses.data.deleteExpense
@@ -368,7 +368,10 @@ fun ExpensesScreen(
             SnackbarHost(
                 hostState = snackBarHostState,
                 snackbar = { data ->
-                    ExpensesSnackBar(snackBarData = data)
+                    MySnackBar(
+                        snackBarData = data ,
+                        useOffset = false
+                    )
                 }
             )
         },

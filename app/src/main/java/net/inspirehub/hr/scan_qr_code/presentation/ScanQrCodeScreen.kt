@@ -138,7 +138,7 @@ fun ScanQrCodeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.onSecondaryColor)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp , vertical = 10.dp)
             .verticalScroll(rememberScrollState())
             .padding(WindowInsets.navigationBars.asPaddingValues())
             .padding(WindowInsets.statusBars.asPaddingValues()),
@@ -197,7 +197,6 @@ fun ScanQrCodeScreen(
             onClick = { handleCompanyInput() },
             label = stringResource(R.string.next)
         )
-
 
         if (showErrorDialog) {
             MyDialog(

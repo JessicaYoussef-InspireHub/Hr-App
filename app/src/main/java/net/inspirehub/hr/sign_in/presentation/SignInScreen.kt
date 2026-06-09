@@ -107,12 +107,11 @@ fun SignInScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(colors.onSecondaryColor)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp , vertical = 10.dp)
             .padding(WindowInsets.navigationBars.asPaddingValues())
             .padding(WindowInsets.statusBars.asPaddingValues()),
         horizontalAlignment = Alignment.CenterHorizontally
-    )
-    {
+    ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,

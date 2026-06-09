@@ -42,7 +42,6 @@ import net.inspirehub.hr.expenses.components.AnalyticDistribution
 import net.inspirehub.hr.expenses.components.CategoryDropdown
 import net.inspirehub.hr.expenses.components.DescriptionInputExpenses
 import net.inspirehub.hr.expenses.components.ExpenseDate
-import net.inspirehub.hr.expenses.components.ExpensesSnackBar
 import net.inspirehub.hr.expenses.components.IncludedTaxes
 import net.inspirehub.hr.expenses.components.Notes
 import net.inspirehub.hr.expenses.components.PaidBy
@@ -59,6 +58,7 @@ import net.inspirehub.hr.expenses.data.fetchExpenses
 import net.inspirehub.hr.expenses.data.fetchTaxes
 import java.time.LocalDate
 import android.net.Uri
+import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.expenses.components.AttachmentsSection
 import net.inspirehub.hr.expenses.data.ExpenseAttachment
 import net.inspirehub.hr.expenses.data.ExpenseAttachmentResponse
@@ -161,8 +161,9 @@ fun EditExpenseScreen(
                 SnackbarHost(
                     hostState = snackBarHostState
                 ) { data ->
-                    ExpensesSnackBar(
-                        snackBarData = data
+                    MySnackBar(
+                        snackBarData = data,
+                        useOffset = false
                     )
                 }
             },

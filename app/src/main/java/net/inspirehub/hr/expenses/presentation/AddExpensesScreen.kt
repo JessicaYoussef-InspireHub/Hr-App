@@ -59,7 +59,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.FullLoading
-import net.inspirehub.hr.expenses.components.ExpensesSnackBar
+import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.expenses.data.ExpenseAttachment
 import net.inspirehub.hr.utils.getFileName
 import net.inspirehub.hr.utils.getMimeType
@@ -136,8 +136,9 @@ fun AddExpensesScreen(
                 SnackbarHost(
                     hostState = snackBarHostState
                 ) { data ->
-                    ExpensesSnackBar(
-                        snackBarData = data
+                    MySnackBar(
+                        snackBarData = data,
+                        useOffset = false
                     )
                 }
             },
