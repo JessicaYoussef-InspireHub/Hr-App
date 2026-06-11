@@ -11,10 +11,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +32,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import net.inspirehub.hr.KeyboardArrowLeftIcon
+import net.inspirehub.hr.KeyboardArrowRightIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.utils.convertToArabicDigits
@@ -123,15 +121,11 @@ fun MyCalendarPicker(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Previous Month",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clickable {
-                        currentMonth = currentMonth.minusMonths(1)
-                    },
-                tint = colors.tertiaryColor
+
+            KeyboardArrowLeftIcon(
+                onClick = {
+                    currentMonth = currentMonth.minusMonths(1)
+                }
             )
 
             Text(
@@ -145,15 +139,10 @@ fun MyCalendarPicker(
                 color = colors.tertiaryColor
             )
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Next Month",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clickable {
-                        currentMonth = currentMonth.plusMonths(1)
-                    },
-                tint = colors.tertiaryColor
+            KeyboardArrowRightIcon(
+                onClick = {
+                    currentMonth = currentMonth.plusMonths(1)
+                }
             )
 
         }

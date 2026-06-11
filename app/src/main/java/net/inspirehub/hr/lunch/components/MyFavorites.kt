@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,8 +30,6 @@ import androidx.compose.foundation.layout.Row
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -40,6 +37,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.GeneralIcon
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 
@@ -64,10 +63,9 @@ fun MyFavorite() {
             .background(colors.surfaceContainerHigh, CircleShape)
             .clickable { showSheet = true }
     ) {
-        Icon(
+        GeneralIcon(
             imageVector = Icons.Filled.Star,
             contentDescription = "favorite",
-            tint = colors.onBackgroundColor,
             modifier = Modifier
                 .size(40.dp)
                 .padding(8.dp)
@@ -96,13 +94,9 @@ fun MyFavorite() {
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.TopEnd,
                     ) {
-                        IconButton(onClick = { showSheet = false }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.close),
-                                tint = colors.tertiaryColor,
-                            )
-                        }
+                        CloseIcon(
+                            onClick = { showSheet = false }
+                        )
                     }
 
                     Row (

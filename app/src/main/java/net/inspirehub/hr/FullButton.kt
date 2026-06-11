@@ -29,7 +29,7 @@ fun FullButton(
             contentColor = colors.onSecondaryColor,
             containerColor = colors.tertiaryColor
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(8.dp)
 
     ) {
         Text(

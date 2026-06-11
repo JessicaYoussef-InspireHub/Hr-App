@@ -10,14 +10,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apartment
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +23,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.GeneralIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
@@ -57,13 +55,9 @@ fun PaymentTypeBottomSheet(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.TopEnd,
             ) {
-                IconButton(onClick = { onDismiss() }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.close),
-                        tint = colors.tertiaryColor,
-                    )
-                }
+                CloseIcon(
+                    onClick = onDismiss
+                )
             }
             Text(
                 text = stringResource(R.string.choose_payment_type),
@@ -97,12 +91,11 @@ fun PaymentTypeBottomSheet(
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
+                    GeneralIcon(
                         imageVector = Icons.Default.Apartment,
-                        contentDescription = stringResource(R.string.company),
-                        tint = colors.onBackgroundColor,
-                        modifier = Modifier.size(40.dp)
+                        contentDescription = stringResource(R.string.company)
                     )
+
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = stringResource(R.string.company),
@@ -119,12 +112,11 @@ fun PaymentTypeBottomSheet(
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = stringResource(R.string.employee),
-                        tint = colors.onBackgroundColor,
-                        modifier = Modifier.size(40.dp)
-                    )
+                   GeneralIcon(
+                       imageVector = Icons.Default.Person,
+                       contentDescription = stringResource(R.string.employee)
+                   )
+
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = stringResource(R.string.employee),

@@ -3,7 +3,6 @@ package net.inspirehub.hr.protection.presentation
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -11,8 +10,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -44,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
+import net.inspirehub.hr.BackIcon
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.appColors
 
@@ -89,16 +87,11 @@ fun ConfirmPinScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Box(modifier = Modifier.fillMaxWidth()) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .size(32.dp)
-                    .clickable {
-                        navController.popBackStack()
-                    },
-                tint = colors.tertiaryColor
+            BackIcon(
+                onClick = {
+                  navController.popBackStack()
+                },
+                modifier = Modifier.align(Alignment.CenterStart)
             )
         }
         Image(

@@ -13,13 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -52,6 +48,7 @@ import net.inspirehub.hr.expenses.components.SwipeToDeleteItem
 import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.fetchExpenses
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.ChecklistIcon
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.SharedPrefManager
@@ -241,16 +238,8 @@ fun ExpensesScreen(
                     label = stringResource(R.string.expenses),
                     onBackClick = { navController.popBackStack() },
                     actions = {
-                        Icon(
-                            imageVector = Icons.Default.Checklist,
-                            contentDescription = "Select",
-                            tint = colors.onSecondaryColor,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .padding(horizontal = 8.dp)
-                                .clickable {
-                                    isSelectionMode = true
-                                }
+                        ChecklistIcon(
+                            onClick = { isSelectionMode = true }
                         )
                     }
                 )
@@ -369,7 +358,7 @@ fun ExpensesScreen(
                 hostState = snackBarHostState,
                 snackbar = { data ->
                     MySnackBar(
-                        snackBarData = data ,
+                        snackBarData = data,
                         useOffset = false
                     )
                 }
@@ -388,7 +377,8 @@ fun ExpensesScreen(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
                 onFilterClick = {
-                    showFilterSheet = true },
+                    showFilterSheet = true
+                },
                 isFilterActive = showFilterSheet
             )
 
@@ -585,14 +575,14 @@ fun ExpensesScreen(
         }
 
         if (showNoReportDialog) {
-                MyDialog(
-                    onConfirm = { showNoReportDialog = false },
-                    onDismiss = { showNoReportDialog = false },
-                    title = stringResource(R.string.invalid_request),
-                    subtitle = stringResource(R.string.you_have_no_expense_to_report),
-                    confirmButtonText = stringResource(R.string.ok),
-                    isLoading = false
-                )
+            MyDialog(
+                onConfirm = { showNoReportDialog = false },
+                onDismiss = { showNoReportDialog = false },
+                title = stringResource(R.string.invalid_request),
+                subtitle = stringResource(R.string.you_have_no_expense_to_report),
+                confirmButtonText = stringResource(R.string.ok),
+                isLoading = false
+            )
         }
 
         if (showPaymentSheet) {
@@ -640,7 +630,6 @@ fun ExpensesScreen(
                 },
 
 
-
                 onApply = {
                     fromDate = tempFromDate
                     toDate = tempToDate
@@ -668,7 +657,7 @@ fun ExpensesScreen(
                     tempFilterByAttachment = it
                 },
 
-            )
+                )
         }
 
         if (showFromDatePicker) {

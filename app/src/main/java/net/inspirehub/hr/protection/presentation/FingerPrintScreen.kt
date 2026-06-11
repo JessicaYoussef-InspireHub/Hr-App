@@ -14,10 +14,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
+import net.inspirehub.hr.BackIcon
+import net.inspirehub.hr.FingerprintIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
@@ -156,14 +154,12 @@ fun FingerPrintScreen(
                     .padding(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clickable { navController.popBackStack() },
-                    tint = colors.tertiaryColor
+                BackIcon(
+                    onClick = {
+                        navController.popBackStack()
+                    }
                 )
+
                 Spacer(modifier = Modifier.weight(0.3f))
             if( errorMessage == null){
                 Text(
@@ -185,34 +181,30 @@ fun FingerPrintScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Fingerprint,
-                        contentDescription = stringResource(R.string.fingerprint_authentication),
-                        modifier = Modifier
-                            .size(200.dp)
-                            .clickable {
-                                println("👆 The fingerprint icon has been pressed.")
-                                if (activity != null) {
-                                    startBiometricAuth(
-                                        activity = activity,
-                                        executor = executor,
-                                        context = context,
-                                        onResult = { success ->
-                                            println("🎯 Authentication result: $success")
-                                            viewModel.onAuthenticationResult(
-                                                success,
+                    FingerprintIcon(
+                        onClick = {
+                            println("👆 The fingerprint icon has been pressed.")
+                            if (activity != null) {
+                                startBiometricAuth(
+                                    activity = activity,
+                                    executor = executor,
+                                    context = context,
+                                    onResult = { success ->
+                                        println("🎯 Authentication result: $success")
+                                        viewModel.onAuthenticationResult(
+                                            success,
+                                        )
+                                        if (success) {
+                                            SharedPrefManager(context).setFingerprintAuthSuccess(
+                                                true
                                             )
-                                            if (success) {
-                                                SharedPrefManager(context).setFingerprintAuthSuccess(
-                                                    true
-                                                )
-                                            }
                                         }
-                                    )
-                                }
-                            },
-                        tint = colors.tertiaryColor
+                                    }
+                                )
+                            }
+                        }
                     )
+
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         authStatusText,

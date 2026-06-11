@@ -10,15 +10,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +24,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.GeneralIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
@@ -60,13 +58,8 @@ fun UploadBottomSheet(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.TopEnd,
             ) {
-                IconButton(onClick = { onDismiss() }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.close),
-                        tint = colors.tertiaryColor,
-                    )
-                }
+                CloseIcon(
+                    onClick = { onDismiss() })
             }
             Text(
                 text = stringResource(R.string.choose_option),
@@ -92,12 +85,11 @@ fun UploadBottomSheet(
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
+                    GeneralIcon(
                         imageVector = Icons.Default.Photo,
                         contentDescription = stringResource(R.string.filter_by_suppliers),
-                        tint = colors.onBackgroundColor,
-                        modifier = Modifier.size(40.dp)
                     )
+
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = stringResource(R.string.gallery),
@@ -114,12 +106,11 @@ fun UploadBottomSheet(
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
+                    GeneralIcon(
                         imageVector = Icons.Default.CameraAlt,
                         contentDescription = stringResource(R.string.camera),
-                        tint = colors.onBackgroundColor,
-                        modifier = Modifier.size(40.dp)
                     )
+
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = stringResource(R.string.camera),
@@ -137,12 +128,11 @@ fun UploadBottomSheet(
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
+                    GeneralIcon(
                         imageVector = Icons.Default.Folder,
                         contentDescription = stringResource(R.string.files),
-                        tint = colors.onBackgroundColor,
-                        modifier = Modifier.size(40.dp)
                     )
+
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = stringResource(R.string.files),
@@ -151,9 +141,6 @@ fun UploadBottomSheet(
                     )
                 }
             }
-
-
-
             Spacer(modifier = Modifier.height(20.dp))
         }
     }

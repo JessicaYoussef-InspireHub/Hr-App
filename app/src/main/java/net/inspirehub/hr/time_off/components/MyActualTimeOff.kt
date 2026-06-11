@@ -66,8 +66,7 @@ fun MyActualTimeOff(
                                 if (leave.request_unit == "day" || leave.request_unit == "half_day") "من الأيام المتاحة" else "من الساعات المتاحة"
                             } else {
                                 if (leave.request_unit == "day" || leave.request_unit == "half_day") "DAYS AVAILABLE" else "HOURS AVAILABLE"
-                            },
-                            showIcon = leave.name == "Annual Leaves"
+                            }
                         )
                     }
                 if ( index < visibleLeaveTypes.lastIndex) {

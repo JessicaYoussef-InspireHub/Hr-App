@@ -15,13 +15,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -35,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +51,7 @@ import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.ArrowDropDownIcon
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.MySnackBar
@@ -236,22 +232,16 @@ fun CreateReportScreen(
 
                     Spacer(modifier = Modifier.height(25.dp))
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            .clickable { isExpanded = !isExpanded},
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
 
                     ) {
                         TextFirstExpenses(stringResource(R.string.your_expenses))
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = null,
-                            tint = colors.onBackgroundColor,
-                            modifier = Modifier
-                                .size(28.dp)
-                                .rotate(if (isExpanded) 0f else 180f)
-                                .clickable {
-                                    isExpanded = !isExpanded
-                                }
+
+                        ArrowDropDownIcon(
+                            expanded = isExpanded
                         )
                     }
 

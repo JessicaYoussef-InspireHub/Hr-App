@@ -6,17 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.ArrowRightAlt
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
@@ -70,13 +66,7 @@ fun Dates(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .size(20.dp),
-                    tint = colors.onBackgroundColor
-                )
+                ArrowRightAlt()
 
                 Text(
                     text = formattedEnd,

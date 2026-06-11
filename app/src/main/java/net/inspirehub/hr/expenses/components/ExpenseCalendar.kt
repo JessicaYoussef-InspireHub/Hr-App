@@ -19,12 +19,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +37,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import net.inspirehub.hr.KeyboardArrowLeftIcon
+import net.inspirehub.hr.KeyboardArrowRightIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
@@ -90,13 +88,10 @@ fun ExpenseCalendar(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Previous Month",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clickable { currentMonth = currentMonth.minusMonths(1) },
-                            tint = colors.tertiaryColor
+                        KeyboardArrowLeftIcon(
+                            onClick = {
+                                currentMonth = currentMonth.minusMonths(1)
+                            }
                         )
 
                         Text(
@@ -110,13 +105,10 @@ fun ExpenseCalendar(
                             color = colors.tertiaryColor
                         )
 
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = "Next Month",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clickable { currentMonth = currentMonth.plusMonths(1) },
-                            tint = colors.tertiaryColor
+                        KeyboardArrowRightIcon(
+                            onClick = {
+                                currentMonth = currentMonth.plusMonths(1)
+                            }
                         )
                     }
 

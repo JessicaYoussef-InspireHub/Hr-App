@@ -75,8 +75,7 @@ fun AddToCart(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
 
-        )
-        {
+        ){
             Button(
                 onClick = {
                     if (quantity > 1) quantity--

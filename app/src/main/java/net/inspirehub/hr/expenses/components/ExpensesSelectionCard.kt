@@ -1,6 +1,5 @@
 package net.inspirehub.hr.expenses.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -34,6 +30,7 @@ import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.Expense
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
+import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.utils.formatNumber
 
@@ -71,11 +68,11 @@ fun ExpensesSelectionCard(
         }
 
         expenseList.isEmpty() -> {
-            Box (
+            Box(
                 modifier = Modifier
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
-            ){
+            ) {
                 Text(
                     stringResource(R.string.no_expenses_yet),
                     color = colors.onBackgroundColor,
@@ -98,7 +95,8 @@ fun ExpensesSelectionCard(
                         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                     ) {
                         Column(
-                            modifier = Modifier.padding(12.dp)
+                            modifier = Modifier.padding(start = 12.dp)
+                                .padding(vertical = 12.dp)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -110,13 +108,9 @@ fun ExpensesSelectionCard(
                                     fontWeight = FontWeight.SemiBold,
                                     color = colors.onBackgroundColor,
                                 )
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.delete),
-                                    tint = colors.tertiaryColor,
-                                    modifier = Modifier.clickable {
-                                        onRemove(expense)
-                                    }
+                                CloseIcon(
+                                    onClick = { onRemove(expense) },
+                                    contentDescription = stringResource(R.string.delete)
                                 )
                             }
 
@@ -130,7 +124,8 @@ fun ExpensesSelectionCard(
                                     val currency = expense.currency_symbol ?: ""
                                     val position = expense.currency_position ?: "after"
 
-                                    val formattedBaseAmount = formatNumber("%.2f".format(baseAmount) , currentLanguage)
+                                    val formattedBaseAmount =
+                                        formatNumber("%.2f".format(baseAmount), currentLanguage)
 
                                     val formattedBase = when (position) {
                                         "before" -> "$currency $formattedBaseAmount"
@@ -144,7 +139,8 @@ fun ExpensesSelectionCard(
 
                                     if (tax != null && tax != 0.0) {
 
-                                        val formattedTaxAmount = formatNumber("%.2f".format(tax) , currentLanguage)
+                                        val formattedTaxAmount =
+                                            formatNumber("%.2f".format(tax), currentLanguage)
 
                                         val formattedTax = when (position) {
                                             "before" -> "$currency $formattedTaxAmount"
@@ -169,7 +165,12 @@ fun ExpensesSelectionCard(
                                             fontWeight = FontWeight.Bold
                                         )
                                     ) {
-                                        append(formatNumber(formatDate(expense.date) , currentLanguage))
+                                        append(
+                                            formatNumber(
+                                                formatDate(expense.date),
+                                                currentLanguage
+                                            )
+                                        )
                                     }
 
                                     append(" ${stringResource(R.string.and_its_status_is)} ")
@@ -187,7 +188,6 @@ fun ExpensesSelectionCard(
                             )
                         }
                     }
-
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }

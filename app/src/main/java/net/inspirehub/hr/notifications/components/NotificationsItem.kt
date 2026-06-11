@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.GeneralIcon
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.notifications.data.NotificationEntity
 import net.inspirehub.hr.utils.convertToArabicDigits
@@ -73,14 +73,14 @@ fun NotificationItem(notification: NotificationEntity) {
         )
         {
             if (notification.title == "Leave Request Approved") {
-                Icon(
+                GeneralIcon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = notification.title,
                     modifier = Modifier.size(30.dp),
                     tint = colors.tertiaryColor
                 )
             } else {
-                Icon(
+                GeneralIcon(
                     imageVector = Icons.Default.Cancel,
                     contentDescription = notification.title,
                     modifier = Modifier.size(30.dp),
@@ -112,12 +112,13 @@ fun NotificationItem(notification: NotificationEntity) {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         if (isNew) {
-                            Icon(
-                            imageVector = Icons.Default.Circle,
-                            contentDescription = "New",
-                            modifier = Modifier.size(12.dp),
-                            tint = colors.tertiaryColor
-                        )}
+                            GeneralIcon(
+                                imageVector = Icons.Default.Circle,
+                                contentDescription = "New",
+                                modifier = Modifier.size(12.dp),
+                                tint = colors.tertiaryColor
+                            )
+                        }
                     }
                 }
                 Text(

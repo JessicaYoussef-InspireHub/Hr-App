@@ -21,13 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,6 +55,8 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.ui.platform.LocalContext
+import net.inspirehub.hr.AddIcon
+import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.utils.convertToArabicDigits
 
@@ -190,12 +188,7 @@ fun DoublePermissionDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.close),
-                        tint = colors.tertiaryColor,
-                        modifier = Modifier.clickable { onDismiss() }
-                    )
+                    CloseIcon(onClick = { onDismiss() })
                 }
                 Text(
                     text = formattedDate,
@@ -437,15 +430,11 @@ fun DoublePermissionDialog(
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add",
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clickable {
-                                    showNewVacationDialog = true
-                                },
-                            tint = colors.tertiaryColor
+                        AddIcon(
+                            modifier = Modifier.size(20.dp),
+                            onClick = {
+                                showNewVacationDialog = true
+                            }
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(

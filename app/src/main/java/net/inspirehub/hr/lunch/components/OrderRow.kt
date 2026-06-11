@@ -10,21 +10,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import net.inspirehub.hr.R
+import net.inspirehub.hr.AddIcon
+import net.inspirehub.hr.DeleteIcon
+import net.inspirehub.hr.RemoveIcon
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
@@ -71,12 +67,7 @@ fun OrderRow(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Remove,
-                    contentDescription = "minus",
-                    tint = colors.tertiaryColor,
-                    modifier = Modifier.size(14.dp)
-                )
+                RemoveIcon()
             }
 
             Text(
@@ -101,12 +92,7 @@ fun OrderRow(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "add",
-                    tint = colors.tertiaryColor,
-                    modifier = Modifier.size(14.dp)
-                )
+                AddIcon()
             }
         }
 
@@ -121,15 +107,9 @@ fun OrderRow(
                 color = colors.onBackgroundColor,
                 fontWeight = FontWeight.Medium
             )
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(R.string.delete),
-                tint = colors.tertiaryColor,
-                modifier = Modifier
-                    .size(28.dp)
-                    .clickable {
-                        onRemoveItem(item)
-                    }
+            DeleteIcon(
+                onClick = { onRemoveItem(item) },
+                tint = colors.tertiaryColor
             )
         }
     }

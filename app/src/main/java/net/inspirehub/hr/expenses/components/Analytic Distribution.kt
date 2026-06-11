@@ -17,16 +17,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Percent
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -46,6 +41,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+import net.inspirehub.hr.ArrowDropDownIcon
+import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.DeleteIcon
+import net.inspirehub.hr.GeneralIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
@@ -117,12 +117,7 @@ fun AnalyticDistribution(
             )
         },
         trailingIcon = {
-            Icon(
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = null,
-                tint = colors.onBackgroundColor,
-                modifier = Modifier.size(28.dp)
-            )
+            ArrowDropDownIcon(expanded = showSheet)
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -177,13 +172,9 @@ fun AnalyticDistribution(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.TopEnd,
                 ) {
-                    IconButton(onClick = { showSheet = false }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close),
-                            tint = colors.tertiaryColor,
-                        )
-                    }
+                    CloseIcon(
+                        onClick = { showSheet = false }
+                    )
                 }
                 Text(
                     text = stringResource(R.string.analytic_distribution),
@@ -274,13 +265,13 @@ fun AnalyticDistribution(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(
+                                        GeneralIcon(
                                             imageVector = Icons.Default.Percent,
                                             contentDescription = "Percent",
-                                            tint = colors.onBackgroundColor,
                                             modifier = Modifier.size(22.dp)
                                         )
-                                        IconButton(
+
+                                        DeleteIcon (
                                             onClick = {
                                                 val newLines = lines.toMutableList()
                                                 val newDistributions = selectedDistributions.toMutableList()
@@ -289,15 +280,9 @@ fun AnalyticDistribution(
                                                 newDistributions.removeAt(index)
                                                 lines = newLines
                                                 selectedDistributions = newDistributions
-                                            }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = stringResource(R.string.delete),
-                                                tint = colors.onBackgroundColor,
-                                                modifier = Modifier.size(28.dp)
-                                            )
-                                        }
+                                            },
+                                            tint = colors.onBackgroundColor
+                                        )
                                     }
                                 }
                             }

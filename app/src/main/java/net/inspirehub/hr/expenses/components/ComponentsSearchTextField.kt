@@ -4,9 +4,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -20,6 +17,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SearchIcon
 import net.inspirehub.hr.appColors
 @Composable
 fun ComponentsSearchTextField(
@@ -53,11 +51,7 @@ fun ComponentsSearchTextField(
                 fontSize = 16.sp
             ),
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                    tint = iconAndCursorColor
-                )
+                 SearchIcon(tint = iconAndCursorColor)
             },
             singleLine = true,
             modifier = Modifier.padding(horizontal = 8.dp),

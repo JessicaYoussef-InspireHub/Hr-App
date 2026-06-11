@@ -14,14 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,7 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -47,8 +42,10 @@ import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.submitExpense
 import net.inspirehub.hr.utils.formatNumber
-import androidx.compose.material.icons.filled.AttachFile
+import net.inspirehub.hr.AttachFileIcon
+import net.inspirehub.hr.CheckIcon
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.SendIcon
 
 data class ExpenseItem(
     val id: Int,
@@ -138,13 +135,7 @@ fun ExpenseItemCard(
                 )
 
                 if (expense.hasAttachments) {
-                    Icon(
-                        imageVector = Icons.Default.AttachFile,
-                        contentDescription = "Attachments",
-                        tint = colors.tertiaryColor,
-                        modifier = Modifier
-                            .size(18.dp)
-                    )
+                    AttachFileIcon()
                 }
 
                 if (isSelectionMode) {
@@ -176,11 +167,7 @@ fun ExpenseItemCard(
                             contentAlignment = Alignment.Center
                         ) {
                             if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Select",
-                                    tint = colors.onSecondaryColor,
-                                )
+                                CheckIcon()
                             }
                         }
                     }
@@ -272,35 +259,27 @@ fun ExpenseItemCard(
                 )
 
                 if (!is17Version) {
-                    Icon(
-                        imageVector = if (showSend)
-                            Icons.AutoMirrored.Filled.Send
-                        else
-                            Icons.Default.Check,
-                        contentDescription = "Send",
-                        modifier = Modifier
-                            .size(22.dp)
-                            .rotate(if (showSend) -30f else 0f)
-                            .clickable(enabled = showSend) {
-                                coroutineScope.launch {
-                                    val sharedPref = SharedPrefManager(context)
-                                    val token = sharedPref.getToken()
+                    SendIcon(
+                        enabled = showSend,
+                        onClick =  {
+                            coroutineScope.launch {
+                                val sharedPref = SharedPrefManager(context)
+                                val token = sharedPref.getToken()
 
-                                    val result = submitExpense(
-                                        context = context,
-                                        token = token ?: "",
-                                        expenseId = expense.id
-                                    )
+                                val result = submitExpense(
+                                    context = context,
+                                    token = token ?: "",
+                                    expenseId = expense.id
+                                )
 
-                                    if (result.status == "success") {
-                                        onSendSuccess()
-                                    } else {
-                                        errorMessage = result.message
-                                    }
-                                    println("Submit result: ${result.message}")
+                                if (result.status == "success") {
+                                    onSendSuccess()
+                                } else {
+                                    errorMessage = result.message
                                 }
-                            },
-                        tint = colors.tertiaryColor
+                                println("Submit result: ${result.message}")
+                            }
+                        }
                     )
                 }
             }

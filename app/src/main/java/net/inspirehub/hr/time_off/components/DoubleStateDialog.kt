@@ -20,13 +20,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,6 +50,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.inspirehub.hr.AddIcon
+import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.MyDialog
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -164,13 +162,7 @@ fun DoubleStateDialog(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.close),
-                        tint = colors.tertiaryColor,
-                        modifier = Modifier
-                            .clickable { onDismiss() }
-                    )
+                    CloseIcon(onClick = { onDismiss() })
                 }
                 Text(
                     text = formattedDate,
@@ -364,16 +356,11 @@ fun DoubleStateDialog(
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add",
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clickable {
-                                        showNewVacationDialog = true
-
-                                    },
-                                tint = colors.tertiaryColor
+                            AddIcon(
+                                modifier = Modifier.size(20.dp),
+                                onClick = {
+                                    showNewVacationDialog = true
+                                }
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(

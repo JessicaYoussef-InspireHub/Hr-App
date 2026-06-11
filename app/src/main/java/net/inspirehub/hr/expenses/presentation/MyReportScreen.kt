@@ -10,11 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +43,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.ChecklistIcon
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.expenses.components.ExpensesAndReportSearchBar
@@ -133,14 +130,8 @@ fun MyReportScreen(
                         navController.navigate("ExpensesScreen")
                     },
                     actions = {
-                        Icon(
-                            imageVector = Icons.Default.Checklist,
-                            contentDescription = "Select",
-                            tint = colors.onSecondaryColor,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .padding(horizontal = 8.dp)
-                                .clickable { isSelectionMode = !isSelectionMode }
+                        ChecklistIcon(
+                            onClick = { isSelectionMode = !isSelectionMode }
                         )
                     }
                 )

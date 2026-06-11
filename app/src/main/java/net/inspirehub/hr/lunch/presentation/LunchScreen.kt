@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -60,6 +59,7 @@ import net.inspirehub.hr.lunch.components.LunchSearchBox
 import net.inspirehub.hr.lunch.data.LunchProduct
 import net.inspirehub.hr.lunch.data.fetchLunchProducts
 import androidx.core.graphics.scale
+import net.inspirehub.hr.GeneralIcon
 import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.lunch.components.MyHistoryBottomSheet
 import net.inspirehub.hr.lunch.components.MyOrderBottomSheet
@@ -289,10 +289,9 @@ fun LunchScreen(
                                     .background(colors.surfaceContainerHigh, CircleShape)
                                     .clickable { showHistorySheet = true }
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.History,
+                                GeneralIcon(
+                                    imageVector = Icons.Default.History,
                                     contentDescription = "History",
-                                    tint = colors.onBackgroundColor,
                                     modifier = Modifier
                                         .size(40.dp)
                                         .padding(8.dp)
@@ -304,10 +303,9 @@ fun LunchScreen(
                                     .background(colors.surfaceContainerHigh, CircleShape)
                                     .clickable { openCartSheet = true }
                             ) {
-                                Icon(
+                                GeneralIcon(
                                     imageVector = Icons.Default.Fastfood,
                                     contentDescription = "MyOrder",
-                                    tint = colors.onBackgroundColor,
                                     modifier = Modifier
                                         .size(40.dp)
                                         .padding(8.dp)

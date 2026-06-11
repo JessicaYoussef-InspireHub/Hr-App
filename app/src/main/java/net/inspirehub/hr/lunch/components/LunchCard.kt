@@ -7,12 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.StarIcon
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import net.inspirehub.hr.lunch.data.FavoriteLunch
@@ -101,30 +98,26 @@ fun LunchCard(
                     Spacer(modifier = Modifier.width(8.dp))
                 }
 
-                Icon(
-                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                    contentDescription = "Favourite Icon",
-                    tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable {
-                            scope.launch {
-                                if (isFavorite) {
-                                    db.favoriteLunchDao().getFavoriteByIdFlow(productId).let {
-                                        db.favoriteLunchDao().deleteFavorite(productId)
-                                    }
-                                } else {
-                                    val favorite = FavoriteLunch(
-                                        id = productId,
-                                        name = name,
-                                        supplierName = supplierName,
-                                        price = price,
-                                        imageBase64 = imageBase64
-                                    )
-                                    db.favoriteLunchDao().insert(favorite)
+                StarIcon(
+                    isFavorite = isFavorite,
+                    onClick = {
+                        scope.launch {
+                            if (isFavorite) {
+                                db.favoriteLunchDao().getFavoriteByIdFlow(productId).let {
+                                    db.favoriteLunchDao().deleteFavorite(productId)
                                 }
+                            } else {
+                                val favorite = FavoriteLunch(
+                                    id = productId,
+                                    name = name,
+                                    supplierName = supplierName,
+                                    price = price,
+                                    imageBase64 = imageBase64
+                                )
+                                db.favoriteLunchDao().insert(favorite)
                             }
                         }
+                    }
                 )
             }
 

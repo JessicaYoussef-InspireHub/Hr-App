@@ -11,11 +11,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -29,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
@@ -78,13 +75,9 @@ fun EditReportBottomSheet(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.TopEnd,
             ) {
-                IconButton(onClick = { onDismiss() }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.close),
-                        tint = colors.tertiaryColor,
-                    )
-                }
+                CloseIcon (
+                    onClick = { onDismiss() }
+                )
             }
 
             Text(

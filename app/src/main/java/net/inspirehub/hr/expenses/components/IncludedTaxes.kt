@@ -2,6 +2,7 @@ package net.inspirehub.hr.expenses.components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +35,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.ArrowDropDownIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
@@ -100,8 +101,14 @@ fun IncludedTaxes(
                                 color = colors.surfaceContainerHigh,
                                 shape = RoundedCornerShape(20.dp)
                             )
+                            .border(
+                                width = 1.dp,
+                                color = colors.tertiaryColor,
+                                shape = RoundedCornerShape(20.dp)
+                            )
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .fillMaxWidth()
+
                     ) {
                         Text(
                             formatNumber(tax.name, currentLanguage),
@@ -117,7 +124,7 @@ fun IncludedTaxes(
                             contentDescription = "Remove Tax",
                             modifier = Modifier
                                 .size(16.dp)
-                                .align(Alignment.TopEnd)
+                                .align(Alignment.CenterEnd)
                                 .clickable {
                                     onTaxesChange(selectedTaxes - tax)
                                 },
@@ -148,11 +155,8 @@ fun IncludedTaxes(
                         }
                     },
                     trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "ArrowDropDown",
-                            tint = colors.onBackgroundColor,
-                            modifier = Modifier.size(28.dp)
+                        ArrowDropDownIcon(
+                            expanded = expanded
                         )
                     },
                     modifier = Modifier

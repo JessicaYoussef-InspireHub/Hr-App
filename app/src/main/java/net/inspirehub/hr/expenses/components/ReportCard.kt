@@ -15,13 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,7 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -42,8 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.ArrowDropDownIcon
+import net.inspirehub.hr.CheckIcon
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SendIcon
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.ExpenseReport
@@ -69,10 +66,6 @@ fun ReportCard(
     val currentLanguage = sharedPref.getLanguage()
     var showLockedDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val icon = if (canEdit)
-        Icons.AutoMirrored.Filled.Send
-    else
-        Icons.Default.Check
 
 
     fun formatDate(input: String): String {
@@ -128,32 +121,25 @@ fun ReportCard(
                 )
 
                 Row {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = if (canEdit) "Send Report" else "Already Submitted",
-                        tint = colors.tertiaryColor,
-                        modifier = Modifier
-                            .size(22.dp)
-                            .rotate(if (canEdit) -30f else 0f)
-                            .clickable(enabled = canEdit) {
-                                if (canEdit) {
-                                    scope.launch {
-                                        val token = sharedPref.getToken().orEmpty()
+                    SendIcon(
+                        enabled = canEdit,
+                        onClick = {
+                            scope.launch {
+                                val token = sharedPref.getToken().orEmpty()
 
-                                        val success = submitSheet(
-                                            context = context,
-                                            token = token,
-                                            sheetId = report.sheet_id
-                                        )
+                                val success = submitSheet(
+                                    context = context,
+                                    token = token,
+                                    sheetId = report.sheet_id
+                                )
 
-                                        if (success) {
-                                            onSendSuccess()
-                                        } else {
-                                            println("❌ Failed to submit")
-                                        }
-                                    }
+                                if (success) {
+                                    onSendSuccess()
+                                } else {
+                                    println("❌ Failed to submit")
                                 }
                             }
+                        }
                     )
 
 
@@ -186,11 +172,7 @@ fun ReportCard(
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (isSelected) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Select",
-                                        tint = colors.onSecondaryColor,
-                                    )
+                                    CheckIcon()
                                 }
                             }
                         }
@@ -243,16 +225,12 @@ fun ReportCard(
                         colors.onBackgroundColor,
                     fontSize = 16.sp
                 )
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
+                ArrowDropDownIcon(
+                    expanded = isExpanded,
                     tint = if (isState)
                         colors.onBackgroundColor.copy(alpha = 0.7f)
                     else
-                        colors.onBackgroundColor,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .rotate(if (isExpanded) 0f else 180f)
+                        colors.onBackgroundColor
                 )
             }
 

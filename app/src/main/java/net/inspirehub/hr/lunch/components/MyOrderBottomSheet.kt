@@ -14,12 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
@@ -90,13 +87,9 @@ fun MyOrderBottomSheet(
                         .fillMaxWidth(),
                     contentAlignment = Alignment.TopEnd,
                 ) {
-                    IconButton(onClick = { onDismiss() }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close),
-                            tint = colors.tertiaryColor,
-                        )
-                    }
+                    CloseIcon(
+                        onClick = { onDismiss() }
+                    )
                 }
                 Text(
                     text = stringResource(R.string.my_order),

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Photo
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.GeneralIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
@@ -106,10 +106,9 @@ fun UploadImageOrFileBox(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
+        GeneralIcon(
             imageVector = Icons.Default.Photo,
             contentDescription = "upload",
-            tint = colors.tertiaryColor,
             modifier = Modifier.size(50.dp)
         )
 

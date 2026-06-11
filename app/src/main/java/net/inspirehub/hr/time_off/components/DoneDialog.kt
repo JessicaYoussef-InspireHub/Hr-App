@@ -27,12 +27,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +51,8 @@ import net.inspirehub.hr.time_off.data.sendApiForRequestTimeOff
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.inspirehub.hr.AddIcon
+import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
@@ -187,12 +185,8 @@ fun TimeOffDetailsDialog(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.close),
-                        tint = colors.tertiaryColor,
-                        modifier = Modifier
-                            .clickable { onDismiss() }
+                    CloseIcon(
+                        onClick = { onDismiss() }
                     )
                 }
                 Text(
@@ -296,17 +290,13 @@ fun TimeOffDetailsDialog(
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add",
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clickable {
-                                    showNewVacationDialog = true
-
-                                },
-                            tint = colors.tertiaryColor
+                        AddIcon(
+                            modifier = Modifier.size(20.dp),
+                            onClick = {
+                                showNewVacationDialog = true
+                            }
                         )
+
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
                             text = stringResource(R.string.create_another_one),

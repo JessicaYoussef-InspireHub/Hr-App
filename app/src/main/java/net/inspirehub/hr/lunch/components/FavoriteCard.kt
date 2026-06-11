@@ -13,10 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import net.inspirehub.hr.R
+import net.inspirehub.hr.StarIcon
 import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.utils.convertToArabicDigits
 import java.util.Locale
@@ -147,17 +145,13 @@ fun FavoriteCard() {
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = "Remove from favorites",
-                        tint = colors.tertiaryColor,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable {
-                                coroutineScope.launch {
-                                    db.favoriteLunchDao().deleteFavorite(item.id)
-                                }
+                    StarIcon(
+                        isFavorite = true,
+                        onClick = {
+                            coroutineScope.launch {
+                                db.favoriteLunchDao().deleteFavorite(item.id)
                             }
+                        }
                     )
                 }
             }

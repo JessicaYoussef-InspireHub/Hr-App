@@ -2,7 +2,6 @@ package net.inspirehub.hr.lunch.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,16 +11,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,8 +30,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.StarIcon
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import net.inspirehub.hr.lunch.data.FavoriteLunch
@@ -62,7 +56,7 @@ fun LunchBottomSheet(
     val colors = appColors()
 
     val imageBitmap = remember(imageBase64) {
-        imageBase64?.let { base64ToImageBitmap(it, 120 , 120) }
+        imageBase64?.let { base64ToImageBitmap(it, 120, 120) }
     }
 
 
@@ -105,13 +99,9 @@ fun LunchBottomSheet(
                     .padding(horizontal = 5.dp),
                 contentAlignment = Alignment.TopEnd,
             ) {
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.close),
-                        tint = colors.tertiaryColor,
-                    )
-                }
+                CloseIcon(
+                    onClick = { onDismiss() }
+                )
             }
 
             Row(
@@ -136,11 +126,11 @@ fun LunchBottomSheet(
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Top
                 ) {
-                    Row (
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
-                    ){
+                    ) {
                         Text(
                             text = name,
                             fontSize = 20.sp,
@@ -171,31 +161,30 @@ fun LunchBottomSheet(
                                 Spacer(modifier = Modifier.width(4.dp))
                             }
 
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                                contentDescription = "Favourite Icon",
-                                tint = if (isFavorite) colors.tertiaryColor else colors.onBackgroundColor,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clickable {
-                                        scope.launch {
-                                            if (isFavorite) {
-                                                db.favoriteLunchDao()
-                                                    .getFavoriteByIdFlow(productId)
-                                                    .let { db.favoriteLunchDao().deleteFavorite(productId) }
-                                            } else {
-                                                db.favoriteLunchDao().insert(
-                                                    FavoriteLunch(
-                                                        id = productId,
-                                                        name = name,
-                                                        supplierName = supplierName,
-                                                        price = price,
-                                                        imageBase64 = imageBase64
-                                                    )
+                            StarIcon(
+                                isFavorite = isFavorite,
+                                onClick = {
+                                    scope.launch {
+                                        if (isFavorite) {
+                                            db.favoriteLunchDao()
+                                                .getFavoriteByIdFlow(productId)
+                                                .let {
+                                                    db.favoriteLunchDao()
+                                                        .deleteFavorite(productId)
+                                                }
+                                        } else {
+                                            db.favoriteLunchDao().insert(
+                                                FavoriteLunch(
+                                                    id = productId,
+                                                    name = name,
+                                                    supplierName = supplierName,
+                                                    price = price,
+                                                    imageBase64 = imageBase64
                                                 )
-                                            }
+                                            )
                                         }
                                     }
+                                }
                             )
                         }
                     }

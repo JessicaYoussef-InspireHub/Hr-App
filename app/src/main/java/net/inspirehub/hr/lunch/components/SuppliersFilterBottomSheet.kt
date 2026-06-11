@@ -18,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocalCarWash
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -27,8 +26,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +40,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.GeneralIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SmallLoading
 import net.inspirehub.hr.appColors
@@ -80,10 +79,10 @@ fun SuppliersFilterBottomSheet(
             .background(colors.surfaceContainerHigh, CircleShape)
             .clickable { showSheet = true }
     ) {
-        Icon(
+
+        GeneralIcon(
             imageVector = Icons.Default.LocalCarWash,
             contentDescription = stringResource(R.string.filter_by_suppliers),
-            tint = colors.onBackgroundColor,
             modifier = Modifier
                 .size(40.dp)
                 .padding(8.dp)
@@ -110,13 +109,9 @@ fun SuppliersFilterBottomSheet(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.TopEnd,
                     ) {
-                        IconButton(onClick = { showSheet = false }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.close),
-                                tint = colors.tertiaryColor,
-                            )
-                        }
+                        CloseIcon(
+                            onClick = { showSheet = false }
+                        )
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -214,12 +209,12 @@ fun SuppliersFilterBottomSheet(
                                             horizontalArrangement = Arrangement.Start,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(
+                                            GeneralIcon(
                                                 imageVector = Icons.Default.Person,
                                                 contentDescription = "Name",
-                                                tint = colors.onBackgroundColor,
                                                 modifier = Modifier.size(25.dp)
                                             )
+
                                             Text(
                                                 text = supplier.name,
                                                 color = colors.onBackgroundColor,
@@ -237,14 +232,13 @@ fun SuppliersFilterBottomSheet(
                                             horizontalArrangement = Arrangement.Start,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(
+                                            GeneralIcon(
                                                 imageVector = Icons.Default.Phone,
                                                 contentDescription = "Phone",
-                                                tint = colors.onBackgroundColor,
-                                                modifier = Modifier
-                                                    .size(20.dp)
+                                                modifier = Modifier.size(20.dp)
                                                     .padding(start = 4.dp)
                                             )
+
                                             Text(
                                                 text = supplier.phone,
                                                 color = colors.onBackgroundColor,
@@ -257,14 +251,13 @@ fun SuppliersFilterBottomSheet(
                                             horizontalArrangement = Arrangement.Start,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(
+                                            GeneralIcon(
                                                 imageVector = Icons.Default.LocationOn,
                                                 contentDescription = "Address",
-                                                tint = colors.onBackgroundColor,
-                                                modifier = Modifier
-                                                    .size(20.dp)
+                                                modifier = Modifier.size(20.dp)
                                                     .padding(start = 2.dp)
                                             )
+
                                             Text(
                                                 text = supplier.address,
                                                 color = colors.onBackgroundColor,

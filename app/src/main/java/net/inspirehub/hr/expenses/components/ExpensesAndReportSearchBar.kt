@@ -7,9 +7,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -19,6 +16,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.inspirehub.hr.FilterAltIcon
+import net.inspirehub.hr.SearchIcon
 import net.inspirehub.hr.appColors
 
 @Composable
@@ -67,9 +66,7 @@ fun ExpensesAndReportSearchBar(
                     fontSize = 16.sp
                 ),
                 leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null,
+                    SearchIcon(
                         tint = iconAndCursorColor
                     )
                 },
@@ -96,14 +93,7 @@ fun ExpensesAndReportSearchBar(
                 .background(colors.surfaceContainerHigh, CircleShape)
                 .clickable { onFilterClick() }
         ) {
-            Icon(
-                imageVector = Icons.Default.FilterAlt,
-                contentDescription = "Filter",
-                tint = if (isFilterActive) colors.tertiaryColor else colors.onBackgroundColor,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(10.dp)
-            )
+            FilterAltIcon( isActive = isFilterActive )
         }
     }
 }
