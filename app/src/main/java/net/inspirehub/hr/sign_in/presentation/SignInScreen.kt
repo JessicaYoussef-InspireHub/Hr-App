@@ -112,7 +112,7 @@ fun SignInScreen(
         Box(modifier = Modifier.fillMaxWidth()) {
             BackIcon(
                 onClick = { navController.navigate("ScanQrCodeScreen") },
-                modifier = Modifier.align(Alignment.CenterEnd)
+                modifier = Modifier.align(Alignment.CenterStart)
             )
         }
         Image(

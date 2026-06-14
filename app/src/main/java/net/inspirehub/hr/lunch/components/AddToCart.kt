@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -34,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
 import net.inspirehub.hr.lunch.data.DatabaseProvider
@@ -141,8 +141,10 @@ fun AddToCart(
             }
         }
 
-        Button(
-            onClick = {
+
+
+        SmallButtons(
+            onConfirm =  {
                 val db = DatabaseProvider.getDatabase(context)
                 val activity = context as? ComponentActivity
 
@@ -162,18 +164,9 @@ fun AddToCart(
                 }
                 onAddClick(quantity)
             },
+            onDismiss = {},
+            confirmButtonText = stringResource(R.string.add) + " " + localizedTotal,
             modifier = Modifier.height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colors.tertiaryColor
-            ),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(
-                stringResource(R.string.add) + " " + localizedTotal,
-                color = colors.onSecondaryColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
-        }
+        )
     }
 }

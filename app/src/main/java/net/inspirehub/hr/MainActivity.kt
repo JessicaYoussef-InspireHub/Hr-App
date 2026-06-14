@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
 
             val sharedPref = SharedPrefManager(this)
             val darkMode = sharedPref.isDarkModeEnabled()
+            Log.d("DARK_MODE", "Loaded = $darkMode")
 
             CompositionLocalProvider {
 

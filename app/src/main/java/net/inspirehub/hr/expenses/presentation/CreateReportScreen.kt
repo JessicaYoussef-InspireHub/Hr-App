@@ -41,11 +41,9 @@ import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.expenses.components.ExpenseReportSummary
 import net.inspirehub.hr.expenses.components.ExpensesSelectionCard
-import net.inspirehub.hr.expenses.components.SaveCancelButton
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
@@ -55,6 +53,7 @@ import net.inspirehub.hr.ArrowDropDownIcon
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.MySnackBar
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.expenses.components.EditReportBottomSheet
 import net.inspirehub.hr.expenses.data.sendReport
 
@@ -127,23 +126,17 @@ fun CreateReportScreen(
             },
             bottomBar = {
                 Column {
-                    SaveCancelButton(
-                        stringResource(R.string.save),
-                        isLoading = isLoading,
-                        onCancel = {
-                            navController.navigate("ExpensesScreen") {
-                                popUpTo("AddExpensesScreen") { inclusive = true }
-                            }
-                        },
+
+                    SmallButtons(
                         onConfirm = {
-                            if (isLoading) return@SaveCancelButton
+                            if (isLoading) return@SmallButtons
 
                             summaryError = summary.isBlank()
-                            if (summaryError) return@SaveCancelButton
+                            if (summaryError) return@SmallButtons
 
                             if (selectedExpenses.isEmpty()) {
                                 showEmptyExpensesDialog = true
-                                return@SaveCancelButton
+                                return@SmallButtons
                             }
 
                             scope.launch {
@@ -177,7 +170,17 @@ fun CreateReportScreen(
 
                                 isLoading = false
                             }
-                        }
+                        },
+                        onDismiss = {
+                            navController.navigate("ExpensesScreen") {
+                                popUpTo("AddExpensesScreen") { inclusive = true }
+                            }
+                        },
+                        confirmButtonText = stringResource(R.string.save),
+                        dismissButtonText = stringResource(R.string.discard),
+                        isLoading = isLoading,
+                        equalWeight = true,
+                        modifier = Modifier .padding(vertical = 16.dp , horizontal = 5.dp)
                     )
                     BottomBar(navController = navController)
                 }
@@ -290,14 +293,6 @@ fun CreateReportScreen(
                     },
                     label = stringResource(R.string.add_more_expenses)
                 )
-            }
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .clickable(enabled = false) {}
-                ) {
-                    FullLoading()
-                }
             }
         }
 

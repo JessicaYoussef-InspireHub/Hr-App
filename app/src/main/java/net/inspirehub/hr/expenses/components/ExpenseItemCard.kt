@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -46,6 +44,7 @@ import net.inspirehub.hr.AttachFileIcon
 import net.inspirehub.hr.CheckIcon
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.SendIcon
+import net.inspirehub.hr.SmallButtons
 
 data class ExpenseItem(
     val id: Int,
@@ -175,19 +174,12 @@ fun ExpenseItemCard(
 
                 if (isAddMode) {
                     Spacer(modifier = Modifier.width(6.dp))
-                    Button(
-                        onClick = { onSelect() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.tertiaryColor
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.add),
-                            color = colors.onSecondaryColor,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
+                    SmallButtons(
+                        onConfirm = { onSelect() },
+                        onDismiss = {  },
+                        confirmButtonText = stringResource(R.string.add),
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))

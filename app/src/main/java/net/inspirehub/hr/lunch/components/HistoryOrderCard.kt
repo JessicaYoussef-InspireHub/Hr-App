@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -25,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.OrderWithItems
 import net.inspirehub.hr.utils.formatNumber
@@ -86,20 +84,12 @@ fun HistoryOrderCard(
                         color = colors.onBackgroundColor
                     )
                 }
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.tertiaryColor,
-                        contentColor = colors.onSecondaryColor
-                    ),
-                    onClick = onReorderClick,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        stringResource(R.string.re_order),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+
+                SmallButtons(
+                    onConfirm = { onReorderClick() },
+                    onDismiss = {},
+                    confirmButtonText = stringResource(R.string.re_order),
+                )
             }
         }
     }

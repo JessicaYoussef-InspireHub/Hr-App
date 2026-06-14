@@ -14,13 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +38,7 @@ import net.inspirehub.hr.KeyboardArrowLeftIcon
 import net.inspirehub.hr.KeyboardArrowRightIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.utils.formatNumber
 import java.time.LocalDate
@@ -196,49 +194,15 @@ fun ExpenseCalendar(
                         }
                     }
 
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            onClick = {
-                                selectedDate?.let { onDateSelected(it) }
-                                onDismiss()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                contentColor = colors.onSecondaryColor,
-                                containerColor = colors.tertiaryColor
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                stringResource(R.string.apply),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Button(
-                            onClick = {
-                                onDismiss()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = colors.inverseOnSurface,
-                                contentColor = colors.onSecondaryContainer
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                stringResource(R.string.discard),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
+                    SmallButtons(
+                        onConfirm = {
+                            selectedDate?.let { onDateSelected(it) }
+                            onDismiss()
+                        },
+                        onDismiss = { onDismiss() },
+                        confirmButtonText = stringResource(R.string.apply),
+                        dismissButtonText = stringResource(R.string.discard)
+                    )
                 }
             }
         }

@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,6 +55,7 @@ import kotlinx.coroutines.launch
 import net.inspirehub.hr.AddIcon
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.utils.convertToArabicDigits
 
@@ -160,42 +159,20 @@ fun PermissionDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             if (record?.state == "draft" || record?.state == "confirm") {
-                Button(
-                    onClick = {
+                SmallButtons(
+                    onConfirm = {
                         showDeleteConfirmation = true
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.tertiaryColor,
-                        contentColor = colors.onSecondaryColor
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-
-                ) {
-                    Text(
-                        text = stringResource(R.string.delete),
-                        color = colors.onSecondaryColor,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    onDismiss = {},
+                    confirmButtonText = stringResource(R.string.delete),
+                )
             } else {
-                Button(
-                    onClick = {
-                        onDismiss()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.tertiaryColor,
-                        contentColor = colors.onSecondaryColor
-                    ),
-                    shape = RoundedCornerShape(10.dp)
 
-                ) {
-                    Text(
-                        text = stringResource(R.string.ok),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+                SmallButtons(
+                    onConfirm = { onDismiss() },
+                    onDismiss = { onDismiss() },
+                    confirmButtonText = stringResource(R.string.ok),
+                )
             }
         },
         title = {
@@ -249,7 +226,7 @@ fun PermissionDialog(
                                 )
                             }
 
-                            "refuse" -> {
+                            "cancel" -> {
                                 Box(
                                     modifier = Modifier
                                         .size(15.dp)
@@ -321,7 +298,7 @@ fun PermissionDialog(
                                 )
                             }
 
-                            "refuse" -> {
+                            "cancel" -> {
                                 Box(
                                     modifier = Modifier
                                         .size(15.dp)

@@ -21,8 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,6 +51,7 @@ import kotlinx.coroutines.withContext
 import net.inspirehub.hr.AddIcon
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.SmallButtons
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -120,7 +119,7 @@ fun DoubleStateDialog(
 
     var showNewVacationDialog by remember { mutableStateOf(false) }
 
-    val allRefused = leaveRecords.isNotEmpty() && leaveRecords.all { it.state == "refuse" }
+    val allRefused = leaveRecords.isNotEmpty() && leaveRecords.all { it.state == "cancel" }
 
     val hasDraftOrConfirm = leaveRecords.any { it.state == "draft" || it.state == "confirm" }
     val colors = appColors()
@@ -129,27 +128,19 @@ fun DoubleStateDialog(
         containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
-//            if (!allRefused) {
-            Button(
-                onClick = {
+
+            SmallButtons(
+                onConfirm = {
                     if (hasDraftOrConfirm) {
                         showDeleteConfirmation = true
                     } else {
                         onConfirm()
                     }
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.tertiaryColor,
-                    contentColor = colors.onSecondaryColor
-                ),
-                shape = RoundedCornerShape(10.dp)
-
-            ) {
-                Text(
-                    text = if (hasDraftOrConfirm)
-                        stringResource(R.string.remove_pending) else stringResource(R.string.ok),
-                )
-            }
+                onDismiss = {  },
+                confirmButtonText = if (hasDraftOrConfirm)
+                    stringResource(R.string.remove_pending) else stringResource(R.string.ok),
+            )
         },
         text = {
             Column(
@@ -205,7 +196,7 @@ fun DoubleStateDialog(
                                         )
                                     }
 
-                                    "refuse" -> {
+                                    "cancel" -> {
                                         Box(
                                             modifier = Modifier
                                                 .size(15.dp)

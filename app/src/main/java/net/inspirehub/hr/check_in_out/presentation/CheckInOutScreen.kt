@@ -18,6 +18,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -37,7 +38,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.SharedPrefManager
-import net.inspirehub.hr.check_in_out.components.CheckInOutButton
 import net.inspirehub.hr.check_in_out.data.CheckInOutViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -80,6 +80,7 @@ import net.inspirehub.hr.check_in_out.data.checkLocationUpdatesRaw
 import net.inspirehub.hr.sign_in.data.SignInApiService
 import net.inspirehub.hr.utils.convertToArabicDigits
 import com.google.firebase.messaging.FirebaseMessaging
+import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MyDialog
 
 var timeChangeReceiver: BroadcastReceiver? = null
@@ -562,10 +563,28 @@ fun CheckInOutScreen(
                     contentAlignment = Alignment.Center
                 ) {
 
-                    CheckInOutButton(
-                        attendanceStatus = attendanceStatus,
-                        isWithinDistance = (isWithinDistance == true),
+                    FullButton(
+                        label = when (attendanceStatus) {
+                            "checked_in" -> stringResource(R.string.check_out)
+                            "checked_out" -> stringResource(R.string.check_in)
+                            else -> "..."
+                        },
+                        enabled = isWithinDistance == true,
                         isLoading = isButtonLoading || isWithinDistance == null,
+                        containerColor =
+                            if (attendanceStatus == "checked_in")
+                                colors.tertiaryColor
+                            else
+                                colors.onSecondaryColor,
+                        contentColor =
+                            if (attendanceStatus == "checked_in")
+                                colors.onSecondaryColor
+                            else
+                                colors.tertiaryColor,
+                        border =
+                            if (isWithinDistance == true)
+                                BorderStroke(2.dp, colors.tertiaryColor)
+                            else null,
                         onClick = {
                             if (!isButtonLoading) {
                                 coroutineScope.launch {

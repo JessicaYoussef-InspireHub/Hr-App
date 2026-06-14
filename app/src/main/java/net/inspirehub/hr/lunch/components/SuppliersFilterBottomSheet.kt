@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,7 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.GeneralIcon
+import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.SmallLoading
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.Supplier
@@ -148,7 +149,8 @@ fun SuppliersFilterBottomSheet(
                                     fontWeight = FontWeight.Medium,
                                     color = colors.onBackgroundColor,
                                 )
-                            }}
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -163,159 +165,166 @@ fun SuppliersFilterBottomSheet(
                         Column(
                             modifier = Modifier.verticalScroll(scrollState)
                         ) {
-                    if (isLoading) {
-                        SmallLoading()
-                    }  else if (suppliers.isEmpty()) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Spacer(modifier = Modifier.height(20.dp))
+                            if (isLoading) {
+                                SmallLoading()
+                            } else if (suppliers.isEmpty()) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Spacer(modifier = Modifier.height(20.dp))
 
-                            Text(
-                                text = stringResource(R.string.no_suppliers_yet),
-                                color = colors.tertiaryColor,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                                    Text(
+                                        text = stringResource(R.string.no_suppliers_yet),
+                                        color = colors.tertiaryColor,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
 
-                            Spacer(modifier = Modifier.height(20.dp))
+                                    Spacer(modifier = Modifier.height(20.dp))
+                                }
+                            } else {
+
+                                suppliers.forEachIndexed { index, supplier ->
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 5.dp, horizontal = 12.dp)
+                                                .clickable {
+                                                    selectedSuppliers =
+                                                        selectedSuppliers.toMutableList().also {
+                                                            it[index] = !it[index]
+                                                        }
+                                                },
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        )
+                                        {
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalArrangement = Arrangement.Top,
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Start,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    GeneralIcon(
+                                                        imageVector = Icons.Default.Person,
+                                                        contentDescription = "Name",
+                                                        modifier = Modifier.size(25.dp)
+                                                    )
+
+                                                    Text(
+                                                        text = supplier.name,
+                                                        color = colors.onBackgroundColor,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 20.sp,
+                                                        modifier = Modifier.padding(start = 4.dp)
+                                                    )
+
+                                                }
+
+                                                Spacer(modifier = Modifier.height(5.dp))
+
+
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Start,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    GeneralIcon(
+                                                        imageVector = Icons.Default.Phone,
+                                                        contentDescription = "Phone",
+                                                        modifier = Modifier
+                                                            .size(20.dp)
+                                                            .padding(start = 4.dp)
+                                                    )
+
+                                                    Text(
+                                                        text = supplier.phone,
+                                                        color = colors.onBackgroundColor,
+                                                        fontWeight = FontWeight.Medium,
+                                                        fontSize = 16.sp,
+                                                        modifier = Modifier.padding(start = 4.dp)
+                                                    )
+                                                }
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Start,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    GeneralIcon(
+                                                        imageVector = Icons.Default.LocationOn,
+                                                        contentDescription = "Address",
+                                                        modifier = Modifier
+                                                            .size(20.dp)
+                                                            .padding(start = 2.dp)
+                                                    )
+
+                                                    Text(
+                                                        text = supplier.address,
+                                                        color = colors.onBackgroundColor,
+                                                        fontWeight = FontWeight.Medium,
+                                                        fontSize = 16.sp,
+                                                        modifier = Modifier.padding(start = 4.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            Checkbox(
+                                                checked = selectedSuppliers.getOrElse(index) { false },
+                                                onCheckedChange = { isChecked ->
+                                                    selectedSuppliers =
+                                                        selectedSuppliers.toMutableList().also {
+                                                            it[index] = isChecked
+                                                        }
+                                                },
+                                                colors = CheckboxDefaults.colors(
+                                                    uncheckedColor = colors.tertiaryColor,
+                                                    checkedColor = colors.tertiaryColor,
+                                                    checkmarkColor = colors.onSecondaryColor
+                                                )
+                                            )
+                                        }
+                                        if (index != suppliers.size - 1) {
+                                            MyDivider(
+                                                horizontalPadding = 16,
+                                                verticalPadding = 8,
+                                                color = colors.surfaceTint,
+                                                thickness = 1
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                    else {
-
-                        suppliers.forEachIndexed { index, supplier ->
-                            Column {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 5.dp, horizontal = 12.dp)
-                                        .clickable {
-                                            selectedSuppliers =
-                                                selectedSuppliers.toMutableList().also {
-                                                    it[index] = !it[index]
-                                                }
-                                        },
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                )
-                                {
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalArrangement = Arrangement.Top,
-                                        horizontalAlignment = Alignment.Start
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.Start,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            GeneralIcon(
-                                                imageVector = Icons.Default.Person,
-                                                contentDescription = "Name",
-                                                modifier = Modifier.size(25.dp)
-                                            )
-
-                                            Text(
-                                                text = supplier.name,
-                                                color = colors.onBackgroundColor,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 20.sp,
-                                                modifier = Modifier.padding(start = 4.dp)
-                                            )
-
-                                        }
-
-                                        Spacer(modifier = Modifier.height(5.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
 
-                                        Row(
-                                            horizontalArrangement = Arrangement.Start,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            GeneralIcon(
-                                                imageVector = Icons.Default.Phone,
-                                                contentDescription = "Phone",
-                                                modifier = Modifier.size(20.dp)
-                                                    .padding(start = 4.dp)
-                                            )
-
-                                            Text(
-                                                text = supplier.phone,
-                                                color = colors.onBackgroundColor,
-                                                fontWeight = FontWeight.Medium,
-                                                fontSize = 16.sp,
-                                                modifier = Modifier.padding(start = 4.dp)
-                                            )
-                                        }
-                                        Row(
-                                            horizontalArrangement = Arrangement.Start,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            GeneralIcon(
-                                                imageVector = Icons.Default.LocationOn,
-                                                contentDescription = "Address",
-                                                modifier = Modifier.size(20.dp)
-                                                    .padding(start = 2.dp)
-                                            )
-
-                                            Text(
-                                                text = supplier.address,
-                                                color = colors.onBackgroundColor,
-                                                fontWeight = FontWeight.Medium,
-                                                fontSize = 16.sp,
-                                                modifier = Modifier.padding(start = 4.dp)
-                                            )
-                                        }
-                                    }
-
-                                    Checkbox(
-                                        checked = selectedSuppliers.getOrElse(index) { false },
-                                        onCheckedChange = { isChecked ->
-                                            selectedSuppliers =
-                                                selectedSuppliers.toMutableList().also {
-                                                    it[index] = isChecked
-                                                }
-                                        },
-                                        colors = CheckboxDefaults.colors(
-                                            uncheckedColor = colors.tertiaryColor,
-                                            checkedColor = colors.tertiaryColor,
-                                            checkmarkColor = colors.onSecondaryColor
-                                        )
-                                    )
+                    SmallButtons(
+                        onConfirm = {
+                            val selectedSupplierIds = suppliers
+                                .filterIndexed { index, _ ->
+                                    selectedSuppliers.getOrElse(index) { false }
                                 }
-                                if (index != suppliers.size - 1) {
-                                    HorizontalDivider(
-                                        thickness = 1.dp,
-                                        modifier = Modifier.padding(
-                                            horizontal = 16.dp,
-                                            vertical = 8.dp
-                                        ),
-                                        color = colors.surfaceTint
-                                    )
-                                }
-                            }
-                        }}}}
-                        Spacer(modifier = Modifier.height(20.dp))
+                                .map { it.id }
 
-                        SuppliersFilterActions(
-                            onApply = {
-                                val selectedSupplierIds = suppliers
-                                    .filterIndexed { index, _ ->
-                                        selectedSuppliers.getOrElse(index) { false }
-                                    }
-                                    .map { it.id }
-
-                                onApply(selectedSupplierIds)
-                                showSheet = false
-                            },
-                            onDiscard = {
-                                selectedSuppliers = List(suppliers.size) { false }
-                                onApply(emptyList())
-                                showSheet = false
-                            }
-                        )
-                    }
+                            onApply(selectedSupplierIds)
+                            showSheet = false
+                        },
+                        onDismiss = {
+                            selectedSuppliers = List(suppliers.size) { false }
+                            onApply(emptyList())
+                            showSheet = false
+                        },
+                        confirmButtonText = stringResource(R.string.apply),
+                        dismissButtonText = stringResource(R.string.discard),
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        equalWeight = true
+                    )
                 }
             }
         }
+    }
 }

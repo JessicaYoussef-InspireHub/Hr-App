@@ -14,14 +14,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Percent
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -46,8 +42,10 @@ import net.inspirehub.hr.ArrowDropDownIcon
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.DeleteIcon
 import net.inspirehub.hr.GeneralIcon
+import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.AnalyticAccount
 import net.inspirehub.hr.expenses.data.fetchAnalyticAccounts
@@ -286,9 +284,8 @@ fun AnalyticDistribution(
                                     }
                                 }
                             }
-
-                            HorizontalDivider(
-                                thickness = 1.dp,
+                            MyDivider(
+                                thickness = 1,
                                 color = colors.surfaceColor
                             )
                         }
@@ -310,13 +307,8 @@ fun AnalyticDistribution(
                                     selectedDistributions = selectedDistributions + ""
                                 }
                         )
-                      Button(
-                          colors = ButtonDefaults.buttonColors(
-                              contentColor = colors.onSecondaryColor,
-                              containerColor = colors.tertiaryColor
-                          ),
-                          shape = RoundedCornerShape(10.dp),
-                            onClick = {
+                        SmallButtons(
+                            onConfirm =  {
                                 selectedDistributions = tempDistributions.toList()
 
                                 val result = mutableMapOf<Int, Int>()
@@ -334,14 +326,10 @@ fun AnalyticDistribution(
                                 onDistributionChange(result)
 
                                 showSheet = false
-                            }
-                        ) {
-                          Text(
-                              stringResource(R.string.apply),
-                              fontSize = 15.sp,
-                              fontWeight = FontWeight.SemiBold
-                          )
-                        }
+                            },
+                            onDismiss = { showSheet = false },
+                            confirmButtonText = stringResource(R.string.apply)
+                        )
                     }
                 }
             }

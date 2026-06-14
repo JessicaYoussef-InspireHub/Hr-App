@@ -28,6 +28,7 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import androidx.compose.material3.*
 import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.SmallButtons
 import java.time.LocalDate
 
 
@@ -215,9 +216,8 @@ fun ExpensesFilterBottomSheet(
 
             Spacer(Modifier.height(40.dp))
 
-            ResetAndApplyButtons(
-                onReset = onReset,
-                onApply = {
+            SmallButtons(
+                onConfirm = {
                     val from = tempFromDate ?: LocalDate.now()
                     val to = tempToDate ?: LocalDate.now()
 
@@ -227,8 +227,14 @@ fun ExpensesFilterBottomSheet(
                         dateError = false
                         onApply()
                     }
-                }
+                },
+                onDismiss = {
+                    onReset()
+                },
+                confirmButtonText = stringResource(R.string.apply),
+                dismissButtonText = stringResource(R.string.reset)
             )
+
             Spacer(Modifier.height(20.dp))
         }
     }

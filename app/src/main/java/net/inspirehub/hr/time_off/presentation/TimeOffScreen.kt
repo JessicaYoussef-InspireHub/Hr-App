@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +40,7 @@ import androidx.navigation.NavController
 import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.FullLoading
+import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
@@ -207,7 +207,7 @@ fun TimeOffScreen(
                 Log.i("TimeOffScreen", "✅ time_off_status loaded")
 
                 val validated = timeOffStatus.records.daily_records
-                    .filter { it.state in listOf("confirm", "draft", "validate", "refuse") }
+                    .filter { it.state in listOf("confirm", "draft", "validate", "cancel") }
                     .flatMap { record ->
                         val start = LocalDate.parse(record.start_date)
                         val end = LocalDate.parse(record.end_date)
@@ -236,7 +236,7 @@ fun TimeOffScreen(
                 Log.i("TimeOffScreen", "this_year_time_off = $yearResult")
 
                 val validated = yearResult.records.daily_records
-                    .filter { it.state in listOf("confirm", "draft", "validate", "refuse") }
+                    .filter { it.state in listOf("confirm", "draft", "validate", "cancel") }
                     .flatMap { record ->
                         val start = LocalDate.parse(record.start_date)
                         val end = LocalDate.parse(record.end_date)
@@ -327,11 +327,9 @@ fun TimeOffScreen(
                     publicHolidayDates = publicHolidayDates,
                     leaveTypeColors = leaveTypeColors
                 )
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colors.inverseOnSurface)
-                )
+
+                MyDivider(color = colors.inverseOnSurface)
+
                 Spacer(modifier = Modifier.height(10.dp))
                 Column(
                     verticalArrangement = Arrangement.spacedBy(0.dp),

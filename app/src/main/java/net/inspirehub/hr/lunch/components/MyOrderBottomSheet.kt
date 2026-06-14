@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.FullButton
+import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.lunch.data.CartItem
@@ -146,13 +146,11 @@ fun MyOrderBottomSheet(
                                         }
                                     )
                                 if (index != cartItems.size - 1) {
-                                    HorizontalDivider(
-                                        thickness = 1.dp,
-                                        modifier = Modifier.padding(
-                                            horizontal = 16.dp,
-                                            vertical = 8.dp
-                                        ),
-                                        color = colors.surfaceColor
+                                    MyDivider(
+                                        horizontalPadding = 16,
+                                        verticalPadding = 8,
+                                        color = colors.surfaceColor,
+                                        thickness = 1
                                     )
                                 }
                             }

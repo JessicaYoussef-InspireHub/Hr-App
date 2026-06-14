@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -46,9 +45,10 @@ fun BottomBar(
     var moreMenuExpanded by remember { mutableStateOf(false) }
 
     Column {
-        HorizontalDivider(
-            thickness = 1.dp, color = colors.inverseOnSurface
+        MyDivider(
+            thickness = 1 , color = colors.inverseOnSurface
         )
+
         Box {
             NavigationBar(
                 containerColor = colors.onSecondaryColor,

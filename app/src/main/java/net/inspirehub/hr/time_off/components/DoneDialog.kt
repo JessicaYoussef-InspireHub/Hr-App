@@ -27,8 +27,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +52,7 @@ import kotlinx.coroutines.withContext
 import net.inspirehub.hr.AddIcon
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -139,43 +138,22 @@ fun TimeOffDetailsDialog(
         onDismissRequest = { onDismiss() },
         confirmButton = {
             if (record.state == "draft" || record.state == "confirm") {
-                Button(
-                    onClick = {
+                SmallButtons(
+                    onConfirm = {
                         showDeleteConfirmation = true
-
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.tertiaryColor,
-                        contentColor = colors.onSecondaryColor
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-
-                ) {
-                    Text(
-                        text = stringResource(R.string.delete),
-                        color = colors.onSecondaryColor,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    onDismiss = {  },
+                    confirmButtonText = stringResource(R.string.delete),
+                )
             } else if (record.state == "validate" ) {
-                Button(
-                    onClick = {
+
+                SmallButtons(
+                    onConfirm = {
                         onDismiss()
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.tertiaryColor,
-                        contentColor = colors.onSecondaryColor
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-
-                ) {
-                    Text(
-                        text = stringResource(R.string.ok),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+                    onDismiss = {  },
+                    confirmButtonText = stringResource(R.string.ok),
+                )
             }
         },
         title = {
@@ -229,7 +207,7 @@ fun TimeOffDetailsDialog(
                             )
                         }
 
-                        "refuse" -> {
+                        "cancel" -> {
                             Box(
                                 modifier = Modifier
                                     .size(15.dp)
@@ -284,7 +262,7 @@ fun TimeOffDetailsDialog(
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                if (record.state == "refuse") {
+                if (record.state == "cancel") {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start,

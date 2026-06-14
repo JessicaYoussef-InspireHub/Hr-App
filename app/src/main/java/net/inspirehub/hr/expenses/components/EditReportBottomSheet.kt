@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.data.Expense
 
@@ -192,10 +193,7 @@ fun EditReportBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            SaveCancelButton(
-                stringResource(R.string.new_expense),
-                onCancel = { onDismiss() },
-                isLoading = false,
+            SmallButtons(
                 onConfirm = {
                     onDismiss()
                     if (editScreen){
@@ -203,7 +201,16 @@ fun EditReportBottomSheet(
                     }
                     else
                         navController.navigate("AddExpensesScreen?source=create_report&reportId=$reportId&paymentMode=$requiredPaymentMode")
-                }
+                },
+                onDismiss = { onDismiss() },
+                confirmButtonText = stringResource(R.string.new_expense),
+                dismissButtonText = stringResource(R.string.discard),
+                isLoading = false,
+                modifier = Modifier.padding(
+                    vertical = 16.dp , horizontal = 5.dp
+                ),
+                equalWeight = true
+
             )
         }
     }

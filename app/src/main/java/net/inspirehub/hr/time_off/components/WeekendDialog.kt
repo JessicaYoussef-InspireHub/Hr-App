@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.R
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 
 
@@ -35,25 +33,11 @@ fun WeekendAndPublicHolidayDialog(
         containerColor = colors.surfaceVariant,
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(
-                onClick = {
-                    onDismiss()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.tertiaryColor,
-                    contentColor = colors.onSecondaryColor
-                ),
-                shape = RoundedCornerShape(10.dp)
-
-            ) {
-                Text(
-                    text = stringResource(R.string.ok),
-                    color = colors.onSecondaryColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
+            SmallButtons(
+                onConfirm = { onDismiss() },
+                onDismiss = { onDismiss() },
+                confirmButtonText = stringResource(R.string.ok),
+            )
         },
         text = {
             Column(

@@ -3,7 +3,6 @@ package net.inspirehub.hr.expenses.presentation
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,7 +45,6 @@ import net.inspirehub.hr.expenses.components.DescriptionInputExpenses
 import net.inspirehub.hr.expenses.components.IncludedTaxes
 import net.inspirehub.hr.expenses.components.Notes
 import net.inspirehub.hr.expenses.components.PaidBy
-import net.inspirehub.hr.expenses.components.SaveCancelButton
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.components.TotalPriceExpenses
 import net.inspirehub.hr.expenses.data.ExpenseCategory
@@ -58,8 +56,8 @@ import net.inspirehub.hr.expenses.data.fetchTaxes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.MySnackBar
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.expenses.data.ExpenseAttachment
 import net.inspirehub.hr.utils.getFileName
 import net.inspirehub.hr.utils.getMimeType
@@ -152,22 +150,9 @@ fun AddExpensesScreen(
             },
             bottomBar = {
                 Column {
-                    SaveCancelButton(
-                        stringResource(R.string.save),
-                        isLoading = isLoading,
-                        onCancel = {
-                            if (fromEditReport) {
-                                reportId?.let {
-                                    navController.navigate("EditReportScreen/$it")
-                                }
-                            } else {
-                                navController.navigate("ExpensesScreen") {
-                                    popUpTo("AddExpensesScreen") { inclusive = true }
-                                }
-                            }
-                        },
+                    SmallButtons(
                         onConfirm = {
-                            if (isLoading) return@SaveCancelButton
+                            if (isLoading) return@SmallButtons
                             categoryError = selectedCategory == null
                             descriptionError = description.isBlank()
                             amountError = totalAmount <= 0.0
@@ -180,9 +165,9 @@ fun AddExpensesScreen(
                                 )
                             }
 
-                            if (categoryError || descriptionError || amountError || currencyError) return@SaveCancelButton
+                            if (categoryError || descriptionError || amountError || currencyError) return@SmallButtons
                             isLoading = true
-                            val token = sharedPref.getToken() ?: return@SaveCancelButton
+                            val token = sharedPref.getToken() ?: return@SmallButtons
 
                             CoroutineScope(Dispatchers.IO).launch {
                                 val response = createExpense(
@@ -242,7 +227,24 @@ fun AddExpensesScreen(
                                 }
                             }
                         },
+                        onDismiss = {
+                            if (fromEditReport) {
+                                reportId?.let {
+                                    navController.navigate("EditReportScreen/$it")
+                                }
+                            } else {
+                                navController.navigate("ExpensesScreen") {
+                                    popUpTo("AddExpensesScreen") { inclusive = true }
+                                }
+                            }
+                        },
+                        confirmButtonText = stringResource(R.string.save),
+                        dismissButtonText = stringResource(R.string.discard),
+                        isLoading = isLoading,
+                        equalWeight = true,
+                        modifier = Modifier.padding(vertical = 16.dp , horizontal = 5.dp)
                     )
+
                     BottomBar(navController = navController)
                 }
             }
@@ -418,14 +420,6 @@ fun AddExpensesScreen(
                     existingFiles = emptyList(),
                     onDeleteExisting = { }
                 )
-            }
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .clickable(enabled = false) {}
-                ) {
-                    FullLoading()
-                }
             }
         }
     }

@@ -2,7 +2,6 @@ package net.inspirehub.hr.expenses.presentation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.BottomBar
-import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
@@ -45,7 +43,6 @@ import net.inspirehub.hr.expenses.components.ExpenseDate
 import net.inspirehub.hr.expenses.components.IncludedTaxes
 import net.inspirehub.hr.expenses.components.Notes
 import net.inspirehub.hr.expenses.components.PaidBy
-import net.inspirehub.hr.expenses.components.SaveCancelButton
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.components.TotalPriceExpenses
 import net.inspirehub.hr.expenses.data.Expense
@@ -59,6 +56,7 @@ import net.inspirehub.hr.expenses.data.fetchTaxes
 import java.time.LocalDate
 import android.net.Uri
 import net.inspirehub.hr.MySnackBar
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.expenses.components.AttachmentsSection
 import net.inspirehub.hr.expenses.data.ExpenseAttachment
 import net.inspirehub.hr.expenses.data.ExpenseAttachmentResponse
@@ -177,17 +175,12 @@ fun EditExpenseScreen(
             },
             bottomBar = {
                 Column {
-                    SaveCancelButton(
-                        stringResource(R.string.update),
-                        isLoading = isFetching || isSubmitting,
-                        onCancel = {
-                            navController.navigate("ExpensesScreen")
-                        },
+                    SmallButtons(
                         onConfirm = {
-                            if (isFetching || isSubmitting) return@SaveCancelButton
+                            if (isFetching || isSubmitting) return@SmallButtons
                             descriptionError = descriptionText.isBlank()
                             amountError = amount == null || amount == 0.0
-                            if (descriptionError || amountError) return@SaveCancelButton
+                            if (descriptionError || amountError) return@SmallButtons
                             isSubmitting = true
 
                             val attachmentsList = selectedFiles.map { uri ->
@@ -229,7 +222,16 @@ fun EditExpenseScreen(
 
                             }
                         },
+                        onDismiss = {
+                            navController.navigate("ExpensesScreen")
+                        },
+                        confirmButtonText = stringResource(R.string.update),
+                        dismissButtonText = stringResource(R.string.discard),
+                        isLoading = isFetching || isSubmitting,
+                        equalWeight = true,
+                        modifier = Modifier.padding(vertical = 16.dp , horizontal = 5.dp)
                     )
+
                     BottomBar(navController = navController)
                 }
             }
@@ -396,14 +398,6 @@ fun EditExpenseScreen(
                         }
                     )
                 }
-            }
-        }
-        if (isFetching || isSubmitting) {
-            Box(
-                modifier = Modifier
-                    .clickable(enabled = false) {}
-            ) {
-                FullLoading()
             }
         }
     }

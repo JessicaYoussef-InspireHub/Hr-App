@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import net.inspirehub.hr.AddIcon
 import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.utils.convertToArabicDigits
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -138,7 +137,7 @@ fun DoublePermissionDialog(
         }
     }
 
-    val allRefused = records.all { it.state == "refuse" }
+    val allRefused = records.all { it.state == "cancel" }
     val hasConfirmOrDraft = records.any { it.state == "confirm" || it.state == "draft" }
     val hasValidate = records.any { it.state == "validate" }
     val hasOtherThanConfirm = records.any { it.state != "confirm" }
@@ -152,29 +151,20 @@ fun DoublePermissionDialog(
         confirmButton = {
             when {
                 allRefused -> {
-                    Button(
-                        onClick = { onDismiss() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.tertiaryColor,
-                            contentColor = colors.onSecondaryColor
-                        ),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(text = stringResource(R.string.ok))
-                    }
+
+                    SmallButtons(
+                        onConfirm = { onDismiss() },
+                        onDismiss = {  },
+                        confirmButtonText = stringResource(R.string.ok)
+                    )
                 }
 
                 approveWithOtherThanConfirm -> {
-                    Button(
-                        onClick = { onDismiss() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.tertiaryColor,
-                            contentColor = colors.onSecondaryColor
-                        ),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(text = stringResource(R.string.ok))
-                    }
+                    SmallButtons(
+                        onConfirm = { onDismiss() },
+                        onDismiss = {  },
+                        confirmButtonText = stringResource(R.string.ok)
+                    )
                 }
             }
         },
@@ -228,7 +218,7 @@ fun DoublePermissionDialog(
                                         )
                                     }
 
-                                    "refuse" -> {
+                                    "cancel" -> {
                                         Box(
                                             modifier = Modifier
                                                 .size(15.dp)
@@ -322,25 +312,13 @@ fun DoublePermissionDialog(
                                 modifier = Modifier.padding(start = 20.dp),
                             )
                             if (record.state == "draft" || record.state == "confirm") {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Button(
-                                        onClick = {
-                                            recordToDelete = record
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = colors.tertiaryColor,
-                                            contentColor = colors.onSecondaryColor
-                                        ),
-                                        shape = RoundedCornerShape(10.dp),
-                                        modifier = Modifier.padding(start = 20.dp)
-                                    ) {
-                                        Text(text = stringResource(R.string.delete))
-                                    }
-                                }
+
+                                SmallButtons(
+                                    onConfirm = { recordToDelete = record },
+                                    onDismiss = {  },
+                                    confirmButtonText = stringResource(R.string.delete),
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))

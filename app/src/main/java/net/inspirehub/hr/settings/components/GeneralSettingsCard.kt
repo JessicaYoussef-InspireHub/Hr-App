@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,7 +18,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +40,7 @@ import java.util.Locale
 import android.content.res.Configuration
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.appColors
 
@@ -109,12 +108,16 @@ fun GeneralSettingsCard(
 
 
                 if (showDialog) {
+                    val darkMode = sharedPref.isDarkModeEnabled()
+                    val language = sharedPref.getLanguage()
                     MyDialog(
                         onConfirm = {
                             showDialog = false
                             viewModel.changeCompany()
                             navController.navigate("ScanQrCodeScreen")
                             sharedPref.setProtectionSkipped(false)
+                            sharedPref.setDarkModeEnabled(darkMode)
+                            sharedPref.saveLanguage(language)
                         },
                         onDismiss = { showDialog = false },
                         title = stringResource(R.string.change_company),
@@ -125,10 +128,8 @@ fun GeneralSettingsCard(
                     )
                 }
 
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
+                MyDivider(
+                    horizontalPadding = 20,
                     color = colors.surfaceColor
                 )
 
@@ -148,12 +149,11 @@ fun GeneralSettingsCard(
 
                 if (expanded) {
                     Column {
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 35.dp),
+                        MyDivider(
+                            horizontalPadding = 35,
                             color = colors.surfaceColor
                         )
+
                         SettingsLanguage(
                             label = stringResource(R.string.arabic),
                             icon = painterResource(id = R.drawable.egypt),
@@ -164,10 +164,8 @@ fun GeneralSettingsCard(
                                 expanded = false
                             }
                         )
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 35.dp),
+                        MyDivider(
+                            horizontalPadding = 35,
                             color = colors.surfaceColor
                         )
 
@@ -184,10 +182,8 @@ fun GeneralSettingsCard(
                     }
                 }
 
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
+                MyDivider(
+                    horizontalPadding = 20,
                     color = colors.surfaceColor
                 )
 

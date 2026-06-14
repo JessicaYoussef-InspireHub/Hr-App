@@ -12,12 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.time_off.data.LeaveType
 import net.inspirehub.hr.utils.convertToArabicDigits
@@ -79,10 +79,8 @@ fun MyActualTimeOff(
                 }
             }
         }
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(colors.inverseOnSurface)
+        MyDivider(
+            color = colors.inverseOnSurface
         )
     }
 }

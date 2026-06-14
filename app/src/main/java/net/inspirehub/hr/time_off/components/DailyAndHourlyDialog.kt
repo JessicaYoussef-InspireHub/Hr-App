@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,7 +40,9 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.platform.LocalContext
 import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.utils.convertToArabicDigits
 
@@ -52,8 +52,6 @@ fun DailyAndHourlyDialog(
     dailyRecords: List<TimeOffRecord>,
     hourlyRecords: List<HourlyTimeOffRecord>,
     onDismiss: () -> Unit,
-    token: String,
-    onRefreshRequest: () -> Unit,
     clickedDate: LocalDate?
 ) {
     val colors = appColors()
@@ -164,7 +162,7 @@ fun DailyAndHourlyDialog(
                         val daysText =
                             if (currentLanguage == "ar") convertToArabicDigits(durationInt.toString()) else durationInt.toString()
                         val dayWord = getLocalizedDayText(
-                            context = androidx.compose.ui.platform.LocalContext.current,
+                            context = LocalContext.current,
                             count = durationInt,
                             language = currentLanguage
                         )
@@ -187,7 +185,7 @@ fun DailyAndHourlyDialog(
                                         )
                                     }
 
-                                    "refuse" -> {
+                                    "cancel" -> {
                                         Box(
                                             modifier = Modifier
                                                 .size(15.dp)
@@ -256,7 +254,7 @@ fun DailyAndHourlyDialog(
                         val translatedLeaveType = record.leave_type
                         val durationInt = record.duration_hours
                         val hourWord = getLocalizedHourText(
-                            context = androidx.compose.ui.platform.LocalContext.current,
+                            context = LocalContext.current,
                             count = durationInt,
                             language = currentLanguage
                         )
@@ -280,7 +278,7 @@ fun DailyAndHourlyDialog(
                                )
                            }
 
-                           "refuse" -> {
+                           "cancel" -> {
                                Box(
                                    modifier = Modifier
                                        .size(15.dp)
@@ -380,18 +378,11 @@ fun DailyAndHourlyDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.tertiaryColor,
-                    contentColor = colors.onSecondaryColor
-                ),
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text(stringResource(R.string.ok),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold)
-            }
+            SmallButtons(
+                onConfirm = { onDismiss() },
+                onDismiss = { onDismiss() },
+                confirmButtonText = stringResource(R.string.ok)
+            )
         }
     )
 }

@@ -40,7 +40,6 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.expenses.components.ExpenseReportSummary
 import net.inspirehub.hr.expenses.components.ExpensesSelectionCard
-import net.inspirehub.hr.expenses.components.SaveCancelButton
 import net.inspirehub.hr.expenses.components.TextFirstExpenses
 import net.inspirehub.hr.expenses.data.Expense
 import net.inspirehub.hr.expenses.data.ExpenseReport
@@ -54,6 +53,7 @@ import net.inspirehub.hr.ArrowDropDownIcon
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.expenses.components.EditReportBottomSheet
 import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 
@@ -151,21 +151,16 @@ fun EditReportScreen(
             },
             bottomBar = {
                 Column {
-                    SaveCancelButton(
-                        stringResource(R.string.update),
-                        isLoading = isLoading,
-                        onCancel = {
-                            navController.navigate("MyReportScreen")
-                        },
+                    SmallButtons(
                         onConfirm = {
-                            if (isLoading) return@SaveCancelButton
+                            if (isLoading) return@SmallButtons
 
                             summaryError = summaryName.isBlank()
-                            if (summaryError) return@SaveCancelButton
+                            if (summaryError) return@SmallButtons
 
                             if (selectedExpenses.isEmpty()) {
                                 expensesError = true
-                                return@SaveCancelButton
+                                return@SmallButtons
                             } else {
                                 expensesError = false
                             }
@@ -215,6 +210,12 @@ fun EditReportScreen(
                             }
 
                         },
+                        onDismiss = { navController.navigate("MyReportScreen") },
+                        confirmButtonText = stringResource(R.string.update),
+                        dismissButtonText = stringResource(R.string.discard),
+                        isLoading = isLoading,
+                        equalWeight = true,
+                        modifier = Modifier.padding(vertical = 16.dp , horizontal = 5.dp)
                     )
                     BottomBar(navController = navController)
                 }
@@ -345,7 +346,7 @@ fun EditReportScreen(
             }
 
         }
-        if (isLoading || isUpdating) {
+        if ( isUpdating ) {
             Box(
                 modifier = Modifier
                     .clickable(enabled = false) {}

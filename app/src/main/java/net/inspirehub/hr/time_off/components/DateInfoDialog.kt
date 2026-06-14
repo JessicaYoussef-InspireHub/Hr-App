@@ -47,6 +47,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.time_off.data.LeaveDurationData
 import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
@@ -247,8 +248,8 @@ fun DateInfoDialog(
 
     fun convertSelectedTimeToHour24(time: String, language: String): Double {
         val arabicToEnglish = mapOf(
-            '٠' to '0','١' to '1','٢' to '2','٣' to '3','٤' to '4',
-            '٥' to '5','٦' to '6','٧' to '7','٨' to '8','٩' to '9'
+            '٠' to '0', '١' to '1', '٢' to '2', '٣' to '3', '٤' to '4',
+            '٥' to '5', '٦' to '6', '٧' to '7', '٨' to '8', '٩' to '9'
         )
 
         val normalized = time.map { arabicToEnglish[it] ?: it }.joinToString("")
@@ -428,7 +429,8 @@ fun DateInfoDialog(
                                             leaveTypeColors = leaveTypeColors
 
                                         )
-                                        DialogActionsRow(
+
+                                        SmallButtons(
                                             onConfirm = {
                                                 Log.d("CALENDAR", "save")
 
@@ -500,17 +502,16 @@ fun DateInfoDialog(
 
                                                 showStartCalendar = false
                                             },
-                                            onDiscard = {
+                                            onDismiss = {
                                                 showStartCalendar = false
                                             },
-
+                                            confirmButtonText = stringResource(R.string.apply),
+                                            dismissButtonText = stringResource(R.string.discard),
                                             modifier = Modifier.padding(
                                                 horizontal = 15.dp,
                                                 vertical = 10.dp
-                                            ),
-                                            isCalendarDialog = true
+                                            )
                                         )
-
                                     }
                                 }
                             }
@@ -552,7 +553,7 @@ fun DateInfoDialog(
                                             leaveTypeColors = leaveTypeColors
                                         )
 
-                                        DialogActionsRow(
+                                        SmallButtons(
                                             onConfirm = {
                                                 Log.d("CALENDAR", "save")
 
@@ -615,14 +616,15 @@ fun DateInfoDialog(
                                                 }
                                                 showEndCalendar = false
                                             },
-                                            onDiscard = {
+                                            onDismiss = {
                                                 showEndCalendar = false
                                             },
+                                            confirmButtonText = stringResource(R.string.apply),
+                                            dismissButtonText = stringResource(R.string.discard),
                                             modifier = Modifier.padding(
                                                 horizontal = 15.dp,
                                                 vertical = 10.dp
-                                            ),
-                                            isCalendarDialog = true
+                                            )
                                         )
                                     }
                                 }
@@ -642,7 +644,8 @@ fun DateInfoDialog(
                                     selectedHour = selectedFromHour.split(":").getOrNull(0),
                                     selectedMinute = selectedFromHour.split(":").getOrNull(1),
                                     onHourChange = { hour ->
-                                        val minute = selectedFromHour.split(":").getOrNull(1) ?: "00"
+                                        val minute =
+                                            selectedFromHour.split(":").getOrNull(1) ?: "00"
                                         selectedFromHour = "$hour:$minute"
 
                                         Log.d("TIME_DEBUG", "FROM hour changed: $selectedFromHour")
@@ -654,7 +657,10 @@ fun DateInfoDialog(
                                         val hour = selectedFromHour.split(":").getOrNull(0) ?: "9"
                                         selectedFromHour = "$hour:$minute"
 
-                                        Log.d("TIME_DEBUG", "FROM minute changed: $selectedFromHour")
+                                        Log.d(
+                                            "TIME_DEBUG",
+                                            "FROM minute changed: $selectedFromHour"
+                                        )
 
                                         calculatePermissionDuration()
                                     }
@@ -768,10 +774,10 @@ fun DateInfoDialog(
                         }
                         Spacer(modifier = Modifier.height(30.dp))
 
-                        DialogActionsRow(
+                        SmallButtons(
                             onConfirm = {
                                 if (permissionErrorMessage.isNotEmpty()) {
-                                    return@DialogActionsRow
+                                    return@SmallButtons
                                 }
 
 
@@ -833,13 +839,13 @@ fun DateInfoDialog(
                                         }
                                     }
 
-                                    return@DialogActionsRow
+                                    return@SmallButtons
                                 }
 
 
                                 if (selectedLeaveType == null) {
                                     leaveTypeError = pleaseChooseTypeText
-                                    return@DialogActionsRow
+                                    return@SmallButtons
                                 }
 
                                 if (isHalfDay) {
@@ -883,7 +889,7 @@ fun DateInfoDialog(
                                         }
                                     }
 
-                                    return@DialogActionsRow
+                                    return@SmallButtons
                                 }
 
 
@@ -938,9 +944,11 @@ fun DateInfoDialog(
                                     }
                                 }
                             },
-                            onDiscard = {
+                            onDismiss = {
                                 if (!isLoading) onDiscard()
                             },
+                            confirmButtonText = stringResource(R.string.save),
+                            dismissButtonText = stringResource(R.string.discard),
                             isLoading = isLoading
                         )
                     }
@@ -950,7 +958,7 @@ fun DateInfoDialog(
                             onConfirm = { showErrorDialog = false },
                             onDismiss = { showErrorDialog = false },
                             confirmButtonText = stringResource(R.string.ok),
-                            subtitle = "$errorMessage \n " ,
+                            subtitle = "$errorMessage \n ",
                             title = stringResource(R.string.invalid_request)
                         )
                     }
@@ -961,7 +969,7 @@ fun DateInfoDialog(
                             onConfirm = { showPermissionErrorDialog = false },
                             onDismiss = { showPermissionErrorDialog = false },
                             confirmButtonText = stringResource(R.string.ok),
-                            subtitle = errorMessage ,
+                            subtitle = errorMessage,
                             title = stringResource(R.string.invalid_request)
                         )
                     }

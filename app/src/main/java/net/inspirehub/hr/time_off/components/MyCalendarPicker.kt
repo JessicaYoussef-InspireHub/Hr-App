@@ -71,7 +71,11 @@ fun MyCalendarPicker(
     var selectedDateForInfoDialog by remember { mutableStateOf<LocalDate?>(null) }
     var selectedLeaveRecords by remember { mutableStateOf<List<TimeOffRecord>>(emptyList()) }
     val context = LocalContext.current
-    var dailyAndHourlyRecords by remember { mutableStateOf<Pair<List<TimeOffRecord>, List<HourlyTimeOffRecord>>?>(null) }
+    var dailyAndHourlyRecords by remember {
+        mutableStateOf<Pair<List<TimeOffRecord>, List<HourlyTimeOffRecord>>?>(
+            null
+        )
+    }
     var permissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
     var doublePermissionDialogRecords by remember { mutableStateOf<List<HourlyTimeOffRecord>?>(null) }
     val colors = appColors()
@@ -227,7 +231,8 @@ fun MyCalendarPicker(
                     }
 
                     val firstState = firstDailyRecord?.state ?: firstHourlyRecord?.state
-                    val firstLeaveType = firstDailyRecord?.leave_type ?: firstHourlyRecord?.leave_type
+                    val firstLeaveType =
+                        firstDailyRecord?.leave_type ?: firstHourlyRecord?.leave_type
 
 
                     val isWeekendHoliday = weekendDayNames.map { it.lowercase() }
@@ -236,8 +241,8 @@ fun MyCalendarPicker(
                     val states = dateToStatesMap[date] ?: emptySet()
                     val hourlyStates = dateToHourlyStatesMap[date] ?: emptySet()
                     val isPermission = hourlyStates.isNotEmpty()
-                    val isRefusedPermission = hourlyStates.contains("refuse")
-                    val isRefused = states.contains("refuse")
+                    val isRefusedPermission = hourlyStates.contains("cancel")
+                    val isRefused = states.contains("cancel")
 
 
                     Box(
@@ -253,14 +258,19 @@ fun MyCalendarPicker(
                             .background(
                                 when {
                                     isWeekendHoliday || publicHolidayDates.contains(date) -> if (isDialogMode) colors.surfaceColor else colors.surfaceVariant
-                                    firstState == "refuse" -> colors.transparent
+                                    firstState == "cancel" -> colors.transparent
                                     firstState == "draft" || firstState == "confirm" -> colors.transparent
-                                    firstState == "validate" -> leaveTypeColors[firstLeaveType] ?: colors.transparent
+                                    firstState == "validate" -> leaveTypeColors[firstLeaveType]
+                                        ?: colors.transparent
+
                                     firstState == null && isToday -> colors.tertiaryColor
                                     else -> leaveTypeColors[firstLeaveType] ?: colors.transparent
                                 },
                                 shape = when {
-                                    isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
+                                    isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(
+                                        0.dp
+                                    )
+
                                     else -> CircleShape
                                 }
                             )
@@ -300,7 +310,8 @@ fun MyCalendarPicker(
 
 
                                     matchedDailyRecords.isNotEmpty() && matchedHourlyRecords.isNotEmpty() -> {
-                                        dailyAndHourlyRecords = matchedDailyRecords to matchedHourlyRecords
+                                        dailyAndHourlyRecords =
+                                            matchedDailyRecords to matchedHourlyRecords
                                         showDialogForDate = date
                                     }
 
@@ -319,9 +330,6 @@ fun MyCalendarPicker(
                                             permissionDialogRecords = matchedRecords
                                         }
                                     }
-
-
-
 
 
                                     isWeekendHoliday && publicHolidayDates.contains(date) -> {
@@ -348,7 +356,7 @@ fun MyCalendarPicker(
 
                                     matchedRecords.size == 1 -> {
                                         val record = matchedRecords.first()
-                                        val isRefusedState = record.state == "refuse"
+                                        val isRefusedState = record.state == "cancel"
 
                                         if (isDialogMode && isRefusedState) {
                                             val newDates = if (selectedDates.contains(date)) {
@@ -397,7 +405,8 @@ fun MyCalendarPicker(
                                         val end = LocalDate.parse(it.end_date)
                                         !date.isBefore(start) && !date.isAfter(end)
                                     }?.leave_type
-                                    leaveTypeColors[leaveType] ?: colors.tertiaryColor.copy(alpha = 0.2f)
+                                    leaveTypeColors[leaveType]
+                                        ?: colors.tertiaryColor.copy(alpha = 0.2f)
                                 }
 
                                 hourlyStates.isNotEmpty() -> {
@@ -405,7 +414,8 @@ fun MyCalendarPicker(
                                         val leaveDay = LocalDate.parse(it.leave_day)
                                         date == leaveDay
                                     }?.leave_type
-                                    leaveTypeColors[leaveType] ?: colors.tertiaryColor.copy(alpha = 0.2f)
+                                    leaveTypeColors[leaveType]
+                                        ?: colors.tertiaryColor.copy(alpha = 0.2f)
                                 }
 
                                 else -> colors.tertiaryColor.copy(alpha = 0.2f)
@@ -416,7 +426,10 @@ fun MyCalendarPicker(
                                     .matchParentSize()
                                     .clip(
                                         when {
-                                            isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(0.dp)
+                                            isWeekendHoliday || publicHolidayDates.contains(date) -> RoundedCornerShape(
+                                                0.dp
+                                            )
+
                                             else -> CircleShape
                                         }
                                     )
@@ -426,16 +439,16 @@ fun MyCalendarPicker(
                                     lineColor = leaveTypeColor.copy(alpha = 0.3f)
                                 )
                             }
-                    }
+                        }
 
                         Text(
                             text = dayText,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
-                            color = if(isToday) colors.onSecondaryColor else colors.onBackgroundColor,
+                            color = if (isToday) colors.onSecondaryColor else colors.onBackgroundColor,
                             fontSize = 16.sp
                         )
-                        if (firstState == "refuse") {
+                        if (firstState == "cancel") {
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
@@ -449,6 +462,7 @@ fun MyCalendarPicker(
                                                     }?.leave_type
                                                     leaveTypeColors[leaveType] ?: colors.transparent
                                                 }
+
                                                 isRefused -> {
                                                     val leaveType = dailyRecords.find {
                                                         val start = LocalDate.parse(it.start_date)
@@ -457,6 +471,7 @@ fun MyCalendarPicker(
                                                     }?.leave_type
                                                     leaveTypeColors[leaveType] ?: colors.transparent
                                                 }
+
                                                 else -> colors.tertiaryColor
                                             },
                                             start = Offset(0f, size.height / 2),
@@ -493,12 +508,8 @@ fun MyCalendarPicker(
                 dailyRecords = daily,
                 hourlyRecords = hourly,
                 onDismiss = { dailyAndHourlyRecords = null },
-                token = token,
-                onRefreshRequest = onRefreshRequest,
-                clickedDate = showDialogForDate,
-
-
-                )
+                clickedDate = showDialogForDate
+            )
         }
 
 

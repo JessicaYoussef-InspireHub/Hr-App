@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.R
 import net.inspirehub.hr.StarIcon
 import net.inspirehub.hr.lunch.data.CartItem
@@ -156,12 +156,13 @@ fun FavoriteCard() {
                 }
             }
             if (index != favorites.lastIndex) {
-            HorizontalDivider(
-                thickness = 1.dp,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                color = colors.surfaceTint
-
-            )}
+                MyDivider(
+                    horizontalPadding = 16,
+                    verticalPadding = 8,
+                    color = colors.surfaceTint,
+                    thickness = 1
+                )
+            }
         }
     }
 }

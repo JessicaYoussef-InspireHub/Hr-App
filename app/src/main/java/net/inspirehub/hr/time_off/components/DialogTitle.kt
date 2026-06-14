@@ -1,6 +1,5 @@
 package net.inspirehub.hr.time_off.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
@@ -45,9 +44,6 @@ fun DialogTitle(
             )
         }
         Spacer(modifier = Modifier.size(10.dp))
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth()
-                .background(colors.inverseOnSurface)
-        )
+        MyDivider( color = colors.inverseOnSurface )
     }
 }

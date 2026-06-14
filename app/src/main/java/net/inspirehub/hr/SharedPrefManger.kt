@@ -131,7 +131,10 @@ class SharedPrefManager(context: Context) {
     }
 
     fun setDarkModeEnabled(enabled: Boolean) {
-        prefs.edit { putBoolean("dark_mode", enabled) }
+        prefs.edit {
+            putBoolean("dark_mode", enabled)
+        }
+        Log.d("DARK_MODE", "Saved = $enabled")
     }
 
     fun saveTimeDifference(diffMinutes: Long) {

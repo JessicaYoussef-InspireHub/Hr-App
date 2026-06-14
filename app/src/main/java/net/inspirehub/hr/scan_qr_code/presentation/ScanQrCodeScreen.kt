@@ -142,7 +142,7 @@ fun ScanQrCodeScreen(
             .verticalScroll(rememberScrollState())
             .padding(WindowInsets.navigationBars.asPaddingValues())
             .padding(WindowInsets.statusBars.asPaddingValues()),
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
 
@@ -150,7 +150,7 @@ fun ScanQrCodeScreen(
             painter = painterResource(R.drawable.scan_qr_code),
             contentDescription = stringResource(R.string.scan_a_qr_code),
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(0.7f)
                 .border(
                     width = 1.dp,
                     color = colors.tertiaryColor,
@@ -165,14 +165,13 @@ fun ScanQrCodeScreen(
                     })
                 }
         )
-
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
             stringResource(R.string.or) ,
             color = colors.tertiaryColor,
             fontWeight = FontWeight.SemiBold ,
             fontSize = 40.sp)
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text(stringResource(R.string.enter_your_company_information),
             color = colors.onBackgroundColor,
