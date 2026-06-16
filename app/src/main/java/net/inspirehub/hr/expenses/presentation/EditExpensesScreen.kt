@@ -55,6 +55,7 @@ import net.inspirehub.hr.expenses.data.fetchExpenses
 import net.inspirehub.hr.expenses.data.fetchTaxes
 import java.time.LocalDate
 import android.net.Uri
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.expenses.components.AttachmentsSection
@@ -98,6 +99,24 @@ fun EditExpenseScreen(
     var selectedFiles by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var deleteAttachmentIds by remember { mutableStateOf<List<Int>>(emptyList()) }
     var existingAttachments by remember { mutableStateOf<List<ExpenseAttachmentResponse>>(emptyList()) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    val hasChanges = expense?.let { exp ->
+        descriptionText != exp.name ||
+                noteText != exp.description ||
+                paidBy != (exp.payment_mode ?: "employee") ||
+                amount != exp.total_amount ||
+                selectedDate != LocalDate.parse(exp.date) ||
+                selectedCategory?.id != exp.product_id ||
+                selectedTaxes.map { it.id }.toSet() != exp.taxes.map { it.id }.toSet() ||
+                analyticDistribution != exp.analytic_distribution
+            .mapKeys { it.key.toIntOrNull() ?: 0 }
+            .mapValues { it.value.toInt() } ||
+                selectedFiles.isNotEmpty() ||
+                deleteAttachmentIds.isNotEmpty() ||
+                (selectedCurrency != null && selectedCurrency?.id != exp.currency_id)
+
+    } ?: false
 
     LaunchedEffect(expenseId) {
         isFetching = true
@@ -169,7 +188,11 @@ fun EditExpenseScreen(
                 MyAppBar(
                     label = stringResource(R.string.edit_expense),
                     onBackClick = {
-                        navController.popBackStack()
+                        if (hasChanges) {
+                            showDiscardDialog = true
+                        } else {
+                            navController.popBackStack()
+                        }
                     }
                 )
             },
@@ -223,13 +246,17 @@ fun EditExpenseScreen(
                             }
                         },
                         onDismiss = {
-                            navController.navigate("ExpensesScreen")
+                            if (hasChanges) {
+                                showDiscardDialog = true
+                            } else {
+                                navController.navigate("ExpensesScreen")
+                            }
                         },
                         confirmButtonText = stringResource(R.string.update),
                         dismissButtonText = stringResource(R.string.discard),
                         isLoading = isFetching || isSubmitting,
                         equalWeight = true,
-                        modifier = Modifier.padding(vertical = 16.dp , horizontal = 5.dp)
+                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 5.dp)
                     )
 
                     BottomBar(navController = navController)
@@ -399,6 +426,26 @@ fun EditExpenseScreen(
                     )
                 }
             }
+        }
+        if (showDiscardDialog) {
+            MyDialog(
+                onDismiss = {
+                    showDiscardDialog = false
+                },
+                onConfirm = {
+                    showDiscardDialog = false
+
+                    navController.navigate("ExpensesScreen") {
+                        popUpTo("ExpensesScreen")
+                    }
+                },
+                title = stringResource(R.string.discard_changes),
+                subtitle = stringResource(
+                    R.string.you_have_unsaved_changes_are_you_sure_you_want_to_discard_them
+                ),
+                confirmButtonText = stringResource(R.string.discard),
+                dismissButtonText = stringResource(R.string.cancel),
+            )
         }
     }
 }

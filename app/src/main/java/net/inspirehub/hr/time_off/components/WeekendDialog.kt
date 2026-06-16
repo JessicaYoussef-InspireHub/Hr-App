@@ -35,7 +35,6 @@ fun WeekendAndPublicHolidayDialog(
         confirmButton = {
             SmallButtons(
                 onConfirm = { onDismiss() },
-                onDismiss = { onDismiss() },
                 confirmButtonText = stringResource(R.string.ok),
             )
         },

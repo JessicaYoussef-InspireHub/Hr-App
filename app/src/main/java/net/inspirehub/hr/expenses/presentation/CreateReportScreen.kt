@@ -81,6 +81,12 @@ fun CreateReportScreen(
     var isBottomSheetLoading by remember { mutableStateOf(false) }
     var removedExpenses by remember { mutableStateOf<List<Expense>>(emptyList()) }
     var selectedExpenses by remember { mutableStateOf<List<Expense>>(emptyList()) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
+    var initialExpenses by remember { mutableStateOf<List<Expense>>(emptyList()) }
+
+    val hasChanges =
+        summary.isNotBlank() ||
+                selectedExpenses.map { it.id }.toSet() != initialExpenses.map { it.id }.toSet()
 
     LaunchedEffect(refreshTrigger) {
 
@@ -95,6 +101,7 @@ fun CreateReportScreen(
                 else -> false
             }
         }
+        initialExpenses = selectedExpenses
 
         isExpensesLoading = false
     }
@@ -110,9 +117,9 @@ fun CreateReportScreen(
                 SnackbarHost(
                     hostState = snackBarHostState
                 ) { data ->
-                   MySnackBar(
+                    MySnackBar(
                         snackBarData = data,
-                       useOffset = false
+                        useOffset = false
                     )
                 }
             },
@@ -120,7 +127,11 @@ fun CreateReportScreen(
                 MyAppBar(
                     label = stringResource(R.string.create_report),
                     onBackClick = {
-                        navController.popBackStack()
+                        if (hasChanges) {
+                            showDiscardDialog = true
+                        } else {
+                            navController.popBackStack()
+                        }
                     }
                 )
             },
@@ -172,15 +183,19 @@ fun CreateReportScreen(
                             }
                         },
                         onDismiss = {
-                            navController.navigate("ExpensesScreen") {
-                                popUpTo("AddExpensesScreen") { inclusive = true }
+                            if (hasChanges) {
+                                showDiscardDialog = true
+                            } else {
+                                navController.navigate("ExpensesScreen") {
+                                    popUpTo("AddExpensesScreen") { inclusive = true }
+                                }
                             }
                         },
                         confirmButtonText = stringResource(R.string.save),
                         dismissButtonText = stringResource(R.string.discard),
                         isLoading = isLoading,
                         equalWeight = true,
-                        modifier = Modifier .padding(vertical = 16.dp , horizontal = 5.dp)
+                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 5.dp)
                     )
                     BottomBar(navController = navController)
                 }
@@ -235,8 +250,9 @@ fun CreateReportScreen(
 
                     Spacer(modifier = Modifier.height(25.dp))
                     Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .clickable { isExpanded = !isExpanded},
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isExpanded = !isExpanded },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
 
@@ -301,12 +317,29 @@ fun CreateReportScreen(
                 onConfirm = {
                     showEmptyExpensesDialog = false
                     refreshTrigger++
-                            },
+                },
                 onDismiss = { showEmptyExpensesDialog = false },
                 dismissButtonText = stringResource(R.string.cancel),
                 confirmButtonText = stringResource(R.string.add_expenses),
                 title = stringResource(R.string.invalid_request),
                 subtitle = stringResource(R.string.please_add_at_least_one_expense_before_saving),
+            )
+        }
+
+        if (showDiscardDialog) {
+            MyDialog(
+                onDismiss = { showDiscardDialog = false },
+                onConfirm = {
+                    showDiscardDialog = false
+
+                    navController.navigate("ExpensesScreen") {
+                        popUpTo("AddExpensesScreen") { inclusive = true }
+                    }
+                },
+                title = stringResource(R.string.discard_changes),
+                subtitle = stringResource(R.string.you_have_unsaved_changes_are_you_sure_you_want_to_discard_them),
+                confirmButtonText = stringResource(R.string.discard),
+                dismissButtonText = stringResource(R.string.cancel),
             )
         }
 

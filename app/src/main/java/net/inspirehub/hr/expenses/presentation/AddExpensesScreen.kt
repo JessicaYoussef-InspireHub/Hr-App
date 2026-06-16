@@ -56,6 +56,7 @@ import net.inspirehub.hr.expenses.data.fetchTaxes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.expenses.data.ExpenseAttachment
@@ -97,7 +98,7 @@ fun AddExpensesScreen(
     var amountError by remember { mutableStateOf(false) }
     var currencyError by remember { mutableStateOf(false) }
     var selectedFiles by remember { mutableStateOf<List<Uri>>(emptyList()) }
-
+    var showDiscardDialog by remember { mutableStateOf(false) }
     val paymentModeFromReport =
         navController.currentBackStackEntry
             ?.arguments
@@ -105,6 +106,21 @@ fun AddExpensesScreen(
             ?: "employee"
 
     var paymentMode by remember { mutableStateOf(paymentModeFromReport) }
+    val initialPaymentMode = paymentModeFromReport
+
+
+    val hasChanges =
+        description.isNotBlank() ||
+                notes.isNotBlank() ||
+                totalAmount > 0.0 ||
+                selectedCategory != null ||
+                selectedFiles.isNotEmpty() ||
+                selectedDate != LocalDate.now() ||
+                selectedTaxes.isNotEmpty() ||
+                analyticMap.isNotEmpty() ||
+                selectedCurrency != null ||
+                paymentMode != initialPaymentMode
+
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -144,7 +160,11 @@ fun AddExpensesScreen(
                 MyAppBar(
                     label = stringResource(R.string.add_expenses),
                     onBackClick = {
-                        navController.popBackStack()
+                        if (hasChanges) {
+                            showDiscardDialog = true
+                        } else {
+                            navController.popBackStack()
+                        }
                     }
                 )
             },
@@ -228,13 +248,17 @@ fun AddExpensesScreen(
                             }
                         },
                         onDismiss = {
-                            if (fromEditReport) {
-                                reportId?.let {
-                                    navController.navigate("EditReportScreen/$it")
-                                }
+                            if (hasChanges) {
+                                showDiscardDialog = true
                             } else {
-                                navController.navigate("ExpensesScreen") {
-                                    popUpTo("AddExpensesScreen") { inclusive = true }
+                                if (fromEditReport) {
+                                    reportId?.let {
+                                        navController.navigate("EditReportScreen/$it")
+                                    }
+                                } else {
+                                    navController.navigate("ExpensesScreen") {
+                                        popUpTo("AddExpensesScreen") { inclusive = true }
+                                    }
                                 }
                             }
                         },
@@ -242,7 +266,7 @@ fun AddExpensesScreen(
                         dismissButtonText = stringResource(R.string.discard),
                         isLoading = isLoading,
                         equalWeight = true,
-                        modifier = Modifier.padding(vertical = 16.dp , horizontal = 5.dp)
+                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 5.dp)
                     )
 
                     BottomBar(navController = navController)
@@ -419,6 +443,30 @@ fun AddExpensesScreen(
                     onFilesChange = { selectedFiles = it },
                     existingFiles = emptyList(),
                     onDeleteExisting = { }
+                )
+            }
+
+
+            if (showDiscardDialog) {
+                MyDialog(
+                    onDismiss = { showDiscardDialog = false },
+                    onConfirm = {
+                        showDiscardDialog = false
+
+                        if (fromEditReport) {
+                            reportId?.let {
+                                navController.navigate("EditReportScreen/$it")
+                            }
+                        } else {
+                            navController.navigate("ExpensesScreen") {
+                                popUpTo("AddExpensesScreen") { inclusive = true }
+                            }
+                        }
+                    },
+                    title = stringResource(R.string.discard_changes),
+                    subtitle = stringResource(R.string.you_have_unsaved_changes_are_you_sure_you_want_to_discard_them),
+                    confirmButtonText = stringResource(R.string.discard),
+                    dismissButtonText = stringResource(R.string.cancel),
                 )
             }
         }

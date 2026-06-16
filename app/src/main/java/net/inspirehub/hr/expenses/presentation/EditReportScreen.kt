@@ -51,6 +51,7 @@ import net.inspirehub.hr.expenses.data.editReport
 import androidx.compose.material3.ExperimentalMaterial3Api
 import net.inspirehub.hr.ArrowDropDownIcon
 import net.inspirehub.hr.FullButton
+import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.MySnackBar
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.SmallButtons
@@ -85,12 +86,26 @@ fun EditReportScreen(
     var isBottomSheetLoading by remember { mutableStateOf(false) }
     var expensesError by remember { mutableStateOf(false) }
     var removedExpenses by remember { mutableStateOf<List<Expense>>(emptyList()) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
 
     val firstPaymentMode = when (firstMatchedExpense?.payment_mode) {
         "company_account" -> stringResource(R.string.company)
         "own_account" -> stringResource(R.string.employee)
         else -> "Unknown"
     }
+
+    val hasChanges = report?.let { rep ->
+
+        val originalExpenseIds =
+            rep.expenses.map { it.id }.sorted()
+
+        val currentExpenseIds =
+            selectedExpenses.map { it.id }.sorted()
+
+        summaryName != rep.name ||
+                originalExpenseIds != currentExpenseIds
+
+    } ?: false
 
     LaunchedEffect(reportId, newExpenseId) {
 
@@ -145,7 +160,11 @@ fun EditReportScreen(
                 MyAppBar(
                     label = stringResource(R.string.edit_report),
                     onBackClick = {
-                        navController.popBackStack()
+                            if (hasChanges) {
+                                showDiscardDialog = true
+                            } else {
+                                navController.popBackStack()
+                        }
                     }
                 )
             },
@@ -210,7 +229,13 @@ fun EditReportScreen(
                             }
 
                         },
-                        onDismiss = { navController.navigate("MyReportScreen") },
+                        onDismiss = {
+                            if (hasChanges) {
+                                showDiscardDialog = true
+                            } else {
+                                navController.navigate("MyReportScreen")
+                            }
+                        },
                         confirmButtonText = stringResource(R.string.update),
                         dismissButtonText = stringResource(R.string.discard),
                         isLoading = isLoading,
@@ -353,6 +378,29 @@ fun EditReportScreen(
             ) {
                 FullLoading()
             }
+        }
+
+        if (showDiscardDialog) {
+            MyDialog(
+                onDismiss = {
+                    showDiscardDialog = false
+                },
+                onConfirm = {
+                    showDiscardDialog = false
+
+                    navController.navigate("MyReportScreen") {
+                        popUpTo("EditReportScreen") {
+                            inclusive = true
+                        }
+                    }
+                },
+                title = stringResource(R.string.discard_changes),
+                subtitle = stringResource(
+                    R.string.you_have_unsaved_changes_are_you_sure_you_want_to_discard_them
+                ),
+                confirmButtonText = stringResource(R.string.discard),
+                dismissButtonText = stringResource(R.string.cancel)
+            )
         }
 
         if (showBottomSheet) {

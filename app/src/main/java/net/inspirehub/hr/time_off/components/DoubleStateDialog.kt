@@ -137,7 +137,6 @@ fun DoubleStateDialog(
                         onConfirm()
                     }
                 },
-                onDismiss = {  },
                 confirmButtonText = if (hasDraftOrConfirm)
                     stringResource(R.string.remove_pending) else stringResource(R.string.ok),
             )

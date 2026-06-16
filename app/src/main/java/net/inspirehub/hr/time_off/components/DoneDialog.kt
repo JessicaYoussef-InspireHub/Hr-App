@@ -142,16 +142,12 @@ fun TimeOffDetailsDialog(
                     onConfirm = {
                         showDeleteConfirmation = true
                     },
-                    onDismiss = {  },
                     confirmButtonText = stringResource(R.string.delete),
                 )
             } else if (record.state == "validate" ) {
 
                 SmallButtons(
-                    onConfirm = {
-                        onDismiss()
-                    },
-                    onDismiss = {  },
+                    onConfirm = { onDismiss() },
                     confirmButtonText = stringResource(R.string.ok),
                 )
             }

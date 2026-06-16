@@ -58,6 +58,9 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -65,7 +68,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.work.WorkManager
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.check_in_out.components.OfflineSnackBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.inspirehub.hr.FullLoading
@@ -82,6 +84,7 @@ import net.inspirehub.hr.utils.convertToArabicDigits
 import com.google.firebase.messaging.FirebaseMessaging
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.MySnackBar
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -150,6 +153,7 @@ fun CheckInOutScreen(
     val employeeFullName = sharedPref.getEmployeeName() ?: "User"
     val employeeFirstName = employeeFullName.split(" ").firstOrNull() ?: employeeFullName
     val scope = rememberCoroutineScope()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     DisposableEffect(isWithinDistance) {
         Log.d("disable", "changed -> $isWithinDistance")
@@ -469,10 +473,31 @@ fun CheckInOutScreen(
         exitProcess(0)
     }
 
+    LaunchedEffect(offlineMessage) {
+        if (offlineMessage.isNotEmpty()) {
+            snackBarHostState.showSnackbar(
+                message = offlineMessage,
+                duration = SnackbarDuration.Long
+            )
+            offlineMessage = ""
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
         Scaffold(
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackBarHostState,
+                ) { data ->
+
+                    MySnackBar(
+                        snackBarData = data,
+                        useOffset = false
+                    )
+                }
+            },
             bottomBar = {
                 Column {
                     Text(
@@ -824,7 +849,6 @@ fun CheckInOutScreen(
             }
         }
 
-
         if (showFakeLocationDialog) {
             MyDialog(
                 title = stringResource(R.string.invalid_request),
@@ -897,13 +921,6 @@ fun CheckInOutScreen(
                 confirmButtonText = stringResource(R.string.ok),
                 onConfirm = { showInternetRequiredDialog = false },
                 onDismiss = { showInternetRequiredDialog = false },
-            )
-        }
-
-        if (offlineMessage.isNotEmpty()) {
-            OfflineSnackBar(
-                message = offlineMessage,
-                onDismiss = { offlineMessage = "" }
             )
         }
     }

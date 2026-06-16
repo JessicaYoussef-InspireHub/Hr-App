@@ -164,7 +164,6 @@ fun AddToCart(
                 }
                 onAddClick(quantity)
             },
-            onDismiss = {},
             confirmButtonText = stringResource(R.string.add) + " " + localizedTotal,
             modifier = Modifier.height(50.dp),
         )

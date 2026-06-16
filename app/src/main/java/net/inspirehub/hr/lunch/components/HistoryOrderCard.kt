@@ -87,7 +87,6 @@ fun HistoryOrderCard(
 
                 SmallButtons(
                     onConfirm = { onReorderClick() },
-                    onDismiss = {},
                     confirmButtonText = stringResource(R.string.re_order),
                 )
             }

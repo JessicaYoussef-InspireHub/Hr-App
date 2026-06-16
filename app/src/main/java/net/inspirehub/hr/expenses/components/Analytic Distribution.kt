@@ -327,7 +327,6 @@ fun AnalyticDistribution(
 
                                 showSheet = false
                             },
-                            onDismiss = { showSheet = false },
                             confirmButtonText = stringResource(R.string.apply)
                         )
                     }

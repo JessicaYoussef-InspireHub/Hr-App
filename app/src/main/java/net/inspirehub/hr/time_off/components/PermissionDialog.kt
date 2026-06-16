@@ -163,14 +163,12 @@ fun PermissionDialog(
                     onConfirm = {
                         showDeleteConfirmation = true
                     },
-                    onDismiss = {},
                     confirmButtonText = stringResource(R.string.delete),
                 )
             } else {
 
                 SmallButtons(
                     onConfirm = { onDismiss() },
-                    onDismiss = { onDismiss() },
                     confirmButtonText = stringResource(R.string.ok),
                 )
             }

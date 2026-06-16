@@ -278,6 +278,8 @@
 يتوفر إصدار جديد. يمكنك التحديث الآن أو الاستمرار في استخدام التطبيق.
 </string>
     <string name="no_suppliers_yet">لا يوجد موردون حتى الآن</string>
+    <string name="discard_changes">هل تريد تجاهل التغييرات؟</string>
+    <string name="you_have_unsaved_changes_are_you_sure_you_want_to_discard_them">لديك تغييرات غير محفوظة. هل أنت متأكد من رغبتك في حذفها؟</string>
 
 </resources>
 

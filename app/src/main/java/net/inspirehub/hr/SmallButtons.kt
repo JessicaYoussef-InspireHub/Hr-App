@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SmallButtons(
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: (() -> Unit)? = null,
     confirmButtonText: String,
     dismissButtonText: String? = null,
     isLoading: Boolean = false,
@@ -65,7 +65,7 @@ fun SmallButtons(
             if (dismissButtonText != null) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
-                    onClick = { onDismiss() },
+                    onClick = { onDismiss?.invoke() },
                     modifier =
                         if (equalWeight) Modifier.weight(1f)
                         else Modifier,

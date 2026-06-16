@@ -154,7 +154,6 @@ fun DoublePermissionDialog(
 
                     SmallButtons(
                         onConfirm = { onDismiss() },
-                        onDismiss = {  },
                         confirmButtonText = stringResource(R.string.ok)
                     )
                 }
@@ -162,7 +161,6 @@ fun DoublePermissionDialog(
                 approveWithOtherThanConfirm -> {
                     SmallButtons(
                         onConfirm = { onDismiss() },
-                        onDismiss = {  },
                         confirmButtonText = stringResource(R.string.ok)
                     )
                 }
@@ -315,7 +313,6 @@ fun DoublePermissionDialog(
 
                                 SmallButtons(
                                     onConfirm = { recordToDelete = record },
-                                    onDismiss = {  },
                                     confirmButtonText = stringResource(R.string.delete),
                                     modifier = Modifier.padding(top = 10.dp)
                                 )

@@ -176,7 +176,6 @@ fun ExpenseItemCard(
                     Spacer(modifier = Modifier.width(6.dp))
                     SmallButtons(
                         onConfirm = { onSelect() },
-                        onDismiss = {  },
                         confirmButtonText = stringResource(R.string.add),
                         modifier = Modifier.weight(1f)
                     )
