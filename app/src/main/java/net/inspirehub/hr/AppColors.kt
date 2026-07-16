@@ -21,7 +21,17 @@ data class AppColors(
     val onSecondaryContainer : Color,
     val surfaceDim : Color,
     val onTertiaryContainer : Color,
-    val surfaceTint : Color
+    val surfaceTint : Color,
+    val surfaceContainer : Color,
+    val surfaceContainerHighest : Color,
+    val surfaceContainerLow : Color,
+    val outline : Color,
+    val onSurface : Color,
+    val onSurfaceVariant : Color,
+    val surfaceBright : Color,
+    val  inverseSurface : Color,
+    val surfaceContainerLowest : Color,
+    val onError : Color
 
 )
 
@@ -44,6 +54,16 @@ fun appColors(): AppColors {
         onSecondaryContainer = MaterialTheme.colorScheme.onSecondaryContainer,
         surfaceDim = MaterialTheme.colorScheme.surfaceDim,
         onTertiaryContainer = MaterialTheme.colorScheme.onTertiaryContainer,
-        surfaceTint = MaterialTheme.colorScheme.surfaceTint
+        surfaceTint = MaterialTheme.colorScheme.surfaceTint,
+        surfaceContainer = MaterialTheme.colorScheme.surfaceContainer,
+        surfaceContainerHighest = MaterialTheme.colorScheme.surfaceContainerHighest,
+        surfaceContainerLow = MaterialTheme.colorScheme.surfaceContainerLow,
+        outline = MaterialTheme.colorScheme.outline,
+        onSurface = MaterialTheme.colorScheme.onSurface,
+        onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant,
+        surfaceBright = MaterialTheme.colorScheme.surfaceBright,
+        inverseSurface = MaterialTheme.colorScheme.inverseSurface,
+        surfaceContainerLowest = MaterialTheme.colorScheme.surfaceContainerLowest,
+        onError = MaterialTheme.colorScheme.onError
     )
 }

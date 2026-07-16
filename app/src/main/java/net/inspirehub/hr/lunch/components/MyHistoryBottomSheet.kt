@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,6 +58,7 @@ fun MyHistoryBottomSheet(
     val sharedPref = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPref.getLanguage()
     var orders by remember { mutableStateOf(emptyList<OrderWithItems>()) }
+    val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
 
     LaunchedEffect(Unit) {
         orders = db.orderDao().getOrdersWithItems()
@@ -87,7 +89,8 @@ fun MyHistoryBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = colors.surfaceContainerHigh,
-        windowInsets = WindowInsets(0)
+        windowInsets = WindowInsets(0),
+        sheetState = sheetState
     ) {
         val scrollState = rememberScrollState()
 

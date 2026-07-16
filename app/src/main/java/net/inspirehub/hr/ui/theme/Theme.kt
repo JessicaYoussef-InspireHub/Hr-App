@@ -29,6 +29,17 @@ private val LightColorScheme = lightColorScheme(
     scrim = Dark_green,
     onErrorContainer = Dark_yellow,
     errorContainer = Light_yellow,
+    surfaceContainer = PresentColor,
+    surfaceContainerHighest = AbsentColor,
+    surfaceContainerLow = LateColor,
+    outline = AlertPermission,
+    onSurfaceVariant = lightBottomSheetGray,
+    surfaceBright = lightWeekendAndPublicColor,
+    inverseSurface = LightGray,
+    surfaceContainerLowest = LightGray,
+    onError = workHoursColor
+
+
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -48,7 +59,17 @@ private val DarkColorScheme = darkColorScheme(
     inversePrimary = Light_green,
     scrim = Dark_green,
     onErrorContainer = Dark_yellow,
-    errorContainer = Light_yellow
+    errorContainer = Light_yellow,
+    surfaceContainer = PresentColor,
+    surfaceContainerHighest = AbsentColor,
+    surfaceContainerLow = LateColor,
+    outline = AlertPermission,
+    onSurfaceVariant = White,
+    surfaceContainerLowest = White,
+    surfaceBright = Dark_Lunch_card,
+    inverseSurface = darkWeekendAndPublicColor,
+    onError = workHoursColor
+
 )
 
 @Composable

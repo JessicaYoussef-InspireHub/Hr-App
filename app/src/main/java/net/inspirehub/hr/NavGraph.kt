@@ -9,7 +9,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import net.inspirehub.hr.attendance.presentation.AttendanceScreen
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
+import net.inspirehub.hr.deduction.presentation.DeductionScreen
 import net.inspirehub.hr.expenses.presentation.AddExpensesScreen
 import net.inspirehub.hr.expenses.presentation.CreateReportScreen
 import net.inspirehub.hr.expenses.presentation.EditExpenseScreen
@@ -92,6 +94,10 @@ fun MyAppNavHost(
                 nextDestination = nextDestination
             )
         }
+
+        composable("DeductionScreen") { DeductionScreen(navController) }
+
+        composable("AttendanceScreen") { AttendanceScreen(navController) }
 
         composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
 

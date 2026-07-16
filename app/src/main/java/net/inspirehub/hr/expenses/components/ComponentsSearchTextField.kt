@@ -2,6 +2,7 @@ package net.inspirehub.hr.expenses.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Text
@@ -61,11 +62,11 @@ fun ComponentsSearchTextField(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
                 disabledContainerColor = containerColor,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+                focusedIndicatorColor = colors.transparent,
+                unfocusedIndicatorColor = colors.transparent,
+                disabledIndicatorColor = colors.transparent
             ),
-            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+            keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Search
             )
         )

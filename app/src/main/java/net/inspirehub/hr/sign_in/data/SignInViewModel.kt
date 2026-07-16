@@ -70,7 +70,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     allowedLocationsIds = employeeData?.allowed_locations_ids ?: emptyList(),
                     companies = companies,
                     companyUrl = response.result.company_url ?: "",
-                    employeeName = employeeData?.name ?: ""
+                    employeeName = employeeData?.name ?: "",
+                    allowTimeOffWithMinutes = response.result.allow_time_off_With_minutes
                 )
 
                 _uiState.value = SignInUiState.Success(response)
@@ -116,7 +117,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         allowedLocationsIds: List<Int>,
         companies: List<Company>,
         companyUrl: String,
-        employeeName: String
+        employeeName: String,
+        allowTimeOffWithMinutes: Boolean
     ) {
         val sharedPref = SharedPrefManager(getApplication())
 
@@ -131,6 +133,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         sharedPref.saveCompaniesLatLng(companies)
         sharedPref.saveCompanyUrl(companyUrl)
         sharedPref.saveEmployeeName(employeeName)
+        sharedPref.saveAllowTimeOffWithMinutes(allowTimeOffWithMinutes)
 
     }
 

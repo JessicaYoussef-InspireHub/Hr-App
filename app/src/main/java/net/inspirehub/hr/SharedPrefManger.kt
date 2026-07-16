@@ -22,6 +22,15 @@ class SharedPrefManager(context: Context) {
         return if (name.isNullOrBlank()) null else name
     }
 
+
+    fun saveAllowTimeOffWithMinutes(value: Boolean) {
+        prefs.edit { putBoolean("allow_time_off_With_minutes", value) }
+    }
+
+    fun getAllowTimeOffWithMinutes(): Boolean {
+        return prefs.getBoolean("allow_time_off_With_minutes", false)
+    }
+
     fun clearCheckOutScheduledTime() {
         prefs.edit { remove("check_out_scheduled_time") }
         Log.d("SharedPrefManager", "🗑️ Check-Out time cleared")

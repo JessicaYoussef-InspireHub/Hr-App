@@ -38,7 +38,9 @@ data class TimeOffRequestForRequestEmployee(
     val request_unit_half: Boolean? = null,
     val request_hour_from: Double? = null,
     val request_hour_to: Double? = null,
-    val request_unit_hours: Boolean? = null
+    val request_unit_hours: Boolean? = null,
+    val permission_period: String? = null,
+    val permission_duration: Double? = null,
 
 )
 
@@ -106,6 +108,7 @@ data class LeaveType(
     val id: Int,
     val name: String,
     val request_unit: String,
+    val enable_leave_time_slot: Boolean = false,
     val requires_allocation: String,
     val remaining_balance: Float? = null,
     val original_balance: Float? = null,
@@ -151,7 +154,12 @@ suspend fun fetchEmployeeLeaveTypes(
         val bodyText = response.bodyAsText()
         println("✅ Response get_employee_leave_type : $bodyText")
 
-        Json.decodeFromString<LeaveTypeResponse>(bodyText)
+        val json = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+        }
+
+        json.decodeFromString<LeaveTypeResponse>(bodyText)
     } catch (e: Exception) {
         println("❌ Error fetching leave types: ${e.message}")
         null

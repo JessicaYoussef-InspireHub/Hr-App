@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -206,6 +208,72 @@ fun BottomBar(
                         moreMenuExpanded = false
                         if (currentRoute != "ExpensesScreen") {
                             navController.navigate("ExpensesScreen") {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.AccessTime,
+                                stringResource(R.string.AttendanceHistory),
+                                tint = if (currentRoute == "AttendanceScreen")
+                                    colors.tertiaryColor
+                                else
+                                    colors.onBackgroundColor
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.AttendanceHistory),
+                                color =
+                                    if (currentRoute == "AttendanceScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor
+                            )
+                        }
+                    }, onClick = {
+                        moreMenuExpanded = false
+                        if (currentRoute != "AttendanceScreen") {
+                            navController.navigate("AttendanceScreen") {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.HourglassBottom,
+                                stringResource(R.string.AttendanceDeduction),
+                                tint = if (currentRoute == "DeductionScreen")
+                                    colors.tertiaryColor
+                                else
+                                    colors.onBackgroundColor
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.AttendanceDeduction),
+                                color =
+                                    if (currentRoute == "DeductionScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor
+                            )
+                        }
+                    }, onClick = {
+                        moreMenuExpanded = false
+                        if (currentRoute != "DeductionScreen") {
+                            navController.navigate("DeductionScreen") {
                                 launchSingleTop = true
                             }
                         }

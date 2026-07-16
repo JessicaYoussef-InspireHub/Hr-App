@@ -57,12 +57,13 @@ fun ExpensesFilterBottomSheet(
     var showDateSection by remember { mutableStateOf(tempFromDate != null || tempToDate != null) }
     var showAttachmentSection by remember { mutableStateOf(attachmentFilter != null) }
     var showStatusSection by remember { mutableStateOf(selectedStatuses.isNotEmpty()) }
-
+    val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
 
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         containerColor = colors.surfaceContainerHigh,
-        windowInsets = WindowInsets(0)
+        windowInsets = WindowInsets(0),
+        sheetState = sheetState
     ) {
 
         Column(

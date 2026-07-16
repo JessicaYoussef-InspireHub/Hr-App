@@ -11,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -76,9 +75,9 @@ fun ExpensesAndReportSearchBar(
                     focusedContainerColor = colors.surfaceContainerHigh,
                     unfocusedContainerColor = colors.surfaceContainerHigh,
                     disabledContainerColor = colors.surfaceContainerHigh,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    focusedIndicatorColor = colors.transparent,
+                    unfocusedIndicatorColor = colors.transparent,
+                    disabledIndicatorColor = colors.transparent
                 ),
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                     imeAction = ImeAction.Search

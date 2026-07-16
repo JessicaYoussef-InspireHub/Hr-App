@@ -22,6 +22,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,6 +60,7 @@ fun AnalyticDistribution(
     initialDistribution: Map<Int, Int> = emptyMap(),
     onDistributionChange: (Map<Int, Int>) -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
     var showSheet by remember { mutableStateOf(false) }
     var lines by remember { mutableStateOf(listOf("100")) }
     val colors = appColors()
@@ -152,6 +154,7 @@ fun AnalyticDistribution(
         ModalBottomSheet(
             onDismissRequest = { showSheet = false },
             containerColor = colors.surfaceContainerHigh,
+            sheetState = sheetState,
             windowInsets = WindowInsets(0)
         ) {
             val scrollState = rememberScrollState()
@@ -215,7 +218,7 @@ fun AnalyticDistribution(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 200.dp)
+                            .heightIn(max = 600.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
                         lines.forEachIndexed { index, percentage ->
@@ -269,15 +272,27 @@ fun AnalyticDistribution(
                                             modifier = Modifier.size(22.dp)
                                         )
 
-                                        DeleteIcon (
+                                        DeleteIcon(
                                             onClick = {
+                                                if (lines.size <= 1) return@DeleteIcon
+
                                                 val newLines = lines.toMutableList()
-                                                val newDistributions = selectedDistributions.toMutableList()
+                                                val newSelected = selectedDistributions.toMutableList()
+                                                val newTemp = tempDistributions.toMutableList()
 
                                                 newLines.removeAt(index)
-                                                newDistributions.removeAt(index)
+
+                                                if (index < newSelected.size) {
+                                                    newSelected.removeAt(index)
+                                                }
+
+                                                if (index < newTemp.size) {
+                                                    newTemp.removeAt(index)
+                                                }
+
                                                 lines = newLines
-                                                selectedDistributions = newDistributions
+                                                selectedDistributions = newSelected
+                                                tempDistributions = newTemp
                                             },
                                             tint = colors.onBackgroundColor
                                         )
@@ -327,6 +342,7 @@ fun AnalyticDistribution(
 
                                 showSheet = false
                             },
+                            onDismiss = { showSheet = false },
                             confirmButtonText = stringResource(R.string.apply)
                         )
                     }

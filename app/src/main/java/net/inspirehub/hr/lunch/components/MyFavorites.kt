@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.Row
 import net.inspirehub.hr.lunch.data.DatabaseProvider
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -54,7 +55,7 @@ fun MyFavorite() {
         .collectAsState(initial = emptyList())
     var showClearDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-
+    val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
 
 
 
@@ -76,7 +77,8 @@ fun MyFavorite() {
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
                 containerColor = colors.surfaceContainerHigh,
-                windowInsets = WindowInsets(0)
+                windowInsets = WindowInsets(0),
+                sheetState = sheetState
             ) {
                 val scrollState = rememberScrollState()
 

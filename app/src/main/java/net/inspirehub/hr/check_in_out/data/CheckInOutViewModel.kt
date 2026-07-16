@@ -67,7 +67,6 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
     fun startPollingAttendance(token: String) {
         viewModelScope.launch {
-            while(true) {
                 val result = fetchAttendanceStatus(context, token)
                 if(result != null) {
                     _attendanceStatus.value = result.attendance_status ?: "checked_out"
@@ -80,8 +79,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                         _lastCheckOut.value
                     )
                 }
-                delay(3000)
-            }
+//                delay(3000)
         }
     }
 

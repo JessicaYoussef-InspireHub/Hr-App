@@ -24,6 +24,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.material3.*
 import java.time.LocalDate
+import androidx.compose.ui.platform.LocalContext
+import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.utils.formatLocalizedShortDate
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ExpensesDateRangeRow(
@@ -35,12 +38,9 @@ fun ExpensesDateRangeRow(
 
     val colors = appColors()
     val today = LocalDate.now()
-
-    fun formatDate(date: LocalDate?): String {
-        return date?.let {
-            "%02d/%02d/%d".format(it.dayOfMonth, it.monthValue, it.year)
-        } ?: ""
-    }
+    val context = LocalContext.current
+    val sharedPref = SharedPrefManager(context)
+    val currentLanguage = sharedPref.getLanguage()
 
     Column(
         modifier = Modifier.padding(horizontal = 12.dp)
@@ -60,7 +60,10 @@ fun ExpensesDateRangeRow(
             Spacer(modifier = Modifier.width(8.dp))
 
             TextField(
-                value = fromDate?.let { formatDate(it) } ?: "",
+                value = formatLocalizedShortDate(
+                    fromDate,
+                    currentLanguage
+                ),
                 onValueChange = {},
                 readOnly = true,
                 enabled = false,
@@ -89,7 +92,10 @@ fun ExpensesDateRangeRow(
                 ),
                 placeholder = {
                     Text(
-                        text = formatDate(today),
+                        text = formatLocalizedShortDate(
+                            today,
+                            currentLanguage
+                        ),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = colors.tertiaryColor
@@ -115,7 +121,10 @@ fun ExpensesDateRangeRow(
             Spacer(modifier = Modifier.width(29.dp))
 
             TextField(
-                value = toDate?.let { formatDate(it) } ?: "",
+                value = formatLocalizedShortDate(
+                    toDate,
+                    currentLanguage
+                ),
                 onValueChange = {},
                 readOnly = true,
                 enabled = false,
@@ -145,7 +154,10 @@ fun ExpensesDateRangeRow(
                 ),
                 placeholder = {
                     Text(
-                        text = formatDate(today),
+                        text = formatLocalizedShortDate(
+                            today,
+                            currentLanguage
+                        ),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = colors.tertiaryColor

@@ -53,6 +53,7 @@ fun EditReportBottomSheet(
     val availableFiltered = availableExpenses.filter { it.id !in removedIds }
     val selectedIds = remember { mutableStateListOf<Int>() }
     val requiredPaymentMode = paymentMode
+    val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
 
     if (!showBottomSheet) return
 
@@ -60,7 +61,8 @@ fun EditReportBottomSheet(
         containerColor = colors.surfaceContainerHigh,
         windowInsets = WindowInsets(0),
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState()
+        sheetState = sheetState
+
     ) {
         Column(
             modifier = Modifier
@@ -93,7 +95,7 @@ fun EditReportBottomSheet(
             if (isBottomSheetLoading) {
                 FullLoading()
             } else {
-                val maxHeightDp = 200.dp
+                val maxHeightDp = 600.dp
 
                 if (removedExpenses.isEmpty() && availableFiltered.isEmpty()) {
                     Column(

@@ -67,6 +67,12 @@ fun ExpenseFlowRow(
                 label = {
                     Text(label)
                 },
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = selectedStatuses.contains(key),
+                    borderColor = colors.onBackgroundColor.copy(alpha = 0.12f),
+                    selectedBorderColor = colors.tertiaryColor
+                ),
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = colors.tertiaryColor,
                     containerColor = colors.transparent,

@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,6 +62,7 @@ fun MyOrderBottomSheet(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
 
     LaunchedEffect(showSheet) {
         if (showSheet) {
@@ -73,6 +75,8 @@ fun MyOrderBottomSheet(
             onDismissRequest = { onDismiss() },
             containerColor = colors.surfaceContainerHigh,
             windowInsets = WindowInsets(0),
+            sheetState = sheetState
+
         ) {
             Column(
                 modifier = Modifier
@@ -115,7 +119,7 @@ fun MyOrderBottomSheet(
                         )
                     }
                 } else {
-                    val maxHeightDp = 200.dp
+                    val maxHeightDp = 600.dp
 
                     Box(
                         modifier = Modifier

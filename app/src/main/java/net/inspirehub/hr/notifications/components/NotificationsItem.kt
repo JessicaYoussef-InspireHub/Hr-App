@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.GeneralIcon
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.notifications.data.NotificationEntity
 import net.inspirehub.hr.utils.convertToArabicDigits
@@ -50,9 +51,15 @@ private fun formatTimestamp(timestamp: Long): Pair<String, String> {
 @Composable
 fun NotificationItem(notification: NotificationEntity) {
     val (_, rawTime) = formatTimestamp(notification.timestamp)
-    val timeStr = convertToArabicDigits(rawTime)
-    val colors = appColors()
     val context = LocalContext.current
+    val sharedPrefManger = SharedPrefManager(context)
+    val currentLanguage = sharedPrefManger.getLanguage()
+    val timeStr = if (currentLanguage == "ar") {
+        convertToArabicDigits(rawTime)
+    } else {
+        rawTime
+    }
+    val colors = appColors()
     val prefs = context.getSharedPreferences("notif_prefs", Context.MODE_PRIVATE)
     val lastOpenTime = prefs.getLong("last_open_time", 0L)
     val isNew =  notification.timestamp > lastOpenTime

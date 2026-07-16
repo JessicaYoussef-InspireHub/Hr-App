@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.utils.formatNumber
-
+import net.inspirehub.hr.utils.formatLocalizedTime
 @Composable
 fun TimePickerBox(
     selectedHour: String?,
@@ -36,7 +36,16 @@ fun TimePickerBox(
     val currentLanguage = sharedPrefManager.getLanguage()
     val hours = (0..23).map { it.toString() }
     val minutes = (0..59).map { it.toString().padStart(2, '0') }
+    val allowTimeOffWithMinutes = sharedPrefManager.getAllowTimeOffWithMinutes()
 
+    val timeList = remember {
+        buildList {
+            for (hour in 0..23) {
+                add("${hour}:00")
+                add("${hour}:30")
+            }
+        }
+    }
 
     fun formatHourTo12(hour: String): String {
         val h = hour.toIntOrNull() ?: return hour
@@ -53,83 +62,137 @@ fun TimePickerBox(
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (allowTimeOffWithMinutes) {
+            // 🔹 HOURS BOX
+            Box {
+                var expandedHour by remember { mutableStateOf(false) }
 
-        // 🔹 HOURS BOX
-        Box {
-            var expandedHour by remember { mutableStateOf(false) }
+                Text(
+                    text = formatNumber(formatHourTo12(selectedHour ?: "9"), currentLanguage),
+                    color = colors.onBackgroundColor,
+                    modifier = Modifier
+                        .clickable { expandedHour = true }
+                        .padding(start = 10.dp),
+                    fontSize = 14.sp
+                )
+
+                DropdownMenu(
+                    expanded = expandedHour,
+                    onDismissRequest = { expandedHour = false },
+                    modifier = Modifier.background(colors.onSecondaryColor)
+                ) {
+                    hours.forEach { hour ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    formatNumber(hour, currentLanguage),
+                                    color = colors.onBackgroundColor,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            },
+                            onClick = {
+                                onHourChange(hour)
+                                expandedHour = false
+                            }
+                        )
+                    }
+                }
+            }
 
             Text(
-                text = formatNumber(formatHourTo12(selectedHour ?: "9") , currentLanguage),
+                " : ",
                 color = colors.onBackgroundColor,
-                modifier = Modifier
-                    .clickable { expandedHour = true }
-                    .padding(start = 10.dp),
-                fontSize = 14.sp
+                fontSize = 18.sp
             )
 
-            DropdownMenu(
-                expanded = expandedHour,
-                onDismissRequest = { expandedHour = false },
-                modifier = Modifier.background(colors.onSecondaryColor)
-            ) {
-                hours.forEach { hour ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                formatNumber(hour , currentLanguage),
-                                color = colors.onBackgroundColor,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        },
-                        onClick = {
-                            onHourChange(hour)
-                            expandedHour = false
-                        }
-                    )
+            // 🔹 MINUTES BOX
+            Box {
+                var expandedMinute by remember { mutableStateOf(false) }
+
+                Text(
+                    text = formatNumber(selectedMinute ?: "00", currentLanguage),
+                    color = colors.onBackgroundColor,
+                    modifier = Modifier
+                        .clickable { expandedMinute = true }
+                        .padding(start = 10.dp),
+                    fontSize = 14.sp
+                )
+
+                DropdownMenu(
+                    expanded = expandedMinute,
+                    onDismissRequest = { expandedMinute = false },
+                    modifier = Modifier.background(colors.onSecondaryColor)
+                ) {
+                    minutes.forEach { minute ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    formatNumber(minute, currentLanguage),
+                                    color = colors.onBackgroundColor,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            },
+                            onClick = {
+                                onMinuteChange(minute)
+                                expandedMinute = false
+                            }
+                        )
+                    }
                 }
             }
         }
+        else {
+            var expanded by remember { mutableStateOf(false) }
 
-        Text(
-            " : ",
-            color = colors.onBackgroundColor,
-            fontSize = 18.sp
-        )
+            Box {
 
-        // 🔹 MINUTES BOX
-        Box {
-            var expandedMinute by remember { mutableStateOf(false) }
+                Text(
+                    text = formatLocalizedTime(
+                        hour = (selectedHour ?: "9").toInt(),
+                        minute = (selectedMinute ?: "00").toInt(),
+                        language = currentLanguage
+                    ),
+                    modifier = Modifier
+                        .clickable { expanded = true }
+                        .padding(start = 10.dp),
+                    color = colors.onBackgroundColor,
+                    fontSize = 14.sp
+                )
 
-            Text(
-                text = formatNumber(selectedMinute ?: "00" , currentLanguage),
-                color = colors.onBackgroundColor,
-                modifier = Modifier
-                    .clickable { expandedMinute = true }
-                    .padding(start = 10.dp),
-                fontSize = 14.sp
-            )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(colors.onSecondaryColor)
+                ) {
 
-            DropdownMenu(
-                expanded = expandedMinute,
-                onDismissRequest = { expandedMinute = false },
-                modifier = Modifier.background(colors.onSecondaryColor)
-            ) {
-                minutes.forEach { minute ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                formatNumber(minute , currentLanguage),
-                                color = colors.onBackgroundColor,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        },
-                        onClick = {
-                            onMinuteChange(minute)
-                            expandedMinute = false
-                        }
-                    )
+                    timeList.forEach { time ->
+
+                        DropdownMenuItem(
+                            text = {
+                                val parts = time.split(":")
+
+                                Text(
+                                    text = formatLocalizedTime(
+                                        hour = parts[0].toInt(),
+                                        minute = parts[1].toInt(),
+                                        language = currentLanguage
+                                    ),
+                                    color = colors.onBackgroundColor
+                                )
+                            },
+                            onClick = {
+
+                                val parts = time.split(":")
+
+                                onHourChange(parts[0])
+                                onMinuteChange(parts[1])
+
+                                expanded = false
+                            }
+                        )
+                    }
                 }
             }
         }

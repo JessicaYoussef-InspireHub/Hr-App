@@ -195,7 +195,7 @@ fun NotificationsScreen(
                             item {
                                 Text(
                                     text = formatDateHeader(date),
-                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
                                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -261,5 +261,12 @@ private fun formatDateHeader(dateStr: String): String {
     }
 
 // ✅ Convert numbers to Arabic
-    return convertToArabicDigits(result)
+    val sharedPref = SharedPrefManager(context)
+    val language = sharedPref.getLanguage()
+
+    return if (language == "ar") {
+        convertToArabicDigits(result)
+    } else {
+        result
+    }
 }

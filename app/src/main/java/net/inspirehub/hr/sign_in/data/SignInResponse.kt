@@ -71,15 +71,6 @@ data class SignInResult(
     val message: MessageContent? = null,   // nullable
     val company_name: String? = null,
     val license_expiry_date: String? = null,
-    val company_url: String? = null
+    val company_url: String? = null,
+    val allow_time_off_With_minutes: Boolean = false
 )
-
-@Serializable
-data class ErrorResult(
-    val status: String,
-    val message: String,
-    val error_code: String? = null
-)
-
-
-

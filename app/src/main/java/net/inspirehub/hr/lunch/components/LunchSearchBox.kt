@@ -32,7 +32,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.graphics.Color
 import net.inspirehub.hr.SearchIcon
 
 
@@ -99,9 +98,9 @@ fun LunchSearchBox(
                         focusedContainerColor = colors.surfaceContainerHigh,
                         unfocusedContainerColor = colors.surfaceContainerHigh,
                         disabledContainerColor = colors.surfaceContainerHigh,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = colors.transparent,
+                        unfocusedIndicatorColor = colors.transparent,
+                        disabledIndicatorColor = colors.transparent
                     ),
                     keyboardOptions = KeyboardOptions.Default.copy(
                         imeAction = ImeAction.Search

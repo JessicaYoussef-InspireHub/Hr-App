@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -121,6 +122,35 @@ fun DateInfoDialog(
     var description by remember { mutableStateOf("") }
     var leaveDurationData by remember { mutableStateOf<LeaveDurationData?>(null) }
 
+    var selectedPermissionPeriod by remember {
+        mutableStateOf(context.getString(R.string.select_permission_period))
+    }
+
+    val showPermissionDuration =
+        selectedPermissionPeriod == stringResource(R.string.morning_permission) ||
+                selectedPermissionPeriod == stringResource(R.string.evening_permission)
+
+    val isMidDay = selectedPermissionPeriod == stringResource(R.string.mid_day_permission)
+    var permissionPeriodError by remember { mutableStateOf("") }
+
+    val shouldHideTimePicker =
+        when {
+            selectedLeaveType?.request_unit == "hours_only" &&
+                    selectedLeaveType?.enable_leave_time_slot == true ->
+                !isMidDay
+
+
+            selectedLeaveType?.enable_leave_time_slot == true &&
+                    showPermissionDuration ->
+                true
+
+            else -> false
+        }
+
+    val showTimePicker = (permissionChecked || selectedLeaveType?.request_unit == "hours_only") && !shouldHideTimePicker
+
+    val duration30 = stringResource(R.string.duration_30_minutes)
+    var selectedPermissionDuration by remember { mutableStateOf(PermissionDuration( title = duration30, hours = 0.5)) }
 
     fun convertToDoubleHour(time: String): Double? {
         return try {
@@ -133,6 +163,15 @@ fun DateInfoDialog(
         } catch (e: Exception) {
             Log.e("TIME_PARSE", "Failed parsing time: $time", e)
             null
+        }
+    }
+
+    fun getPermissionPeriodValue(period: String): String {
+        return when (period) {
+            context.getString(R.string.morning_permission) -> "morning"
+            context.getString(R.string.mid_day_permission) -> "mid_day"
+            context.getString(R.string.evening_permission) -> "evening"
+            else -> ""
         }
     }
 
@@ -246,7 +285,7 @@ fun DateInfoDialog(
     val warningMessage = leaveDurationData?.casualWarningMessage()
 
 
-    fun convertSelectedTimeToHour24(time: String, language: String): Double {
+    fun convertSelectedTimeToHour24(time: String): Double {
         val arabicToEnglish = mapOf(
             '٠' to '0', '١' to '1', '٢' to '2', '٣' to '3', '٤' to '4',
             '٥' to '5', '٦' to '6', '٧' to '7', '٨' to '8', '٩' to '9'
@@ -630,10 +669,62 @@ fun DateInfoDialog(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(15.dp))
+
+                        if (selectedLeaveType?.enable_leave_time_slot == true) {
+                            Spacer(modifier = Modifier.height(15.dp))
+
+                            FirstText(stringResource(R.string.permission_period))
+
+                            Spacer(modifier = Modifier.height(15.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 20.dp)
+                            ) {
+                                PermissionPeriodDropdown(
+                                    selectedOption = selectedPermissionPeriod,
+                                    onOptionSelected = {
+                                        selectedPermissionPeriod = it
+                                        permissionPeriodError = ""
+                                    }
+                                )
+                            }
+
+                            if (permissionPeriodError.isNotEmpty()) {
+                                Text(
+                                    text = permissionPeriodError,
+                                    color = colors.error,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(start = 20.dp, top = 4.dp)
+                                )
+                            }
+                        }
+
+                        if (
+                            selectedLeaveType?.enable_leave_time_slot == true &&
+                            showPermissionDuration
+                        ) {
+                            Spacer(modifier = Modifier.height(15.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                FirstText(stringResource(R.string.duration))
+                                Spacer(modifier = Modifier.width(10.dp))
+                                PermissionDurationDropdown(
+                                    selectedOption = selectedPermissionDuration,
+                                    onOptionSelected = {
+                                        selectedPermissionDuration = it
+                                    }
+                                )
+                            }
+                        }
 
 
-                        if (permissionChecked || selectedLeaveType?.request_unit == "hours_only") {
+
+                        if (showTimePicker) {
+                            Spacer(modifier = Modifier.height(15.dp))
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -707,7 +798,16 @@ fun DateInfoDialog(
                                 ) {
                                     FirstText(stringResource(R.string.duration))
                                     Spacer(Modifier.width(10.dp))
-                                    DurationHours(hours = leaveHours)
+                                    DurationHours(
+                                        hours = if (
+                                            selectedLeaveType?.enable_leave_time_slot == true &&
+                                            showPermissionDuration
+                                        ) {
+                                            selectedPermissionDuration.hours
+                                        } else {
+                                            leaveHours
+                                        }
+                                    )
                                 }
                             }
 
@@ -776,27 +876,38 @@ fun DateInfoDialog(
 
                         SmallButtons(
                             onConfirm = {
+                                Log.d("Jessica SAVE", "Save Clicked")
+                                Log.d("Jessica SAVE", "permissionChecked = $permissionChecked")
+                                Log.d("Jessica SAVE", "selectedPermissionPeriod = $selectedPermissionPeriod")
+                                Log.d("Jessica SAVE", "permissionErrorMessage = $permissionErrorMessage")
+                                Log.d("Jessica SAVE", "enable_leave_time_slot = ${selectedLeaveType?.enable_leave_time_slot}")
+                                Log.d("Jessica SAVE", "request_unit = ${selectedLeaveType?.request_unit}")
+
+                                if (
+                                    selectedLeaveType?.enable_leave_time_slot == true &&
+                                    selectedPermissionPeriod == context.getString(R.string.select_permission_period)
+                                ) {
+                                    permissionPeriodError =
+                                        context.getString(R.string.please_select_permission_period)
+                                    return@SmallButtons
+                                }
+
+
                                 if (permissionErrorMessage.isNotEmpty()) {
                                     return@SmallButtons
                                 }
 
 
-                                if (permissionChecked) {
+                                if (permissionChecked || selectedLeaveType?.request_unit == "hours_only") {
 
-                                    Log.d("SAVE_ACTION", "Permission with custom hour")
+                                    Log.d("Jessica SAVE_ACTION", "Permission with custom hour")
 
                                     isLoading = true
                                     CoroutineScope(Dispatchers.IO).launch {
                                         val startDateStr = selectedStartDate.toString()
 
-                                        val fromHourForApi = convertSelectedTimeToHour24(
-                                            selectedFromHour,
-                                            currentLanguage
-                                        )
-                                        val toHourForApi = convertSelectedTimeToHour24(
-                                            selectedToHour,
-                                            currentLanguage
-                                        )
+                                        val fromHourForApi = convertSelectedTimeToHour24(selectedFromHour)
+                                        val toHourForApi = convertSelectedTimeToHour24(selectedToHour)
 
                                         val request = TimeOffRequestForRequestEmployee(
                                             employee_token = token,
@@ -807,15 +918,21 @@ fun DateInfoDialog(
                                             request_date_to = startDateStr,
                                             request_hour_from = fromHourForApi,
                                             request_hour_to = toHourForApi,
-                                            request_unit_hours = true
+                                            request_unit_hours = true,
+                                            permission_period = getPermissionPeriodValue(selectedPermissionPeriod),
+                                            permission_duration = selectedPermissionDuration.hours
                                         )
 
-                                        Log.d("REQUEST_BODY_Permission", request.toString())
+                                        Log.d("Jessica REQUEST_BODY_Permission", request.toString())
+                                        Log.d("PERIOD Jessica", getPermissionPeriodValue(selectedPermissionPeriod))
 
                                         val response = sendApiForRequestTimeOff(context, request)
 
 
-                                        Log.d("API_RESPONSE_Permission", response.toString())
+                                        Log.d("Jessica API_RESPONSE_Permission", response.toString())
+                                        Log.d("Jessica API_RESPONSE", response.toString())
+                                        Log.d("Jessica API_STATUS", response?.result?.status ?: "null")
+                                        Log.d("Jessica API_MESSAGE", response?.result?.message ?: "null")
 
                                         withContext(Dispatchers.Main) {
                                             isLoading = false
@@ -855,8 +972,7 @@ fun DateInfoDialog(
                                     CoroutineScope(Dispatchers.IO).launch {
                                         val startDateStr = selectedStartDate.toString()
 
-                                        val period =
-                                            if (halfDayOption == morningText) "am" else "pm"
+                                        val period = if (halfDayOption == morningText) "am" else "pm"
 
                                         val request = TimeOffRequestForRequestEmployee(
                                             employee_token = token,

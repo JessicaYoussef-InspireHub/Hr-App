@@ -27,6 +27,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +64,7 @@ fun SuppliersFilterBottomSheet(
     var selectedSuppliers by remember { mutableStateOf<List<Boolean>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     val isAllSelected = suppliers.isNotEmpty() && selectedSuppliers.all { it }
+    val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
 
 
     LaunchedEffect(showSheet) {
@@ -91,6 +93,7 @@ fun SuppliersFilterBottomSheet(
 
         if (showSheet) {
             ModalBottomSheet(
+                sheetState = sheetState,
                 onDismissRequest = { showSheet = false },
                 containerColor = colors.surfaceContainerHigh,
                 windowInsets = WindowInsets(0)
@@ -154,7 +157,7 @@ fun SuppliersFilterBottomSheet(
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
-                    val maxHeightDp = 200.dp
+                    val maxHeightDp = 600.dp
 
                     Box(
                         modifier = Modifier

@@ -108,6 +108,8 @@ private fun checkInternetConnection(context: Context): Boolean {
 }
 
 
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("MissingPermission", "SuspiciousIndentation")
 @OptIn(ExperimentalPermissionsApi::class)
@@ -154,6 +156,10 @@ fun CheckInOutScreen(
     val employeeFirstName = employeeFullName.split(" ").firstOrNull() ?: employeeFullName
     val scope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        Log.d("TOKEN", "Stored Token: $token")
+    }
 
     DisposableEffect(isWithinDistance) {
         Log.d("disable", "changed -> $isWithinDistance")
