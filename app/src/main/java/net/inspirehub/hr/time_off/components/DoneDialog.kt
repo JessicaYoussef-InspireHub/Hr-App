@@ -203,7 +203,7 @@ fun TimeOffDetailsDialog(
                             )
                         }
 
-                        "cancel" -> {
+                        "refuse" -> {
                             Box(
                                 modifier = Modifier
                                     .size(15.dp)
@@ -258,7 +258,7 @@ fun TimeOffDetailsDialog(
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                if (record.state == "cancel") {
+                if (record.state == "refuse") {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start,
@@ -323,7 +323,7 @@ fun TimeOffDetailsDialog(
                 }
 
                 if (showNewVacationDialog) {
-                    DateInfoDialog(
+                    TimeOffRequestBottomSheet(
                         date = clickedDate ?: startDate,                         selectedDates = selectedDates ?: emptySet(),
                         onDateSelectedChange = onDateSelectedChange ?: {},
                         onConfirm = {

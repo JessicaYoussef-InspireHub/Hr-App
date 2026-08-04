@@ -254,7 +254,7 @@ fun BottomBar(
                         ) {
                             Icon(
                                 Icons.Default.HourglassBottom,
-                                stringResource(R.string.AttendanceDeduction),
+                                stringResource(R.string.Deduction),
                                 tint = if (currentRoute == "DeductionScreen")
                                     colors.tertiaryColor
                                 else
@@ -262,7 +262,7 @@ fun BottomBar(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                stringResource(R.string.AttendanceDeduction),
+                                stringResource(R.string.Deduction),
                                 color =
                                     if (currentRoute == "DeductionScreen")
                                         colors.tertiaryColor

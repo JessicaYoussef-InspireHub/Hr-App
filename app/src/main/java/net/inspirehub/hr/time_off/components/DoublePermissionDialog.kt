@@ -110,7 +110,7 @@ fun DoublePermissionDialog(
         }
     }
 
-    val allRefused = records.all { it.state == "cancel" }
+    val allRefused = records.all { it.state == "refuse" }
     val hasConfirmOrDraft = records.any { it.state == "confirm" || it.state == "draft" }
     val hasValidate = records.any { it.state == "validate" }
     val hasOtherThanConfirm = records.any { it.state != "confirm" }
@@ -189,7 +189,7 @@ fun DoublePermissionDialog(
                                         )
                                     }
 
-                                    "cancel" -> {
+                                    "refuse" -> {
                                         Box(
                                             modifier = Modifier
                                                 .size(15.dp)
@@ -350,7 +350,7 @@ fun DoublePermissionDialog(
 
 
                         if (showNewVacationDialog) {
-                            DateInfoDialog(
+                            TimeOffRequestBottomSheet(
                                 date = (clickedDate ?: startDate) ?: LocalDate.now(),
                                 selectedDates = selectedDates ?: emptySet(),
                                 onDateSelectedChange = onDateSelectedChange ?: {},

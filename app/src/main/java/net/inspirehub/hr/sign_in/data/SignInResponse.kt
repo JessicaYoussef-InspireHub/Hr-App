@@ -29,8 +29,9 @@ data class SignInResponseWrapper(
 data class MessageContent(
     val status: String,
     val message: String,
-    val employee_data: EmployeeDataWrapper,
-    val company: List<Company>
+    val employee_data: EmployeeDataWrapper? = null,
+    val company: List<Company> = emptyList(),
+    val error_code: String? = null
 )
 
 
@@ -73,4 +74,11 @@ data class SignInResult(
     val license_expiry_date: String? = null,
     val company_url: String? = null,
     val allow_time_off_With_minutes: Boolean = false
+)
+
+@Serializable
+data class ErrorResult(
+    val status: String,
+    val message: String,
+    val error_code: String? = null
 )

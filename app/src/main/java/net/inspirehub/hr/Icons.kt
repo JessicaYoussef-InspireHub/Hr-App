@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.dp
 fun GeneralIcon(
     imageVector: ImageVector,
     contentDescription: String,
-    modifier: Modifier = Modifier.size(40.dp),
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier.size(40.dp),
     tint: Color = appColors().onBackgroundColor
 ) {
     Icon(
@@ -142,23 +142,24 @@ fun ArrowDropDownIcon(
 
 @Composable
 fun KeyboardArrowLeftIcon(
-    color: Color = appColors().onTertiaryContainer,
     onClick: () -> Unit
 ) {
+    val color = appColors()
     Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
         contentDescription = "Previous Month",
         modifier = Modifier
             .size(40.dp)
             .clickable { onClick() },
-        tint = color
+        tint = color.onBackgroundColor
     )
 }
 
 @Composable
 fun DeleteIcon(
     onClick: () -> Unit,
-    tint: Color
+    tint: Color,
+    size: Int = 28
 ) {
 
     IconButton(onClick = { onClick() }) {
@@ -166,22 +167,23 @@ fun DeleteIcon(
             imageVector = Icons.Default.Delete,
             contentDescription = stringResource(R.string.delete),
             tint = tint,
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier.size(size.dp)
         )
     }
 }
 @Composable
 fun KeyboardArrowRightIcon(
-    color: Color = appColors().onTertiaryContainer,
     onClick: () -> Unit
 ) {
+    val color = appColors()
+
     Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = "Next Month",
         modifier = Modifier
             .size(40.dp)
             .clickable { onClick() },
-        tint = color
+        tint = color.onBackgroundColor
     )
 }
 

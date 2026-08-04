@@ -40,20 +40,20 @@ import androidx.navigation.NavController
 import net.inspirehub.hr.BottomBar
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.FullLoading
-import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.check_in_out.data.NetworkUtils
-import net.inspirehub.hr.time_off.components.LeaveTypesLazyRow
 import net.inspirehub.hr.time_off.components.MyCalendarPicker
 import net.inspirehub.hr.time_off.components.MyActualTimeOff
-import net.inspirehub.hr.time_off.components.Shapes
 import net.inspirehub.hr.time_off.data.LeaveType
 import net.inspirehub.hr.time_off.data.fetchAndPrintHolidays
 import net.inspirehub.hr.time_off.data.fetchEmployeeLeaveTypes
 import java.time.LocalDate
+import androidx.core.graphics.toColorInt
+import net.inspirehub.hr.time_off.components.LeaveTypesCard
+import net.inspirehub.hr.time_off.components.ShapesCard
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -66,25 +66,15 @@ fun TimeOffScreen(
     val sharedPref = remember { SharedPrefManager(context) }
     val token = remember { sharedPref.getToken() ?: "No token found" }
 
-    var remainingLeavesData by remember { mutableStateOf<RemainingLeavesResponse?>(null) }
-    var annualLeaveRemaining by remember { mutableStateOf("0") }
-
     var yearTimeOffData by remember { mutableStateOf<TimeOffYearResponse?>(null) }
     var timeOffStatusResponse by remember { mutableStateOf<TimeOffStatusResponse?>(null) }
-    var monthTimeOffData by remember { mutableStateOf<TimeOffYearResponse?>(null) }
     val validatedDates = remember { mutableStateOf<Map<LocalDate, String>>(emptyMap()) }
-
-    var permissionRemainingHours by remember { mutableStateOf("0") }
 
     val isLoading = remember { mutableStateOf(false) }
 
     var shouldRefresh by remember { mutableStateOf(false) }
 
-    var holidayText by remember { mutableStateOf("") }
-
     var weekendDayNames by remember { mutableStateOf<Set<String>>(emptySet()) }
-
-    var officialHolidayText by remember { mutableStateOf("") }
 
     var publicHolidayDates by remember { mutableStateOf<Set<LocalDate>>(emptySet()) }
 
@@ -118,9 +108,9 @@ fun TimeOffScreen(
                 it.result.leave_types.forEach { leaveType ->
                     val colorHex = if (leaveType.color.isNullOrBlank()) "#00000000" else leaveType.color
                     val safeColor = try {
-                        android.graphics.Color.parseColor(colorHex)
+                        colorHex.toColorInt()
                     } catch (e: IllegalArgumentException) {
-                        android.graphics.Color.TRANSPARENT // fallback آمن
+                        android.graphics.Color.TRANSPARENT
                     }
                     leaveTypeColors[leaveType.name] = Color(safeColor)
                 }
@@ -129,9 +119,7 @@ fun TimeOffScreen(
 
             val result = fetchAndPrintHolidays(token , context)
 
-            holidayText = result.weekendText
             weekendDayNames = result.weekendDays.toSet()
-            officialHolidayText = result.holidaysText
             publicHolidayDates = result.publicHolidayDates
 
             println("weekendDayNames = $weekendDayNames")
@@ -148,7 +136,6 @@ fun TimeOffScreen(
             )
 
             if (monthResult is TimeOffYearResponse) {
-                monthTimeOffData = monthResult
                 Log.i("TimeOffScreen", "this_month_time_off = $monthResult")
             }
 
@@ -162,16 +149,6 @@ fun TimeOffScreen(
             )
 
             if (remainingResult is RemainingLeavesResponse) {
-                remainingLeavesData = remainingResult
-                val annual = remainingResult.leave_summary.find {
-                    it.leave_type.equals("annual leave", ignoreCase = true)
-                }
-                annualLeaveRemaining = annual?.remaining_days?.toString() ?: "0"
-
-                val permission = remainingResult.permission_summary.find {
-                    it.leave_type.equals("permission", ignoreCase = true)
-                }
-                permissionRemainingHours = permission?.remaining_hours?.toString() ?: "0"
 
                 println("📋 Remaining Leaves Summary:")
                 remainingResult.leave_summary.forEach { summary ->
@@ -207,7 +184,7 @@ fun TimeOffScreen(
                 Log.i("TimeOffScreen", "✅ time_off_status loaded")
 
                 val validated = timeOffStatus.records.daily_records
-                    .filter { it.state in listOf("confirm", "draft", "validate", "cancel") }
+                    .filter { it.state in listOf("confirm", "draft", "validate", "refuse") }
                     .flatMap { record ->
                         val start = LocalDate.parse(record.start_date)
                         val end = LocalDate.parse(record.end_date)
@@ -236,7 +213,7 @@ fun TimeOffScreen(
                 Log.i("TimeOffScreen", "this_year_time_off = $yearResult")
 
                 val validated = yearResult.records.daily_records
-                    .filter { it.state in listOf("confirm", "draft", "validate", "cancel") }
+                    .filter { it.state in listOf("confirm", "draft", "validate", "refuse") }
                     .flatMap { record ->
                         val start = LocalDate.parse(record.start_date)
                         val end = LocalDate.parse(record.end_date)
@@ -306,15 +283,17 @@ fun TimeOffScreen(
                 modifier = Modifier
                     .background(colors.onSecondaryColor)
                     .padding(paddingValues)
+                    .padding( 12.dp)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+
             ) {
 
                 MyActualTimeOff(
                     leaveTypes = leaveTypesState.value
                 )
 
-                Spacer(modifier = Modifier.height(0.dp))
                 MyCalendarPicker(
                     selectedDates = selectedDates,
                     onDateSelectedChange = { selectedDates = it },
@@ -328,15 +307,12 @@ fun TimeOffScreen(
                     leaveTypeColors = leaveTypeColors
                 )
 
-                MyDivider(color = colors.inverseOnSurface)
-
-                Spacer(modifier = Modifier.height(10.dp))
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    LeaveTypesLazyRow(leaveTypes)
-                    Shapes()
+                    ShapesCard()
+                    LeaveTypesCard( leaveTypes = leaveTypes )
                 }
             }
         }

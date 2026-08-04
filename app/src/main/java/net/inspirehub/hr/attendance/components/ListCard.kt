@@ -38,7 +38,7 @@ fun ListCard(
     val context = LocalContext.current
     val sharedPref = SharedPrefManager(context)
     val currentLanguage = sharedPref.getLanguage()
-    val workedMinutes = (day.states.sumOf { it.workedHours } * 60).toInt()
+    val workedMinutes = (day.states.sumOf { it.workedHoursPercentage } * 60).toInt()
     val workedHours = workedMinutes / 60
     val remainingMinutes = workedMinutes % 60
 

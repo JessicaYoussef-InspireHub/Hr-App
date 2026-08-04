@@ -57,27 +57,17 @@ fun DayStatus.getPercentage(
     attendanceStates: List<AttendanceState>
 ): Int {
 
-    val totalSessions = attendanceStates.size
-
     return when (this) {
 
         DayStatus.PRESENT -> 100
 
-        DayStatus.IN_PROGRESS -> {
-            val expectedHours = attendanceStates.sumOf { it.expectedHours }
-            val workedHours = attendanceStates.sumOf { it.workedHours }
-
-            if (expectedHours > 0)
-                ((workedHours / expectedHours) * 100)
-                    .toInt()
-                    .coerceIn(0, 100)
-            else
-                0
+        DayStatus.IN_PROGRESS,
+        DayStatus.LATE -> {
+            attendanceStates
+                .maxOfOrNull { it.workedHoursPercentage.toInt() }
+                ?.coerceIn(0, 100)
+                ?: 0
         }
-
-        DayStatus.LATE ->
-            if (totalSessions == 0) 0
-            else (attendanceStates.count { it.endMinutes == null } * 100) / totalSessions
 
         DayStatus.ABSENT -> 0
     }
@@ -91,24 +81,12 @@ fun DayStatus.getProgress(
 
         DayStatus.PRESENT -> 1f
 
-        DayStatus.IN_PROGRESS -> {
-            val expectedHours = attendanceStates.sumOf { it.expectedHours }
-            val workedHours = attendanceStates.sumOf { it.workedHours }
-
-            if (expectedHours > 0)
-                (workedHours / expectedHours).toFloat().coerceIn(0f, 1f)
-            else
-                0f
-        }
-
+        DayStatus.IN_PROGRESS,
         DayStatus.LATE -> {
-            val expectedHours = attendanceStates.sumOf { it.expectedHours }
-            val workedHours = attendanceStates.sumOf { it.workedHours }
-
-            if (expectedHours > 0)
-                (workedHours / expectedHours).toFloat().coerceIn(0f, 1f)
-            else
-                0f
+            (attendanceStates
+                .maxOfOrNull { it.workedHoursPercentage }
+                ?.div(100.0)
+                ?: 0.0).toFloat()
         }
 
         DayStatus.ABSENT -> 0f

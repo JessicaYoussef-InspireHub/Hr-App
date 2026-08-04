@@ -155,7 +155,7 @@ fun AnalyticDistribution(
             onDismissRequest = { showSheet = false },
             containerColor = colors.surfaceContainerHigh,
             sheetState = sheetState,
-            windowInsets = WindowInsets(0)
+            contentWindowInsets = { WindowInsets(0) }
         ) {
             val scrollState = rememberScrollState()
 

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     id ("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
     kotlin("kapt")
 }
 
@@ -15,8 +16,8 @@ android {
         applicationId = "net.inspirehub.hr"
         minSdk = 24
         targetSdk = 36
-        versionCode = 22
-        versionName = "1.1.3"
+        versionCode = 26
+        versionName = "1.1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -58,11 +59,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    implementation (libs.androidx.activity.compose.v180)
     implementation (libs.androidx.lifecycle.viewmodel.compose) 
     implementation (libs.core)
     implementation(libs.zxing.android.embedded)
-    implementation(libs.core.v352)
 
     implementation(libs.ktor.client.content.negotiation)  
     implementation(libs.ktor.ktor.serialization.kotlinx.json)  
@@ -84,6 +83,7 @@ dependencies {
     implementation(libs.androidx.appcompat)  
 
     implementation(libs.compose)
+    implementation(libs.androidx.compose.material3)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -101,7 +101,6 @@ dependencies {
     implementation (libs.androidx.work.runtime.ktx)
 
     implementation(platform(libs.firebase.bom))
-    implementation (platform(libs.firebase.bom.v3211))
     implementation(libs.firebase.analytics)
 
     implementation(libs.firebase.messaging)
@@ -114,6 +113,7 @@ dependencies {
     implementation(libs.app.update)
     implementation(libs.app.update.ktx)
 
+    implementation(libs.firebase.crashlytics.ktx)
     kapt(libs.androidx.room.compiler)
 
 }

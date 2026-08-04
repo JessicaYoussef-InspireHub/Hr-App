@@ -68,12 +68,9 @@ import java.time.YearMonth
 data class AttendanceState(
     val startMinutes: Int,
     val endMinutes: Int?,
-    val isLate: Boolean,
-    val workedHours: Double,
-    val delayMinutes: Int,
-    val delay: String,
-    val expectedHours: Double,
-    val type: AttendanceType = AttendanceType.ATTENDANCE
+    val workedHoursAndMinutes: String,
+    val workedHoursPercentage: Double,
+    val workEntryType : String
 )
 
 enum class AttendanceView {
@@ -105,12 +102,7 @@ fun getDayStatus(day: AttendanceDay): DayStatus {
     if (hasOpenAttendance) {
         return DayStatus.IN_PROGRESS
     }
-
-    return if (day.states.any { !it.isLate }) {
-        DayStatus.PRESENT
-    } else {
-        DayStatus.LATE
-    }
+    return DayStatus.PRESENT
 }
 
 enum class DayStatus {
@@ -155,38 +147,80 @@ fun AttendanceScreen(
     var showFromCalendar by remember { mutableStateOf(false) }
     var showToCalendar by remember { mutableStateOf(false) }
     var selectedRange by remember { mutableStateOf(LocalDate.now()) }
+    var tempSelectedRange by remember { mutableStateOf(selectedRange) }
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
     var attendanceResponse by remember { mutableStateOf<AttendanceResponse?>(null) }
     var fromDate by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
-    var currentMonth by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
-    val firstDayOfMonth = currentMonth.withDayOfMonth(1).toString()
-    val lastDayOfMonth = currentMonth.withDayOfMonth(currentMonth.lengthOfMonth()).toString()
     var isLoading by remember { mutableStateOf(true) }
+    val allDays = remember(attendanceResponse) { attendanceResponse?.toAttendanceDays() ?: emptyList() }
+    var toDate by remember { mutableStateOf( LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())) }
+    var isFilterApplied by rememberSaveable { mutableStateOf(false) }
+    var tempFromDate by remember { mutableStateOf(fromDate) }
+    var tempToDate by remember { mutableStateOf(toDate) }
 
-    LaunchedEffect(currentMonth) {
+    val (apiFromDate, apiToDate) = remember(
+        selectedFilter,
+        selectedRange,
+        fromDate,
+        toDate
+    ) {
+        when (selectedFilter) {
+
+            TimeFilter.DAY -> {
+                selectedRange to selectedRange
+            }
+
+            TimeFilter.WEEK -> {
+                val start = selectedRange.with(java.time.DayOfWeek.MONDAY)
+                val end = selectedRange.with(java.time.DayOfWeek.SUNDAY)
+                start to end
+            }
+
+            TimeFilter.MONTH -> {
+                selectedRange.withDayOfMonth(1) to
+                        selectedRange.withDayOfMonth(selectedRange.lengthOfMonth())
+            }
+
+            TimeFilter.QUARTER -> {
+                val startMonth = ((selectedRange.monthValue - 1) / 3) * 3 + 1
+
+                val start = LocalDate.of(
+                    selectedRange.year,
+                    startMonth,
+                    1
+                )
+
+                val end = start.plusMonths(2)
+                    .withDayOfMonth(start.plusMonths(2).lengthOfMonth())
+
+                start to end
+            }
+
+            TimeFilter.YEAR -> {
+                LocalDate.of(selectedRange.year, 1, 1) to
+                        LocalDate.of(selectedRange.year, 12, 31)
+            }
+
+            TimeFilter.CUSTOM -> {
+                fromDate to toDate
+            }
+        }
+    }
+
+    LaunchedEffect(apiFromDate, apiToDate) {
         isLoading = true
-        val token = sharedPref.getToken()
 
         attendanceResponse = fetchAttendance(
             context = context,
-            token = token,
-            fromDate = firstDayOfMonth,
-            toDate = lastDayOfMonth
+            token = sharedPref.getToken(),
+            fromDate = apiFromDate.toString(),
+            toDate = apiToDate.toString()
         )
+
         isLoading = false
     }
 
-    val allDays =
-        remember(attendanceResponse) { attendanceResponse?.toAttendanceDays() ?: emptyList() }
-
-    var toDate by remember {
-        mutableStateOf(
-            LocalDate.now().withDayOfMonth(
-                LocalDate.now().lengthOfMonth()
-            )
-        )
-    }
 
     fun applyFilters(
         list: List<AttendanceDay>,
@@ -195,28 +229,11 @@ fun AttendanceScreen(
     ): List<AttendanceDay> {
 
         val timeFiltered = when (timeFilter) {
-
-            TimeFilter.DAY -> {
-                val today = LocalDate.now()
-                list.filter { it.date == today.toString() }
-            }
-
-            TimeFilter.WEEK -> {
-                list.takeLast(7)
-            }
-
-            TimeFilter.MONTH -> {
-                list
-            }
-
-            TimeFilter.QUARTER -> {
-                list
-            }
-
-            TimeFilter.YEAR -> {
-                list
-            }
-
+            TimeFilter.DAY,
+            TimeFilter.WEEK,
+            TimeFilter.MONTH,
+            TimeFilter.QUARTER,
+            TimeFilter.YEAR,
             TimeFilter.CUSTOM -> {
                 list
             }
@@ -249,6 +266,7 @@ fun AttendanceScreen(
     val filteredDays = remember(
         selectedFilter,
         selectedAttendanceFilter,
+        selectedRange,
         allDays
     ) {
         applyFilters(
@@ -355,11 +373,12 @@ fun AttendanceScreen(
                         .clickable {
                             tempSelectedFilter = selectedFilter
                             tempSelectedAttendanceFilter = selectedAttendanceFilter
+                            tempSelectedRange = selectedRange
                             showFilterSheet = true
                         }
                 ) {
                     FilterAltIcon(
-                        isActive = showFilterSheet
+                        isActive = showFilterSheet || isFilterApplied
                     )
                 }
 
@@ -368,15 +387,29 @@ fun AttendanceScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             FilterTitle(
-                startDate = currentMonth.withDayOfMonth(1),
-                endDate = currentMonth.withDayOfMonth(currentMonth.lengthOfMonth()),
-
+                currentDate = selectedRange,
+                selectedFilter = selectedFilter,
+                fromDate = fromDate,
+                toDate = toDate,
                 onPrevious = {
-                    currentMonth = currentMonth.minusMonths(1)
+                    when (selectedFilter) {
+                        TimeFilter.DAY -> selectedRange = selectedRange.minusDays(1)
+                        TimeFilter.WEEK -> selectedRange = selectedRange.minusWeeks(1)
+                        TimeFilter.MONTH -> selectedRange = selectedRange.minusMonths(1)
+                        TimeFilter.QUARTER -> selectedRange = selectedRange.minusMonths(3)
+                        TimeFilter.YEAR -> selectedRange = selectedRange.minusYears(1)
+                        TimeFilter.CUSTOM -> {}
+                    }
                 },
-
                 onNext = {
-                    currentMonth = currentMonth.plusMonths(1)
+                    when (selectedFilter) {
+                        TimeFilter.DAY -> selectedRange = selectedRange.plusDays(1)
+                        TimeFilter.WEEK -> selectedRange = selectedRange.plusWeeks(1)
+                        TimeFilter.MONTH -> selectedRange = selectedRange.plusMonths(1)
+                        TimeFilter.QUARTER -> selectedRange = selectedRange.plusMonths(3)
+                        TimeFilter.YEAR -> selectedRange = selectedRange.plusYears(1)
+                        TimeFilter.CUSTOM -> {}
+                    }
                 }
             )
 
@@ -495,12 +528,14 @@ fun AttendanceScreen(
 
                         2 -> {
                             CalendarTab(
-                                currentMonth = YearMonth.from(currentMonth),
+                                currentMonth = YearMonth.from(selectedRange),
                                 days = filteredDays,
                                 onDayClick = { day ->
                                     selectedDay = day
                                     showBottomSheet = true
-                                }
+                                },
+                                totalWorkedHours = attendanceResponse?.total_worked_hours ?: 0.0,
+                                totalExpectedHours = attendanceResponse?.expected_worked ?: 0.0,
                             )
                         }
                     }
@@ -510,9 +545,9 @@ fun AttendanceScreen(
 
         if (showFilterSheet) {
             FilterBottomSheet(
-                currentDate = selectedRange,
+                currentDate = tempSelectedRange,
                 onCurrentDateChange = {
-                    selectedRange = it
+                    tempSelectedRange = it
                 },
                 selectedFilter = tempSelectedFilter,
                 selectedAttendanceFilter = tempSelectedAttendanceFilter,
@@ -522,8 +557,8 @@ fun AttendanceScreen(
                 onAttendanceFilterSelected = {
                     tempSelectedAttendanceFilter = it
                 },
-                fromDate = fromDate,
-                toDate = toDate,
+                fromDate = tempFromDate,
+                toDate = tempToDate,
                 onFromDateClick = {
                     showFromCalendar = true
                 },
@@ -533,19 +568,36 @@ fun AttendanceScreen(
                 onApply = {
                     selectedFilter = tempSelectedFilter
                     selectedAttendanceFilter = tempSelectedAttendanceFilter
+
+                    selectedRange = tempSelectedRange
+
+                    fromDate = tempFromDate
+                    toDate = tempToDate
+
+                    isFilterApplied = true
                     showFilterSheet = false
                 },
                 onReset = {
-                    val now = LocalDate.now()
-                    val firstDay = now.withDayOfMonth(1)
-                    val lastDay = now.withDayOfMonth(now.lengthOfMonth())
-
-                    fromDate = firstDay
-                    toDate = lastDay
                     tempSelectedFilter = TimeFilter.MONTH
                     tempSelectedAttendanceFilter = AttendanceFilter.ALL
+
+                    tempSelectedRange = LocalDate.now()
+
+                    tempFromDate = LocalDate.now().withDayOfMonth(1)
+                    tempToDate =
+                        LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())
+
+                    selectedFilter = tempSelectedFilter
+                    selectedAttendanceFilter = tempSelectedAttendanceFilter
+                    selectedRange = tempSelectedRange
+                    fromDate = tempFromDate
+                    toDate = tempToDate
+
+                    isFilterApplied = false
+                    showFilterSheet = false
                 },
                 onDismiss = {
+                    tempSelectedRange = selectedRange
                     showFilterSheet = false
                 }
             )
@@ -558,7 +610,7 @@ fun AttendanceScreen(
                     showFromCalendar = false
                 },
                 onDateSelected = {
-                    fromDate = it
+                    tempFromDate = it
                 }
             )
         }
@@ -570,7 +622,7 @@ fun AttendanceScreen(
                     showToCalendar = false
                 },
                 onDateSelected = {
-                    toDate = it
+                    tempToDate = it
                 }
             )
         }

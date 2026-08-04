@@ -2,7 +2,6 @@ package net.inspirehub.hr.time_off.components
 
 import HourlyTimeOffRecord
 import TimeOffRecord
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -35,6 +34,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Path
@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalContext
 import net.inspirehub.hr.CloseIcon
+import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.utils.convertToArabicDigits
@@ -56,31 +57,14 @@ fun DailyAndHourlyDialog(
     clickedDate: LocalDate?
 ) {
     val colors = appColors()
+    val context = LocalContext.current
+    val currentLanguage = remember { SharedPrefManager(context).getLanguage() }
+    val locale = Locale.forLanguageTag(currentLanguage)
+
     val formattedDate = clickedDate?.format(
-        DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
+        DateTimeFormatter.ofPattern("dd MMMM yyyy", locale)
     ) ?: ""
 
-
-    val currentLanguage = Locale.getDefault().language
-
-
-    fun getLocalizedDayText(
-        context: Context,
-        count: Int,
-        language: String
-    ): String {
-        return if (language == "ar") {
-            when (count) {
-                1 -> "يوم"
-                2 -> "يومين"
-                in 3..10 -> "أيام"
-                else -> "يومًا"
-            }
-        } else {
-            if (count == 1) context.getString(R.string.day)
-            else context.getString(R.string.days)
-        }
-    }
 
     fun formatDecimalHourToTime(decimalHour: Double?, currentLanguage: String): String {
         if (decimalHour == null) return ""
@@ -130,14 +114,31 @@ fun DailyAndHourlyDialog(
                     dailyRecords.forEach { record ->
 
                         val translatedLeaveType = record.leave_type
-                        val durationInt = record.duration_days.toInt()
-                        val daysText =
-                            if (currentLanguage == "ar") convertToArabicDigits(durationInt.toString()) else durationInt.toString()
-                        val dayWord = getLocalizedDayText(
-                            context = LocalContext.current,
-                            count = durationInt,
-                            language = currentLanguage
-                        )
+                        val duration = record.duration_days
+
+                        val displayText = if (duration % 1.0 == 0.0) {
+                            duration.toInt().toString()
+                        } else {
+                            duration.toString()
+                        }
+
+                        val dayWord = when (duration) {
+                            0.5 -> {
+                                if (currentLanguage == "ar") "يوم" else "Day"
+                            }
+                            1.0 -> {
+                                if (currentLanguage == "ar") "يوم" else "Day"
+                            }
+                            2.0 -> {
+                                if (currentLanguage == "ar") "يومين" else "Days"
+                            }
+                            in 3.0..10.0 -> {
+                                if (currentLanguage == "ar") "أيام" else "Days"
+                            }
+                            else -> {
+                                if (currentLanguage == "ar") "يومًا" else "Days"
+                            }
+                        }
 
                         Column {
                             Row(
@@ -157,7 +158,7 @@ fun DailyAndHourlyDialog(
                                         )
                                     }
 
-                                    "cancel" -> {
+                                    "refuse" -> {
                                         Box(
                                             modifier = Modifier
                                                 .size(15.dp)
@@ -209,7 +210,7 @@ fun DailyAndHourlyDialog(
                                 )
                             }
                             Text(
-                                "$translatedLeaveType: $daysText $dayWord",
+                                "$translatedLeaveType: $displayText $dayWord",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Normal,
                                 color = colors.onBackgroundColor,
@@ -249,7 +250,7 @@ fun DailyAndHourlyDialog(
                                )
                            }
 
-                           "cancel" -> {
+                           "refuse" -> {
                                Box(
                                    modifier = Modifier
                                        .size(15.dp)

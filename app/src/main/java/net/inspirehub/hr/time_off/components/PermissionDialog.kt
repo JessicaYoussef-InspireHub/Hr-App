@@ -195,7 +195,7 @@ fun PermissionDialog(
                                 )
                             }
 
-                            "cancel" -> {
+                            "refuse" -> {
                                 Box(
                                     modifier = Modifier
                                         .size(15.dp)
@@ -267,7 +267,7 @@ fun PermissionDialog(
                                 )
                             }
 
-                            "cancel" -> {
+                            "refuse" -> {
                                 Box(
                                     modifier = Modifier
                                         .size(15.dp)
@@ -377,7 +377,7 @@ fun PermissionDialog(
                 }
 
                 if (showNewVacationDialog) {
-                    DateInfoDialog(
+                    TimeOffRequestBottomSheet(
                         date = clickedDate ?: startDate,
                         selectedDates = selectedDates ?: emptySet(),
                         onDateSelectedChange = onDateSelectedChange ?: {},

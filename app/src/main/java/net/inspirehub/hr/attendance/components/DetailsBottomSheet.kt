@@ -28,7 +28,6 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.attendance.presentation.AttendanceDay
-import net.inspirehub.hr.attendance.presentation.AttendanceType
 import net.inspirehub.hr.attendance.presentation.getDayStatus
 import net.inspirehub.hr.utils.formatLocalizedDate
 import net.inspirehub.hr.utils.formatLocalizedTime
@@ -49,19 +48,18 @@ fun DetailsBottomSheet(
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPref.getLanguage()
-    val attendanceStates = day.states.filter { it.type == AttendanceType.ATTENDANCE }
+    val attendanceStates = day.states.filter {  it.workEntryType.equals("Attendance", true)}
     val firstAttendance = attendanceStates.minByOrNull { it.startMinutes }
     val lastAttendance = attendanceStates.filter { it.endMinutes != null }.maxByOrNull { it.endMinutes!! }
     val scrollState = rememberScrollState()
-    val totalWorkedHours = attendanceStates.sumOf { it.workedHours }
+    val totalWorkedHours = attendanceStates.sumOf { it.workedHoursPercentage }
     val workedHoursCount = totalWorkedHours.toInt()
     val workedMinutesCount = ((totalWorkedHours - workedHoursCount) * 60).toInt()
-    val totalDelay = attendanceStates.sumOf { it.delayMinutes }
 
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         containerColor = colors.surfaceContainerHigh,
-        windowInsets = WindowInsets(0),
+        contentWindowInsets = { WindowInsets(0) },
         sheetState = sheetState
     ) {
 
@@ -98,7 +96,7 @@ fun DetailsBottomSheet(
             Spacer(Modifier.height(16.dp))
 
             DetailsStatusCard(
-                lateMinutes = totalDelay,
+                lateMinutes = 0,
                 status = status
             )
 

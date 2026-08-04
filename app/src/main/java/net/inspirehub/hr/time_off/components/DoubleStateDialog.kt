@@ -119,7 +119,7 @@ fun DoubleStateDialog(
 
     var showNewVacationDialog by remember { mutableStateOf(false) }
 
-    val allRefused = leaveRecords.isNotEmpty() && leaveRecords.all { it.state == "cancel" }
+    val allRefused = leaveRecords.isNotEmpty() && leaveRecords.all { it.state == "refuse" }
 
     val hasDraftOrConfirm = leaveRecords.any { it.state == "draft" || it.state == "confirm" }
     val colors = appColors()
@@ -195,7 +195,7 @@ fun DoubleStateDialog(
                                         )
                                     }
 
-                                    "cancel" -> {
+                                    "refuse" -> {
                                         Box(
                                             modifier = Modifier
                                                 .size(15.dp)
@@ -317,7 +317,7 @@ fun DoubleStateDialog(
                         }
 
                         if (showNewVacationDialog) {
-                            DateInfoDialog(
+                            TimeOffRequestBottomSheet(
                                 date = (clickedDate ?: startDate) ?: LocalDate.now(),
                                 selectedDates = selectedDates ?: emptySet(),
                                 onDateSelectedChange = onDateSelectedChange ?: {},

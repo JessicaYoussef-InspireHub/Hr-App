@@ -7,24 +7,31 @@ import kotlinx.serialization.json.JsonElement
 data class AttendanceResponse(
     val status: String,
     val count: Int,
+    val expected_worked: Double,
     val total_worked_hours: Double,
-    val total_expected_hours: Double,
-    val data: List<AttendanceItem>,
-    val time_off_data: TimeOffData
+    val summary: Map<String, AttendanceSummary>,
+    val data: List<AttendanceDayResponse>
+)
+
+@Serializable
+data class AttendanceSummary(
+    val count: Int,
+    val total_hours: Double,
+    val total_minutes: Double
+)
+
+@Serializable
+data class AttendanceDayResponse(
+    val date: String,
+    val entries: List<AttendanceItem>
 )
 
 @Serializable
 data class AttendanceItem(
-    val check_in: String? = null,
-    val check_out: JsonElement? = null,
-    val worked_hours: Double,
-    val expected_hours: Double,
-    val delay_minutes: Int,
-    val delay: String,
-    val is_late: Boolean
-)
-
-@Serializable
-data class TimeOffData(
-    val status: String
+    val entry_name: String,
+    val work_entry_type: String,
+    val duration: Double,
+    val duration_time: String,
+    val from_date: JsonElement? = null,
+    val to_date: JsonElement? = null
 )

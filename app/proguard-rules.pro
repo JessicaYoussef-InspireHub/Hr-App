@@ -21,5 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 -dontwarn org.slf4j.impl.StaticLoggerBinder
--keep class net.inspirehub.hr.** { *; }
 -dontwarn net.inspirehub.hr.**

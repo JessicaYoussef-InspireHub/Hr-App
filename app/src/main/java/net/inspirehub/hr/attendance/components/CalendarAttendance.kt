@@ -46,6 +46,7 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.ceil
+import androidx.compose.ui.platform.LocalLocale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -77,7 +78,7 @@ fun CalendarAttendance(
             Text(
                 text = currentMonth.month.getDisplayName(
                     TextStyle.FULL,
-                    Locale.getDefault()
+                    LocalLocale.current.platformLocale
                 ) + " " + formatNumber(yearText, currentLanguage),
                 textAlign = TextAlign.Center,
                 fontSize = 20.sp,
@@ -130,9 +131,6 @@ fun CalendarAttendance(
                     val date = currentMonth.atDay(day)
                     val key = date.toString()
                     val dayData = calendarMap[key]
-                    val workedHours = dayData?.states?.sumOf { it.workedHours } ?: 0.0
-                    val expectedHours = dayData?.states?.sumOf { it.expectedHours } ?: 8.0
-                    val progress = (workedHours / expectedHours).coerceIn(0.0, 1.0).toFloat()
 
                     Box(
                         modifier = Modifier
@@ -172,7 +170,7 @@ fun CalendarAttendance(
                             ) {
                                 if (dayData != null) {
                                     CircularProgressIndicator(
-                                        progress = { progress },
+                                        progress = 100f,
                                         modifier = Modifier.fillMaxSize(),
                                         strokeWidth = 2.dp,
                                         color = statusUi.color,

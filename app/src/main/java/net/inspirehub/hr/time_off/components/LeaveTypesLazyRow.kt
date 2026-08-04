@@ -1,10 +1,12 @@
 package net.inspirehub.hr.time_off.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,48 +17,71 @@ import net.inspirehub.hr.time_off.data.LeaveType
 import androidx.core.graphics.toColorInt
 import net.inspirehub.hr.appColors
 
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LeaveTypesLazyRow(
+fun LeaveTypesCard(
     leaveTypes: List<LeaveType>
-){
+) {
     val colors = appColors()
 
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 15.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(35.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(
+            2.dp,
+            colors.surfaceColor
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = colors.transparent
+        )
     ) {
-        items(leaveTypes) { leaveType ->
-            val colorHex = leaveType.color?.ifEmpty { "#FFFFFF" } ?: "#FFFFFF"
-            val color = try {
-                Color(colorHex.toColorInt())
-            } catch (e: Exception) {
-                colors.tertiaryColor
-            }
 
-            val translatedName = leaveType.name
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .wrapContentWidth()
-            ){
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .background(color, CircleShape)
-                )
+            leaveTypes.forEach { leaveType ->
 
-                Spacer(modifier = Modifier.width(8.dp))
+                val color = leaveType.color?.let {
+                    try {
+                        Color(it.toColorInt())
+                    } catch (_: Exception) {
+                        colors.tertiaryColor
+                    }
+                } ?: colors.tertiaryColor
 
-                Text(
-                    text = translatedName,
-                    color = colors.onBackgroundColor,
+                LegendItem(
+                    color = color,
+                    text = leaveType.name
                 )
             }
         }
     }
 }
 
+@Composable
+fun LegendItem(
+    color: Color,
+    text: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
 
+        Box(
+            Modifier
+                .size(12.dp)
+                .background(color, CircleShape)
+        )
 
+        Spacer(Modifier.width(6.dp))
+
+        Text(
+            text = text,
+            color = appColors().onBackgroundColor
+        )
+    }
+}

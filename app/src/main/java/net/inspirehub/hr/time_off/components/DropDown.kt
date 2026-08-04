@@ -33,6 +33,15 @@ import net.inspirehub.hr.time_off.data.getLeaveDuration
 import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import net.inspirehub.hr.CheckIcon
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -56,115 +65,180 @@ fun DropDown(
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val sharedPrefManager = remember { SharedPrefManager(context) }
-    val currentLanguage = sharedPrefManager.getLanguage() // "ar" or "en"
+    val currentLanguage = sharedPrefManager.getLanguage()
 
+    if (isLoading) {
 
-    Column {
-        if (isLoading) {
-            SmallLoading()
-        } else {
-            Row(
-                modifier = Modifier.clickable {
+        SmallLoading()
+
+    } else {
+
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
                     expanded = true
+                },
+            border = BorderStroke(
+                2.dp,
+                colors.surfaceColor
+            ),
+            colors = CardDefaults.cardColors(
+                containerColor = colors.transparent
+            ),
+            shape = RoundedCornerShape(12.dp)
 
-                }
+        ) {
+            Row(
+                modifier = Modifier.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = selectedLeaveType?.let {
-                        val translatedName = it.name
-                        val remaining = it.remaining_balance?.toString() ?: ""
-                        val original = it.original_balance?.toString() ?: ""
-
-                        if (it.remaining_balance != null)
-                            "$translatedName (${
-                                if (currentLanguage == "ar") convertToArabicDigits(
-                                    remaining
-                                ) else remaining
-                            } ${stringResource(R.string.remaining_out_of)} ${
-                                if (currentLanguage == "ar") convertToArabicDigits(
-                                    original
-                                ) else original
-                            })"
-                        else
-                            translatedName
-                    } ?: stringResource(R.string.select_leave_type),
-                    color = colors.onBackgroundColor,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
+                Column(
                     modifier = Modifier.weight(1f)
+                ) {
 
+                    Text(
+                        text = selectedLeaveType?.name
+                            ?: stringResource(R.string.select_leave_type),
+                        color = colors.onBackgroundColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    selectedLeaveType?.remaining_balance?.let {
+
+                        Spacer(Modifier.height(2.dp))
+
+                        val remaining =
+                            if (currentLanguage == "ar")
+                                convertToArabicDigits(it.toString())
+                            else
+                                it.toString()
+
+                        val original =
+                            if (currentLanguage == "ar")
+                                convertToArabicDigits(
+                                    selectedLeaveType.original_balance.toString()
+                                )
+                            else
+                                selectedLeaveType.original_balance.toString()
+
+                        Text(
+                            text = "$remaining ${stringResource(R.string.remaining_out_of)} $original",
+                            color = colors.tertiaryColor,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
+                ArrowDropDownIcon(
+                    expanded = expanded
                 )
-
-                ArrowDropDownIcon(expanded = expanded)
             }
         }
+    }
 
-        if (!isLoading) {
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .background(
-                        color = colors.onSecondaryColor,
-                    )
-            ) {
-                leaveTypes
-                    .filter { it.remaining_balance == null || it.remaining_balance > 0 }
-                    .forEach { item ->
-                        val translatedName = item.name
-                        val remaining = item.remaining_balance ?: 0
-                        val original = item.original_balance ?: 0
+    if (!isLoading) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(
+                    color = colors.surfaceContainerHigh,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .width(320.dp),
+            border = BorderStroke(
+                2.dp,
+                colors.surfaceColor
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            leaveTypes
+                .filter { it.remaining_balance == null || it.remaining_balance > 0 }
+                .forEach { item ->
+                    DropdownMenuItem(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                if (selectedLeaveType?.id == item.id)
+                                    colors.tertiaryColor
+                                else
+                                    colors.transparent
+                            ),
+                        text = {
 
-                        DropdownMenuItem(
-                            text = {
+                            Column {
                                 Text(
-                                    if (item.remaining_balance != null)
-                                        "$translatedName (${
-                                            if (currentLanguage == "ar") convertToArabicDigits(
-                                                remaining.toString()
-                                            ) else remaining
-                                        } ${stringResource(R.string.remaining_out_of)} ${
-                                            if (currentLanguage == "ar") convertToArabicDigits(
-                                                original.toString()
-                                            ) else original
-                                        })"
+                                    text = item.name,
+                                    color = if (selectedLeaveType?.id == item.id)
+                                        colors.onSecondaryColor
                                     else
-                                        translatedName,
-                                    color = colors.onBackgroundColor,
+                                        colors.onBackgroundColor,
                                     fontSize = 15.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.Bold
                                 )
-                            },
-                            onClick = {
-                                onLeaveTypeSelected(item)
-                                expanded = false
 
-                                isLoading = true
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    try {
-                                        val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
-                                        val response = getLeaveDuration(
-                                            context = context,
-                                            employeeToken = token,
-                                            requestDateFrom = selectedStartDate.format(formatter),
-                                            requestDateTo = selectedEndDate.format(formatter),
-                                            leaveTypeId = item.id,
-                                        )
-                                        withContext(Dispatchers.Main) {
-                                            leaveDays(response.result.data?.days ?: 1.0)
-                                            isLoading = false
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.e("LEAVE_DURATION", e.message ?: "error")
-                                        withContext(Dispatchers.Main) {
-                                            isLoading = false
-                                        }
+                                item.remaining_balance?.let {
+
+                                    Spacer(Modifier.height(2.dp))
+
+                                    val remaining =
+                                        if (currentLanguage == "ar")
+                                            convertToArabicDigits(it.toString())
+                                        else
+                                            it.toString()
+
+                                    val original =
+                                        if (currentLanguage == "ar")
+                                            convertToArabicDigits(item.original_balance.toString())
+                                        else
+                                            item.original_balance.toString()
+
+                                    Text(
+                                        text = "$remaining ${stringResource(R.string.remaining_out_of)} $original",
+                                        fontSize = 13.sp,
+                                        color = colors.onBackgroundColor.copy(.6f)
+                                    )
+                                }
+                            }
+                        },
+                        trailingIcon = {
+                            if (selectedLeaveType?.id == item.id) {
+                                CheckIcon()
+                            }
+                        },
+                        onClick = {
+                            onLeaveTypeSelected(item)
+                            expanded = false
+
+                            isLoading = true
+                            CoroutineScope(Dispatchers.IO).launch {
+                                try {
+                                    val formatter =
+                                        DateTimeFormatter.ofPattern("MM-dd-yyyy")
+                                    val response = getLeaveDuration(
+                                        context = context,
+                                        employeeToken = token,
+                                        requestDateFrom = selectedStartDate.format(formatter),
+                                        requestDateTo = selectedEndDate.format(formatter),
+                                        leaveTypeId = item.id,
+                                    )
+                                    withContext(Dispatchers.Main) {
+                                        leaveDays(response.result.data?.days ?: 1.0)
+                                        isLoading = false
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("LEAVE_DURATION", e.message ?: "error")
+                                    withContext(Dispatchers.Main) {
+                                        isLoading = false
                                     }
                                 }
                             }
-                        )
-                    }
-            }
+                        }
+                    )
+                }
         }
     }
 }

@@ -72,7 +72,6 @@ fun PeriodSelectorCard(
             ) {
 
                 KeyboardArrowLeftIcon(
-                    color = colors.onBackgroundColor,
                     onClick = onPrevious
                 )
 
@@ -93,7 +92,6 @@ fun PeriodSelectorCard(
                 }
 
                 KeyboardArrowRightIcon(
-                    color = colors.onBackgroundColor,
                     onClick = onNext
                 )
             }

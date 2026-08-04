@@ -88,7 +88,7 @@ fun TimeLineSection(
             states.forEach { state ->
 
                 val barColor =
-                    if (state.type == AttendanceType.PERMISSION)
+                    if (state.workEntryType == "Permissions")
                         colors.outline
                     else
                         statusUi.color

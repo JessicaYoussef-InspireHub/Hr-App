@@ -1,6 +1,5 @@
 package net.inspirehub.hr.settings.components
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -37,12 +36,13 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.settings.data.SettingsViewModel
 import java.util.Locale
-import android.content.res.Configuration
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.appColors
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 
 
 @Composable
@@ -53,26 +53,18 @@ fun GeneralSettingsCard(
     val colors = appColors()
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
-    var locale by remember { mutableStateOf(Locale(sharedPref.getLanguage())) }
+    var locale by remember {  mutableStateOf(Locale.forLanguageTag(sharedPref.getLanguage())) }
     var expanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var isDarkMode by remember { mutableStateOf(sharedPref.isDarkModeEnabled()) }
 
-    @SuppressLint("LocalContextConfigurationRead")
     fun updateLocale(newLocale: Locale) {
         locale = newLocale
         sharedPref.saveLanguage(newLocale.language)
 
-        Locale.setDefault(newLocale)
-        val resources = context.resources
-        val configuration = Configuration(resources.configuration)
-        configuration.setLocale(newLocale)
-        configuration.setLayoutDirection(newLocale)
-
-        resources.updateConfiguration(configuration, resources.displayMetrics)
-
-        val activity = context as Activity
-        activity.recreate()
+        AppCompatDelegate.setApplicationLocales(
+            LocaleListCompat.forLanguageTags(newLocale.language)
+        )
     }
 
     Column {
@@ -159,7 +151,7 @@ fun GeneralSettingsCard(
                             icon = painterResource(id = R.drawable.egypt),
                             onClick = {
                                 if (locale.language != "ar") {
-                                    updateLocale(Locale("ar"))
+                                    updateLocale(Locale.forLanguageTag("ar"))
                                 }
                                 expanded = false
                             }
@@ -174,7 +166,7 @@ fun GeneralSettingsCard(
                             icon = painterResource(id = R.drawable.america),
                             onClick = {
                                 if (locale.language != "en") {
-                                    updateLocale(Locale("en"))
+                                    updateLocale(Locale.forLanguageTag("en"))
                                 }
                                 expanded = false
                             }
@@ -203,7 +195,9 @@ fun GeneralSettingsCard(
                                 checkedThumbColor = colors.onSecondaryColor,
                                 checkedTrackColor = colors.tertiaryColor,
                                 uncheckedThumbColor = colors.onSecondaryColor,
-                                uncheckedTrackColor = colors.onBackgroundColor
+                                uncheckedTrackColor = colors.onBackgroundColor,
+                                uncheckedBorderColor = colors.transparent,
+                                checkedBorderColor = colors.transparent
                             )
                         )
                     }

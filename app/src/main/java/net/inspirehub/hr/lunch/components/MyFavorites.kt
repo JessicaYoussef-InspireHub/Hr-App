@@ -77,7 +77,7 @@ fun MyFavorite() {
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
                 containerColor = colors.surfaceContainerHigh,
-                windowInsets = WindowInsets(0),
+                contentWindowInsets = { WindowInsets(0) },
                 sheetState = sheetState
             ) {
                 val scrollState = rememberScrollState()

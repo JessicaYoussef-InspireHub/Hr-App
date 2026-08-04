@@ -1,13 +1,11 @@
 package net.inspirehub.hr.utils
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.util.Base64
 import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
-import net.inspirehub.hr.attendance.presentation.AttendanceState
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
@@ -136,6 +134,23 @@ fun getLocalizedHourText(
     }
 }
 
+fun getLocalizedMinuteText(
+    count: Int,
+    language: String
+): String {
+    return if (language == "ar") {
+        when (count) {
+            0 -> "دقيقة"
+            1 -> "دقيقة"
+            2 -> "دقيقتان"
+            in 3..10 -> "دقائق"
+            else -> "دقيقة"
+        }
+    } else {
+        if (count == 1) "minute" else "minutes"
+    }
+}
+
 fun formatLocalizedTime(
     hour: Int,
     minute: Int,
@@ -207,20 +222,38 @@ fun formatLocalizedShortDate(
     return "$day/$month/$year"
 }
 
-@SuppressLint("DefaultLocale")
-fun formatTime(minutes: Int): String {
-    val hour = minutes / 60
-    val minute = minutes % 60
-    return String.format("%02d:%02d", hour, minute)
-}
+fun getLocalizedDayText(
+    count: Double?,
+    language: String
+): String {
 
-fun workedHours(states: List<AttendanceState>): String {
-    val totalMinutes = states
-        .filter { it.endMinutes != null }
-        .sumOf { it.endMinutes!! - it.startMinutes }
+    if (count == null) return ""
 
-    val hours = totalMinutes / 60
-    val minutes = totalMinutes % 60
+    return if (language == "ar") {
+        when {
+            count == 0.5 -> "نصف يوم"
+            count == 1.0 -> "يوم"
+            count == 2.0 -> "يومان"
+            count % 1 == 0.5 ->
+                "${formatNumber(count.toInt().toString(), language)} يوم ونصف"
 
-    return "${hours}h ${minutes}m"
+            count in 3.0..10.0 && count % 1 == 0.0 ->
+                "${formatNumber(count.toInt().toString(), language)} أيام"
+
+            count > 10 && count % 1 == 0.0 ->
+                "${formatNumber(count.toInt().toString(), language)} يوم"
+
+            else ->
+                "${formatNumber(count.toString(), language)} يوم"
+        }
+    } else {
+        when {
+            count == 0.5 -> "Half day"
+            count == 1.0 -> "1 day"
+            count == 2.0 -> "2 days"
+            count % 1 == 0.5 -> "${count.toInt()} and a half days"
+            count % 1 == 0.0 -> "${count.toInt()} days"
+            else -> "$count days"
+        }
+    }
 }

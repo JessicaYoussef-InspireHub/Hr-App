@@ -59,7 +59,7 @@ fun EditReportBottomSheet(
 
     ModalBottomSheet(
         containerColor = colors.surfaceContainerHigh,
-        windowInsets = WindowInsets(0),
+        contentWindowInsets = { WindowInsets(0) },
         onDismissRequest = onDismiss,
         sheetState = sheetState
 

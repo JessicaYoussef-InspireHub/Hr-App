@@ -45,7 +45,7 @@ fun UploadBottomSheet(
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         containerColor = colors.surfaceContainerHigh,
-        windowInsets = WindowInsets(0),
+        contentWindowInsets = { WindowInsets(0) },
         sheetState = sheetState
     ) {
         Column(

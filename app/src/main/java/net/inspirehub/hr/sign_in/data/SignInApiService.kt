@@ -14,19 +14,22 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
-
-
+import io.ktor.client.engine.okhttp.*
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 object SignInApiService {
 
-    private val httpClient = HttpClient {
-        install(Logging) { level = LogLevel.ALL }
+    private val httpClient = HttpClient(OkHttp) {
+        install(Logging) {
+            level = LogLevel.ALL
+        }
+
         install(ContentNegotiation) {
             json(Json {
-                prettyPrint = true
-                isLenient = true
                 ignoreUnknownKeys = true
+                isLenient = true
             })
         }
+
         followRedirects = true
     }
 
@@ -38,6 +41,7 @@ object SignInApiService {
         )
 
         try {
+            Log.d("BASE_URL", AppConfig.baseUrl)
             val response: HttpResponse = httpClient.post(AppConfig.baseUrl + "/api/mobile_token") {
                 contentType(ContentType.Application.Json)
                 setBody(payload)
@@ -81,11 +85,15 @@ object SignInApiService {
                 isLenient = true
             }.decodeFromString(responseBody)
 
-//            Json.decodeFromString(responseBody)
         } catch (e: Exception) {
             Log.e("API_ERROR", "Exception in renewToken: ${e.message}", e)
             throw e
         }
+    }
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
     }
 
 
@@ -121,25 +129,14 @@ object SignInApiService {
             Log.d("HTTP", "Raw Response: $responseBody")
             println("📥 Response Body: $responseBody")
 
-            // Parse JSON manually للتحقق من status قبل Serialization
-            val jsonElement = Json.parseToJsonElement(responseBody).jsonObject
+            val jsonElement = json.parseToJsonElement(responseBody).jsonObject
             val resultElement = jsonElement["result"]!!.jsonObject
             val status = resultElement["status"]!!.jsonPrimitive.content
 
             return if (status == "error") {
-                val message = resultElement["message"]!!.jsonPrimitive.content
-                // نرجع كـ SignInResponseWrapper جزئي مع رسالة الخطأ
-                SignInResponseWrapper(
-                    jsonrpc = jsonElement["jsonrpc"]!!.jsonPrimitive.content,
-                    id = jsonElement["id"]?.jsonPrimitive?.content,
-                    result = SignInResult(
-                        status = "error",
-                        message = Json.decodeFromJsonElement(resultElement) // message ممكن نعمله JsonElement
-                    )
-                )
+                val error = json.decodeFromJsonElement<ErrorResult>(resultElement)
+                throw Exception(error.message)
             } else {
-                // لو success ممكن نعمل decode كامل
-//                Json.decodeFromString<SignInResponseWrapper>(responseBody)
                 Json {
                     ignoreUnknownKeys = true
                     isLenient = true
@@ -148,9 +145,22 @@ object SignInApiService {
             }
 
         } catch (e: Exception) {
-            Log.e("API_ERROR", "Exception: ${e.message}", e)
+
+            var t: Throwable? = e
+            while (t != null) {
+
+                val message = "${t.javaClass.name}: ${t.message}"
+
+                Log.e("SSL_DEBUG", message, t)
+
+                FirebaseCrashlytics.getInstance().log(message)
+
+                t = t.cause
+            }
+
+            FirebaseCrashlytics.getInstance().recordException(e)
+
             throw e
         }
     }
-
 }

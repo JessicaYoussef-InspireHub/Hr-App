@@ -27,7 +27,9 @@ import net.inspirehub.hr.attendance.presentation.getDayStatus
 
 @Composable
 fun AttendanceSummary(
-    days: List<AttendanceDay>
+    days: List<AttendanceDay>,
+    totalWorkedHours: Double,
+    totalExpectedHours: Double
 ) {
 
     val colors = appColors()
@@ -66,7 +68,9 @@ fun AttendanceSummary(
                 AttendanceRing(
                     present = present,
                     late = late,
-                    absent = absent
+                    absent = absent,
+                    totalWorkedHours = totalWorkedHours,
+                    totalExpectedHours = totalExpectedHours
                 )
 
                 Spacer(Modifier.width(40.dp))

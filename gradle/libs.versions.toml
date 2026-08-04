@@ -14,6 +14,7 @@ coreSplashscreen = "1.0.1"
 coreVersion = "3.5.2"
 firebaseBom = "34.5.0"
 firebaseBomVersion = "32.1.1"
+firebaseCrashlyticsKtx = "19.4.4"
 firebaseFirestoreKtx = "25.1.4"
 firebaseMessaging = "25.0.1"
 glide = "5.0.5"
@@ -30,7 +31,7 @@ ktorClientSerialization = "2.3.0"
 ktorSerializationKotlinxJsonVersion = "2.3.0"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
-composeBom = "2024.04.01"
+composeBom = "2026.06.01"
 materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.0"
 playServicesLocation = "21.3.0"
@@ -38,6 +39,7 @@ roomKtx = "2.8.3"
 workRuntimeKtx = "2.10.5"
 zxingAndroidEmbedded = "4.3.0"
 firebaseMessagingKtx = "25.0.1"
+material3 = "1.4.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -63,6 +65,7 @@ core-v352 = { module = "com.google.zxing:core", version.ref = "coreVersion" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-bom-v3211 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
+firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
@@ -91,6 +94,7 @@ ktor-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-ko
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 com-google-firebase-firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

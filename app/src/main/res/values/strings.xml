@@ -279,7 +279,7 @@ You have</string>
     <string name="discard_changes">Discard changes?</string>
     <string name="you_have_unsaved_changes_are_you_sure_you_want_to_discard_them">You have unsaved changes. Are you sure you want to discard them?</string>
     <string name="AttendanceHistory">Attendance History</string>
-    <string name="AttendanceDeduction">Attendance Deduction</string>
+    <string name="Deduction">Deduction</string>
     <string name="present">Present</string>
     <string name="late">Late</string>
     <string name="absent">Absent</string>
@@ -345,5 +345,23 @@ You have</string>
     <string name="duration_1_hour_30_minutes">1 Hour 30 Minutes</string>
     <string name="duration_2_hours">2 Hours</string>
     <string name="please_select_permission_period">Please select the permission period</string>
+    <string name="by_day">By day</string>
+    <string name="by_week">By week</string>
+    <string name="by_month">By month</string>
+    <string name="by_quarter">By quarter</string>
+    <string name="by_year">By year</string>
+    <string name="you_are_doing_great">You\'re doing great!</string>
+    <string name="heads_up">Heads up!</string>
+    <string name="limit_exceeded">Limit Exceeded!</string>
+    <string name="you_have_used">You\'ve used </string>
+    <string name="out_of_your"> out of your </string>
+    <string name="allowed_this_month"> allowed this month</string>
+    <string name="days_available">DAYS AVAILABLE</string>
+    <string name="hours_available">HOURS AVAILABLE</string>
+    <string name="request">request</string>
+    <string name="requests">requests</string>
+    <string name="request_time_off">Request Time Off</string>
+    <string name="create_another_leave_request">Create another leave request</string>
+    <string name="create_a_new_leave_request">Create a new leave request</string>
 
 </resources>

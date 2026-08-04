@@ -280,7 +280,7 @@
     <string name="discard_changes">هل تريد تجاهل التغييرات؟</string>
     <string name="you_have_unsaved_changes_are_you_sure_you_want_to_discard_them">لديك تغييرات غير محفوظة. هل أنت متأكد من رغبتك في حذفها؟</string>
     <string name="AttendanceHistory">سجل الحضور والانصراف</string>
-    <string name="AttendanceDeduction">رصيد التأخير</string>
+    <string name="Deduction">رصيد التأخير</string>
     <string name="present">حاضر</string>
     <string name="late">متأخر</string>
     <string name="absent">غائب</string>
@@ -349,6 +349,24 @@
     <string name="duration_1_hour_30_minutes">ساعة و٣٠ دقيقة</string>
     <string name="duration_2_hours">ساعتان</string>
     <string name="please_select_permission_period">من فضلك اختر فترة الإذن</string>
+    <string name="by_day">حسب اليوم</string>
+    <string name="by_week">حسب الأسبوع</string>
+    <string name="by_month">حسب الشهر</string>
+    <string name="by_quarter">حسب الربع السنوي</string>
+    <string name="by_year">حسب السنة</string>
+    <string name="you_are_doing_great">أنت ملتزم بشكل ممتاز!</string>
+    <string name="heads_up">تنبيه!</string>
+    <string name="limit_exceeded">تم تجاوز الحد المسموح!</string>
+    <string name="you_have_used">لقد استخدمت </string>
+    <string name="out_of_your"> دقيقة من أصل </string>
+    <string name="allowed_this_month"> دقيقة مسموح بها هذا الشهر</string>
+    <string name="days_available">من الأيام المتاحة</string>
+    <string name="hours_available">من الساعات المتاحة</string>
+    <string name="request">طلب</string>
+    <string name="requests">طلبات</string>
+    <string name="request_time_off">طلب إجازة</string>
+    <string name="create_another_leave_request">إنشاء طلب إجازة آخر</string>
+    <string name="create_a_new_leave_request">إنشاء طلب إجازة جديد</string>
 
 </resources>
 

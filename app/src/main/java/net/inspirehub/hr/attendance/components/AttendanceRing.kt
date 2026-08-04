@@ -22,7 +22,9 @@ import net.inspirehub.hr.utils.formatNumber
 fun AttendanceRing(
     present: Int,
     late: Int,
-    absent: Int
+    absent: Int,
+    totalWorkedHours: Double,
+    totalExpectedHours: Double
 ) {
 
     val colors = appColors()
@@ -36,7 +38,12 @@ fun AttendanceRing(
     val absentSweep = 360f * absent / total
 
     val attendancePercent =
-        ((present + late).toFloat() / total * 100).toInt()
+        if (totalExpectedHours > 0) {
+            ((totalWorkedHours / totalExpectedHours) * 100)
+                .coerceIn(0.0, 100.0)
+        } else {
+            0.0
+        }
 
     Box(contentAlignment = Alignment.Center) {
 
@@ -101,7 +108,7 @@ fun AttendanceRing(
         }
 
         Text(
-            text = "${formatNumber(attendancePercent.toString(), language)}%",
+            text = "${formatNumber(attendancePercent.toInt().toString(), language)}%",
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
             color = colors.onBackgroundColor

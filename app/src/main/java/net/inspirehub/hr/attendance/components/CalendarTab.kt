@@ -21,6 +21,8 @@ import java.time.YearMonth
 fun CalendarTab(
     currentMonth: YearMonth,
     days: List<AttendanceDay>,
+    totalWorkedHours: Double,
+    totalExpectedHours: Double,
     onDayClick: (AttendanceDay) -> Unit
 ) {
     val colors = appColors()
@@ -40,7 +42,9 @@ fun CalendarTab(
         Spacer(modifier = Modifier.height(20.dp))
 
         AttendanceSummary(
-            days = days
+            days = days,
+            totalWorkedHours = totalWorkedHours,
+            totalExpectedHours = totalExpectedHours
         )
         Spacer(modifier = Modifier.height(40.dp))
     }

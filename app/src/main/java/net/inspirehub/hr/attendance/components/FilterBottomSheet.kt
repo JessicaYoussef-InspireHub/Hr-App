@@ -119,7 +119,7 @@ fun FilterBottomSheet(
         onDismissRequest = { onDismiss() },
         containerColor = colors.surfaceContainerHigh,
         sheetState = sheetState,
-        windowInsets = WindowInsets(0)
+        contentWindowInsets = { WindowInsets(0) }
     ) {
         Column(
             modifier = Modifier
@@ -218,7 +218,7 @@ fun FilterBottomSheet(
                         when (selectedFilter) {
 
                             TimeFilter.DAY ->
-                                formatLocalizedDate(currentDate.toString(), currentLanguage)
+                                onCurrentDateChange(currentDate.minusDays(1))
 
                             TimeFilter.WEEK ->
                                 onCurrentDateChange(currentDate.minusWeeks(1))
