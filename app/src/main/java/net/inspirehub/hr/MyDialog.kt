@@ -20,14 +20,19 @@ fun MyDialog(
     subtitle: String,
     confirmButtonText: String,
     dismissButtonText: String? = null,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    subtitleContent: (@Composable () -> Unit)? = null
 ) {
 
     val colors = appColors()
 
     AlertDialog(
         containerColor = colors.surfaceVariant,
-        onDismissRequest = { onDismiss() },
+        onDismissRequest = {
+            if (!isLoading) {
+                onDismiss()
+            }
+        },
         title = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -38,7 +43,11 @@ fun MyDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    CloseIcon( onClick = { onDismiss() } )
+                    CloseIcon(onClick = {
+                        if (!isLoading) {
+                            onDismiss()
+                        }
+                    })
                 }
                 Text(
                     title,
@@ -49,15 +58,15 @@ fun MyDialog(
             }
         },
         text = {
-            if (isLoading) {
-                SmallLoading()
-            } else {
-                Text(
-                    subtitle,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = colors.onBackgroundColor
-                )
+                if (subtitleContent != null) {
+                    subtitleContent()
+                } else {
+                    Text(
+                        text = subtitle,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = colors.onBackgroundColor
+                    )
             }
         },
         confirmButton = {

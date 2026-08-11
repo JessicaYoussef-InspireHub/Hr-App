@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
@@ -487,5 +488,17 @@ fun DateRangeIcon(){
         contentDescription = "DateRange",
         tint = colors.onBackgroundColor ,
         modifier = Modifier.size(18.dp)
+    )
+}
+
+@Composable
+fun InfoIcon(){
+    val colors = appColors()
+
+    Icon(
+        imageVector = Icons.Default.Info,
+        contentDescription = stringResource(R.string.notes),
+        tint = colors.tertiaryColor,
+        modifier = Modifier.size(20.dp)
     )
 }

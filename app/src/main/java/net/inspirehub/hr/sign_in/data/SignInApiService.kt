@@ -16,18 +16,18 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import io.ktor.client.engine.okhttp.*
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-object SignInApiService {
 
+object SignInApiService {
+    private val json = Json { ignoreUnknownKeys = true
+        isLenient = true
+    }
     private val httpClient = HttpClient(OkHttp) {
         install(Logging) {
             level = LogLevel.ALL
         }
 
         install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-            })
+            json(json)
         }
 
         followRedirects = true
@@ -80,20 +80,12 @@ object SignInApiService {
             val responseBody: String = response.body()
             Log.d("HTTP", "Raw RenewToken Response: $responseBody")
 
-            Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-            }.decodeFromString(responseBody)
+            json.decodeFromString<RenewTokenResponse>(responseBody)
 
         } catch (e: Exception) {
             Log.e("API_ERROR", "Exception in renewToken: ${e.message}", e)
             throw e
         }
-    }
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
     }
 
 
@@ -110,7 +102,10 @@ object SignInApiService {
             api_key = apiKey
         )
 
-        val jsonBody = Json { prettyPrint = true; ignoreUnknownKeys = true }.encodeToString(SignInRequest.serializer(), payload)
+        val jsonBody = json.encodeToString(
+            SignInRequest.serializer(),
+            payload
+        )
         println("📤 SignIn Request:")
         println("URL: ${AppConfig.baseUrl}/api/validate_company")
         println("Headers: Content-Type=application/json, Accept=application/json")
@@ -130,17 +125,14 @@ object SignInApiService {
             println("📥 Response Body: $responseBody")
 
             val jsonElement = json.parseToJsonElement(responseBody).jsonObject
-            val resultElement = jsonElement["result"]!!.jsonObject
-            val status = resultElement["status"]!!.jsonPrimitive.content
+            val resultElement = jsonElement["result"]?.jsonObject ?: throw Exception("Missing result in response")
+            val status = resultElement["status"]?.jsonPrimitive?.content ?: throw Exception("Missing status in response")
 
-            return if (status == "error") {
+           if (status == "error") {
                 val error = json.decodeFromJsonElement<ErrorResult>(resultElement)
                 throw Exception(error.message)
             } else {
-                Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                }.decodeFromString<SignInResponseWrapper>(responseBody)
+               json.decodeFromString<SignInResponseWrapper>(responseBody)
 
             }
 

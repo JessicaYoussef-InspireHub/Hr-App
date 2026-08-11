@@ -20,6 +20,7 @@ import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.settings.components.AccountCard
+import net.inspirehub.hr.settings.components.AttendanceReminderCard
 import net.inspirehub.hr.settings.components.GeneralSettingsCard
 import net.inspirehub.hr.settings.components.SecurityCard
 
@@ -29,6 +30,7 @@ fun SettingsScreen(
     navController: NavController,
 ) {
     val colors = appColors()
+
     BackHandler(enabled = true) {
         navController.navigate("CheckInOutScreen") {
             popUpTo("SettingsScreen") { inclusive = true }
@@ -69,6 +71,11 @@ fun SettingsScreen(
 
             item {
                 AccountCard(navController = navController)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                AttendanceReminderCard()
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }

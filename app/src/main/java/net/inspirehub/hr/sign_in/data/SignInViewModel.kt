@@ -10,8 +10,6 @@ import net.inspirehub.hr.SharedPrefManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -37,12 +35,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 val result = response.result
 
                 if (response.result.status == "error") {
-                    // لو في خطأ، نحوله لحالة Error
-                    val errorMsg = if (response.result.message is JsonElement) {
-                        response.result.message.jsonPrimitive.content
-                    } else {
-                        response.result.message.toString()
-                    }
+
+                    val errorMsg = response.result.message.toString()
                     _uiState.value = SignInUiState.Error(errorMsg)
                     return@launch
                 }
@@ -74,9 +68,24 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     allowTimeOffWithMinutes = response.result.allow_time_off_With_minutes
                 )
 
+                val trackingConfig = getTrackingConfig(
+                    context = getApplication(),
+                    employeeToken = employeeData?.employee_token ?: ""
+                )
+
+                val sharedPref = SharedPrefManager(getApplication())
+
+                sharedPref.saveIsTracked(trackingConfig.result.is_tracked)
+
+                sharedPref.saveWorkingHoursOnly(trackingConfig.result.working_hours_only)
+
+                sharedPref.saveTrackingIntervalMinutes(trackingConfig.result.tracking_interval_minutes)
+
+                sharedPref.saveMinDistanceMeters(trackingConfig.result.min_distance_meters)
+
                 _uiState.value = SignInUiState.Success(response)
 
-                // إرسال FCM token
+
                 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val fcmToken = task.result

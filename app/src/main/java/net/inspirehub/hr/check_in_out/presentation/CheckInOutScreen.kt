@@ -1028,7 +1028,6 @@
 //}
 
 
-
 package   net.inspirehub.hr.check_in_out.presentation
 
 import android.Manifest
@@ -1116,6 +1115,11 @@ import com.google.firebase.messaging.FirebaseMessaging
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.MySnackBar
+import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
+import androidx.core.net.toUri
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -1139,10 +1143,10 @@ private fun checkInternetConnection(context: Context): Boolean {
 }
 
 
-
-
 @RequiresApi(Build.VERSION_CODES.O)
-@SuppressLint("MissingPermission", "SuspiciousIndentation", "LocalContextGetResourceValueCall")
+@SuppressLint("MissingPermission", "SuspiciousIndentation", "LocalContextGetResourceValueCall",
+    "UseKtx"
+)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CheckInOutScreen(
@@ -1188,6 +1192,145 @@ fun CheckInOutScreen(
     val scope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
     val locationAccuracy by viewModel.locationAccuracy.collectAsState()
+    var showBackgroundLocationDialog by remember { mutableStateOf(false) }
+
+    fun hasAllLocationPermissions(context: Context): Boolean {
+        val fineGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        val coarseGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        if (!fineGranted && !coarseGranted) {
+            return false
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+            val backgroundGranted =
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+            if (!backgroundGranted) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    val backgroundLocationPermissionState =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            rememberPermissionState(
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            )
+        } else {
+            null
+        }
+
+    LaunchedEffect(
+        locationPermissionState.status.isGranted,
+        backgroundLocationPermissionState?.status?.isGranted
+    ) {
+
+        val fineGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        val coarseGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        val backgroundGranted =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            } else {
+                true
+            }
+
+        Log.d(
+            "TEST LOCATION_PERMISSION",
+            "fine=$fineGranted | coarse=$coarseGranted | background=$backgroundGranted"
+        )
+
+        // 1. Foreground location missing
+        if (!fineGranted && !coarseGranted) {
+
+            Log.d(
+                "TEST LOCATION_PERMISSION",
+                "❌ Foreground location missing → requesting"
+            )
+
+            locationPermissionState.launchPermissionRequest()
+
+            return@LaunchedEffect
+        }
+
+        // 2. Foreground موجود ولكن Background ناقص
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            !backgroundGranted
+        ) {
+
+            Log.d(
+                "TEST LOCATION_PERMISSION",
+                "⚠️ Background location missing → showing dialog"
+            )
+
+            showBackgroundLocationDialog = true
+
+            return@LaunchedEffect
+        }
+
+        // 3. كل الصلاحيات موجودة
+        Log.d(
+            "TEST LOCATION_PERMISSION",
+            "✅ All location permissions granted"
+        )
+
+        showBackgroundLocationDialog = false
+    }
+
+    LaunchedEffect(
+        locationPermissionState.status.isGranted,
+        backgroundLocationPermissionState?.status?.isGranted
+    ) {
+
+        val hasPermissions = hasAllLocationPermissions(context)
+
+        Log.d("TEST LOCATION_TRACKING", "Permissions check = $hasPermissions")
+
+        if (!hasPermissions) {
+            Log.d("TEST LOCATION_TRACKING", "❌ Location permissions are not complete")
+            return@LaunchedEffect
+        }
+
+        val isTracked = sharedPref.getIsTracked()
+
+        Log.d("TEST LOCATION_TRACKING", "✅ Permissions granted | isTracked=$isTracked" )
+
+        if (isTracked) {
+            Log.d("TEST LOCATION_TRACKING",  "🚀 Starting tracking" )
+
+            LocationTrackingManager.updateTracking(context)
+        } else {
+            Log.d( "TEST LOCATION_TRACKING",  "⏸ Tracking disabled because isTracked=false")
+        }
+    }
+
 
     LaunchedEffect(Unit) {
         Log.d("TOKEN", "Stored Token: $token")
@@ -1272,6 +1415,7 @@ fun CheckInOutScreen(
 
     LaunchedEffect(Unit) {
         FirebaseMessaging.getInstance().token.addOnSuccessListener { fcmToken ->
+            Log.d("TEST_FCM_TOKEN", "🔥 CURRENT FCM TOKEN = $fcmToken")
 
             scope.launch {
                 SignInApiService.sendDeviceToken(
@@ -1279,6 +1423,13 @@ fun CheckInOutScreen(
                     mobileToken = fcmToken
                 )
             }
+        }  .addOnFailureListener { e ->
+
+            Log.e(
+                "TEST_FCM_TOKEN",
+                "❌ Failed to get FCM token",
+                e
+            )
         }
 
         val response = checkLocationUpdatesRaw(context, token)
@@ -1375,36 +1526,96 @@ fun CheckInOutScreen(
 
 // ✅ Every time the user returns to the application (from settings or any other screen)
     DisposableEffect(lifecycleOwner) {
+
         val observer = LifecycleEventObserver { _, event ->
+
             if (event == Lifecycle.Event.ON_RESUME) {
-                val gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+                val fineGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                val coarseGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                val backgroundGranted =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    } else {
+                        true
+                    }
+
+                Log.d(
+                    "TEST LOCATION_TRACKING",
+                    "🔄 ON_RESUME | fine=$fineGranted | coarse=$coarseGranted | background=$backgroundGranted"
+                )
+
+                // Foreground location missing
+                if (!fineGranted && !coarseGranted) {
+
+                    Log.d(
+                        "TEST LOCATION_TRACKING",
+                        "❌ Foreground location still missing"
+                    )
+
+                    return@LifecycleEventObserver
+                }
+
+                // Foreground موجود لكن Background مش موجود
+                if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                    !backgroundGranted
+                ) {
+
+                    Log.d(
+                        "TEST LOCATION_TRACKING",
+                        "⚠️ Background location still missing"
+                    )
+
+                    showBackgroundLocationDialog = true
+
+                    return@LifecycleEventObserver
+                }
+
+                // كل permissions موجودة
+                Log.d(
+                    "TEST LOCATION_TRACKING",
+                    "✅ All permissions granted"
+                )
+
+                showBackgroundLocationDialog = false
+
+                val isTracked = sharedPref.getIsTracked()
+
+                Log.d(
+                    "TEST LOCATION_TRACKING",
+                    "🚀 ON_RESUME → isTracked=$isTracked"
+                )
+
+                if (isTracked) {
+                    LocationTrackingManager.updateTracking(context)
+                }
+
+                // GPS
+                val gpsStatus =
+                    locationManager.isProviderEnabled(
+                        LocationManager.GPS_PROVIDER
+                    )
+
                 isGpsEnabled = gpsStatus
-                Log.d("GPS_STATUS", "🔁 GPS status after resume: $gpsStatus")
 
                 if (!gpsStatus) {
-                    println("❌ GPS is still OFF")
                     showGpsDialog = true
                 } else {
-                    println("✅ GPS is ON now")
                     showGpsDialog = false
-
-                    // ✅ Re-verify distance and location after GPS is turned on
-                    Log.d("GPS_STATUS", "🔄 Re-checking location and distance...")
-//                    viewModel.checkLocationAndDistance(latitude, longitude, allowedDistance)
-
-                    val companies = sharedPref.getCompaniesLatLng()
-                    val allowedIds = sharedPref.getAllowedLocationsIds()
-
-                    if (!isOffline) {
-                        viewModel.syncOfflineData(token)
-                    }
-
-                    // ✅ Loading will be temporarily enabled after returning
-                    isInitialLoading = true
-                    coroutineScope.launch {
-                        delay(1000)
-                        isInitialLoading = false
-                    }
                 }
             }
         }
@@ -1457,25 +1668,6 @@ fun CheckInOutScreen(
     }
 
 
-    LaunchedEffect(locationPermissionState.status.isGranted) {
-        Log.d(
-            "disable",
-            "LaunchedEffect triggered | Permission granted: ${locationPermissionState.status.isGranted}"
-        )
-        if (locationPermissionState.status.isGranted) {
-            Log.d("disable", "Calling checkLocationAndDistance()...")
-//            viewModel.checkLocationAndDistance(latitude, longitude, allowedDistance)
-
-            val companies = sharedPref.getCompaniesLatLng()
-            val allowedIds = sharedPref.getAllowedLocationsIds()
-
-            delay(60_000)
-
-        } else {
-            locationPermissionState.launchPermissionRequest()
-        }
-    }
-
     LaunchedEffect(Unit) {
         val companies = sharedPref.getCompaniesLatLng()
         val allowedIds = sharedPref.getAllowedLocationsIds()
@@ -1486,9 +1678,9 @@ fun CheckInOutScreen(
         )
     }
 
-    DisposableEffect(Unit){
+    DisposableEffect(Unit) {
 
-        onDispose{
+        onDispose {
             viewModel.stopLocationUpdates()
         }
     }
@@ -1531,10 +1723,10 @@ fun CheckInOutScreen(
                 }
             },
             bottomBar = {
-                Column (
+                Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.Start
-                ){
+                ) {
                     Text(
                         text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                         modifier = Modifier.padding(start = 12.dp),
@@ -1568,9 +1760,23 @@ fun CheckInOutScreen(
             ) {
                 Text(
                     when (attendanceStatus) {
-                        "checked_in" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${stringResource(R.string.you_are_checked_in)}"
-                        "checked_out" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${stringResource(R.string.you_are_checked_out)}"
-                        else -> "${stringResource(R.string.welcome)} $employeeFirstName\n${stringResource(R.string.loading)}"
+                        "checked_in" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${
+                            stringResource(
+                                R.string.you_are_checked_in
+                            )
+                        }"
+
+                        "checked_out" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${
+                            stringResource(
+                                R.string.you_are_checked_out
+                            )
+                        }"
+
+                        else -> "${stringResource(R.string.welcome)} $employeeFirstName\n${
+                            stringResource(
+                                R.string.loading
+                            )
+                        }"
                     },
                     color = colors.tertiaryColor,
                     textAlign = TextAlign.Center,
@@ -1666,7 +1872,8 @@ fun CheckInOutScreen(
                                         if (diffMinutes < 1) {
 
                                             // If the difference is less than a minute → Prevent pressure
-                                            offlineMessage = context.getString(R.string.wait_one_minute)
+                                            offlineMessage =
+                                                context.getString(R.string.wait_one_minute)
                                             return@launch
                                         }
                                     }
@@ -1781,7 +1988,8 @@ fun CheckInOutScreen(
                                             )
 
                                             // Message to the user
-                                            offlineMessage = context.getString(R.string.offline_saved_message)
+                                            offlineMessage =
+                                                context.getString(R.string.offline_saved_message)
                                         } else {
 
 
@@ -1898,7 +2106,7 @@ fun CheckInOutScreen(
         if (showOfflineCheckOutDialog) {
             MyDialog(
                 title = stringResource(R.string.attention),
-                subtitle =  stringResource(R.string.are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available),
+                subtitle = stringResource(R.string.are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available),
                 onDismiss = { showOfflineCheckOutDialog = false },
                 dismissButtonText = stringResource(R.string.cancel),
                 confirmButtonText = stringResource(R.string.ok),
@@ -1927,13 +2135,11 @@ fun CheckInOutScreen(
 
         if (showNotAllowedDialog) {
             MyDialog(
-                title =  stringResource(R.string.attention) ,
-                subtitle = stringResource(R.string.you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed ),
+                title = stringResource(R.string.attention),
+                subtitle = stringResource(R.string.you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed),
                 confirmButtonText = stringResource(R.string.ok),
                 onConfirm = {
                     showNotAllowedDialog = false
-                    val companies = sharedPref.getCompaniesLatLng()
-                    val allowedIds = sharedPref.getAllowedLocationsIds()
 
                 },
                 onDismiss = { showNotAllowedDialog = false },
@@ -1948,8 +2154,8 @@ fun CheckInOutScreen(
         if (showInternetRequiredDialog) {
 
             MyDialog(
-                title = stringResource(R.string.check_not_allowed) ,
-                subtitle =   stringResource(R.string.you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online),
+                title = stringResource(R.string.check_not_allowed),
+                subtitle = stringResource(R.string.you_have_changed_the_time_while_offline_you_cannot_perform_a_check_operation_until_you_are_back_online),
                 confirmButtonText = stringResource(R.string.ok),
                 onConfirm = { showInternetRequiredDialog = false },
                 onDismiss = { showInternetRequiredDialog = false },
@@ -1959,14 +2165,13 @@ fun CheckInOutScreen(
 
     if (showGpsDialog) {
         MyDialog(
-            title = stringResource(R.string.enable_location) ,
+            title = stringResource(R.string.enable_location),
             subtitle = stringResource(R.string.please_enable_gps_so_the_app_can_accurately_detect_your_location),
             confirmButtonText = stringResource(R.string.enable_now),
             dismissButtonText = stringResource(R.string.cancel),
             onConfirm = {
                 showGpsDialog = false
-                val intent =
-                    android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                val intent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 context.startActivity(intent)
             },
             onDismiss = { showGpsDialog = false },
@@ -1986,11 +2191,34 @@ fun CheckInOutScreen(
         )
     }
 
+    if (showBackgroundLocationDialog) {
+
+        MyDialog(
+            title = stringResource(R.string.background_location_permission),
+            subtitle = stringResource(R.string.background_location_message),
+            confirmButtonText = stringResource(R.string.open_settings),
+            dismissButtonText = stringResource(R.string.cancel),
+
+            onConfirm = {
+                showBackgroundLocationDialog = false
+                val intent = Intent(
+                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                ).apply {
+                    data = "package:${context.packageName}".toUri()
+                }
+                context.startActivity(intent)
+            },
+
+            onDismiss = {
+                showBackgroundLocationDialog = false
+            }
+        )
+    }
+
 
 
 
     if (showErrorDialog) {
-
         MyDialog(
             title = stringResource(R.string.attention),
             subtitle = if (!isOffline) {

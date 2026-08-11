@@ -578,7 +578,6 @@ import androidx.work.workDataOf
 import net.inspirehub.hr.SharedPrefManager
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -649,7 +648,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         locationCallback = object : LocationCallback() {
 
             override fun onLocationResult(result: LocationResult) {
-
+                Log.d("SERVICE_TEST_view_model", "Location callback fired")
                 val location = result.lastLocation ?: return
 
                 checkLocationAndDistanceAllCompanies(
@@ -659,7 +658,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 )
             }
         }
-
+        Log.d("SERVICE_TEST", "Requesting location updates")
         fusedLocationClient.requestLocationUpdates(
             request,
             locationCallback!!,
@@ -751,14 +750,14 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 } else {
                     // ❌ في حالة فشل السيرفر → fallback على الكاش
                     val (status, checkIn, checkOut) = cache.getStatus()
-                    _attendanceStatus.value = status
+                    setAttendanceStatus(status)
                     _lastCheckIn.value = checkIn
                     _lastCheckOut.value = checkOut
                 }
             } else {
                 // 🔹 Offline → جلب من الكاش
                 val (status, checkIn, checkOut) = cache.getStatus()
-                _attendanceStatus.value = status
+                setAttendanceStatus(status)
                 _lastCheckIn.value = checkIn
                 _lastCheckOut.value = checkOut
             }
@@ -790,8 +789,15 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         Log.d("OfflineWorker", "⏳ OfflineWorker enqueued")
     }
 
-    fun setAttendanceStatus(newStatus: String) {
-        _attendanceStatus.value = newStatus
+    fun setAttendanceStatus(status: String) {
+        _attendanceStatus.value = status
+
+        SharedPrefManager(getApplication()).saveAttendanceStatus(status)
+
+        Log.d(
+            "TEST ATTENDANCE_STATUS",
+            "Attendance status saved = $status"
+        )
     }
 
 
@@ -1020,6 +1026,9 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                     result.attendance_status?.let {
                         _attendanceStatus.value = it
+
+                        SharedPrefManager(context)
+                            .saveAttendanceStatus(it)
                     }
 
                     result.checkInTime?.let {
@@ -1051,12 +1060,22 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                     if (action == "check_out") {
                         cancelCheckOutReminder(context)
+
+                        LocationTrackingManager.updateTracking(
+                            context = context,
+                            attendanceStatus = "checked_out"
+                        )
                     }
 
                     if (action == "check_in") {
                         result.todayScheduledHours?.let { hours ->
                             scheduleCheckOutReminder(context, hours)
                         }
+
+                        LocationTrackingManager.updateTracking(
+                            context = context,
+                            attendanceStatus = "checked_in"
+                        )
                     }
 
                     onComplete(result.attendance_status)

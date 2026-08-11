@@ -11,6 +11,80 @@ import java.util.Date
 
 class SharedPrefManager(context: Context) {
 
+    fun saveAttendanceStatus(status: String) {
+        prefs.edit {
+            putString("attendance_status", status)
+        }
+    }
+
+    fun getAttendanceStatus(): String {
+        return prefs.getString(
+            "attendance_status",
+            "checked_out"
+        ) ?: "checked_out"
+    }
+
+    fun setAttendanceReminderEnabled(enabled: Boolean) {
+        prefs.edit {
+            putBoolean("attendance_reminder_enabled", enabled)
+        }
+    }
+
+    fun isAttendanceReminderEnabled(): Boolean {
+        return prefs.getBoolean("attendance_reminder_enabled", false)
+    }
+
+
+    fun saveLastAttendanceReminderType(type: String?) {
+        prefs.edit {
+            if (type == null) {
+                remove("last_attendance_reminder_type")
+            } else {
+                putString("last_attendance_reminder_type", type)
+            }
+        }
+    }
+
+    fun getLastAttendanceReminderType(): String? {
+        return prefs.getString(
+            "last_attendance_reminder_type",
+            null
+        )
+    }
+
+
+    fun saveIsTracked(value: Boolean) {
+        prefs.edit { putBoolean("is_tracked", value) }
+    }
+
+    fun getIsTracked(): Boolean {
+        return prefs.getBoolean("is_tracked", false)
+    }
+
+    fun saveWorkingHoursOnly(value: Boolean) {
+        prefs.edit { putBoolean("working_hours_only", value) }
+    }
+
+    fun getWorkingHoursOnly(): Boolean {
+        return prefs.getBoolean("working_hours_only", false)
+    }
+
+    fun saveTrackingIntervalMinutes(value: Float) {
+        prefs.edit { putFloat("tracking_interval_minutes", value) }
+    }
+
+    fun getTrackingIntervalMinutes(): Float {
+        return prefs.getFloat("tracking_interval_minutes", 0f)
+    }
+
+    fun saveMinDistanceMeters(value: Float) {
+        prefs.edit { putFloat("min_distance_meters", value) }
+    }
+
+    fun getMinDistanceMeters(): Float {
+        return prefs.getFloat("min_distance_meters", 0f)
+    }
+
     fun saveEmployeeName(name: String?) {
         if (!name.isNullOrBlank()) {
             prefs.edit { putString("employee_name", name) }

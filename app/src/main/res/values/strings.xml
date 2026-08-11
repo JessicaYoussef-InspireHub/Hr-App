@@ -363,5 +363,24 @@ You have</string>
     <string name="request_time_off">Request Time Off</string>
     <string name="create_another_leave_request">Create another leave request</string>
     <string name="create_a_new_leave_request">Create a new leave request</string>
+    <string name="check_in_reminder">Check-In Reminder</string>
+    <string name="you_are_inside_work_location_without_check_in">You are inside work location without check in</string>
+    <string name="check_out_reminder">Check-Out Reminder</string>
+    <string name="you_left_work_location_without_check_out">You left the work location. Don\'t forget to check out</string>
+    <string name="attendance_reminder">Attendance Reminder</string>
+    <string name="attendance_reminder_running">Attendance reminder is running</string>
+    <string name="attendance_reminder_intro">By enabling Background Location Tracking, the app will periodically check your location to remind you to check in or check out when necessary.</string>
+    <string name="check_out_reminder_title">• Check-out reminder:</string>
+    <string name="check_out_reminder_description">The app will monitor your location only while you are checked in. You will be notified if you leave the permitted work location without checking out.</string>
+    <string name="check_in_reminder_title">• Check-in reminder:</string>
+    <string name="check_in_reminder_description">The app will monitor your location only while you are checked out. You will be notified if you enter the permitted work location without checking in.</string>
+    <string name="attendance_reminder_no_api">Background location tracking data will be processed securely and exclusively on your device. No information will be transmitted to your company or any external parties.</string>
+    <string name="location_service">Location Service</string>
+    <string name="getting_your_location">Getting your location...</string>
+    <string name="background_location_permission">Background Location Permission</string>
+    <string name="background_location_message">
+    To keep location tracking working when the app is in the background, please allow location access all the time.\n\nGo to Settings → Permissions → Location → Allow all the time.
+</string>
+    <string name="open_settings">Open Settings</string>
 
 </resources>

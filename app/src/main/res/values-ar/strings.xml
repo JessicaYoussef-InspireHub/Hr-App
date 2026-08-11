@@ -367,6 +367,25 @@
     <string name="request_time_off">طلب إجازة</string>
     <string name="create_another_leave_request">إنشاء طلب إجازة آخر</string>
     <string name="create_a_new_leave_request">إنشاء طلب إجازة جديد</string>
+    <string name="check_in_reminder">تذكير بتسجيل الحضور</string>
+    <string name="you_are_inside_work_location_without_check_in">أنت داخل مكان العمل ولم تقم بتسجيل الحضور</string>
+    <string name="check_out_reminder">تذكير بتسجيل الانصراف</string>
+    <string name="you_left_work_location_without_check_out">لقد غادرت مكان العمل. لا تنسَ تسجيل الانصراف</string>
+    <string name="attendance_reminder">تذكير الحضور والانصراف</string>
+    <string name="attendance_reminder_running">تذكير الحضور والانصراف قيد التشغيل</string>
+    <string name="attendance_reminder_intro">عند تفعيل تتبع الموقع في الخلفية، سيتحقق التطبيق من موقعك بشكل دوري لتذكيرك بتسجيل الحضور أو الانصراف عند الحاجة.</string>
+    <string name="check_out_reminder_title">• تذكير بتسجيل الانصراف:</string>
+    <string name="check_out_reminder_description">سيقوم التطبيق بمراقبة موقعك فقط أثناء تسجيلك للحضور. سيتم إرسال تذكير إليك إذا غادرت موقع العمل المسموح به دون تسجيل الانصراف.</string>
+    <string name="check_in_reminder_title">• تذكير بتسجيل الحضور:</string>
+    <string name="check_in_reminder_description">سيقوم التطبيق بمراقبة موقعك فقط أثناء عدم تسجيلك للحضور. سيتم إرسال تذكير إليك إذا دخلت إلى موقع العمل المسموح به دون تسجيل الحضور.</string>
+    <string name="attendance_reminder_no_api"> سيتم معالجة بيانات الموقع في الخلفية بشكل آمن وحصري على جهازك. ولن يتم إرسال أي معلومات إلى شركتك أو إلى أي جهات خارجية.</string>
+    <string name="location_service">خدمة تحديد الموقع</string>
+    <string name="getting_your_location">جاري تحديد موقعك...</string>
+    <string name="background_location_permission">السماح بالموقع في الخلفية</string>
+    <string name="background_location_message">
+    للحفاظ على عمل تتبع الموقع أثناء وجود التطبيق في الخلفية، يُرجى السماح للتطبيق بالوصول إلى الموقع طوال الوقت.\n\nانتقل إلى الإعدادات ← الأذونات ← الموقع ← السماح طوال الوقت.
+</string>
+    <string name="open_settings">فتح الإعدادات</string>
 
 </resources>
 
