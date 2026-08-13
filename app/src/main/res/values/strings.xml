@@ -378,9 +378,9 @@ You have</string>
     <string name="location_service">Location Service</string>
     <string name="getting_your_location">Getting your location...</string>
     <string name="background_location_permission">Background Location Permission</string>
-    <string name="background_location_message">
-    To keep location tracking working when the app is in the background, please allow location access all the time.\n\nGo to Settings → Permissions → Location → Allow all the time.
+    <string name="background_location_message">To enable attendance reminders while the app is running in the background, the app needs permission to access your location all the time.\n\nAfter tapping "OK", the app settings will open.\n\nSelect:\nPermissions → Location → Allow all the time\n\nThen return to the app to complete the activation.
 </string>
     <string name="open_settings">Open Settings</string>
+
 
 </resources>

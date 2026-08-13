@@ -382,10 +382,9 @@
     <string name="location_service">خدمة تحديد الموقع</string>
     <string name="getting_your_location">جاري تحديد موقعك...</string>
     <string name="background_location_permission">السماح بالموقع في الخلفية</string>
-    <string name="background_location_message">
-    للحفاظ على عمل تتبع الموقع أثناء وجود التطبيق في الخلفية، يُرجى السماح للتطبيق بالوصول إلى الموقع طوال الوقت.\n\nانتقل إلى الإعدادات ← الأذونات ← الموقع ← السماح طوال الوقت.
-</string>
+    <string name="background_location_message">لتفعيل تذكيرات الحضور أثناء عمل التطبيق في الخلفية، يحتاج التطبيق إلى السماح بالوصول إلى الموقع طوال الوقت.\n\nبعد الضغط على "موافق"، سيتم فتح إعدادات التطبيق.\n\nاختر: الأذونات ← الموقع ← السماح طوال الوقت (Allow all the time)\n\nثم ارجع إلى التطبيق لإكمال التفعيل.</string>
     <string name="open_settings">فتح الإعدادات</string>
+
 
 </resources>
 

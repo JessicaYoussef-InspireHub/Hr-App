@@ -129,7 +129,7 @@ class LocationForegroundService : Service() {
             startForeground(
                 NOTIFICATION_ID,
                 createNotification(),
-                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
             )
         } else {
             startForeground(

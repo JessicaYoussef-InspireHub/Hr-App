@@ -38,8 +38,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
+import net.inspirehub.hr.check_in_out.data.hasBackgroundLocationPermission
 import net.inspirehub.hr.InfoIcon
-
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.compose.foundation.Image
+import android.util.Log
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 @Composable
 fun AttendanceReminderCard() {
     val colors = appColors()
@@ -48,6 +62,113 @@ fun AttendanceReminderCard() {
 
     var isReminderEnabled by remember { mutableStateOf(sharedPref.isAttendanceReminderEnabled()) }
     var showReminderDialog by remember { mutableStateOf(false) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+
+        val observer = LifecycleEventObserver { _, event ->
+
+            if (event == Lifecycle.Event.ON_RESUME) {
+
+                val backgroundGranted =
+                    hasBackgroundLocationPermission(context)
+
+                Log.d("LOCATION_PERMISSION", "ON_RESUME")
+
+                Log.d("LOCATION_PERMISSION", "Background granted = $backgroundGranted")
+
+                if (backgroundGranted) {
+
+                    Log.d("LOCATION_PERMISSION", "Background permission confirmed")
+
+                    showPermissionDialog = false
+
+                    isReminderEnabled = true
+
+                    LocalAttendanceReminderManager.start(context)
+
+                } else {
+
+                    Log.d("LOCATION_PERMISSION", "Background permission still missing")
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val backgroundPermissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+
+            Log.d("LOCATION_PERMISSION", "Background permission result = $isGranted"
+            )
+
+            if (isGranted) {
+
+                Log.d("LOCATION_PERMISSION", "Background location GRANTED")
+                isReminderEnabled = true
+                LocalAttendanceReminderManager.start(context)
+
+            } else {
+
+                Log.d( "LOCATION_PERMISSION", "Background location DENIED")
+
+                isReminderEnabled = false
+            }
+        }
+
+    val locationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            val fineGranted =
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+            val coarseGranted =
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+            val locationGranted =
+                fineGranted || coarseGranted
+
+            Log.d("LOCATION_PERMISSION", "Foreground result: $permissions")
+
+            if (!locationGranted) {
+
+                Log.d("LOCATION_PERMISSION", "Foreground location DENIED")
+
+                isReminderEnabled = false
+
+                return@rememberLauncherForActivityResult
+            }
+
+            Log.d("LOCATION_PERMISSION", "Foreground location GRANTED")
+
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+
+                Log.d("LOCATION_PERMISSION", "Android 10 → requesting background")
+
+                backgroundPermissionLauncher.launch(
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                )
+
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+                Log.d("LOCATION_PERMISSION", "Android 11+ → Settings required")
+
+                showPermissionDialog = true
+            }
+        }
+
+
+
 
     Column {
         Text(
@@ -78,6 +199,7 @@ fun AttendanceReminderCard() {
                     label = stringResource(R.string.attendance_reminder),
                     icon = Icons.Default.NotificationsActive,
                     onClick = {
+
                         if (!isReminderEnabled) {
                             showReminderDialog = true
                         } else {
@@ -96,10 +218,7 @@ fun AttendanceReminderCard() {
                                     showReminderDialog = true
                                 } else {
                                     isReminderEnabled = false
-
-                                    LocalAttendanceReminderManager.stop(
-                                        context
-                                    )
+                                    LocalAttendanceReminderManager.stop(context)
                                 }
                             },
                             colors = SwitchDefaults.colors(
@@ -122,10 +241,14 @@ fun AttendanceReminderCard() {
         MyDialog(
             onConfirm = {
                 showReminderDialog = false
-                isReminderEnabled = true
-                LocalAttendanceReminderManager.start(context)
-            },
 
+                if (hasBackgroundLocationPermission(context)) {
+                    isReminderEnabled = true
+                    LocalAttendanceReminderManager.start(context)
+                } else {
+                    showPermissionDialog = true
+                }
+            },
             onDismiss = {
                 showReminderDialog = false
                 isReminderEnabled = false
@@ -200,6 +323,112 @@ fun AttendanceReminderCard() {
             confirmButtonText = stringResource(R.string.ok),
 
             dismissButtonText = stringResource(R.string.cancel)
+        )
+    }
+
+    if (showPermissionDialog) {
+
+        MyDialog(
+            title = stringResource(R.string.background_location_permission),
+            subtitle = " ",
+            subtitleContent = {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.background_location_message),
+                        color = colors.onBackgroundColor,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Image(
+                        painter = painterResource(id = R.drawable.background_location_settings),
+                        contentDescription = stringResource(
+                            R.string.background_location_permission
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(
+                                BorderStroke(
+                                    1.dp,
+                                    colors.inverseOnSurface
+                                ),
+                                RoundedCornerShape(12.dp)
+                            ),
+                        contentScale = ContentScale.FillWidth
+                    )
+                }
+            },
+
+            confirmButtonText = stringResource(R.string.open_settings),
+
+            dismissButtonText = stringResource(R.string.cancel),
+
+            onConfirm = {
+
+                Log.d("LOCATION_PERMISSION", "========== BACKGROUND LOCATION OK ==========")
+
+                Log.d("LOCATION_PERMISSION", "SDK = ${Build.VERSION.SDK_INT}")
+
+                val fineGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                val coarseGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                Log.d("LOCATION_PERMISSION", "Fine = $fineGranted")
+
+                Log.d("LOCATION_PERMISSION", "Coarse = $coarseGranted")
+
+                if (!fineGranted && !coarseGranted) {
+
+                    Log.d("LOCATION_PERMISSION", "Foreground location missing")
+
+                    locationPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+
+                    return@MyDialog
+                }
+
+                // Foreground location exists
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+
+                    Log.d("LOCATION_PERMISSION", "Android 10 → requesting background permission")
+
+                    backgroundPermissionLauncher.launch(
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    )
+
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+                    Log.d("LOCATION_PERMISSION", "Android 11+ → requesting background location")
+
+                    showPermissionDialog = false
+
+                    backgroundPermissionLauncher.launch(
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    )
+                }
+            },
+
+            onDismiss = {
+                showPermissionDialog = false
+                isReminderEnabled = false
+            }
         )
     }
 }

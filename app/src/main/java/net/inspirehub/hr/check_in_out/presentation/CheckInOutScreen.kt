@@ -2198,7 +2198,6 @@ fun CheckInOutScreen(
             subtitle = stringResource(R.string.background_location_message),
             confirmButtonText = stringResource(R.string.open_settings),
             dismissButtonText = stringResource(R.string.cancel),
-
             onConfirm = {
                 showBackgroundLocationDialog = false
                 val intent = Intent(
