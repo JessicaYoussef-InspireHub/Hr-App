@@ -15,12 +15,12 @@
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Android 10+ -->
+<!--     Android 10+-->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" tools:ignore="BackgroundLocationPolicy" />
     <!-- Android 9+ -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:ignore="ForegroundServicesPolicy" />
+<!--    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:ignore="ForegroundServicesPolicy" />-->
     <!-- Android 14 -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+<!--    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.fingerprint" android:required="true" />
 
@@ -66,18 +66,24 @@
         </service>
 
 
-        <service
-            android:name=".check_in_out.data.LocationForegroundService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="location" />
+<!--        <service-->
+<!--            android:name=".check_in_out.data.LocationForegroundService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false"-->
+<!--            android:foregroundServiceType="location" />-->
+
+<!--        <service-->
+<!--            android:name=".check_in_out.data.AttendanceReminderForegroundService"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false"-->
+<!--            android:foregroundServiceType="location" />-->
 
         <receiver
-            android:name=".check_in_out.data.LocalAttendanceReminderReceiver"
+            android:name=".settings.data.LocalAttendanceReminderReceiver"
             android:exported="false" />
 
         <receiver
-            android:name=".check_in_out.data.BootCompletedReceiver"
+            android:name=".settings.data.BootCompletedReceiver"
             android:enabled="true"
             android:exported="true">
 

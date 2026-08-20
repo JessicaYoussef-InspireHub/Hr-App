@@ -1,6 +1,5 @@
 package net.inspirehub.hr
 
-
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -27,7 +26,8 @@ import net.inspirehub.hr.ui.theme.HrTheme
 import java.util.Locale
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
-import net.inspirehub.hr.check_in_out.data.LocalAttendanceReminderManager
+//import net.inspirehub.hr.check_in_out.data.AttendanceReminderForegroundManager
+import net.inspirehub.hr.settings.data.LocalAttendanceReminderManager
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
 
 
@@ -98,6 +98,7 @@ class MainActivity : AppCompatActivity() {
 
         handleNotificationIntent(intent)
         LocalAttendanceReminderManager.restore(this)
+//        AttendanceReminderForegroundManager.restore(this)
 
         setContent {
 

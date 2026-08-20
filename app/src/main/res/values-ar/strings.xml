@@ -371,8 +371,7 @@
     <string name="you_are_inside_work_location_without_check_in">أنت داخل مكان العمل ولم تقم بتسجيل الحضور</string>
     <string name="check_out_reminder">تذكير بتسجيل الانصراف</string>
     <string name="you_left_work_location_without_check_out">لقد غادرت مكان العمل. لا تنسَ تسجيل الانصراف</string>
-    <string name="attendance_reminder">تذكير الحضور والانصراف</string>
-    <string name="attendance_reminder_running">تذكير الحضور والانصراف قيد التشغيل</string>
+    <string name="reminders">التذكيرات</string>
     <string name="attendance_reminder_intro">عند تفعيل تتبع الموقع في الخلفية، سيتحقق التطبيق من موقعك بشكل دوري لتذكيرك بتسجيل الحضور أو الانصراف عند الحاجة.</string>
     <string name="check_out_reminder_title">• تذكير بتسجيل الانصراف:</string>
     <string name="check_out_reminder_description">سيقوم التطبيق بمراقبة موقعك فقط أثناء تسجيلك للحضور. سيتم إرسال تذكير إليك إذا غادرت موقع العمل المسموح به دون تسجيل الانصراف.</string>

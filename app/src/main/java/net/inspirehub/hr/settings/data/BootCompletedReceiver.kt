@@ -1,4 +1,4 @@
-package net.inspirehub.hr.check_in_out.data
+package net.inspirehub.hr.settings.data
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -11,6 +11,19 @@ import java.util.Date
 
 class SharedPrefManager(context: Context) {
 
+    fun setLocationPermissionRequested(requested: Boolean) {
+        prefs.edit {
+            putBoolean("location_permission_requested", requested)
+        }
+    }
+
+    fun wasLocationPermissionRequested(): Boolean {
+        return prefs.getBoolean(
+            "location_permission_requested",
+            false
+        )
+    }
+
     fun saveAttendanceStatus(status: String) {
         prefs.edit {
             putString("attendance_status", status)
@@ -32,6 +45,35 @@ class SharedPrefManager(context: Context) {
 
     fun isAttendanceReminderEnabled(): Boolean {
         return prefs.getBoolean("attendance_reminder_enabled", false)
+    }
+
+    private val CHECK_IN_REMINDER_ENABLED = "check_in_reminder_enabled"
+    private val CHECK_OUT_REMINDER_ENABLED = "check_out_reminder_enabled"
+
+    fun setCheckInReminderEnabled(enabled: Boolean) {
+        prefs.edit {
+            putBoolean(CHECK_IN_REMINDER_ENABLED, enabled)
+        }
+    }
+
+    fun isCheckInReminderEnabled(): Boolean {
+        return prefs.getBoolean(
+            CHECK_IN_REMINDER_ENABLED,
+            false
+        )
+    }
+
+    fun setCheckOutReminderEnabled(enabled: Boolean) {
+        prefs.edit {
+            putBoolean(CHECK_OUT_REMINDER_ENABLED, enabled)
+        }
+    }
+
+    fun isCheckOutReminderEnabled(): Boolean {
+        return prefs.getBoolean(
+            CHECK_OUT_REMINDER_ENABLED,
+            false
+        )
     }
 
 

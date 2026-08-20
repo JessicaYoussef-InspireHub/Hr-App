@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Switch
@@ -29,7 +28,7 @@ import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.check_in_out.data.LocalAttendanceReminderManager
+import net.inspirehub.hr.settings.data.LocalAttendanceReminderManager
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -48,53 +47,124 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.compose.foundation.Image
 import android.util.Log
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import net.inspirehub.hr.MyDivider
+
 @Composable
 fun AttendanceReminderCard() {
     val colors = appColors()
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
-
-    var isReminderEnabled by remember { mutableStateOf(sharedPref.isAttendanceReminderEnabled()) }
-    var showReminderDialog by remember { mutableStateOf(false) }
-    var showPermissionDialog by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    var isCheckInReminderEnabled by remember { mutableStateOf(sharedPref.isCheckInReminderEnabled()) }
+    var isCheckOutReminderEnabled by remember { mutableStateOf(sharedPref.isCheckOutReminderEnabled()) }
+    var showCheckInDialog by remember { mutableStateOf(false) }
+    var showCheckOutDialog by remember { mutableStateOf(false) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var pendingReminderType by remember { mutableStateOf<String?>(null) }
+
+    //    Function: start selected reminder
+    fun startPendingReminder() {
+        when (pendingReminderType) {
+            "CHECK_IN" -> {
+                Log.d("ATTENDANCE_REMINDER", "Starting CHECK-IN reminder")
+
+                isCheckInReminderEnabled = true
+                LocalAttendanceReminderManager.startCheckIn(context)
+            }
+
+            "CHECK_OUT" -> {
+                Log.d("ATTENDANCE_REMINDER", "Starting CHECK-OUT reminder")
+
+                isCheckOutReminderEnabled = true
+                LocalAttendanceReminderManager.startCheckOut(context)
+            }
+        }
+
+        pendingReminderType = null
+    }
 
     DisposableEffect(lifecycleOwner) {
 
         val observer = LifecycleEventObserver { _, event ->
 
+//            if (event == Lifecycle.Event.ON_RESUME) {
+//
+//                Log.d("LOCATION_PERMISSION", "ON_RESUME")
+//
+//
+////              Only continue if a reminder was waiting for permission.
+//                if (pendingReminderType != null) {
+//
+//                    val backgroundGranted = hasBackgroundLocationPermission(context)
+//
+//                    Log.d("LOCATION_PERMISSION", "Background granted = $backgroundGranted")
+//
+//                    if (backgroundGranted) {
+//
+//                        Log.d("LOCATION_PERMISSION", "Background permission confirmed")
+//                        showPermissionDialog = false
+//                        startPendingReminder()
+//
+//                    }
+//                }
+//            }
             if (event == Lifecycle.Event.ON_RESUME) {
-
-                val backgroundGranted =
-                    hasBackgroundLocationPermission(context)
 
                 Log.d("LOCATION_PERMISSION", "ON_RESUME")
 
-                Log.d("LOCATION_PERMISSION", "Background granted = $backgroundGranted")
+                val backgroundGranted = hasBackgroundLocationPermission(context)
 
-                if (backgroundGranted) {
+                Log.d(
+                    "LOCATION_PERMISSION",
+                    "Background permission = $backgroundGranted"
+                )
 
-                    Log.d("LOCATION_PERMISSION", "Background permission confirmed")
+                // Permission was revoked from device settings
+                if (!backgroundGranted) {
+
+                    if (isCheckInReminderEnabled) {
+                        Log.d(
+                            "ATTENDANCE_REMINDER",
+                            "Check-in reminder disabled because background permission was revoked"
+                        )
+
+                        isCheckInReminderEnabled = false
+                        LocalAttendanceReminderManager.stopCheckIn(context)
+                    }
+
+                    if (isCheckOutReminderEnabled) {
+                        Log.d(
+                            "ATTENDANCE_REMINDER",
+                            "Check-out reminder disabled because background permission was revoked"
+                        )
+
+                        isCheckOutReminderEnabled = false
+                        LocalAttendanceReminderManager.stopCheckOut(context)
+                    }
+                }
+
+                // Permission was granted after opening settings
+                if (pendingReminderType != null && backgroundGranted) {
+
+                    Log.d(
+                        "LOCATION_PERMISSION",
+                        "Background permission confirmed"
+                    )
 
                     showPermissionDialog = false
-
-                    isReminderEnabled = true
-
-                    LocalAttendanceReminderManager.start(context)
-
-                } else {
-
-                    Log.d("LOCATION_PERMISSION", "Background permission still missing")
+                    startPendingReminder()
                 }
             }
         }
-
         lifecycleOwner.lifecycle.addObserver(observer)
 
         onDispose {
@@ -102,41 +172,45 @@ fun AttendanceReminderCard() {
         }
     }
 
-    val backgroundPermissionLauncher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
+//  Background permission launcher
+    val backgroundPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
 
-            Log.d("LOCATION_PERMISSION", "Background permission result = $isGranted"
-            )
+        Log.d(
+            "LOCATION_PERMISSION", "Background permission result = $isGranted"
+        )
 
-            if (isGranted) {
+        if (isGranted) {
 
-                Log.d("LOCATION_PERMISSION", "Background location GRANTED")
-                isReminderEnabled = true
-                LocalAttendanceReminderManager.start(context)
+            Log.d("LOCATION_PERMISSION", "Background location GRANTED")
+            showPermissionDialog = false
+            startPendingReminder()
 
-            } else {
+        } else {
 
-                Log.d( "LOCATION_PERMISSION", "Background location DENIED")
+            Log.d("LOCATION_PERMISSION", "Background location DENIED")
 
-                isReminderEnabled = false
+//          Don't enable the switch if permission wasn't granted.
+            when (pendingReminderType) {
+                "CHECK_IN" -> { isCheckInReminderEnabled = false }
+                "CHECK_OUT" -> { isCheckOutReminderEnabled = false }
             }
+            pendingReminderType = null
         }
+    }
 
+//    Foreground location permission launcher
     val locationPermissionLauncher =
         rememberLauncherForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
 
-            val fineGranted =
-                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+            val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
 
-            val coarseGranted =
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 
-            val locationGranted =
-                fineGranted || coarseGranted
+            val locationGranted = fineGranted || coarseGranted
 
             Log.d("LOCATION_PERMISSION", "Foreground result: $permissions")
 
@@ -144,7 +218,11 @@ fun AttendanceReminderCard() {
 
                 Log.d("LOCATION_PERMISSION", "Foreground location DENIED")
 
-                isReminderEnabled = false
+                when (pendingReminderType) {
+                    "CHECK_IN" -> { isCheckInReminderEnabled = false }
+                    "CHECK_OUT" -> { isCheckOutReminderEnabled = false }
+                }
+                pendingReminderType = null
 
                 return@rememberLauncherForActivityResult
             }
@@ -155,9 +233,7 @@ fun AttendanceReminderCard() {
 
                 Log.d("LOCATION_PERMISSION", "Android 10 → requesting background")
 
-                backgroundPermissionLauncher.launch(
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                )
+                backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
 
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 
@@ -172,7 +248,7 @@ fun AttendanceReminderCard() {
 
     Column {
         Text(
-            text = stringResource(R.string.attendance_reminder),
+            text = stringResource(R.string.reminders),
             color = colors.tertiaryColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
@@ -196,29 +272,72 @@ fun AttendanceReminderCard() {
         ) {
             Column {
                 SettingsItem(
-                    label = stringResource(R.string.attendance_reminder),
-                    icon = Icons.Default.NotificationsActive,
+                    label = stringResource(R.string.check_in_reminder),
+                    icon = Icons.Default.HowToReg,
                     onClick = {
-
-                        if (!isReminderEnabled) {
-                            showReminderDialog = true
+                        if (!isCheckInReminderEnabled) {
+//                         User wants to ENABLE check-in
+                            pendingReminderType = "CHECK_IN"
+                            showCheckInDialog = true
                         } else {
-                            isReminderEnabled = false
-
-                            LocalAttendanceReminderManager.stop(
-                                context
-                            )
+//                            User wants to DISABLE check-in
+                            isCheckInReminderEnabled = false
+                            LocalAttendanceReminderManager.stopCheckIn(context)
                         }
                     },
                     trailingIcon = {
                         Switch(
-                            checked = isReminderEnabled,
+                            checked = isCheckInReminderEnabled,
                             onCheckedChange = { enabled ->
                                 if (enabled) {
-                                    showReminderDialog = true
+                                    pendingReminderType = "CHECK_IN"
+                                    showCheckInDialog = true
                                 } else {
-                                    isReminderEnabled = false
-                                    LocalAttendanceReminderManager.stop(context)
+                                    isCheckInReminderEnabled = false
+                                    LocalAttendanceReminderManager.stopCheckIn(context)
+                                }
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = colors.onSecondaryColor,
+                                checkedTrackColor = colors.tertiaryColor,
+                                uncheckedThumbColor = colors.onSecondaryColor,
+                                uncheckedTrackColor = colors.onBackgroundColor,
+                                uncheckedBorderColor = colors.transparent,
+                                checkedBorderColor = colors.transparent
+                            )
+                        )
+                    }
+                )
+
+                MyDivider(
+                    horizontalPadding = 20,
+                    color = colors.surfaceColor
+                )
+
+                SettingsItem(
+                    label = stringResource(R.string.check_out_reminder),
+                    icon = Icons.AutoMirrored.Filled.Logout,
+                    onClick = {
+                        if (!isCheckOutReminderEnabled) {
+//                            User wants to ENABLE check-out
+                            pendingReminderType = "CHECK_OUT"
+                            showCheckOutDialog = true
+                        } else {
+//                            User wants to DISABLE check-out
+                            isCheckOutReminderEnabled = false
+                            LocalAttendanceReminderManager.stopCheckOut(context)
+                        }
+                    },
+                    trailingIcon = {
+                        Switch(
+                            checked = isCheckOutReminderEnabled,
+                            onCheckedChange = { enabled ->
+                                if (enabled) {
+                                    pendingReminderType = "CHECK_OUT"
+                                    showCheckOutDialog = true
+                                } else {
+                                    isCheckOutReminderEnabled = false
+                                    LocalAttendanceReminderManager.stopCheckOut(context)
                                 }
                             },
                             colors = SwitchDefaults.colors(
@@ -236,24 +355,26 @@ fun AttendanceReminderCard() {
         }
     }
 
-    if (showReminderDialog) {
-
+    if (showCheckInDialog) {
         MyDialog(
             onConfirm = {
-                showReminderDialog = false
+                showCheckInDialog = false
+                pendingReminderType = "CHECK_IN"
 
+//                Background permission already exists
                 if (hasBackgroundLocationPermission(context)) {
-                    isReminderEnabled = true
-                    LocalAttendanceReminderManager.start(context)
+                    startPendingReminder()
                 } else {
+//                 Need permission
                     showPermissionDialog = true
                 }
             },
             onDismiss = {
-                showReminderDialog = false
-                isReminderEnabled = false
+                showCheckInDialog = false
+                isCheckInReminderEnabled = false
+                pendingReminderType = null
             },
-            title = stringResource(R.string.attendance_reminder),
+            title = stringResource(R.string.check_in_reminder),
             subtitle = "",
             subtitleContent = {
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -268,22 +389,11 @@ fun AttendanceReminderCard() {
                                     color = colors.tertiaryColor
                                 )
                             ) {
-                                append(stringResource(R.string.check_out_reminder_title))
-                            }
-                            append(" ")
-                            append(stringResource(R.string.check_out_reminder_description))
-
-                            append("\n\n")
-                            withStyle(
-                                style = SpanStyle(
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.tertiaryColor
-                                )
-                            ) {
-                                append(stringResource(R.string.check_in_reminder_title))
+                                append(stringResource( R.string.check_in_reminder_title))
                             }
                             append(" ")
                             append(stringResource(R.string.check_in_reminder_description))
+
                             append("\n")
                         },
                         fontSize = 16.sp,
@@ -296,7 +406,92 @@ fun AttendanceReminderCard() {
                         color = colors.tertiaryColor.copy(alpha = 0.12f)
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = 12.dp,
+                                    vertical = 10.dp
+                                ),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            InfoIcon()
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = stringResource(
+                                    R.string.attendance_reminder_no_api
+                                ),
+                                color = colors.onBackgroundColor,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButtonText = stringResource(R.string.ok),
+
+            dismissButtonText = stringResource(R.string.cancel)
+        )
+    }
+
+
+
+    if (showCheckOutDialog) {
+        MyDialog(
+            onConfirm = {
+                showCheckOutDialog = false
+                pendingReminderType = "CHECK_OUT"
+
+//                Background permission already exists
+                if (hasBackgroundLocationPermission(context)) {
+                    startPendingReminder()
+                } else {
+//                 Need permission
+                    showPermissionDialog = true
+                }
+            },
+            onDismiss = {
+                showCheckOutDialog = false
+                isCheckOutReminderEnabled = false
+                pendingReminderType = null
+            },
+            title = stringResource(R.string.check_out_reminder),
+            subtitle = "",
+            subtitleContent = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = buildAnnotatedString {
+                            append(stringResource(R.string.attendance_reminder_intro))
+                            append("\n\n")
+
+                            withStyle(
+                                style = SpanStyle(
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.tertiaryColor
+                                )
+                            ) {
+                                append(stringResource( R.string.check_out_reminder_title))
+                            }
+                            append(" ")
+                            append(stringResource(R.string.check_out_reminder_description))
+
+                            append("\n")
+                        },
+                        fontSize = 16.sp,
+                        lineHeight = 23.sp,
+                        color = colors.onBackgroundColor
+                    )
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = colors.tertiaryColor.copy(alpha = 0.12f)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .padding(
                                     horizontal = 12.dp,
                                     vertical = 10.dp
@@ -369,9 +564,7 @@ fun AttendanceReminderCard() {
             dismissButtonText = stringResource(R.string.cancel),
 
             onConfirm = {
-
                 Log.d("LOCATION_PERMISSION", "========== BACKGROUND LOCATION OK ==========")
-
                 Log.d("LOCATION_PERMISSION", "SDK = ${Build.VERSION.SDK_INT}")
 
                 val fineGranted =
@@ -387,13 +580,11 @@ fun AttendanceReminderCard() {
                     ) == PackageManager.PERMISSION_GRANTED
 
                 Log.d("LOCATION_PERMISSION", "Fine = $fineGranted")
-
                 Log.d("LOCATION_PERMISSION", "Coarse = $coarseGranted")
 
                 if (!fineGranted && !coarseGranted) {
 
                     Log.d("LOCATION_PERMISSION", "Foreground location missing")
-
                     locationPermissionLauncher.launch(
                         arrayOf(
                             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -409,9 +600,9 @@ fun AttendanceReminderCard() {
 
                     Log.d("LOCATION_PERMISSION", "Android 10 → requesting background permission")
 
-                    backgroundPermissionLauncher.launch(
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    )
+                    showPermissionDialog = false
+
+                    backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
 
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 
@@ -427,8 +618,12 @@ fun AttendanceReminderCard() {
 
             onDismiss = {
                 showPermissionDialog = false
-                isReminderEnabled = false
-            }
+                when (pendingReminderType) {
+                    "CHECK_IN" -> { isCheckInReminderEnabled = false }
+                    "CHECK_OUT" -> { isCheckOutReminderEnabled = false }
+                }
+                pendingReminderType = null
+                }
         )
     }
 }
