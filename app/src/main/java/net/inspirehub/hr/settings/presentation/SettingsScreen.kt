@@ -70,12 +70,12 @@ fun SettingsScreen(
             }
 
             item {
-                AccountCard(navController = navController)
+                AttendanceReminderCard()
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
-                AttendanceReminderCard()
+                AccountCard(navController = navController)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }

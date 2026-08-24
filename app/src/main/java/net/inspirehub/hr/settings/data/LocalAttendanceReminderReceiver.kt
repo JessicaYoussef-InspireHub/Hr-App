@@ -9,15 +9,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.media.AudioAttributes
 import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 import net.inspirehub.hr.MainActivity
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
+import androidx.core.net.toUri
 
 class LocalAttendanceReminderReceiver : BroadcastReceiver() {
 
@@ -25,11 +25,9 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
         context: Context,
         intent: Intent?
     ) {
-        val pendingResult = goAsync()
         val appContext = context.applicationContext
         createNotificationChannel(appContext)
 
-        try {
             val sharedPrefManager = SharedPrefManager(appContext)
 
 //        Check if at least one reminder is enabled
@@ -38,7 +36,7 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
 
             if (!checkInEnabled && !checkOutEnabled) {
                 Log.d(TAG, "No attendance reminders enabled - skipping alarm")
-                pendingResult.finish()
+
                 return
             }
 
@@ -56,64 +54,17 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
 
                 Log.e(TAG, "Alarm Location permission not granted")
 
-                pendingResult.finish()
                 return
             }
 
-//        Get location
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(appContext)
+            Log.d(
+                TAG,
+                "Alarm fired -> requesting location from foreground service"
+            )
 
-            fusedLocationClient
-                .getCurrentLocation(
-                    Priority.PRIORITY_HIGH_ACCURACY,
-                    null
-                ).addOnSuccessListener { location ->
-
-                    if (location == null) {
-                        Log.d(TAG, "Alarm No current location available")
-
-                        // Retry after minimum interval
-                        LocalAttendanceReminderManager.scheduleNextAlarm(
-                            context = appContext,
-                            delayMinutes = LocalAttendanceReminderManager.MIN_INTERVAL_MINUTES
-                        )
-
-                        pendingResult.finish()
-                        return@addOnSuccessListener
-                    }
-
-                    Log.d(
-                        TAG,
-                        "Alarm Location = " + "${location.latitude}, " + "${location.longitude}"
-                    )
-
-                    checkAttendanceReminder(
-                        context = appContext,
-                        latitude = location.latitude,
-                        longitude = location.longitude
-                    )
-
-                    pendingResult.finish()
-                }
-                .addOnFailureListener { exception ->
-
-                    Log.e(TAG, "Alarm Failed to get location", exception)
-
-                    // Retry after minimum interval
-                    LocalAttendanceReminderManager.scheduleNextAlarm(
-                        context = appContext,
-                        delayMinutes = LocalAttendanceReminderManager.MIN_INTERVAL_MINUTES
-                    )
-
-                    pendingResult.finish()
-                }
-
-        } catch (e: Exception) {
-
-            Log.e(TAG, "Alarm Error inside reminder receiver", e)
-
-            pendingResult.finish()
-        }
+            appContext.startAttendanceLocationService(
+                AttendanceLocationForegroundService.ACTION_GET_LOCATION
+            )
     }
 
     private fun calculateNextIntervalMinutes(
@@ -191,13 +142,13 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
         // 3️⃣ Determine whether inside allowed area
         val nearestCompany = companies.minByOrNull { company ->
 
-                calculateDistance(
-                    latitude = latitude,
-                    longitude = longitude,
-                    companyLat = company.lat,
-                    companyLng = company.lng
-                )
-            }
+            calculateDistance(
+                latitude = latitude,
+                longitude = longitude,
+                companyLat = company.lat,
+                companyLng = company.lng
+            )
+        }
 
         val allowedDistance =  nearestCompany?.allowedDistance?.toFloat() ?: 50f
         val isInside = nearestDistance <= allowedDistance
@@ -230,12 +181,12 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
                         "Alarm Check-in reminder already shown -> skip notification"
                     )
                 } else {
-                showReminderNotification(
-                    context = context,
-                    type = CHECK_IN_REMINDER,
-                    title = context.getString(R.string.check_in_reminder),
-                    message = context.getString(R.string.you_are_inside_work_location_without_check_in)
-                )
+                    showReminderNotification(
+                        context = context,
+                        type = CHECK_IN_REMINDER,
+                        title = context.getString(R.string.check_in_reminder),
+                        message = context.getString(R.string.you_are_inside_work_location_without_check_in)
+                    )
                     sharedPrefManager.saveLastAttendanceReminderType(CHECK_IN_REMINDER)
                 }
 
@@ -273,12 +224,12 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
                 if (lastReminderType == CHECK_OUT_REMINDER) {
                     Log.d(TAG, "Alarm Check-out reminder already shown -> skip notification")
                 } else {
-                showReminderNotification(
-                    context = context,
-                    type = CHECK_OUT_REMINDER,
-                    title = context.getString(R.string.check_out_reminder),
-                    message = context.getString(R.string.you_left_work_location_without_check_out)
-                )
+                    showReminderNotification(
+                        context = context,
+                        type = CHECK_OUT_REMINDER,
+                        title = context.getString(R.string.check_out_reminder),
+                        message = context.getString(R.string.you_left_work_location_without_check_out)
+                    )
                     sharedPrefManager.saveLastAttendanceReminderType(CHECK_OUT_REMINDER)
                 }
 
@@ -412,12 +363,25 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
         ) {
 
+            val soundUri = "android.resource://${context.packageName}/${R.raw.attendance_reminder}".toUri()
+
+            val audioAttributes =
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+
             val channel =
                 NotificationChannel(
                     REMINDER_CHANNEL_ID,
                     "Attendance Reminders",
                     NotificationManager.IMPORTANCE_HIGH
-                )
+                ).apply {
+                    description =  "Attendance check-in and check-out reminders"
+                    setSound(soundUri, audioAttributes)
+                    enableVibration(true)
+                    setShowBadge(true)
+                }
 
             val manager = context.getSystemService(
                 NotificationManager::class.java
@@ -453,9 +417,26 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
         private const val REMINDER_NOTIFICATION_ID = 9002
         private const val CHECK_IN_REQUEST_CODE = 9003
         private const val CHECK_OUT_REQUEST_CODE = 9004
-        private const val REMINDER_CHANNEL_ID = "attendance_reminders"
+        private const val REMINDER_CHANNEL_ID = "attendance_reminders_v2"
+
         private const val CHECK_IN_REMINDER = "CHECK_IN_REMINDER"
         private const val CHECK_OUT_REMINDER = "CHECK_OUT_REMINDER"
+
+        fun handleLocation(
+            context: Context,
+            latitude: Double,
+            longitude: Double
+        ) {
+
+            val receiver =
+                LocalAttendanceReminderReceiver()
+
+            receiver.checkAttendanceReminder(
+                context = context,
+                latitude = latitude,
+                longitude = longitude
+            )
+        }
 
         fun cancelReminderNotification(context: Context) {
 
@@ -464,7 +445,9 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
                     Context.NOTIFICATION_SERVICE
                 ) as NotificationManager
 
-            notificationManager.cancel(REMINDER_NOTIFICATION_ID)
+            notificationManager.cancel(
+                REMINDER_NOTIFICATION_ID
+            )
 
             Log.d(
                 TAG,

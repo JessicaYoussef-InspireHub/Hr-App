@@ -22,6 +22,10 @@ object LocalAttendanceReminderManager {
 
         sharedPrefManager.saveLastAttendanceReminderType(null)
 
+        // Start foreground location service
+        appContext.startAttendanceLocationService(
+            AttendanceLocationForegroundService.ACTION_START
+        )
         checkNow(appContext)
     }
 
@@ -46,6 +50,10 @@ object LocalAttendanceReminderManager {
 
         sharedPrefManager.saveLastAttendanceReminderType(null)
 
+        // Start foreground location service
+        appContext.startAttendanceLocationService(
+            AttendanceLocationForegroundService.ACTION_START
+        )
         checkNow(appContext)
     }
 
@@ -94,6 +102,9 @@ object LocalAttendanceReminderManager {
 
         if (!checkInEnabled && !checkOutEnabled) {
             cancelAlarm(context)
+            context.startAttendanceLocationService(
+                AttendanceLocationForegroundService.ACTION_STOP
+            )
         }
     }
 

@@ -14,15 +14,18 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 <!--     Android 10+-->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" tools:ignore="BackgroundLocationPolicy" />
     <!-- Android 9+ -->
-<!--    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:ignore="ForegroundServicesPolicy" />-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:ignore="ForegroundServicesPolicy" />
     <!-- Android 14 -->
-<!--    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>-->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+
     <uses-feature android:name="android.hardware.fingerprint" android:required="true" />
+
+
 
 
 
@@ -78,20 +81,24 @@
 <!--            android:exported="false"-->
 <!--            android:foregroundServiceType="location" />-->
 
+        <service
+            android:name=".settings.data.AttendanceLocationForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
         <receiver
             android:name=".settings.data.LocalAttendanceReminderReceiver"
             android:exported="false" />
 
+
         <receiver
             android:name=".settings.data.BootCompletedReceiver"
             android:enabled="true"
-            android:exported="true">
-
+            android:exported="false">
             <intent-filter>
-                <action
-                    android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-
         </receiver>
 
 

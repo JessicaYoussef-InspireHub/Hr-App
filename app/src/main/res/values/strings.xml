@@ -380,6 +380,7 @@ You have</string>
     <string name="background_location_message">To enable attendance reminders while the app is running in the background, the app needs permission to access your location all the time.\n\nAfter tapping "OK", the app settings will open.\n\nSelect:\nPermissions → Location → Allow all the time\n\nThen return to the app to complete the activation.
 </string>
     <string name="open_settings">Open Settings</string>
-
+    <string name="attendance_reminders_active">Attendance reminders are active</string>
+    <string name="work_location_checked_periodically">Your work location is being checked periodically</string>
 
 </resources>

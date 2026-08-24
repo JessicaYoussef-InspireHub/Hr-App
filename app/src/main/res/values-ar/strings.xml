@@ -383,7 +383,8 @@
     <string name="background_location_permission">السماح بالموقع في الخلفية</string>
     <string name="background_location_message">لتفعيل تذكيرات الحضور أثناء عمل التطبيق في الخلفية، يحتاج التطبيق إلى السماح بالوصول إلى الموقع طوال الوقت.\n\nبعد الضغط على "موافق"، سيتم فتح إعدادات التطبيق.\n\nاختر: الأذونات ← الموقع ← السماح طوال الوقت (Allow all the time)\n\nثم ارجع إلى التطبيق لإكمال التفعيل.</string>
     <string name="open_settings">فتح الإعدادات</string>
-
+    <string name="attendance_reminders_active">تذكيرات الحضور مفعّلة</string>
+    <string name="work_location_checked_periodically">يتم التحقق من موقع عملك بشكل دوري</string>
 
 </resources>
 
