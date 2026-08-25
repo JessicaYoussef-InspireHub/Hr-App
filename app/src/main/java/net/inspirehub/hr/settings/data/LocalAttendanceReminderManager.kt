@@ -26,7 +26,6 @@ object LocalAttendanceReminderManager {
         appContext.startAttendanceLocationService(
             AttendanceLocationForegroundService.ACTION_START
         )
-        checkNow(appContext)
     }
 
     fun stopCheckIn(context: Context) {
@@ -54,7 +53,6 @@ object LocalAttendanceReminderManager {
         appContext.startAttendanceLocationService(
             AttendanceLocationForegroundService.ACTION_START
         )
-        checkNow(appContext)
     }
 
     fun stopCheckOut(context: Context) {
