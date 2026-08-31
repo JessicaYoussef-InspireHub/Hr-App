@@ -50,7 +50,13 @@ object AttendanceLocationNotification {
      *
      * Flip to true if this ever goes on the Play Store.
      */
-    const val PERSISTENT_NOTIFICATION = false
+
+//    const val PERSISTENT_NOTIFICATION_jessica = true
+    fun isPersistentNotificationEnabled(context: Context): Boolean {
+        val sharedPref = SharedPrefManager(context.applicationContext)
+
+        return !sharedPref.isHideAutoNotification()
+    }
 
     /** Cheap and idempotent; safe to call before every post. */
     fun ensureChannel(context: Context) {
@@ -126,7 +132,8 @@ object AttendanceLocationNotification {
     /** A reminder was switched on. Only means anything in persistent mode. */
     fun onRemindersEnabled(context: Context) {
 
-        if (PERSISTENT_NOTIFICATION && anyReminderEnabled(context)) {
+        if (isPersistentNotificationEnabled(context) &&
+            anyReminderEnabled(context)) {
             post(context)
         }
     }
@@ -141,7 +148,8 @@ object AttendanceLocationNotification {
      */
     fun onFixDone(context: Context) {
 
-        if (PERSISTENT_NOTIFICATION && anyReminderEnabled(context)) {
+        if (  isPersistentNotificationEnabled(context) &&
+            anyReminderEnabled(context)) {
             post(context)
         } else {
             hide(context)

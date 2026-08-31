@@ -389,5 +389,6 @@ You have</string>
     <string name="battery_optimization_warning_title">Attendance reminders will not work</string>
     <string name="battery_optimization_warning_message">This app is still restricted by battery optimization, so the scheduled location check can be blocked. Tap here to allow it.</string>
     <string name="battery_optimization_allow">Allow</string>
+    <string name="hide_auto_notification">Hide auto notification</string>
 
 </resources>

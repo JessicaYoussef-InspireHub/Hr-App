@@ -19,7 +19,7 @@ import net.inspirehub.hr.MainActivity
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
-import net.inspirehub.hr.sign_in.data.getTrackingConfig
+//import net.inspirehub.hr.sign_in.data.getTrackingConfig
 
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
@@ -75,31 +75,31 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
                 try {
 
-                    val response = getTrackingConfig(
-                        context = applicationContext,
-                        employeeToken = token
-                    )
+//                    val response = getTrackingConfig(
+//                        context = applicationContext,
+//                        employeeToken = token
+//                    )
 
-                    val config = response.result
+//                    val config = response.result
 
-                    // Save latest values
-                    sharedPref.saveIsTracked(config.is_tracked)
-
-                    sharedPref.saveWorkingHoursOnly(config.working_hours_only)
-
-                    sharedPref.saveTrackingIntervalMinutes(config.tracking_interval_minutes)
-
-                    sharedPref.saveMinDistanceMeters(config.min_distance_meters)
-
-                    Log.d("TEST FCM_CONFIG", "✅ Latest config saved from API")
-
-                    Log.d(
-                        "TEST FCM_CONFIG",
-                        "isTracked=${config.is_tracked} | " +
-                                "workingHoursOnly=${config.working_hours_only} | " +
-                                "interval=${config.tracking_interval_minutes} | " +
-                                "minDistance=${config.min_distance_meters}"
-                    )
+//                    // Save latest values
+//                    sharedPref.saveIsTracked(config.is_tracked)
+//
+//                    sharedPref.saveWorkingHoursOnly(config.working_hours_only)
+//
+//                    sharedPref.saveTrackingIntervalMinutes(config.tracking_interval_minutes)
+//
+//                    sharedPref.saveMinDistanceMeters(config.min_distance_meters)
+//
+//                    Log.d("TEST FCM_CONFIG", "✅ Latest config saved from API")
+//
+//                    Log.d(
+//                        "TEST FCM_CONFIG",
+//                        "isTracked=${config.is_tracked} | " +
+//                                "workingHoursOnly=${config.working_hours_only} | " +
+//                                "interval=${config.tracking_interval_minutes} | " +
+//                                "minDistance=${config.min_distance_meters}"
+//                    )
 
 
                     // Update tracking immediately

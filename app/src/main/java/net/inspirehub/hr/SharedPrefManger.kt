@@ -11,6 +11,18 @@ import java.util.Date
 
 class SharedPrefManager(context: Context) {
 
+    private val HIDE_AUTO_NOTIFICATION = "hide_auto_notification"
+
+    fun setHideAutoNotification(hide: Boolean) {
+        prefs.edit {
+            putBoolean(HIDE_AUTO_NOTIFICATION, hide)
+        }
+    }
+
+    fun isHideAutoNotification(): Boolean {
+        return prefs.getBoolean(HIDE_AUTO_NOTIFICATION, false)
+    }
+
     fun setLocationPermissionRequested(requested: Boolean) {
         prefs.edit {
             putBoolean("location_permission_requested", requested)

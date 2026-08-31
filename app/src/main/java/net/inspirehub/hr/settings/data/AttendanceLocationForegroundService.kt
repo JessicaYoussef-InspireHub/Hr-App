@@ -190,7 +190,7 @@ class AttendanceLocationForegroundService : Service() {
          */
         ServiceCompat.stopForeground(
             this,
-            if (AttendanceLocationNotification.PERSISTENT_NOTIFICATION) {
+            if (AttendanceLocationNotification.isPersistentNotificationEnabled(applicationContext)) {
                 ServiceCompat.STOP_FOREGROUND_DETACH
             } else {
                 ServiceCompat.STOP_FOREGROUND_REMOVE

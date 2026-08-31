@@ -61,6 +61,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import net.inspirehub.hr.MyDivider
+import androidx.compose.material.icons.filled.NotificationsOff
+import net.inspirehub.hr.settings.data.AttendanceLocationNotification
 
 @Composable
 fun AttendanceReminderCard() {
@@ -71,6 +73,7 @@ fun AttendanceReminderCard() {
 
     var isCheckInReminderEnabled by remember { mutableStateOf(sharedPref.isCheckInReminderEnabled()) }
     var isCheckOutReminderEnabled by remember { mutableStateOf(sharedPref.isCheckOutReminderEnabled()) }
+    var hideAutoNotification by remember { mutableStateOf(sharedPref.isHideAutoNotification()) }
     var showCheckInDialog by remember { mutableStateOf(false) }
     var showCheckOutDialog by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -383,6 +386,10 @@ fun AttendanceReminderCard() {
             )
         ) {
             Column {
+
+
+
+
                 SettingsItem(
                     label = stringResource(R.string.check_in_reminder),
                     icon = Icons.Default.HowToReg,
@@ -470,10 +477,7 @@ fun AttendanceReminderCard() {
                  * so it comes back the moment the employee undoes the exemption in
                  * system settings.
                  */
-                if (
-                    (isCheckInReminderEnabled || isCheckOutReminderEnabled) &&
-                    !isBatteryUnrestricted
-                ) {
+                if ((isCheckInReminderEnabled || isCheckOutReminderEnabled) && !isBatteryUnrestricted) {
 
                     MyDivider(
                         horizontalPadding = 20,
@@ -527,6 +531,74 @@ fun AttendanceReminderCard() {
                         )
                     }
                 }
+
+                if (isCheckInReminderEnabled || isCheckOutReminderEnabled) {
+                    MyDivider(
+                        horizontalPadding = 20,
+                        color = colors.surfaceColor
+                    )
+
+                    SettingsItem(
+                        label = stringResource(R.string.hide_auto_notification),
+                        icon = Icons.Default.NotificationsOff,
+                        onClick = {
+                            hideAutoNotification = !hideAutoNotification
+
+                            sharedPref.setHideAutoNotification(
+                                hideAutoNotification
+                            )
+
+                            if (hideAutoNotification) {
+                                // User chose to hide the notification
+                                AttendanceLocationNotification.hide(context)
+                            } else {
+                                // User wants the notification back
+                                if (
+                                    isCheckInReminderEnabled ||
+                                    isCheckOutReminderEnabled
+                                ) {
+                                    AttendanceLocationNotification.onRemindersEnabled(context)
+                                }
+                            }
+                        },
+                        trailingIcon = {
+                            Switch(
+                                checked = hideAutoNotification,
+                                onCheckedChange = { enabled ->
+
+                                    hideAutoNotification = enabled
+
+                                    sharedPref.setHideAutoNotification(enabled)
+
+                                    if (enabled) {
+
+                                        AttendanceLocationNotification.hide(context)
+
+                                    } else {
+
+                                        if (
+                                            isCheckInReminderEnabled ||
+                                            isCheckOutReminderEnabled
+                                        ) {
+                                            AttendanceLocationNotification.onRemindersEnabled(
+                                                context
+                                            )
+                                        }
+                                    }
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = colors.onSecondaryColor,
+                                    checkedTrackColor = colors.tertiaryColor,
+                                    uncheckedThumbColor = colors.onSecondaryColor,
+                                    uncheckedTrackColor = colors.onBackgroundColor,
+                                    uncheckedBorderColor = colors.transparent,
+                                    checkedBorderColor = colors.transparent
+                                )
+                            )
+                        }
+                    )
+                }
+
             }
         }
     }
@@ -809,6 +881,7 @@ fun AttendanceReminderCard() {
      * it does work on some devices without the exemption. What they get instead is
      * the warning row inside the card, which stays until they change their mind.
      */
+
     if (showBatteryDialog) {
 
         MyDialog(
@@ -818,6 +891,7 @@ fun AttendanceReminderCard() {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+
                     Text(
                         text = stringResource(R.string.battery_optimization_message),
                         color = colors.onBackgroundColor,
@@ -826,7 +900,9 @@ fun AttendanceReminderCard() {
                         fontWeight = FontWeight.Medium
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
 
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -842,12 +918,17 @@ fun AttendanceReminderCard() {
                                 ),
                             verticalAlignment = Alignment.Top
                         ) {
+
                             InfoIcon()
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(
+                                modifier = Modifier.width(8.dp)
+                            )
 
                             Text(
-                                text = stringResource(R.string.battery_optimization_note),
+                                text = stringResource(
+                                    R.string.battery_optimization_note
+                                ),
                                 color = colors.onBackgroundColor,
                                 fontSize = 14.sp,
                                 lineHeight = 20.sp,
@@ -858,9 +939,13 @@ fun AttendanceReminderCard() {
                 }
             },
 
-            confirmButtonText = stringResource(R.string.open_settings),
+            confirmButtonText = stringResource(
+                R.string.open_settings
+            ),
 
-            dismissButtonText = stringResource(R.string.cancel),
+            dismissButtonText = stringResource(
+                R.string.cancel
+            ),
 
             onConfirm = {
                 showBatteryDialog = false

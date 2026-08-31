@@ -392,6 +392,7 @@
     <string name="battery_optimization_warning_title">لن تعمل تذكيرات الحضور</string>
     <string name="battery_optimization_warning_message">ما زال هذا التطبيق مقيّدًا بواسطة تحسين البطارية، لذلك قد يتم منع التحقق الدوري من الموقع. اضغط هنا للسماح.</string>
     <string name="battery_optimization_allow">السماح</string>
+    <string name="hide_auto_notification">إخفاء الإشعار تلقائيًا</string>
 
 </resources>
 
