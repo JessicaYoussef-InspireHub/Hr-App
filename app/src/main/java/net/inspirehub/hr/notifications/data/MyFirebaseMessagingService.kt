@@ -58,7 +58,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val type = remoteMessage.data["type"]
 
-        if (type == "location_tracking_config_update") {
+        if (type == "location_tracking_config_update" || type == "company_location_update") {
 
             Log.d("TEST FCM_CONFIG", "📩 Tracking config changed → fetching latest config")
 

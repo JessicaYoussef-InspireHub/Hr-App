@@ -28,8 +28,7 @@ import java.util.Locale
 object LocalAttendanceReminderManager {
 
     private const val REQUEST_CODE = 9001
-
-    const val MIN_INTERVAL_MINUTES = 2L
+    const val MIN_INTERVAL_MINUTES = 1L
 
     private val CLOCK_FMT = SimpleDateFormat("HH:mm:ss", Locale.US)
 
