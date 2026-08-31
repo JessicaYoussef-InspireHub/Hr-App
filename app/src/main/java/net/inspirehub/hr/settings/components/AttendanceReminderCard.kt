@@ -2,6 +2,11 @@ package net.inspirehub.hr.settings.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Icon
+import net.inspirehub.hr.settings.data.AttendanceReminderPowerSettings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -71,6 +76,16 @@ fun AttendanceReminderCard() {
     var showPermissionDialog by remember { mutableStateOf(false) }
     var pendingReminderType by remember { mutableStateOf<String?>(null) }
 
+    var showBatteryDialog by remember { mutableStateOf(false) }
+
+    //  True while the system battery dialog is on screen, so ON_RESUME does not
+    //  race the launcher result and ask a second time.
+    var awaitingBatteryResult by remember { mutableStateOf(false) }
+
+    var isBatteryUnrestricted by remember {
+        mutableStateOf(AttendanceReminderPowerSettings.isBatteryUnrestricted(context))
+    }
+
     //    Function: start selected reminder
     fun startPendingReminder() {
         when (pendingReminderType) {
@@ -90,6 +105,30 @@ fun AttendanceReminderCard() {
         }
 
         pendingReminderType = null
+    }
+
+    /*
+     * Location permission is settled by the time this runs. The last thing Android
+     * needs is the battery-optimisation exemption: without it a background process
+     * may not start a foreground service on Android 12+, which is exactly what the
+     * scheduled check has to do. Ask once here; if the employee says no, the
+     * reminder is still switched on and the warning row below stays on screen.
+     */
+    fun continueAfterLocationGranted() {
+
+        isBatteryUnrestricted =
+            AttendanceReminderPowerSettings.isBatteryUnrestricted(context)
+
+        if (isBatteryUnrestricted) {
+
+            startPendingReminder()
+
+        } else {
+
+            Log.d("ATTENDANCE_REMINDER", "App is battery restricted -> asking for the exemption")
+
+            showBatteryDialog = true
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -120,6 +159,14 @@ fun AttendanceReminderCard() {
             if (event == Lifecycle.Event.ON_RESUME) {
 
                 Log.d("LOCATION_PERMISSION", "ON_RESUME")
+
+                /*
+                 * Re-read on every resume: the employee can put the app back under
+                 * battery optimisation from system settings at any time, and the
+                 * warning row inside the card has to appear again when they do.
+                 */
+                isBatteryUnrestricted =
+                    AttendanceReminderPowerSettings.isBatteryUnrestricted(context)
 
                 val backgroundGranted = hasBackgroundLocationPermission(context)
 
@@ -153,7 +200,12 @@ fun AttendanceReminderCard() {
                 }
 
                 // Permission was granted after opening settings
-                if (pendingReminderType != null && backgroundGranted) {
+                if (
+                    pendingReminderType != null &&
+                    backgroundGranted &&
+                    !showBatteryDialog &&
+                    !awaitingBatteryResult
+                ) {
 
                     Log.d(
                         "LOCATION_PERMISSION",
@@ -161,7 +213,7 @@ fun AttendanceReminderCard() {
                     )
 
                     showPermissionDialog = false
-                    startPendingReminder()
+                    continueAfterLocationGranted()
                 }
             }
         }
@@ -169,6 +221,66 @@ fun AttendanceReminderCard() {
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+/*
+ *  Battery optimisation launcher. The system dialog never reports a useful result
+ *  code - "OK" and "back" both come back RESULT_CANCELED - so the answer is read
+ *  from PowerManager instead. Either way the reminder is switched on: a refusal
+ *  leaves the warning row on screen rather than blocking the feature.
+ */
+    val batteryExemptionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+
+        awaitingBatteryResult = false
+
+        isBatteryUnrestricted =
+            AttendanceReminderPowerSettings.isBatteryUnrestricted(context)
+
+        Log.d(
+            "ATTENDANCE_REMINDER",
+            "Battery exemption result -> unrestricted = $isBatteryUnrestricted"
+        )
+
+        if (pendingReminderType != null) {
+            startPendingReminder()
+        }
+    }
+
+    /*
+     * The one-tap system dialog first; the full battery-optimisation list when a ROM
+     * has removed it. resolveActivity() is not trustworthy here - package visibility
+     * on Android 11+ can hide the Activity from us even when it exists - so we just
+     * try, and fall back on the throw.
+     */
+    fun launchBatteryExemption() {
+
+        awaitingBatteryResult = true
+
+        runCatching {
+
+            batteryExemptionLauncher.launch(
+                AttendanceReminderPowerSettings.exemptionIntent(context)
+            )
+
+        }.onFailure {
+
+            Log.w("ATTENDANCE_REMINDER", "No direct exemption dialog -> opening the list", it)
+
+            runCatching {
+
+                batteryExemptionLauncher.launch(
+                    AttendanceReminderPowerSettings.batterySettingsIntent()
+                )
+
+            }.onFailure { noSettings ->
+
+                awaitingBatteryResult = false
+
+                Log.e("ATTENDANCE_REMINDER", "No battery settings screen on this device", noSettings)
+            }
         }
     }
 
@@ -185,7 +297,7 @@ fun AttendanceReminderCard() {
 
             Log.d("LOCATION_PERMISSION", "Background location GRANTED")
             showPermissionDialog = false
-            startPendingReminder()
+            continueAfterLocationGranted()
 
         } else {
 
@@ -351,6 +463,70 @@ fun AttendanceReminderCard() {
                         )
                     }
                 )
+
+                /*
+                 * Stays on screen for as long as a reminder is on and Android is
+                 * still allowed to restrict the app. Re-checked on every ON_RESUME,
+                 * so it comes back the moment the employee undoes the exemption in
+                 * system settings.
+                 */
+                if (
+                    (isCheckInReminderEnabled || isCheckOutReminderEnabled) &&
+                    !isBatteryUnrestricted
+                ) {
+
+                    MyDivider(
+                        horizontalPadding = 20,
+                        color = colors.surfaceColor
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { launchBatteryExemption() }
+                            .padding(
+                                horizontal = 20.dp,
+                                vertical = 12.dp
+                            ),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = colors.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.battery_optimization_warning_title),
+                                color = colors.error,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            Text(
+                                text = stringResource(R.string.battery_optimization_warning_message),
+                                color = colors.onBackgroundColor,
+                                fontSize = 13.sp,
+                                lineHeight = 18.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = stringResource(R.string.battery_optimization_allow),
+                            color = colors.tertiaryColor,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }
@@ -363,7 +539,7 @@ fun AttendanceReminderCard() {
 
 //                Background permission already exists
                 if (hasBackgroundLocationPermission(context)) {
-                    startPendingReminder()
+                    continueAfterLocationGranted()
                 } else {
 //                 Need permission
                     showPermissionDialog = true
@@ -447,7 +623,7 @@ fun AttendanceReminderCard() {
 
 //                Background permission already exists
                 if (hasBackgroundLocationPermission(context)) {
-                    startPendingReminder()
+                    continueAfterLocationGranted()
                 } else {
 //                 Need permission
                     showPermissionDialog = true
@@ -624,6 +800,85 @@ fun AttendanceReminderCard() {
                 }
                 pendingReminderType = null
                 }
+        )
+    }
+
+    /*
+     * The last gate before a reminder is switched on. Unlike the location dialogs,
+     * saying no here does not cancel the reminder - the employee asked for it, and
+     * it does work on some devices without the exemption. What they get instead is
+     * the warning row inside the card, which stays until they change their mind.
+     */
+    if (showBatteryDialog) {
+
+        MyDialog(
+            title = stringResource(R.string.battery_optimization_title),
+            subtitle = " ",
+            subtitleContent = {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.battery_optimization_message),
+                        color = colors.onBackgroundColor,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = colors.tertiaryColor.copy(alpha = 0.12f)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = 12.dp,
+                                    vertical = 10.dp
+                                ),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            InfoIcon()
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = stringResource(R.string.battery_optimization_note),
+                                color = colors.onBackgroundColor,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            },
+
+            confirmButtonText = stringResource(R.string.open_settings),
+
+            dismissButtonText = stringResource(R.string.cancel),
+
+            onConfirm = {
+                showBatteryDialog = false
+                launchBatteryExemption()
+            },
+
+            onDismiss = {
+                showBatteryDialog = false
+
+                Log.d(
+                    "ATTENDANCE_REMINDER",
+                    "Battery exemption refused - enabling anyway, warning stays on screen"
+                )
+
+                // Honour the switch the employee flipped; the warning row does the
+                // reminding from here on.
+                startPendingReminder()
+            }
         )
     }
 }

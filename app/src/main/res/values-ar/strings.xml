@@ -386,5 +386,12 @@
     <string name="attendance_reminders_active">تذكيرات الحضور مفعّلة</string>
     <string name="work_location_checked_periodically">يتم التحقق من موقع عملك بشكل دوري</string>
 
+    <string name="battery_optimization_title">تحسين البطارية</string>
+    <string name="battery_optimization_message">يقوم نظام أندرويد بتقييد التطبيقات في الخلفية لتوفير البطارية. وطالما كان هذا التطبيق مقيّدًا، سيتم منع التحقق الدوري من الموقع ولن تصلك تذكيرات الحضور.\n\nبعد الضغط على "فتح الإعدادات"، اختر:\nالسماح / عدم التحسين\n\nثم ارجع إلى التطبيق لإكمال التفعيل.</string>
+    <string name="battery_optimization_note">يقوم التطبيق بتشغيل نظام تحديد المواقع لثوانٍ قليلة فقط في كل عملية تحقق، لذلك يظل تأثيره على البطارية بسيطًا.</string>
+    <string name="battery_optimization_warning_title">لن تعمل تذكيرات الحضور</string>
+    <string name="battery_optimization_warning_message">ما زال هذا التطبيق مقيّدًا بواسطة تحسين البطارية، لذلك قد يتم منع التحقق الدوري من الموقع. اضغط هنا للسماح.</string>
+    <string name="battery_optimization_allow">السماح</string>
+
 </resources>
 

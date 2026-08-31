@@ -23,6 +23,13 @@
     <!-- Android 14 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
 
+    <!-- Lets the attendance reminder show the "stop restricting this app" dialog.
+         Without the exemption, Android 12+ refuses the scheduled location check
+         because an alarm receiver counts as a background process. -->
+    <uses-permission
+        android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+        tools:ignore="BatteryLife" />
+
     <uses-feature android:name="android.hardware.fingerprint" android:required="true" />
 
 
@@ -81,23 +88,34 @@
 <!--            android:exported="false"-->
 <!--            android:foregroundServiceType="location" />-->
 
+        <!-- Lives for exactly one GPS reading. stopWithTask="false" so swiping the
+             app out of recents does not kill a reading that is in progress. -->
         <service
             android:name=".settings.data.AttendanceLocationForegroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="location" />
+            android:foregroundServiceType="location"
+            android:stopWithTask="false" />
 
+        <!-- Fired by AlarmManager, even from a dead process. -->
         <receiver
             android:name=".settings.data.LocalAttendanceReminderReceiver"
             android:exported="false" />
 
+        <!-- Target of the reminder notification action. -->
+        <receiver
+            android:name=".settings.data.AttendanceReminderActionReceiver"
+            android:exported="false" />
 
+        <!-- A reboot wipes every pending alarm; this puts them back. BOOT_COMPLETED
+             comes from the system, so the receiver has to be exported. -->
         <receiver
             android:name=".settings.data.BootCompletedReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 

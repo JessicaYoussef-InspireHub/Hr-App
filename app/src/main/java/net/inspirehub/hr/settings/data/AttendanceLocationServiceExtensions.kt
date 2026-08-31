@@ -3,8 +3,16 @@ package net.inspirehub.hr.settings.data
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 
+/**
+ * Convenience so the receiver and the settings screen read the same way.
+ *
+ * It deliberately does NOT swallow the failure any more. From Android 12 on,
+ * startForegroundService() from a background process throws
+ * ForegroundServiceStartNotAllowedException, and the alarm receiver has to know
+ * about that so it can take the reading itself instead of silently losing the
+ * round. Callers that are on a foreground path wrap this in runCatching.
+ */
 fun Context.startAttendanceLocationService(
     action: String
 ) {
@@ -16,19 +24,12 @@ fun Context.startAttendanceLocationService(
         this.action = action
     }
 
-    try {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        startForegroundService(intent)
 
-            startForegroundService(intent)
+    } else {
 
-        } else {
-
-            startService(intent)
-        }
-
-    } catch (e: Throwable) {
-
-        Log.e("Alarm", "Could not start attendance location service", e)
+        startService(intent)
     }
 }

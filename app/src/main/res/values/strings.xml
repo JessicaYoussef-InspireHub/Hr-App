@@ -383,4 +383,11 @@ You have</string>
     <string name="attendance_reminders_active">Attendance reminders are active</string>
     <string name="work_location_checked_periodically">Your work location is being checked periodically</string>
 
+    <string name="battery_optimization_title">Battery Optimization</string>
+    <string name="battery_optimization_message">Android restricts apps in the background to save battery. While this app is restricted, the scheduled location check is blocked and attendance reminders will not reach you.\n\nAfter tapping "Open Settings", choose:\nAllow / Don\'t optimize\n\nThen return to the app to complete the activation.</string>
+    <string name="battery_optimization_note">The app only turns the GPS on for a few seconds per check, so the effect on your battery stays small.</string>
+    <string name="battery_optimization_warning_title">Attendance reminders will not work</string>
+    <string name="battery_optimization_warning_message">This app is still restricted by battery optimization, so the scheduled location check can be blocked. Tap here to allow it.</string>
+    <string name="battery_optimization_allow">Allow</string>
+
 </resources>

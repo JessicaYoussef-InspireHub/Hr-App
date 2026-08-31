@@ -12,6 +12,7 @@ import android.location.Location
 import android.media.AudioAttributes
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import net.inspirehub.hr.MainActivity
@@ -21,50 +22,120 @@ import androidx.core.net.toUri
 
 class LocalAttendanceReminderReceiver : BroadcastReceiver() {
 
+    /**
+     * Woken up by AlarmManager. This runs even if the app was closed and its process
+     * was gone - Android recreates the process just to deliver this.
+     *
+     * Order of business, and the order matters:
+     *   1. schedule the NEXT alarm immediately, so the chain can never break, even
+     *      if everything below fails,
+     *   2. hold the CPU awake,
+     *   3. hand the reading to the foreground service,
+     *   4. if Android refuses the service start, take the reading right here.
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     override fun onReceive(
         context: Context,
         intent: Intent?
     ) {
         val appContext = context.applicationContext
-        createNotificationChannel(appContext)
 
-            val sharedPrefManager = SharedPrefManager(appContext)
+        val sharedPrefManager = SharedPrefManager(appContext)
 
 //        Check if at least one reminder is enabled
-            val checkInEnabled = sharedPrefManager.isCheckInReminderEnabled()
-            val checkOutEnabled = sharedPrefManager.isCheckOutReminderEnabled()
+        val checkInEnabled = sharedPrefManager.isCheckInReminderEnabled()
+        val checkOutEnabled = sharedPrefManager.isCheckOutReminderEnabled()
 
-            if (!checkInEnabled && !checkOutEnabled) {
-                Log.d(TAG, "No attendance reminders enabled - skipping alarm")
+        if (!checkInEnabled && !checkOutEnabled) {
+            Log.d(TAG, "No attendance reminders enabled - no new alarm scheduled")
 
-                return
-            }
+            return
+        }
 
-            // Check location permission
-            if (
-                ActivityCompat.checkSelfPermission(
-                    appContext,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(
-                    appContext,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+        /*
+         * The next alarm is booked HERE, before anything that can fail, so the
+         * chain can never break. Everything below only ever moves it: the fix
+         * reschedules with a distance-based delay when it finishes. If every one
+         * of those paths fails we still wake up again in MIN_INTERVAL_MINUTES
+         * instead of stopping for good.
+         */
+        LocalAttendanceReminderManager.scheduleNextAlarm(
+            context = appContext,
+            delayMinutes = LocalAttendanceReminderManager.MIN_INTERVAL_MINUTES
+        )
 
-                Log.e(TAG, "Alarm Location permission not granted")
+        // Check location permission
+        if (
+            ActivityCompat.checkSelfPermission(
+                appContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                appContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
 
-                return
-            }
+            Log.e(TAG, "Alarm Location permission not granted")
 
-            Log.d(
-                TAG,
-                "Alarm fired -> requesting location from foreground service"
-            )
+            return
+        }
+
+        Log.d(
+            TAG,
+            "Alarm fired -> requesting location from foreground service"
+        )
+
+        /*
+         * Held for the gap between this broadcast and the reading actually
+         * starting. Whoever finishes the reading releases it, and the safety
+         * timeout inside AttendanceReminderWakelock covers the case where
+         * nothing ever starts.
+         */
+        AttendanceReminderWakelock.acquire(appContext)
+
+        try {
 
             appContext.startAttendanceLocationService(
                 AttendanceLocationForegroundService.ACTION_GET_LOCATION
             )
+
+        } catch (t: Throwable) {
+
+            /*
+             * ForegroundServiceStartNotAllowedException: we are a background
+             * process, and from Android 12 on a background process may not start
+             * a foreground service unless the app is exempt from battery
+             * optimisation. Take the reading right here instead - a broadcast has
+             * far less time to work with, but it beats skipping the round, and no
+             * notification is shown at all on this path.
+             */
+
+            Log.e(
+                TAG,
+                "Foreground service refused -> taking the reading inside the alarm",
+                t
+            )
+
+            val pendingResult = goAsync()
+
+            AttendanceLocationForegroundService.isTakingFix = true
+
+            AttendanceLocationFix.request(
+                context = appContext
+            ) { location ->
+
+                AttendanceLocationForegroundService.isTakingFix = false
+
+                handleFixResult(appContext, location)
+
+                AttendanceLocationNotification.onFixDone(appContext)
+
+                AttendanceReminderWakelock.release(appContext)
+
+                runCatching { pendingResult.finish() }
+            }
+        }
     }
 
     private fun calculateNextIntervalMinutes(
@@ -281,6 +352,14 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
         message: String
     ) {
 
+        /*
+         * Cheap and idempotent, and it has to happen here rather than only in
+         * onReceive(): this also runs from the foreground service, which can be
+         * started straight from the settings screen without any alarm having fired
+         * first. Posting to a channel that does not exist is silently dropped.
+         */
+        createNotificationChannel(context)
+
         val notificationManager = context.getSystemService(NotificationManager::class.java)
 
         val openAppIntent = Intent(
@@ -421,6 +500,52 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
 
         private const val CHECK_IN_REMINDER = "CHECK_IN_REMINDER"
         private const val CHECK_OUT_REMINDER = "CHECK_OUT_REMINDER"
+
+        /**
+         * The single place where the outcome of one GPS reading is turned into a
+         * decision, whoever took it: the foreground service on the normal path, or
+         * the alarm receiver itself when Android refused the service.
+         */
+        fun handleFixResult(
+            context: Context,
+            location: Location?
+        ) {
+
+            val sharedPrefManager = SharedPrefManager(context)
+
+            /*
+             * A fix can land after the employee switched the reminders off - the GPS
+             * was already searching when they flipped the switch. Acting on it would
+             * show a reminder for a moment they asked not to be reminded about.
+             */
+            if (
+                !sharedPrefManager.isCheckInReminderEnabled() &&
+                !sharedPrefManager.isCheckOutReminderEnabled()
+            ) {
+
+                Log.d(TAG, "Alarm Fix arrived after reminders were disabled -> discarded")
+
+                return
+            }
+
+            if (location == null) {
+
+                Log.d(TAG, "Alarm No GPS location for this round")
+
+                LocalAttendanceReminderManager.scheduleNextAlarm(
+                    context = context,
+                    delayMinutes = LocalAttendanceReminderManager.MIN_INTERVAL_MINUTES
+                )
+
+                return
+            }
+
+            handleLocation(
+                context = context,
+                latitude = location.latitude,
+                longitude = location.longitude
+            )
+        }
 
         fun handleLocation(
             context: Context,

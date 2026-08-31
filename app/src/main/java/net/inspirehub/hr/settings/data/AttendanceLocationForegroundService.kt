@@ -1,10 +1,6 @@
 package net.inspirehub.hr.settings.data
 
 import android.Manifest
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,12 +8,29 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.core.app.NotificationCompat
+import androidx.annotation.RequiresPermission
 import androidx.core.app.ServiceCompat
-import net.inspirehub.hr.MainActivity
-import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 
+/**
+ * The foreground service that hosts one GPS reading for the attendance reminder.
+ *
+ * It is short-lived on purpose. It used to run all day - which is why its
+ * notification never went away; now it exists for exactly as long as one GPS fix
+ * takes: a few seconds normally, at worst the timeout in AttendanceLocationFix.
+ *
+ * Life of one instance:
+ *   alarm fires -> LocalAttendanceReminderReceiver starts us with
+ *   ACTION_GET_LOCATION -> we become a foreground service (notification appears)
+ *   -> one fix -> stopSelf() (notification disappears, unless
+ *   AttendanceLocationNotification.PERSISTENT_NOTIFICATION detaches it) -> the
+ *   process is free to die until the next alarm.
+ *
+ * The catch: from Android 12 on, a process that is in the background is not allowed
+ * to start a foreground service, and an alarm receiver is in the background by
+ * definition. LocalAttendanceReminderReceiver catches that refusal and reads the
+ * position inside the broadcast instead.
+ */
 class AttendanceLocationForegroundService : Service() {
 
     companion object {
@@ -28,61 +41,38 @@ class AttendanceLocationForegroundService : Service() {
 
         const val ACTION_STOP = "net.inspirehub.hr.ATTENDANCE_LOCATION_STOP"
 
-        private const val CHANNEL_ID = "attendance_location_service"
-
-        private const val NOTIFICATION_ID = 9100
-
+        /**
+         * Is a reading happening right now. Static, not an instance field, because
+         * the service now dies between readings: the receiver fallback path and the
+         * "skip this tick" check both need to know without holding a reference to a
+         * service that may not exist.
+         */
         @Volatile
-        var isRunning = false
-            private set
+        var isTakingFix = false
+            internal set
     }
 
-    private var locationRequestInProgress = false
-
-    override fun onCreate() {
-        super.onCreate()
-
-        isRunning = true
-
-        createNotificationChannel()
-    }
-
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     override fun onStartCommand(
         intent: Intent?,
         flags: Int,
         startId: Int
     ): Int {
 
-        if (!startAsForeground()) {
+        val action = intent?.action
+
+        /*
+         * Every cheap reason to give up is checked BEFORE we go foreground, so none
+         * of those cases puts a notification on screen at all. Stopping without ever
+         * calling startForeground() is allowed as long as we are quick about it, and
+         * we are - nothing above that line does any real work.
+         */
+
+        if (action == ACTION_STOP) {
+
+            finish("stop requested")
+
             return START_NOT_STICKY
-        }
-
-        when (intent?.action) {
-
-            ACTION_START -> {
-                requestLocation()
-            }
-
-            ACTION_GET_LOCATION -> {
-                requestLocation()
-            }
-
-            ACTION_STOP -> {
-                stopService()
-                return START_NOT_STICKY
-            }
-        }
-
-        return START_STICKY
-    }
-
-    private fun requestLocation() {
-
-        if (locationRequestInProgress) {
-
-            Log.d("Alarm", "Location request already running -> skip")
-
-            return
         }
 
         val sharedPrefManager = SharedPrefManager(applicationContext)
@@ -92,69 +82,131 @@ class AttendanceLocationForegroundService : Service() {
             !sharedPrefManager.isCheckOutReminderEnabled()
         ) {
 
-            Log.d(
-                "Alarm",
-                "No reminder enabled -> stopping service"
-            )
+            finish("no reminder enabled")
 
-            stopService()
-            return
+            return START_NOT_STICKY
         }
 
         if (
-            checkSelfPermission(
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
+            action != ACTION_START &&
+            action != ACTION_GET_LOCATION
         ) {
 
-            Log.e(
+            /*
+             * Either Android restarted us on its own (intent == null) or someone
+             * sent an action we do not handle. The alarm owns the schedule, so the
+             * right answer is always to go away and wait for it.
+             */
+
+            Log.w(
                 "Alarm",
-                "Fine location permission missing"
+                "Service started without a location request -> going back to sleep " +
+                        "(action=" + action + " startId=" + startId + " flags=" + flags + ")"
             )
 
-            return
+            finish("not a location request")
+
+            return START_NOT_STICKY
         }
 
-        locationRequestInProgress = true
+        if (isTakingFix) {
+
+            /*
+             * This tick arrived while the GPS was still searching for the previous
+             * one. Let the running fix finish; it owns the notification and it will
+             * stop the service itself.
+             */
+
+            Log.d("Alarm", "Location request already running -> skip")
+
+            return START_NOT_STICKY
+        }
+
+        // Android gives us ~10 seconds to become a foreground service.
+        if (!goForeground()) return START_NOT_STICKY
+
+        Log.d("Alarm", "Service up for one reading (startId=" + startId + ")")
+
+        takeFix()
+
+        /*
+         * Nothing to resurrect if we are killed mid-fix: the next alarm is already
+         * booked by the receiver, so a sticky restart would only cost a pointless
+         * notification.
+         */
+        return START_NOT_STICKY
+    }
+
+    /** One GPS reading, then take the notification down and stop. */
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    private fun takeFix() {
+
+        isTakingFix = true
 
         AttendanceLocationFix.request(
             context = applicationContext
         ) { location ->
 
-            locationRequestInProgress = false
+            isTakingFix = false
 
-            if (location == null) {
+            if (location != null) {
 
                 Log.d(
                     "Alarm",
-                    "Foreground service -> no GPS location"
+                    "Foreground service -> GPS Location = " +
+                            "${location.latitude}, " +
+                            "${location.longitude}, " +
+                            "accuracy=${location.accuracy}"
                 )
-
-                LocalAttendanceReminderManager.scheduleNextAlarm(
-                    applicationContext,
-                    LocalAttendanceReminderManager.MIN_INTERVAL_MINUTES
-                )
-
-                return@request
             }
 
-            Log.d(
-                "Alarm",
-                "Foreground service -> GPS Location = " +
-                        "${location.latitude}, " +
-                        "${location.longitude}, " +
-                        "accuracy=${location.accuracy}"
+            LocalAttendanceReminderReceiver.handleFixResult(
+                context = applicationContext,
+                location = location
             )
 
-            LocalAttendanceReminderReceiver.handleLocation(
-                context = applicationContext,
-                latitude = location.latitude,
-                longitude = location.longitude
-            )
+            /*
+             * Wake lock first, then stop: releasing after stopSelf() would run
+             * against a half torn-down service.
+             */
+            AttendanceReminderWakelock.release(applicationContext)
+
+            finish("fix finished")
         }
     }
 
-    private fun startAsForeground(): Boolean {
+    /** Take the notification down and stop. Safe even if we never went foreground. */
+    private fun finish(why: String) {
+
+        Log.d("Alarm", "Service stopping - " + why)
+
+        AttendanceReminderWakelock.release(applicationContext)
+
+        /*
+         * DETACH leaves the notification on screen after the service is gone, which
+         * is the only way a foreground-service notification can outlive its service.
+         * REMOVE takes it with us. onFixDone() then either re-posts the detached one
+         * or cancels it.
+         */
+        ServiceCompat.stopForeground(
+            this,
+            if (AttendanceLocationNotification.PERSISTENT_NOTIFICATION) {
+                ServiceCompat.STOP_FOREGROUND_DETACH
+            } else {
+                ServiceCompat.STOP_FOREGROUND_REMOVE
+            }
+        )
+
+        AttendanceLocationNotification.onFixDone(applicationContext)
+
+        stopSelf()
+    }
+
+    /**
+     * @return false when we must give up (a missing permission would make
+     * startForeground() throw on Android 14+, or the OS refuses the start).
+     */
+    private fun goForeground(): Boolean {
 
         if (
             checkSelfPermission(
@@ -164,17 +216,19 @@ class AttendanceLocationForegroundService : Service() {
 
             Log.e("Alarm", "Cannot start location foreground service: permission missing")
 
-            stopSelf()
+            finish("no location permission")
 
             return false
         }
 
         return try {
 
+            AttendanceLocationNotification.ensureChannel(this)
+
             ServiceCompat.startForeground(
                 this,
-                NOTIFICATION_ID,
-                buildNotification(),
+                AttendanceLocationNotification.ID,
+                AttendanceLocationNotification.build(this),
                 if (
                     Build.VERSION.SDK_INT >=
                     Build.VERSION_CODES.Q
@@ -191,92 +245,25 @@ class AttendanceLocationForegroundService : Service() {
 
             Log.e("Alarm", "Could not promote service to foreground", e)
 
-            stopSelf()
+            finish("foreground refused")
 
             false
         }
     }
 
-    private fun buildNotification(): Notification {
-
-        val openAppIntent =
-            Intent(
-                this,
-                MainActivity::class.java
-            ).apply {
-                flags =
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                            Intent.FLAG_ACTIVITY_SINGLE_TOP
-            }
-
-        val pendingIntent =
-            PendingIntent.getActivity(
-                this,
-                9101,
-                openAppIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or
-                        PendingIntent.FLAG_IMMUTABLE
-            )
-
-        return NotificationCompat.Builder(
-            this,
-            CHANNEL_ID
-        )
-            .setSmallIcon(R.drawable.inspire_hub_logo)
-            .setContentTitle(getString(R.string.attendance_reminders_active))
-            .setContentText(getString(R.string.work_location_checked_periodically))
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setSilent(true)
-            .setShowWhen(false)
-            .setContentIntent(pendingIntent)
-            .build()
-    }
-
-    private fun createNotificationChannel() {
-
-        if (
-            Build.VERSION.SDK_INT >=
-            Build.VERSION_CODES.O
-        ) {
-
-            val channel =
-                NotificationChannel(
-                    CHANNEL_ID,
-                    "Attendance location tracking",
-                    NotificationManager.IMPORTANCE_LOW
-                ).apply {
-
-                    description = "Used while attendance reminders are enabled"
-
-                    setShowBadge(false)
-                }
-
-            getSystemService(
-                NotificationManager::class.java
-            ).createNotificationChannel(channel)
-        }
-    }
-
-    private fun stopService() {
-
-        isRunning = false
-
-        ServiceCompat.stopForeground(
-            this,
-            ServiceCompat.STOP_FOREGROUND_REMOVE
-        )
-
-        stopSelf()
-    }
-
     override fun onDestroy() {
 
-        isRunning = false
+        if (isTakingFix) {
 
-        locationRequestInProgress = false
+            Log.w(
+                "Alarm",
+                "Service destroyed while a fix was still running - this reading is lost"
+            )
+        }
+
+        isTakingFix = false
+
+        AttendanceReminderWakelock.release(applicationContext)
 
         super.onDestroy()
     }
