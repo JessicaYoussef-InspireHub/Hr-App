@@ -46,7 +46,7 @@ object AttendanceReminderWakelock {
     }
 
     @Synchronized
-    fun release(context: Context) {
+    fun release() {
 
         val wakeLock = lock ?: return
 

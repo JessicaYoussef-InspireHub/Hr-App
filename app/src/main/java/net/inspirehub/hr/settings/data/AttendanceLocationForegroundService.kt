@@ -125,7 +125,7 @@ class AttendanceLocationForegroundService : Service() {
         // Android gives us ~10 seconds to become a foreground service.
         if (!goForeground()) return START_NOT_STICKY
 
-        Log.d("Alarm", "Service up for one reading (startId=" + startId + ")")
+        Log.d("Alarm", "Service up for one reading (startId=$startId)")
 
         takeFix()
 
@@ -169,7 +169,7 @@ class AttendanceLocationForegroundService : Service() {
              * Wake lock first, then stop: releasing after stopSelf() would run
              * against a half torn-down service.
              */
-            AttendanceReminderWakelock.release(applicationContext)
+            AttendanceReminderWakelock.release()
 
             finish("fix finished")
         }
@@ -178,9 +178,9 @@ class AttendanceLocationForegroundService : Service() {
     /** Take the notification down and stop. Safe even if we never went foreground. */
     private fun finish(why: String) {
 
-        Log.d("Alarm", "Service stopping - " + why)
+        Log.d("Alarm", "Service stopping - $why")
 
-        AttendanceReminderWakelock.release(applicationContext)
+        AttendanceReminderWakelock.release()
 
         /*
          * DETACH leaves the notification on screen after the service is gone, which
@@ -263,7 +263,7 @@ class AttendanceLocationForegroundService : Service() {
 
         isTakingFix = false
 
-        AttendanceReminderWakelock.release(applicationContext)
+        AttendanceReminderWakelock.release()
 
         super.onDestroy()
     }

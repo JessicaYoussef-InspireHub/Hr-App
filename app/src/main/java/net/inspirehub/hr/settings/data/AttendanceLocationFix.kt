@@ -157,7 +157,7 @@ object AttendanceLocationFix {
                     }
 
                     Log.d(
-                        "Alarm", "GNSS satellites -> " + "visible=${status.satelliteCount}, " + "used=$used"
+                        "Alarm", " satellites -> " + "visible=${status.satelliteCount}, " + "used=$used"
                     )
                 }
             }

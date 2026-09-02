@@ -194,24 +194,6 @@ object LocalAttendanceReminderManager {
         }
     }
 
-    fun checkNow(context: Context) {
-        val appContext = context.applicationContext
-
-        val intent = Intent(
-            appContext,
-            LocalAttendanceReminderReceiver::class.java
-        ).apply {
-            action = "ACTION_CHECK_NOW"
-        }
-
-        appContext.sendBroadcast(intent)
-
-        Log.d(
-            "Alarm AttendanceReminderManager",
-            "Immediate attendance reminder check triggered"
-        )
-    }
-
     fun scheduleNextAlarm(
         context: Context,
         delayMinutes: Long

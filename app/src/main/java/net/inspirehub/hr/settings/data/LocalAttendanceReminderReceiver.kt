@@ -131,7 +131,7 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
 
                 AttendanceLocationNotification.onFixDone(appContext)
 
-                AttendanceReminderWakelock.release(appContext)
+                AttendanceReminderWakelock.release()
 
                 runCatching { pendingResult.finish() }
             }
@@ -381,35 +381,6 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
                         PendingIntent.FLAG_IMMUTABLE
             )
 
-        val actionIntent = Intent(
-            context,
-            AttendanceReminderActionReceiver::class.java
-        ).apply {
-            putExtra(
-                "REMINDER_TYPE",
-                type
-            )
-        }
-
-        val pendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                if (type == CHECK_IN_REMINDER) {
-                    CHECK_IN_REQUEST_CODE
-                } else {
-                    CHECK_OUT_REQUEST_CODE
-                },
-                actionIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or
-                        PendingIntent.FLAG_IMMUTABLE
-            )
-
-//        val actionText =
-//            if (type == CHECK_IN_REMINDER) {
-//                context.getString(R.string.check_in)
-//            } else {
-//                context.getString(R.string.check_out)
-//            }
 
         val notification =
             NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
@@ -420,11 +391,6 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setOngoing(true)
                 .setContentIntent(openAppPendingIntent)
-//                .addAction(
-//                    0,
-////                    actionText,
-//                    pendingIntent
-//                )
                 .build()
 
         notificationManager.notify(
@@ -494,8 +460,6 @@ class LocalAttendanceReminderReceiver : BroadcastReceiver() {
 
         private const val TAG = "LOCAL_ATTENDANCE_REMINDER"
         private const val REMINDER_NOTIFICATION_ID = 9002
-        private const val CHECK_IN_REQUEST_CODE = 9003
-        private const val CHECK_OUT_REQUEST_CODE = 9004
         private const val REMINDER_CHANNEL_ID = "attendance_reminders_v2"
 
         private const val CHECK_IN_REMINDER = "CHECK_IN_REMINDER"

@@ -102,10 +102,6 @@
             android:name=".settings.data.LocalAttendanceReminderReceiver"
             android:exported="false" />
 
-        <!-- Target of the reminder notification action. -->
-        <receiver
-            android:name=".settings.data.AttendanceReminderActionReceiver"
-            android:exported="false" />
 
         <!-- A reboot wipes every pending alarm; this puts them back. BOOT_COMPLETED
              comes from the system, so the receiver has to be exported. -->
