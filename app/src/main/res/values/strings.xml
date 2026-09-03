@@ -368,7 +368,7 @@ You have</string>
     <string name="check_out_reminder">Check-Out Reminder</string>
     <string name="you_left_work_location_without_check_out">You left the work location. Don\'t forget to check out</string>
     <string name="reminders">Reminders</string>
-    <string name="attendance_reminder_intro">By enabling Background Location Tracking, the app will periodically check your location to remind you to check in or check out when necessary.</string>
+    <string name="attendance_reminder_intro">By enabling Background Location Tracking, this app collects location data periodically to remind you to check in or check out. Location data may be collected even when the app is closed or not in use. Your location is used only to provide attendance reminders based on your work location.</string>
     <string name="check_out_reminder_title">• Check-out reminder:</string>
     <string name="check_out_reminder_description">The app will monitor your location only while you are checked in. You will be notified if you leave the permitted work location without checking out.</string>
     <string name="check_in_reminder_title">• Check-in reminder:</string>
