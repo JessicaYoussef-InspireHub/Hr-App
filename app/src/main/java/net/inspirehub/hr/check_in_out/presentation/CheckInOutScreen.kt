@@ -89,7 +89,28 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import net.inspirehub.hr.InfoIcon
+import net.inspirehub.hr.MyDialog
+import net.inspirehub.hr.check_in_out.data.hasBackgroundLocationPermission
+import net.inspirehub.hr.settings.data.AttendanceReminderPowerSettings
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -162,15 +183,21 @@ fun CheckInOutScreen(
     val scope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
     val locationAccuracy by viewModel.locationAccuracy.collectAsState()
+    var showBatteryDialog by remember { mutableStateOf(false) }
     var showBackgroundLocationDialog by remember { mutableStateOf(false) }
+    var awaitingBatteryResult by remember { mutableStateOf(false) }
+    var isBatteryUnrestricted by remember { mutableStateOf(AttendanceReminderPowerSettings.isBatteryUnrestricted(context))}
 
     fun hasAllLocationPermissions(context: Context): Boolean {
-        val fineGranted = ContextCompat.checkSelfPermission(
+
+        val fineGranted =
+            ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
 
-        val coarseGranted = ContextCompat.checkSelfPermission(
+        val coarseGranted =
+            ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
@@ -195,6 +222,197 @@ fun CheckInOutScreen(
         return true
     }
 
+    fun startLocationTrackingIfPossible() {
+
+        val permissionsGranted = hasAllLocationPermissions(context)
+
+        if (!permissionsGranted) {
+
+            Log.d("CHECK IN_LOCATION_TRACKING", "❌ Cannot start tracking → location permissions missing")
+
+            return
+        }
+
+        val isTracked = sharedPref.getIsTracked()
+
+        Log.d("CHECK IN_LOCATION_TRACKING", "Permissions OK | isTracked=$isTracked")
+
+        if (isTracked) {
+
+            Log.d("CHECK IN_LOCATION_TRACKING", "🚀 Starting / updating location tracking")
+
+            LocationTrackingManager.updateTracking(context)
+
+        } else {
+
+            Log.d("CHECK IN_LOCATION_TRACKING", "⏸ Tracking not started because isTracked=false")
+        }
+    }
+
+    fun continueAfterLocationGranted() {
+
+        val hasLocationPermission = hasAllLocationPermissions(context)
+
+        Log.d("CHECK IN_PERMISSION_FLOW", "continueAfterLocationGranted() → location=$hasLocationPermission")
+
+        if (!hasLocationPermission) {
+
+            Log.d("CHECK IN_PERMISSION_FLOW", "❌ Location permissions are not complete")
+
+            return
+        }
+
+        isBatteryUnrestricted =
+            AttendanceReminderPowerSettings.isBatteryUnrestricted(context)
+
+        Log.d("CHECK IN_BATTERY", "Battery unrestricted = $isBatteryUnrestricted")
+
+        if (isBatteryUnrestricted) {
+
+            Log.d("CHECK IN_BATTERY", "✅ Battery already unrestricted → starting tracking")
+
+            startLocationTrackingIfPossible()
+
+        } else {
+
+            Log.d("CHECK IN_BATTERY", "⚠️ Battery restricted → showing battery dialog")
+
+            showBatteryDialog = true
+        }
+    }
+
+    val backgroundPermissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+
+            Log.d("CHECK IN_LOCATION_PERMISSION", "Background permission result = $isGranted")
+
+            if (isGranted) {
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "✅ Background location GRANTED")
+
+                showBackgroundLocationDialog = false
+
+                continueAfterLocationGranted()
+
+            } else {
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "❌ Background location DENIED")
+
+                showBackgroundLocationDialog = false
+            }
+        }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+            val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+            val locationGranted = fineGranted || coarseGranted
+
+            Log.d("CHECK IN_LOCATION_PERMISSION", "Foreground result = $permissions")
+
+            if (!locationGranted) {
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "❌ Foreground location DENIED")
+
+                showBackgroundLocationDialog = false
+
+                return@rememberLauncherForActivityResult
+            }
+
+            Log.d("CHECK IN_LOCATION_PERMISSION", "✅ Foreground location GRANTED")
+
+            /*
+             * Android 10:
+             * Background location can be requested directly.
+             */
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "Android 10 → requesting background location")
+
+                backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+
+                /*
+                 * Android 11+:
+                 * Background location must be enabled from Settings.
+                 */
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "Android 11+ → showing background location dialog")
+
+                showBackgroundLocationDialog = true
+
+            } else {
+
+                continueAfterLocationGranted()
+            }
+        }
+
+    val batteryExemptionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+
+            awaitingBatteryResult = false
+
+            isBatteryUnrestricted = AttendanceReminderPowerSettings.isBatteryUnrestricted(context)
+
+            Log.d("CHECK IN_BATTERY", "Battery exemption result → unrestricted = $isBatteryUnrestricted")
+
+            if (isBatteryUnrestricted) {
+
+                Log.d("CHECK IN_BATTERY", "✅ Battery optimization disabled")
+
+            } else {
+
+                Log.d("CHECK IN_BATTERY", "⚠️ Battery optimization still enabled")
+            }
+
+            /*
+             * In both cases we continue.
+             * The user is not blocked from Check In / Check Out.
+             */
+            startLocationTrackingIfPossible()
+        }
+
+    fun launchBatteryExemption() {
+
+        awaitingBatteryResult = true
+
+        runCatching {
+
+            batteryExemptionLauncher.launch(
+                AttendanceReminderPowerSettings.exemptionIntent(context)
+            )
+
+        }.onFailure {
+
+            Log.w("CHECK IN_BATTERY", "Direct battery exemption unavailable → opening battery settings", it)
+
+            runCatching {
+
+                batteryExemptionLauncher.launch(
+                    AttendanceReminderPowerSettings.batterySettingsIntent()
+                )
+
+            }.onFailure { noSettings ->
+
+                awaitingBatteryResult = false
+
+                Log.e("CHECK IN_BATTERY", "❌ No battery settings screen available", noSettings)
+
+                /*
+                 * Even if settings cannot be opened,
+                 * continue with tracking.
+                 */
+                startLocationTrackingIfPossible()
+            }
+        }
+    }
+
     val backgroundLocationPermissionState =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             rememberPermissionState(
@@ -204,25 +422,19 @@ fun CheckInOutScreen(
             null
         }
 
-    LaunchedEffect(
-        locationPermissionState.status.isGranted,
-        backgroundLocationPermissionState?.status?.isGranted
-    ) {
+    LaunchedEffect(Unit) {
 
-        val fineGranted =
-            ContextCompat.checkSelfPermission(
+        val fineGranted = ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
 
-        val coarseGranted =
-            ContextCompat.checkSelfPermission(
+        val coarseGranted = ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
 
-        val backgroundGranted =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val backgroundGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ContextCompat.checkSelfPermission(
                     context,
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION
@@ -231,74 +443,196 @@ fun CheckInOutScreen(
                 true
             }
 
-        Log.d(
-            "TEST LOCATION_PERMISSION",
-            "fine=$fineGranted | coarse=$coarseGranted | background=$backgroundGranted"
-        )
+        Log.d("CHECK IN_LOCATION_PERMISSION", "========== INITIAL PERMISSION CHECK ==========")
 
-        // 1. Foreground location missing
+        Log.d("CHECK IN_LOCATION_PERMISSION", "Fine = $fineGranted")
+
+        Log.d("CHECK IN_LOCATION_PERMISSION", "Coarse = $coarseGranted")
+
+        Log.d("CHECK IN_LOCATION_PERMISSION", "Background = $backgroundGranted")
+
+        /*
+         * 1. Foreground missing
+         */
         if (!fineGranted && !coarseGranted) {
 
-            Log.d(
-                "TEST LOCATION_PERMISSION",
-                "❌ Foreground location missing → requesting"
-            )
+            Log.d("CHECK IN_LOCATION_PERMISSION", "❌ Foreground missing → requesting")
 
-            locationPermissionState.launchPermissionRequest()
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
 
             return@LaunchedEffect
         }
 
-        // 2. Foreground موجود ولكن Background ناقص
+        /*
+         * 2. Foreground exists but Background missing
+         */
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
             !backgroundGranted
         ) {
 
-            Log.d(
-                "TEST LOCATION_PERMISSION",
-                "⚠️ Background location missing → showing dialog"
-            )
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
 
-            showBackgroundLocationDialog = true
+                Log.d("CHECK IN_LOCATION_PERMISSION", "Android 10 → requesting background")
+
+                backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+
+            } else {
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "Android 11+ → showing background dialog")
+
+                showBackgroundLocationDialog = true
+            }
 
             return@LaunchedEffect
         }
 
-        // 3. كل الصلاحيات موجودة
-        Log.d(
-            "TEST LOCATION_PERMISSION",
-            "✅ All location permissions granted"
-        )
+        /*
+         * 3. Everything granted
+         */
+        Log.d("CHECK IN_LOCATION_PERMISSION", "✅ All location permissions granted")
 
-        showBackgroundLocationDialog = false
+        continueAfterLocationGranted()
     }
 
-    LaunchedEffect(
-        locationPermissionState.status.isGranted,
-        backgroundLocationPermissionState?.status?.isGranted
-    ) {
+    DisposableEffect(lifecycleOwner) {
 
-        val hasPermissions = hasAllLocationPermissions(context)
+        val observer = LifecycleEventObserver { _, event ->
 
-        Log.d("TEST LOCATION_TRACKING", "Permissions check = $hasPermissions")
+            if (event == Lifecycle.Event.ON_RESUME) {
 
-        if (!hasPermissions) {
-            Log.d("TEST LOCATION_TRACKING", "❌ Location permissions are not complete")
-            return@LaunchedEffect
+                Log.d("CHECK IN_PERMISSION_FLOW", "========== ON_RESUME ==========")
+
+                val fineGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                val coarseGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                val backgroundGranted =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    } else {
+                        true
+                    }
+
+                isBatteryUnrestricted = AttendanceReminderPowerSettings.isBatteryUnrestricted(context)
+
+                Log.d("CHECK IN_PERMISSION_FLOW", "Fine=$fineGranted | Coarse=$coarseGranted | Background=$backgroundGranted")
+
+                Log.d("CHECK IN_BATTERY", "Unrestricted=$isBatteryUnrestricted")
+
+                /*
+                 * Foreground location missing
+                 */
+                if (!fineGranted && !coarseGranted) {
+
+                    Log.d("CHECK IN_PERMISSION_FLOW", "❌ Foreground permission still missing")
+
+                    return@LifecycleEventObserver
+                }
+
+                /*
+                 * Background location missing
+                 */
+                if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                    !backgroundGranted
+                ) {
+
+                    Log.d("CHECK IN_PERMISSION_FLOW", "⚠️ Background permission still missing")
+
+                    showBackgroundLocationDialog = true
+
+                    return@LifecycleEventObserver
+                }
+
+                /*
+                 * All location permissions granted
+                 */
+                Log.d("CHECK IN_PERMISSION_FLOW", "✅ All location permissions granted")
+
+                showBackgroundLocationDialog = false
+
+                /*
+                 * Battery settings were opened.
+                 *
+                 * Do not open the battery dialog again while the
+                 * system settings activity is still returning.
+                 */
+                if (awaitingBatteryResult) {
+
+                    Log.d("CHECK IN_BATTERY", "Waiting for battery launcher result")
+
+                    return@LifecycleEventObserver
+                }
+
+                /*
+                 * If battery is already unrestricted,
+                 * start/update tracking.
+                 */
+                if (isBatteryUnrestricted) {
+
+                    Log.d("CHECK IN_BATTERY", "✅ Battery unrestricted → continue tracking")
+
+                    startLocationTrackingIfPossible()
+
+                } else {
+
+                    /*
+                     * Battery restricted.
+                     *
+                     * Show dialog only if we are not already showing it.
+                     */
+                    if (!showBatteryDialog) {
+
+                        Log.d("CHECK IN_BATTERY", "⚠️ Battery restricted → showing battery dialog")
+
+                        showBatteryDialog = true
+                    }
+                }
+
+                /*
+                 * GPS status
+                 */
+                val gpsStatus = locationManager.isProviderEnabled(
+                        LocationManager.GPS_PROVIDER
+                    )
+
+                isGpsEnabled = gpsStatus
+
+                if (!gpsStatus) {
+
+                    Log.d("GPS_STATUS", "❌ GPS is OFF")
+
+                    showGpsDialog = true
+
+                } else {
+
+                    Log.d("GPS_STATUS", "✅ GPS is ON")
+
+                    showGpsDialog = false
+                }
+            }
         }
 
-        val isTracked = sharedPref.getIsTracked()
+        lifecycleOwner.lifecycle.addObserver(observer)
 
-        Log.d("TEST LOCATION_TRACKING", "✅ Permissions granted | isTracked=$isTracked" )
-
-        if (isTracked) {
-            Log.d("TEST LOCATION_TRACKING",  "🚀 Starting tracking" )
-
-            LocationTrackingManager.updateTracking(context)
-        } else {
-            Log.d( "TEST LOCATION_TRACKING",  "⏸ Tracking disabled because isTracked=false")
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
 
@@ -1161,28 +1495,242 @@ fun CheckInOutScreen(
         )
     }
 
-//    if (showBackgroundLocationDialog) {
-//
-//        MyDialog(
-//            title = stringResource(R.string.background_location_permission),
-//            subtitle = stringResource(R.string.background_location_message),
-//            confirmButtonText = stringResource(R.string.open_settings),
-//            dismissButtonText = stringResource(R.string.cancel),
-//            onConfirm = {
-//                showBackgroundLocationDialog = false
-//                val intent = Intent(
-//                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-//                ).apply {
-//                    data = "package:${context.packageName}".toUri()
-//                }
-//                context.startActivity(intent)
-//            },
-//
-//            onDismiss = {
-//                showBackgroundLocationDialog = false
-//            }
-//        )
-//    }
+    if (showBackgroundLocationDialog) {
+
+        MyDialog(
+            title = stringResource(
+                R.string.background_location_permission
+            ),
+
+            subtitle = " ",
+
+            subtitleContent = {
+
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    Text(
+                        text = stringResource(
+                            R.string.background_location_message
+                        ),
+                        color = colors.onBackgroundColor,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+                    Image(
+                        painter = painterResource(
+                            id = R.drawable.background_location_settings
+                        ),
+                        contentDescription = stringResource(
+                            R.string.background_location_permission
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(
+                                BorderStroke(
+                                    1.dp,
+                                    colors.inverseOnSurface
+                                ),
+                                RoundedCornerShape(12.dp)
+                            ),
+                        contentScale = ContentScale.FillWidth
+                    )
+                }
+            },
+
+            confirmButtonText = stringResource(
+                R.string.open_settings
+            ),
+
+            dismissButtonText = stringResource(
+                R.string.cancel
+            ),
+
+            onConfirm = {
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "========== BACKGROUND LOCATION OK ==========")
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "SDK = ${Build.VERSION.SDK_INT}")
+
+                val fineGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                val coarseGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "Fine = $fineGranted")
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "Coarse = $coarseGranted")
+
+                /*
+                 * Foreground permission missing
+                 */
+                if (!fineGranted && !coarseGranted) {
+
+                    Log.d("CHECK IN_LOCATION_PERMISSION", "❌ Foreground location missing")
+
+                    locationPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+
+                    return@MyDialog
+                }
+
+                /*
+                 * Android 10
+                 */
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+
+                    Log.d("CHECK IN_LOCATION_PERMISSION", "Android 10 → requesting background permission")
+
+                    showBackgroundLocationDialog = false
+
+                    backgroundPermissionLauncher.launch(
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    )
+                }
+
+                /*
+                 * Android 11+
+                 */
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+                    Log.d("CHECK IN_LOCATION_PERMISSION", "Android 11+ → opening application settings")
+
+                    showBackgroundLocationDialog = false
+
+                    backgroundPermissionLauncher.launch(
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    )
+                }
+            },
+
+            onDismiss = {
+
+                Log.d("CHECK IN_LOCATION_PERMISSION", "❌ Background location dialog dismissed")
+
+                showBackgroundLocationDialog = false
+            }
+        )
+    }
+
+
+    if (showBatteryDialog) {
+
+        MyDialog(
+            title = stringResource(
+                R.string.battery_optimization_title
+            ),
+
+            subtitle = " ",
+
+            subtitleContent = {
+
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    Text(
+                        text = stringResource(
+                            R.string.battery_optimization_message
+                        ),
+                        color = colors.onBackgroundColor,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = colors.tertiaryColor.copy(
+                            alpha = 0.12f
+                        )
+                    ) {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = 12.dp,
+                                    vertical = 10.dp
+                                ),
+                            verticalAlignment = Alignment.Top
+                        ) {
+
+                            InfoIcon()
+
+                            Spacer(
+                                modifier = Modifier.width(8.dp)
+                            )
+
+                            Text(
+                                text = stringResource(
+                                    R.string.battery_optimization_note
+                                ),
+                                color = colors.onBackgroundColor,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            },
+
+            confirmButtonText = stringResource(
+                R.string.open_settings
+            ),
+
+            dismissButtonText = stringResource(
+                R.string.cancel
+            ),
+
+            onConfirm = {
+
+                Log.d("CHECK IN_BATTERY", "User selected Open Settings")
+
+                showBatteryDialog = false
+
+                launchBatteryExemption()
+            },
+
+            onDismiss = {
+
+                Log.d("CHECK IN_BATTERY", "User refused battery exemption")
+
+                showBatteryDialog = false
+
+                /*
+                 * Do NOT block the Check In / Check Out screen.
+                 *
+                 * Continue tracking even though the battery optimization
+                 * is still enabled.
+                 */
+                startLocationTrackingIfPossible()
+            }
+        )
+    }
 
 
 

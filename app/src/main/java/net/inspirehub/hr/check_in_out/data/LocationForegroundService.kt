@@ -35,6 +35,8 @@ class LocationForegroundService : Service() {
     private lateinit var locationDao: LocationDao
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
+
+    private var isLocationUpdatesStarted = false
     companion object {
         const val CHANNEL_ID = "location_service_channel"
         const val NOTIFICATION_ID = 1001
@@ -102,7 +104,7 @@ class LocationForegroundService : Service() {
         startId: Int
     ): Int {
 
-        Log.d("SERVICE_TEST", "onStartCommand")
+        Log.d("SERVICE_TEST", "onStartCommand called | startId=$startId | intent=$intent")
 
         if (!hasLocationPermission()) {
             Log.e(
@@ -172,10 +174,9 @@ class LocationForegroundService : Service() {
             return START_NOT_STICKY
         }
 
-        Log.d(
-            "TEST LOCATION_SERVICE",
-            "✅ Permissions + tracking conditions OK"
-        )
+        Log.d("TEST LOCATION_SERVICE", "✅ Permissions + tracking conditions OK")
+
+        Log.d("SERVICE_TEST", "isLocationUpdatesStarted=$isLocationUpdatesStarted")
 
         startLocationUpdates()
 
@@ -194,8 +195,13 @@ class LocationForegroundService : Service() {
     private fun startLocationUpdates() {
 
         Log.d("SERVICE_TEST", "startLocationUpdates called")
-        if (!hasLocationPermission()) {
 
+        if (isLocationUpdatesStarted) {
+            Log.d("SERVICE_TEST", "⚠️ Location updates already started → skipping")
+            return
+        }
+
+        if (!hasLocationPermission()) {
             Log.e("TEST LOCATION_SERVICE", "❌ Location permission missing" )
 
             stopSelf()
@@ -205,9 +211,7 @@ class LocationForegroundService : Service() {
         val sharedPref = SharedPrefManager(this)
         val intervalMinutes = sharedPref.getTrackingIntervalMinutes()
         val intervalMillis = (intervalMinutes * 60_000L).toLong()
-        Log.d("TEST_LOCATION_CONFIG",
-            "Tracking interval = $intervalMinutes minutes ($intervalMillis ms)"
-        )
+        Log.d("TEST_LOCATION_CONFIG", "Tracking interval = $intervalMinutes minutes ($intervalMillis ms)")
 
         val request = LocationRequest.Builder( Priority.PRIORITY_HIGH_ACCURACY, intervalMillis )
                 .setMinUpdateIntervalMillis(intervalMillis)
@@ -355,25 +359,34 @@ class LocationForegroundService : Service() {
                 }
             }
         Log.d("SERVICE_TEST", "Requesting location updates")
+
         fusedLocationClient.requestLocationUpdates(
             request,
             locationCallback,
             Looper.getMainLooper()
         )
+
+        isLocationUpdatesStarted = true
+
+        Log.d("SERVICE_TEST", "✅ Location updates registered")
+
     }
 
     override fun onDestroy() {
+
         Log.d("SERVICE_TEST", "onDestroy")
+
+        if (::locationCallback.isInitialized) {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+            Log.d("SERVICE_TEST", "Location updates removed")
+        }
+
+        isLocationUpdatesStarted = false
 
         try {
             connectivityManager.unregisterNetworkCallback(networkCallback)
         } catch (e: Exception) {
             Log.e("SERVICE_TEST", "Error unregistering network callback: ${e.message}")
-        }
-
-        if (::locationCallback.isInitialized) {
-            fusedLocationClient.removeLocationUpdates(locationCallback)
-            Log.d("SERVICE_TEST", "Location updates removed")
         }
 
         super.onDestroy()

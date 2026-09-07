@@ -76,11 +76,11 @@
         </service>
 
 
-<!--        <service-->
-<!--            android:name=".check_in_out.data.LocationForegroundService"-->
-<!--            android:enabled="true"-->
-<!--            android:exported="false"-->
-<!--            android:foregroundServiceType="location" />-->
+        <service
+            android:name=".check_in_out.data.LocationForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
 <!--        <service-->
 <!--            android:name=".check_in_out.data.AttendanceReminderForegroundService"-->
