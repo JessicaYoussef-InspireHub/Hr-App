@@ -111,75 +111,158 @@ suspend fun fetchServerTime(
 }
 
 fun sendOfflineAttendanceAction(
-    context:  Context,
-    token: String, logs: List<Map<String, Any>>) {
-    try {
+    context: Context,
+    token: String,
+    logs: List<Map<String, Any>>
+): Boolean {
+
+    return try {
         println("🟡 [1] ENTERED sendOfflineAttendanceAction()")
         println("🟡 [2] Token received: $token")
         println("🟡 [3] Logs count: ${logs.size}")
 
-        logs.forEachIndexed { index, log ->
-            println("🟢 [4.$index] Log #$index contents: $log")
+        if (logs.isEmpty()) {
+            println("⚠️ No logs to send")
+            return true
         }
 
-        // ✅ تحويل logs إلى JSONArray
-        println("🟡 [5] Converting logs to JSONArray...")
         val jsonLogs = JSONArray()
-        logs.forEachIndexed { i, log ->
-            println("🔹 [5.$i] Converting log #$i ...")
+
+        logs.forEachIndexed { index, log ->
+
+            println("🟢 [4.$index] Log = $log")
+
             val obj = JSONObject()
+
             obj.put("action", log["action"])
             obj.put("lat", log["lat"])
             obj.put("lng", log["lng"])
             obj.put("action_time", log["action_time"])
             obj.put("action_tz", log["action_tz"])
+
             jsonLogs.put(obj)
         }
-        println("✅ [6] JSONArray built successfully: $jsonLogs")
 
-        // ✅ بناء الـ payload
-        println("🟡 [7] Building final payload...")
         val payload = JSONObject().apply {
+
             put("jsonrpc", "2.0")
             put("method", "call")
-            put("params", JSONObject().apply {
-                put("employee_token", token)
-                put("attendance_logs", jsonLogs)
-            })
+
+            put(
+                "params",
+                JSONObject().apply {
+                    put("employee_token", token)
+                    put("attendance_logs", jsonLogs)
+                }
+            )
+
             put("id", 0)
         }
 
-        println("📦 [8] Final payload ready to send:\n$payload")
+        println("📦 Offline payload:")
+        println(payload)
 
-        // ✅ إعداد الريكويست باستخدام OkHttp
-        println("🟡 [9] Preparing OkHttp client...")
-        val client = OkHttpClient()
-        val mediaType = "application/json; charset=utf-8".toMediaType()
-        val body = payload.toString().toRequestBody(mediaType)
         val sharedPref = SharedPrefManager(context)
         val companyUrl = sharedPref.getCompanyUrl()
 
-        val request = Request.Builder()
-            .url("$companyUrl/api/offline_attendance")
-            .post(body)
-            .addHeader("Content-Type", "application/json")
-            .build()
+        val client = OkHttpClient()
 
-        println("🚀 [10] Sending request to server...")
+        val mediaType =
+            "application/json; charset=utf-8".toMediaType()
 
-        val response = client.newCall(request).execute()
+        val body =
+            payload.toString().toRequestBody(mediaType)
 
-        println("🟢 [11] Got response from server!")
-        println("🟢 [12] Response Code: ${response.code}")
-        val responseBody = response.body?.string()
-        println("🟢 [13] Response Body: $responseBody")
+        val request =
+            Request.Builder()
+                .url("$companyUrl/api/offline_attendance")
+                .post(body)
+                .addHeader("Content-Type", "application/json")
+                .build()
 
-        response.close()
-        println("✅ [14] Request completed and response closed.")
+        println("🚀 Sending offline attendance...")
+
+        client.newCall(request).execute().use { response ->
+
+            val responseBody = response.body?.string()
+
+            println("🟢 HTTP Code = ${response.code}")
+            println("🟢 Response = $responseBody")
+
+            if (!response.isSuccessful) {
+
+                println(
+                    "❌ HTTP request failed: ${response.code}"
+                )
+
+                return false
+            }
+
+            if (responseBody.isNullOrBlank()) {
+
+                println("❌ Empty server response")
+
+                return false
+            }
+
+            return try {
+
+                val json =
+                    JSONObject(responseBody)
+
+                val result =
+                    json.optJSONObject("result")
+
+                val status =
+                    result?.optString("status")
+
+                println(
+                    "📦 Offline server status = $status"
+                )
+
+                if (
+                    status.equals(
+                        "Error",
+                        ignoreCase = true
+                    )
+                ) {
+
+                    println(
+                        "❌ Server rejected offline attendance: " +
+                                result?.optString("message")
+                    )
+
+                    false
+
+                } else {
+
+                    println(
+                        "✅ Offline attendance accepted by server"
+                    )
+
+                    true
+                }
+
+            } catch (e: Exception) {
+
+                println(
+                    "❌ Failed parsing offline response: ${e.message}"
+                )
+
+                false
+            }
+        }
 
     } catch (e: Exception) {
-        println("🔴 [ERR] Exception in sendOfflineAttendanceAction: ${e.message}")
+
+        println(
+            "🔴 Exception in sendOfflineAttendanceAction: " +
+                    e.message
+        )
+
         e.printStackTrace()
+
+        false
     }
 }
 

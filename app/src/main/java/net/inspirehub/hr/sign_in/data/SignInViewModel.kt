@@ -68,20 +68,20 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     allowTimeOffWithMinutes = response.result.allow_time_off_With_minutes
                 )
 
-                val trackingConfig = getTrackingConfig(
-                    context = getApplication(),
-                    employeeToken = employeeData?.employee_token ?: ""
-                )
+//                val trackingConfig = getTrackingConfig(
+//                    context = getApplication(),
+//                    employeeToken = employeeData?.employee_token ?: ""
+//                )
 
                 val sharedPref = SharedPrefManager(getApplication())
 
-                sharedPref.saveIsTracked(trackingConfig.result.is_tracked)
-
-                sharedPref.saveWorkingHoursOnly(trackingConfig.result.working_hours_only)
-
-                sharedPref.saveTrackingIntervalMinutes(trackingConfig.result.tracking_interval_minutes)
-
-                sharedPref.saveMinDistanceMeters(trackingConfig.result.min_distance_meters)
+//                sharedPref.saveIsTracked(trackingConfig.result.is_tracked)
+//
+//                sharedPref.saveWorkingHoursOnly(trackingConfig.result.working_hours_only)
+//
+//                sharedPref.saveTrackingIntervalMinutes(trackingConfig.result.tracking_interval_minutes)
+//
+//                sharedPref.saveMinDistanceMeters(trackingConfig.result.min_distance_meters)
 
                 _uiState.value = SignInUiState.Success(response)
 

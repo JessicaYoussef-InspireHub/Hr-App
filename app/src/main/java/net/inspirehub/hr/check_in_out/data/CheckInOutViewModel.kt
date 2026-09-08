@@ -540,6 +540,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 saveOfflineLog(action, _currentLat.value, _currentLng.value, finalActionTime)
                 enqueueWorkManager(token, action, finalActionTime)
                 onComplete("queued")
+                return@launch
             }
         }
     }
@@ -558,7 +559,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             "diff_minutes" to diffMinutes.toString()
         )
 
-        val request = OneTimeWorkRequestBuilder<AttendanceWorker>()
+        val request = OneTimeWorkRequestBuilder<OfflineAttendanceWorker>()
             .setInputData(data)
             .setConstraints(
                 Constraints.Builder()

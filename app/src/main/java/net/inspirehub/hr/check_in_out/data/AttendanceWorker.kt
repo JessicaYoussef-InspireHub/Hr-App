@@ -4,13 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
-import androidx.work.WorkManager
-import androidx.work.WorkInfo
 
 class OfflineAttendanceWorker(
     appContext: Context,
@@ -21,136 +14,104 @@ class OfflineAttendanceWorker(
     private val offlineDao = database.offlineLogDao()
 
     override suspend fun doWork(): Result {
-        Log.d("OfflineWorker", "🚀 Worker started")
-
-        val token = inputData.getString("token") ?: return Result.failure()
-
-        try {
-            val logs = offlineDao.getAllLogs()
-            Log.d("OfflineWorker", "📦 Found ${logs.size} offline logs to send")
-
-            if (logs.isEmpty()) return Result.success()
-
-            val formattedLogs = logs.map { log ->
-                mapOf(
-                    "action" to log.action,
-                    "lat" to log.lat.toString(),
-                    "lng" to log.lng.toString(),
-                    "action_time" to log.action_time,
-                    "action_tz" to log.action_tz
-                )
-            }
-
-            val response = sendOfflineAttendanceAction(
-                context = applicationContext,
-                token = token,
-                logs = formattedLogs
-            )
-
-            if (response != null) {
-                Log.d("OfflineWorker", "✅ Successfully sent ${logs.size} logs")
-                offlineDao.deleteAllLogs()
-                return Result.success()
-            } else {
-                Log.e("OfflineWorker", "❌ Failed to send logs, will retry")
-                return Result.retry()
-            }
-
-        } catch (e: Exception) {
-            Log.e("OfflineWorker", "💥 Exception in OfflineWorker: ${e.message}", e)
-            return Result.retry()
-        }
-    }
-}
-
-
-
-class AttendanceWorker(
-    appContext: Context,
-    params: WorkerParameters
-) : CoroutineWorker(appContext, params) {
-
-    override suspend fun doWork(): Result {
-        Log.d("AttendanceWorker", "🚀 Worker started")
-
-        val token = inputData.getString("token") ?: return Result.failure()
-        val action = inputData.getString("action") ?: return Result.failure()
-        val lat = inputData.getString("lat") ?: "0.0"
-        val lng = inputData.getString("lng") ?: "0.0"
-        val actionTime = inputData.getString("action_time")
-        val diffMinutes = inputData.getString("diff_minutes")?.toLongOrNull() ?: 0L
-
-        // ✅ Check how many attendance records are queued in WorkManager
-        val workManager = WorkManager.getInstance(applicationContext)
-        val allWorkInfos = workManager.getWorkInfosByTag("attendance_tag").get()
-
-        // Count active works excluding this current Worker
-        val activeWorksExcludingCurrent = allWorkInfos.filter { workInfo ->
-            (workInfo.state == WorkInfo.State.ENQUEUED || workInfo.state == WorkInfo.State.RUNNING) &&
-                    workInfo.id != this.id
-        }
-
-        val isSingleRecord = activeWorksExcludingCurrent.isEmpty()
 
         Log.d(
-            "AttendanceWorker",
-            if (isSingleRecord) "📦 Only one record to process"
-            else "📦 More than one record queued (${activeWorksExcludingCurrent.size + 1})"
+            "OfflineWorker",
+            "🚀 Worker started"
         )
 
-        Log.d("AttendanceWorker", "📦 Input data → token=$token, action=$action, lat=$lat, lng=$lng, diff=$diffMinutes")
-
-        // 🕒 Adjust time by adding difference in minutes
-        val adjustedActionTime = try {
-            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
-            val date = sdf.parse(actionTime ?: sdf.format(Date()))!!
-            val calendar = Calendar.getInstance().apply {
-                time = date
-                add(Calendar.MINUTE, diffMinutes.toInt())
-            }
-            sdf.format(calendar.time)
-        } catch (e: Exception) {
-            Log.e("AttendanceWorker", "❌ Time modification error: ${e.message}")
-            actionTime ?: SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
-        }
-
-        Log.d("AttendanceWorker", "🕒 Adjusted action time after diff: $adjustedActionTime")
+        val token =
+            inputData.getString("token")
+                ?: return Result.failure()
 
         return try {
-            val result = if (isSingleRecord) {
-                val res = sendAttendanceAction(
-                    context = applicationContext,
-                    token, action, lat, lng, adjustedActionTime)
-                Log.d("AttendanceWorker", "one")
-                res
-            } else {
 
-                val log = mapOf(
-                    "action" to action,
-                    "lat" to lat,
-                    "lng" to lng,
-                    "action_time" to adjustedActionTime,
-                    "action_tz" to "UTC"
+            // 1️⃣ Get all offline logs from Room
+            val logs =
+                offlineDao.getAllLogs()
+
+            Log.d(
+                "OfflineWorker",
+                "📦 Found ${logs.size} offline logs to send"
+            )
+
+            // Nothing to send
+            if (logs.isEmpty()) {
+
+                Log.d(
+                    "OfflineWorker",
+                    "✅ No offline logs to send"
                 )
+
+                return Result.success()
+            }
+
+            // 2️⃣ Convert Room objects to API format
+            val formattedLogs =
+                logs.map { log ->
+
+                    mapOf(
+                        "action" to log.action,
+                        "lat" to log.lat.toString(),
+                        "lng" to log.lng.toString(),
+                        "action_time" to log.action_time,
+                        "action_tz" to log.action_tz
+                    )
+                }
+
+            Log.d(
+                "OfflineWorker",
+                "📤 Sending ${formattedLogs.size} logs..."
+            )
+
+            // 3️⃣ Send logs to server
+            val success =
                 sendOfflineAttendanceAction(
                     context = applicationContext,
-                    token, listOf(log))
+                    token = token,
+                    logs = formattedLogs
+                )
 
-                Log.d("AttendanceWorker", "more")
-            }
+            Log.d(
+                "OfflineWorker",
+                "📤 Offline endpoint success = $success"
+            )
 
+            // 4️⃣ Delete ONLY if server accepted the logs
+            if (success) {
 
-            if (result != null) {
-                Log.d("AttendanceWorker", "✅ Worker send success: $result")
+                Log.d(
+                    "OfflineWorker",
+                    "✅ Server accepted offline logs"
+                )
+
+                offlineDao.deleteAllLogs()
+
+                Log.d(
+                    "OfflineWorker",
+                    "🗑 Offline logs deleted"
+                )
+
                 Result.success()
+
             } else {
-                Log.e("AttendanceWorker", "❌ Worker send failed (result null)")
+
+                Log.e(
+                    "OfflineWorker",
+                    "❌ Server rejected/failed offline logs"
+                )
+
                 Result.retry()
             }
+
         } catch (e: Exception) {
-            Log.e("AttendanceWorker", "💥 Exception in Worker: ${e.message}", e)
+
+            Log.e(
+                "OfflineWorker",
+                "💥 Exception in OfflineWorker: ${e.message}",
+                e
+            )
+
             Result.retry()
         }
     }

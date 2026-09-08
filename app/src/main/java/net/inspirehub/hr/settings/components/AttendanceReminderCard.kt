@@ -532,72 +532,72 @@ fun AttendanceReminderCard() {
                     }
                 }
 
-                if (isCheckInReminderEnabled || isCheckOutReminderEnabled) {
-                    MyDivider(
-                        horizontalPadding = 20,
-                        color = colors.surfaceColor
-                    )
-
-                    SettingsItem(
-                        label = stringResource(R.string.hide_auto_notification),
-                        icon = Icons.Default.NotificationsOff,
-                        onClick = {
-                            hideAutoNotification = !hideAutoNotification
-
-                            sharedPref.setHideAutoNotification(
-                                hideAutoNotification
-                            )
-
-                            if (hideAutoNotification) {
-                                // User chose to hide the notification
-                                AttendanceLocationNotification.hide(context)
-                            } else {
-                                // User wants the notification back
-                                if (
-                                    isCheckInReminderEnabled ||
-                                    isCheckOutReminderEnabled
-                                ) {
-                                    AttendanceLocationNotification.onRemindersEnabled(context)
-                                }
-                            }
-                        },
-                        trailingIcon = {
-                            Switch(
-                                checked = hideAutoNotification,
-                                onCheckedChange = { enabled ->
-
-                                    hideAutoNotification = enabled
-
-                                    sharedPref.setHideAutoNotification(enabled)
-
-                                    if (enabled) {
-
-                                        AttendanceLocationNotification.hide(context)
-
-                                    } else {
-
-                                        if (
-                                            isCheckInReminderEnabled ||
-                                            isCheckOutReminderEnabled
-                                        ) {
-                                            AttendanceLocationNotification.onRemindersEnabled(
-                                                context
-                                            )
-                                        }
-                                    }
-                                },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = colors.onSecondaryColor,
-                                    checkedTrackColor = colors.tertiaryColor,
-                                    uncheckedThumbColor = colors.onSecondaryColor,
-                                    uncheckedTrackColor = colors.onBackgroundColor,
-                                    uncheckedBorderColor = colors.transparent,
-                                    checkedBorderColor = colors.transparent
-                                )
-                            )
-                        }
-                    )
-                }
+//                if (isCheckInReminderEnabled || isCheckOutReminderEnabled) {
+//                    MyDivider(
+//                        horizontalPadding = 20,
+//                        color = colors.surfaceColor
+//                    )
+//
+//                    SettingsItem(
+//                        label = stringResource(R.string.hide_auto_notification),
+//                        icon = Icons.Default.NotificationsOff,
+//                        onClick = {
+//                            hideAutoNotification = !hideAutoNotification
+//
+//                            sharedPref.setHideAutoNotification(
+//                                hideAutoNotification
+//                            )
+//
+//                            if (hideAutoNotification) {
+//                                // User chose to hide the notification
+//                                AttendanceLocationNotification.hide(context)
+//                            } else {
+//                                // User wants the notification back
+//                                if (
+//                                    isCheckInReminderEnabled ||
+//                                    isCheckOutReminderEnabled
+//                                ) {
+//                                    AttendanceLocationNotification.onRemindersEnabled(context)
+//                                }
+//                            }
+//                        },
+//                        trailingIcon = {
+//                            Switch(
+//                                checked = hideAutoNotification,
+//                                onCheckedChange = { enabled ->
+//
+//                                    hideAutoNotification = enabled
+//
+//                                    sharedPref.setHideAutoNotification(enabled)
+//
+//                                    if (enabled) {
+//
+//                                        AttendanceLocationNotification.hide(context)
+//
+//                                    } else {
+//
+//                                        if (
+//                                            isCheckInReminderEnabled ||
+//                                            isCheckOutReminderEnabled
+//                                        ) {
+//                                            AttendanceLocationNotification.onRemindersEnabled(
+//                                                context
+//                                            )
+//                                        }
+//                                    }
+//                                },
+//                                colors = SwitchDefaults.colors(
+//                                    checkedThumbColor = colors.onSecondaryColor,
+//                                    checkedTrackColor = colors.tertiaryColor,
+//                                    uncheckedThumbColor = colors.onSecondaryColor,
+//                                    uncheckedTrackColor = colors.onBackgroundColor,
+//                                    uncheckedBorderColor = colors.transparent,
+//                                    checkedBorderColor = colors.transparent
+//                                )
+//                            )
+//                        }
+//                    )
+//                }
 
             }
         }

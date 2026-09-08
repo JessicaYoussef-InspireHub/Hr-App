@@ -90,6 +90,7 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
 import androidx.core.net.toUri
+import java.text.SimpleDateFormat
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -917,49 +918,68 @@ fun CheckInOutScreen(
                                         return@launch
                                     }
 
+
+
                                     //  If the operation is check_out, show the OfflineCheckOutDialog
                                     if (isOffline) {
+                                        val utcFormat = SimpleDateFormat(
+                                            "yyyy-MM-dd HH:mm:ss",
+                                            Locale.US
+                                        ).apply {
+                                            timeZone = TimeZone.getTimeZone("UTC")
+                                        }
+
+                                        val offlineActionTime = utcFormat.format(Date())
+
 
                                         val db = AppDatabase.getDatabase(context)
                                         val log = OfflineLog(
                                             action = nextAction,
                                             lat = currentLat,
                                             lng = currentLng,
-                                            action_time = Date().toString(),
-                                            action_tz = TimeZone.getDefault().id
+                                            action_time = offlineActionTime,
+                                            action_tz = "UTC"
+                                        )
+
+                                        Log.d(
+                                            "OfflineLog",
+                                            "💾 Saving offline action_time=$offlineActionTime"
                                         )
 
                                         if (nextAction == "check_in") {
-                                            coroutineScope.launch {
-                                                // Recording the offline log in the database
-                                                withContext(Dispatchers.IO) {
-                                                    db.offlineLogDao().insertLog(log)
 
-                                                    // Print to confirm
-                                                    val allLogs = db.offlineLogDao().getAllLogs()
-                                                    allLogs.forEach { println("💾 Offline Log: $it") }
+                                            withContext(Dispatchers.IO) {
+
+                                                db.offlineLogDao().insertLog(log)
+
+                                                val allLogs =
+                                                    db.offlineLogDao().getAllLogs()
+
+                                                allLogs.forEach {
+                                                    Log.d(
+                                                        "OfflineLog",
+                                                        "💾 Saved = $it"
+                                                    )
                                                 }
                                             }
 
-                                            Log.d(
-                                                "CheckInOutDebug",
-                                                "Updating attendanceStatus in ViewModel"
-                                            )
+                                            // ⭐ مهم جدًا
+                                            val savedToken = sharedPref.getToken()
 
+                                            if (savedToken != null) {
+                                                viewModel.enqueueOfflineWorker(savedToken)
+                                            }
 
-                                            // Live attendance update in the UI
                                             viewModel.setAttendanceStatus(nextStatus)
+
                                             sharedPref.saveLastOfflineActionTime(Date())
 
                                             isButtonLoading = false
-                                            Log.d(
-                                                "CheckInOutDebug",
-                                                "AttendanceStatus after setAttendanceStatus(): $attendanceStatus"
-                                            )
 
-                                            // Message to the user
                                             offlineMessage =
-                                                context.getString(R.string.offline_saved_message)
+                                                context.getString(
+                                                    R.string.offline_saved_message
+                                                )
                                         } else {
 
 
@@ -1081,25 +1101,74 @@ fun CheckInOutScreen(
                 dismissButtonText = stringResource(R.string.cancel),
                 confirmButtonText = stringResource(R.string.ok),
                 onConfirm = {
+
                     showOfflineCheckOutDialog = false
+
                     coroutineScope.launch {
-                        val db = AppDatabase.getDatabase(context)
-                        val log = OfflineLog(
-                            action = "check_out",
-                            lat = currentLat,
-                            lng = currentLng,
-                            action_time = Date().toString(),
-                            action_tz = TimeZone.getDefault().id
+
+                        val db =
+                            AppDatabase.getDatabase(context)
+
+                        val utcFormat = SimpleDateFormat(
+                            "yyyy-MM-dd HH:mm:ss",
+                            Locale.US
+                        ).apply {
+                            timeZone = TimeZone.getTimeZone("UTC")
+                        }
+
+                        val offlineActionTime = utcFormat.format(Date())
+
+                        val log =
+                            OfflineLog(
+                                action = "check_out",
+                                lat = currentLat,
+                                lng = currentLng,
+                                action_time = offlineActionTime,
+                                action_tz = "UTC"
+                            )
+                        Log.d(
+                            "OfflineLog",
+                            "💾 Check-out saved offline: action_time=$offlineActionTime"
                         )
                         withContext(Dispatchers.IO) {
+
                             db.offlineLogDao().insertLog(log)
+
+                            Log.d(
+                                "OfflineLog",
+                                "💾 Check-out saved offline: $log"
+                            )
                         }
-                        viewModel.setAttendanceStatus("checked_out")
-                        sharedPref.saveLastOfflineActionTime(Date())
+
+                        // ⭐ مهم جدًا
+                        val savedToken =
+                            sharedPref.getToken()
+
+                        if (savedToken != null) {
+
+                            viewModel.enqueueOfflineWorker(
+                                savedToken
+                            )
+                        }
+
+                        viewModel.setAttendanceStatus(
+                            "checked_out"
+                        )
+
+                        sharedPref.saveLastOfflineActionTime(
+                            Date()
+                        )
+
                         isButtonLoading = false
                         isErrorDialogLoading = false
+
+                        offlineMessage =
+                            context.getString(
+                                R.string.offline_saved_message
+                            )
                     }
                 }
+
             )
         }
 

@@ -11,6 +11,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import android.content.Context
+import androidx.room.Delete
+
 @Entity(tableName = "offline_logs")
 data class OfflineLog(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -40,6 +42,9 @@ interface OfflineLogDao {
     @Query("SELECT * FROM offline_logs ORDER BY id DESC LIMIT 1")
     suspend fun getLastLog(): OfflineLog?
 
+    @Delete
+    suspend fun delete(log: OfflineLog)
+
 }
 
 
@@ -65,5 +70,3 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-
-
