@@ -14,6 +14,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,8 +23,6 @@ import net.inspirehub.hr.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import android.os.BatteryManager
-import android.location.Location
 import android.net.ConnectivityManager
 import android.net.Network
 import kotlinx.coroutines.delay
@@ -32,26 +31,40 @@ import android.content.pm.ServiceInfo
 class LocationForegroundService : Service() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-    private lateinit var locationDao: LocationDao
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
 
     private var isLocationUpdatesStarted = false
     companion object {
         const val CHANNEL_ID = "location_service_channel"
-        const val NOTIFICATION_ID = 1001
-    }
 
-    private var lastLatitude: Double? = null
-    private var lastLongitude: Double? = null
+        /**
+         * Second channel, IMPORTANCE_MIN, used when the employee turned the
+         * hide-auto-notification switch on while the backend still wants the
+         * long-lived service (showNotification = true).
+         *
+         * Android will not let a foreground service run with no notification at all,
+         * so this is as far out of the way as it can be pushed: no status bar icon,
+         * no sound, collapsed at the bottom of the shade. A channel's importance
+         * cannot be changed after it is created, which is why this is a separate
+         * channel rather than an edit of the one above.
+         */
+        const val CHANNEL_ID_MINIMISED = "location_service_channel_min"
+
+        const val NOTIFICATION_ID = 1001
+
+        /**
+         * Take exactly one reading and stop again. Used only in alarm mode
+         * (showNotification = false), where TrackingAlarmReceiver owns the schedule.
+         */
+        const val ACTION_SINGLE_FIX = "net.inspirehub.hr.TRACKING_SINGLE_FIX"
+    }
 
 
     override fun onCreate() {
         super.onCreate()
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        locationDao = LocationDatabaseProvider.getDatabase(this).locationDao()
 
         createNotificationChannel()
 
@@ -127,6 +140,71 @@ class LocationForegroundService : Service() {
             }
         }
 
+        /*
+         * Alarm mode owns the schedule, so the only thing we may do there is one
+         * reading. Anything else - most likely Android restarting us from an old
+         * sticky start made while the backend still wanted the long-lived service -
+         * has to go away again, before it ever puts a notification on screen.
+         */
+        if (
+            !SharedPrefManager(this).getShowNotification() &&
+            intent?.action != ACTION_SINGLE_FIX
+        ) {
+
+            Log.d(
+                "TEST LOCATION_SERVICE",
+                "Alarm mode -> the alarm books the readings, stopping"
+            )
+
+            stopSelf()
+
+            return START_NOT_STICKY
+        }
+
+        goForeground()
+
+        val shouldTrack = LocationFixHandler.shouldTrack(this)
+
+        Log.d(
+            "TEST LOCATION_SERVICE",
+            "shouldTrack=$shouldTrack | action=${intent?.action}"
+        )
+
+        if (!shouldTrack) {
+
+            Log.d(
+                "TEST LOCATION_SERVICE",
+                "❌ Tracking should not run → stopping service"
+            )
+
+            finishSingleFix()
+
+            return START_NOT_STICKY
+        }
+
+        Log.d("TEST LOCATION_SERVICE", "✅ Permissions + tracking conditions OK")
+
+        /*
+         * Alarm mode: one reading, then take the notification down and die. The alarm
+         * is the schedule here, so there is nothing to keep alive and nothing sticky
+         * to restart - a sticky restart would only cost a pointless notification.
+         */
+        if (intent?.action == ACTION_SINGLE_FIX) {
+
+            takeSingleFix()
+
+            return START_NOT_STICKY
+        }
+
+        Log.d("SERVICE_TEST", "isLocationUpdatesStarted=$isLocationUpdatesStarted")
+
+        startLocationUpdates()
+
+        return START_STICKY
+    }
+
+    private fun goForeground() {
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 NOTIFICATION_ID,
@@ -139,56 +217,52 @@ class LocationForegroundService : Service() {
                 createNotification()
             )
         }
-
-        val sharedPref = SharedPrefManager(this)
-
-        val isTracked = sharedPref.getIsTracked()
-        val workingHoursOnly = sharedPref.getWorkingHoursOnly()
-        val attendanceStatus = sharedPref.getAttendanceStatus()
-
-        val shouldTrack = when {
-            !isTracked -> false
-
-            !workingHoursOnly -> true
-
-            else -> attendanceStatus == "checked_in"
-        }
-
-        Log.d(
-            "TEST LOCATION_SERVICE",
-            "isTracked=$isTracked | " +
-                    "workingHoursOnly=$workingHoursOnly | " +
-                    "attendanceStatus=$attendanceStatus | " +
-                    "shouldTrack=$shouldTrack"
-        )
-
-        if (!shouldTrack) {
-
-            Log.d(
-                "TEST LOCATION_SERVICE",
-                "❌ Tracking should not run → stopping service"
-            )
-
-            stopSelf()
-
-            return START_NOT_STICKY
-        }
-
-        Log.d("TEST LOCATION_SERVICE", "✅ Permissions + tracking conditions OK")
-
-        Log.d("SERVICE_TEST", "isLocationUpdatesStarted=$isLocationUpdatesStarted")
-
-        startLocationUpdates()
-
-        return START_STICKY
     }
 
-    private fun getBatteryLevel(): Int {
+    /** One reading for one alarm tick, then finish. */
+    private fun takeSingleFix() {
 
-        val batteryManager = getSystemService(BATTERY_SERVICE) as BatteryManager
+        Log.d("TEST_TRACKING_ALARM", "Service up for one reading")
 
-        return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY
+        SingleLocationFix.request(this) { location ->
+
+            if (location == null) {
+
+                finishSingleFix()
+
+                return@request
+            }
+
+            CoroutineScope(Dispatchers.IO).launch {
+
+                runCatching {
+                    LocationFixHandler.handle(this@LocationForegroundService, location)
+                }.onFailure {
+                    Log.e("TEST_TRACKING_ALARM", "Reading failed", it)
+                }
+
+                finishSingleFix()
+            }
+        }
+    }
+
+    /**
+     * Take the notification down and stop. REMOVE, not DETACH: in alarm mode the
+     * whole point is that nothing of ours is on screen between two readings.
+     *
+     * Wake lock first, then stop: releasing after stopSelf() would run against a
+     * half torn-down service.
+     */
+    private fun finishSingleFix() {
+
+        TrackingWakelock.release()
+
+        ServiceCompat.stopForeground(
+            this,
+            ServiceCompat.STOP_FOREGROUND_REMOVE
         )
+
+        stopSelf()
     }
 
     @SuppressLint("MissingPermission")
@@ -220,31 +294,10 @@ class LocationForegroundService : Service() {
         locationCallback = object : LocationCallback() {
 
                 override fun onLocationResult( result: LocationResult ) {
+
                     Log.d("SERVICE_TEST", "Location callback fired")
-                    val sharedPref = SharedPrefManager(this@LocationForegroundService)
 
-                    val isTracked = sharedPref.getIsTracked()
-                    val workingHoursOnly = sharedPref.getWorkingHoursOnly()
-                    val attendanceStatus = sharedPref.getAttendanceStatus()
-
-                    val shouldTrack = when {
-                        !isTracked -> false
-
-                        !workingHoursOnly -> true
-
-                        else -> attendanceStatus == "checked_in"
-                    }
-
-                    Log.d(
-                        "TEST LOCATION_SERVICE",
-                        "Callback check -> " +
-                                "isTracked=$isTracked | " +
-                                "workingHoursOnly=$workingHoursOnly | " +
-                                "attendanceStatus=$attendanceStatus | " +
-                                "shouldTrack=$shouldTrack"
-                    )
-
-                    if (!shouldTrack) {
+                    if (!LocationFixHandler.shouldTrack(this@LocationForegroundService)) {
 
                         Log.d(
                             "TEST LOCATION_SERVICE",
@@ -257,103 +310,27 @@ class LocationForegroundService : Service() {
 
                         return
                     }
+
                     val location = result.lastLocation ?: return
-                    val lat = location.latitude
-                    val lng = location.longitude
-                    val accuracy = location.accuracy
 
-                    if (lastLatitude == null || lastLongitude == null) {
-
-                        lastLatitude = lat
-                        lastLongitude = lng
-
-                        return
-                    }
-
-                    val results = FloatArray(1)
-
-                    Location.distanceBetween(
-                        lastLatitude!!,
-                        lastLongitude!!,
-                        lat,
-                        lng,
-                        results
-                    )
-
-                    val distance = results[0]
                     val time = SimpleDateFormat(
                         "HH:mm:ss",
                         Locale.getDefault()
                     ).format(Date())
 
-                    Log.d("TEST_LOCATION", "New Location -> lat=$lat , lng=$lng , distance=$distance , accuracy=$accuracy , time=$time")
+                    Log.d("TEST_LOCATION", "Callback location at $time")
 
-                    val minDistanceMeters = sharedPref.getMinDistanceMeters()
-                    Log.d("TEST_LOCATION_CONFIG", "$minDistanceMeters meters")
+                    // Same decision as the alarm path takes, so both modes report
+                    // the same readings.
+                    CoroutineScope(Dispatchers.IO).launch {
 
-                    if (distance >= minDistanceMeters) {
-
-                        lastLatitude = lat
-                        lastLongitude = lng
-
-                        // Send API
-                        CoroutineScope(Dispatchers.IO).launch {
-                            Log.d("TEST_NETWORK", "Checking internet...")
-                            val hasInternet = NetworkUtils.hasRealInternet()
-                            if (hasInternet) {
-                                try {
-                                    Log.d("TEST_NETWORK", "Internet Available")
-
-                                    sendOfflineLocations(this@LocationForegroundService)
-                                    Log.d("TEST_API", "Sending Current Location...")
-
-                                    val sharedPref = SharedPrefManager(this@LocationForegroundService)
-                                    val token = sharedPref.getToken()
-
-                                    if (token.isNullOrEmpty()) {
-                                        Log.e("TEST_API", "Employee token is null")
-                                        return@launch
-                                    }
-
-                                    val response = LocationApiService.sendLocation(
-                                        context = this@LocationForegroundService,
-                                        employeeToken = token,
-                                        latitude = lat,
-                                        longitude = lng,
-                                        accuracy = accuracy,
-                                        speed = location.speed,
-                                        battery = getBatteryLevel()
-                                    )
-
-                                    Log.d("Test LOCATION_API", "Success = ${response.result?.status}")
-                                    Log.d("TEST_API", "Current Location Sent Successfully")
-
-                                } catch (e: Exception) {
-                                    Log.e("Test LOCATION_API", "Error = ${e.message}")
-                                }
-                            } else {
-                                Log.d("TEST_NETWORK", "No Internet")
-                                locationDao.insert(
-                                    LocationLogEntity(
-                                        latitude = lat,
-                                        longitude = lng,
-                                        accuracy = accuracy,
-                                        speed = location.speed,
-                                        battery = getBatteryLevel(),
-                                        createdAt = System.currentTimeMillis()
-                                    )
-                                )
-                                Log.d("TEST_ROOM", "Saved Offline")
-
-
-                                val count = locationDao.getAll().size
-
-                                Log.d("TEST_ROOM", "Offline Count = $count")
-
-                                LocationWorkScheduler.enqueueOfflineLocationSync(
-                                    this@LocationForegroundService
-                                )
-                            }
+                        runCatching {
+                            LocationFixHandler.handle(
+                                this@LocationForegroundService,
+                                location
+                            )
+                        }.onFailure {
+                            Log.e("TEST LOCATION_SERVICE", "Reading failed", it)
                         }
                     }
                 }
@@ -394,33 +371,72 @@ class LocationForegroundService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    /**
+     * The same notification either way, on a different channel.
+     *
+     * The hide-auto-notification switch in Settings is what picks between them, so
+     * one switch now governs both this and the attendance reminder. It cannot make
+     * this one disappear - Android owns a foreground service's notification for as
+     * long as the service lives - so on this path it minimises it instead: no status
+     * bar icon, no alert, collapsed at the bottom of the shade, and dismissible.
+     * Employees who want it gone entirely need the backend to send
+     * show_notification = false, which switches the whole feature to alarm mode.
+     */
     private fun createNotification(): Notification {
+
+        val minimised = SharedPrefManager(this).isHideAutoNotification()
 
         return NotificationCompat.Builder(
             this,
-            CHANNEL_ID
+            if (minimised) CHANNEL_ID_MINIMISED else CHANNEL_ID
         )
             .setContentTitle(getString(R.string.location_service))
             .setContentText(getString(R.string.getting_your_location))
             .setSmallIcon(R.drawable.inspire_hub_logo)
-            .setOngoing(true)
+            .setOngoing(!minimised)
+            .setSilent(true)
+            .setPriority(
+                if (minimised) {
+                    NotificationCompat.PRIORITY_MIN
+                } else {
+                    NotificationCompat.PRIORITY_LOW
+                }
+            )
+            .setForegroundServiceBehavior(
+                if (minimised) {
+                    // Android 12+ holds it back for ~10s. A single alarm-mode fix is
+                    // often finished before that, so nothing is ever shown.
+                    NotificationCompat.FOREGROUND_SERVICE_DEFERRED
+                } else {
+                    NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE
+                }
+            )
             .build()
     }
 
     private fun createNotificationChannel() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
-            val channel =
-                NotificationChannel(
-                    CHANNEL_ID,
-                    "Location Service",
-                    NotificationManager.IMPORTANCE_LOW
-                )
+        val manager = getSystemService(NotificationManager::class.java) ?: return
 
-            val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_ID,
+                "Location Service",
+                NotificationManager.IMPORTANCE_LOW
+            )
+        )
 
-            manager.createNotificationChannel(channel)
-        }
+        manager.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_ID_MINIMISED,
+                "Location Service (minimised)",
+                NotificationManager.IMPORTANCE_MIN
+            ).apply {
+                description = "Used while the notification is set to stay out of the way"
+                setShowBadge(false)
+            }
+        )
     }
 }

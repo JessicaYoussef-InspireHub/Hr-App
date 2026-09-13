@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
 
 /**
  * A reboot wipes every pending alarm, and installing a new build kills whatever was
@@ -34,5 +35,14 @@ class BootCompletedReceiver : BroadcastReceiver() {
         LocalAttendanceReminderManager.restore(
             context
         )
+
+        /*
+         * Tracking has the same problem when it is running in alarm mode: the reboot
+         * wiped its alarm and nothing else of ours is running to notice. In
+         * foreground-service mode updateTracking() is a no-op here, because a
+         * background process may not start a foreground service - the check in/out
+         * screen starts it on the next resume, exactly as before.
+         */
+        LocationTrackingManager.updateTracking(context)
     }
 }

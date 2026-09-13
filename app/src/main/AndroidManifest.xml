@@ -102,6 +102,13 @@
             android:name=".settings.data.LocalAttendanceReminderReceiver"
             android:exported="false" />
 
+        <!-- One tick of location tracking when the backend sends
+             show_notification = false. Same idea as the reminder receiver above:
+             between two readings nothing of ours runs. -->
+        <receiver
+            android:name=".check_in_out.data.TrackingAlarmReceiver"
+            android:exported="false" />
+
 
         <!-- A reboot wipes every pending alarm; this puts them back. BOOT_COMPLETED
              comes from the system, so the receiver has to be exported. -->

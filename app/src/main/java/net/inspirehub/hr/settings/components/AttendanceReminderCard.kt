@@ -42,6 +42,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
+import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
 import net.inspirehub.hr.check_in_out.data.hasBackgroundLocationPermission
 import net.inspirehub.hr.InfoIcon
 import android.Manifest
@@ -74,6 +75,13 @@ fun AttendanceReminderCard() {
     var isCheckInReminderEnabled by remember { mutableStateOf(sharedPref.isCheckInReminderEnabled()) }
     var isCheckOutReminderEnabled by remember { mutableStateOf(sharedPref.isCheckOutReminderEnabled()) }
     var hideAutoNotification by remember { mutableStateOf(sharedPref.isHideAutoNotification()) }
+
+    /*
+     * The switch below governs the tracking notification on the check in/out screen
+     * as well, so it has to be reachable when tracking is the only thing running.
+     */
+    val isLocationTrackingEnabled = remember { sharedPref.getIsTracked() }
+
     var showCheckInDialog by remember { mutableStateOf(false) }
     var showCheckOutDialog by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -532,7 +540,43 @@ fun AttendanceReminderCard() {
                     }
                 }
 
-                if (isCheckInReminderEnabled || isCheckOutReminderEnabled) {
+                /**
+                 * One switch, two features.
+                 *
+                 * The reminder notification can be taken down outright - its service
+                 * is already gone between readings. The tracking one cannot: Android
+                 * owns a live foreground service's notification, so there it picks a
+                 * minimised notification instead, and the service is restarted to put
+                 * it on the right channel. When the backend sends
+                 * show_notification = false the tracking side is in alarm mode and
+                 * there is nothing on screen to restyle, so this does nothing there.
+                 */
+                val applyHideAutoNotification: (Boolean) -> Unit = { enabled ->
+
+                    hideAutoNotification = enabled
+
+                    sharedPref.setHideAutoNotification(enabled)
+
+                    if (enabled) {
+
+                        AttendanceLocationNotification.hide(context)
+
+                    } else if (
+                        isCheckInReminderEnabled ||
+                        isCheckOutReminderEnabled
+                    ) {
+
+                        AttendanceLocationNotification.onRemindersEnabled(context)
+                    }
+
+                    LocationTrackingManager.refreshNotification(context)
+                }
+
+                if (
+                    isCheckInReminderEnabled ||
+                    isCheckOutReminderEnabled ||
+                    isLocationTrackingEnabled
+                ) {
                     MyDivider(
                         horizontalPadding = 20,
                         color = colors.surfaceColor
@@ -542,49 +586,13 @@ fun AttendanceReminderCard() {
                         label = stringResource(R.string.hide_auto_notification),
                         icon = Icons.Default.NotificationsOff,
                         onClick = {
-                            hideAutoNotification = !hideAutoNotification
-
-                            sharedPref.setHideAutoNotification(
-                                hideAutoNotification
-                            )
-
-                            if (hideAutoNotification) {
-                                // User chose to hide the notification
-                                AttendanceLocationNotification.hide(context)
-                            } else {
-                                // User wants the notification back
-                                if (
-                                    isCheckInReminderEnabled ||
-                                    isCheckOutReminderEnabled
-                                ) {
-                                    AttendanceLocationNotification.onRemindersEnabled(context)
-                                }
-                            }
+                            applyHideAutoNotification(!hideAutoNotification)
                         },
                         trailingIcon = {
                             Switch(
                                 checked = hideAutoNotification,
                                 onCheckedChange = { enabled ->
-
-                                    hideAutoNotification = enabled
-
-                                    sharedPref.setHideAutoNotification(enabled)
-
-                                    if (enabled) {
-
-                                        AttendanceLocationNotification.hide(context)
-
-                                    } else {
-
-                                        if (
-                                            isCheckInReminderEnabled ||
-                                            isCheckOutReminderEnabled
-                                        ) {
-                                            AttendanceLocationNotification.onRemindersEnabled(
-                                                context
-                                            )
-                                        }
-                                    }
+                                    applyHideAutoNotification(enabled)
                                 },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = colors.onSecondaryColor,

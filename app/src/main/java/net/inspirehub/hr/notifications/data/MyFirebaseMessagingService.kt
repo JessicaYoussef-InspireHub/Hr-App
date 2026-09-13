@@ -90,6 +90,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
                     sharedPref.saveMinDistanceMeters(config.min_distance_meters)
 
+                    sharedPref.saveShowNotification(config.show_notification)
+
                     Log.d("TEST FCM_CONFIG", "✅ Latest config saved from API")
 
                     Log.d(
@@ -97,7 +99,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         "isTracked=${config.is_tracked} | " +
                                 "workingHoursOnly=${config.working_hours_only} | " +
                                 "interval=${config.tracking_interval_minutes} | " +
-                                "minDistance=${config.min_distance_meters}"
+                                "minDistance=${config.min_distance_meters} | " +
+                                "showNotification=${config.show_notification}"
                     )
 
 

@@ -83,6 +83,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
                 sharedPref.saveMinDistanceMeters(trackingConfig.result.min_distance_meters)
 
+                sharedPref.saveShowNotification(trackingConfig.result.show_notification)
+
                 _uiState.value = SignInUiState.Success(response)
 
 

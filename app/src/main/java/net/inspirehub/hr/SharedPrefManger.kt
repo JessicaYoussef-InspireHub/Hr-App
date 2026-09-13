@@ -115,6 +115,60 @@ class SharedPrefManager(context: Context) {
         return prefs.getBoolean("is_tracked", false)
     }
 
+    /**
+     * Backend switch, sent next to is_tracked, that picks HOW the home screen
+     * location tracking runs.
+     *
+     *  true  - a long-lived foreground service. Android owns its notification for as
+     *          long as the service lives, so the notification is always on screen and
+     *          the hide-auto-notification toggle can only minimise it.
+     *  false - an AlarmManager chain that starts the service for one reading and lets
+     *          it die again, the same shape as the attendance reminder. Nothing of
+     *          ours runs between two readings, so the notification really disappears.
+     *
+     * Defaults to true so a backend that does not send the field yet keeps the
+     * behaviour it has today.
+     */
+    fun saveShowNotification(value: Boolean) {
+        prefs.edit { putBoolean("show_notification", value) }
+    }
+
+    fun getShowNotification(): Boolean {
+        return prefs.getBoolean("show_notification", true)
+    }
+
+    /**
+     * Where the last reported reading was taken, used to decide whether the next one
+     * moved far enough to be worth sending.
+     *
+     * In prefs rather than in a field because in alarm mode the process dies between
+     * two readings, and a baseline that resets every time would report every fix.
+     */
+    fun saveLastTrackedLocation(
+        latitude: Double,
+        longitude: Double
+    ) {
+        prefs.edit {
+            putString("last_tracked_latitude", latitude.toString())
+            putString("last_tracked_longitude", longitude.toString())
+        }
+    }
+
+    fun getLastTrackedLatitude(): Double? {
+        return prefs.getString("last_tracked_latitude", null)?.toDoubleOrNull()
+    }
+
+    fun getLastTrackedLongitude(): Double? {
+        return prefs.getString("last_tracked_longitude", null)?.toDoubleOrNull()
+    }
+
+    fun clearLastTrackedLocation() {
+        prefs.edit {
+            remove("last_tracked_latitude")
+            remove("last_tracked_longitude")
+        }
+    }
+
     fun saveWorkingHoursOnly(value: Boolean) {
         prefs.edit { putBoolean("working_hours_only", value) }
     }

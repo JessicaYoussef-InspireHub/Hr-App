@@ -33,7 +33,14 @@ data class TrackingConfigResult(
     val is_tracked: Boolean,
     val working_hours_only: Boolean,
     val tracking_interval_minutes: Float,
-    val min_distance_meters: Float
+    val min_distance_meters: Float,
+
+    /**
+     * Whether tracking runs behind a permanent foreground notification (true) or as
+     * an alarm chain that shows nothing between readings (false). Defaulted so an
+     * older backend that does not send it keeps today's behaviour.
+     */
+    val show_notification: Boolean = false
 )
 
 suspend fun getTrackingConfig(
