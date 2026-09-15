@@ -23,7 +23,8 @@ import net.inspirehub.hr.notifications.data.NotificationDatabase
 import net.inspirehub.hr.notifications.data.NotificationEntity
 import net.inspirehub.hr.scan_qr_code.data.ScanQrCodeViewModel
 import net.inspirehub.hr.ui.theme.HrTheme
-import java.util.Locale
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import net.inspirehub.hr.settings.data.LocalAttendanceReminderManager
@@ -56,14 +57,12 @@ class MainActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, true)
         val sharedPref = SharedPrefManager(this)
-        val lang = sharedPref.getLanguage()
-        val locale = Locale(lang)
-        Locale.setDefault(locale)
+        val lang = sharedPref.getLanguage().ifBlank { "en" }
+        val desired = LocaleListCompat.forLanguageTags(lang)
+        if (AppCompatDelegate.getApplicationLocales() != desired) {
+            AppCompatDelegate.setApplicationLocales(desired)
+        }
         AppConfig.init(this)
-
-        val config = resources.configuration
-        config.setLocale(locale)
-        resources.updateConfiguration(config, resources.displayMetrics)
 
 
         FirebaseMessaging.getInstance().token
