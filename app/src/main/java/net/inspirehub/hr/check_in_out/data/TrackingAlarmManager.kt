@@ -41,6 +41,18 @@ object TrackingAlarmManager {
 
         val appContext = context.applicationContext
 
+        if (!hasTrackingLocationPermissions(appContext)) {
+
+            Log.d(
+                "TEST_TRACKING_ALARM",
+                "Location permissions missing -> no chain to run"
+            )
+
+            stop(appContext)
+
+            return
+        }
+
         if (isScheduled(appContext)) {
 
             Log.d("TEST_TRACKING_ALARM", "Chain already running -> nothing to do")
@@ -157,6 +169,24 @@ object TrackingAlarmManager {
  * Callers on a foreground path wrap it in runCatching.
  */
 fun Context.startTrackingSingleFix() {
+
+    /*
+     * Checked here rather than only inside the service: startForegroundService()
+     * puts the process on a timer, and a service that stops itself before showing
+     * its notification - which is all it could do without these permissions - is
+     * killed with ForegroundServiceDidNotStartInTimeException.
+     */
+    if (!hasTrackingLocationPermissions(this)) {
+
+        Log.d(
+            "TEST_TRACKING_ALARM",
+            "Location permissions missing -> no reading to take"
+        )
+
+        TrackingWakelock.release()
+
+        return
+    }
 
     val intent = Intent(
         this,

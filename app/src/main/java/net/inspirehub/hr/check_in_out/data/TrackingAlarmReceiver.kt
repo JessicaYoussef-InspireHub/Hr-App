@@ -54,6 +54,18 @@ class TrackingAlarmReceiver : BroadcastReceiver() {
             return
         }
 
+        if (!hasTrackingLocationPermissions(appContext)) {
+
+            Log.d(
+                "TEST_TRACKING_ALARM",
+                "Location permissions missing -> ending the chain"
+            )
+
+            TrackingAlarmManager.stop(appContext)
+
+            return
+        }
+
         if (!LocationFixHandler.shouldTrack(appContext)) {
 
             Log.d(

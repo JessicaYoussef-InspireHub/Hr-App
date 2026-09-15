@@ -35,6 +35,22 @@ class LocationForegroundService : Service() {
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
 
     private var isLocationUpdatesStarted = false
+
+    /**
+     * The id of the most recent start request we have been handed.
+     *
+     * Every stop goes through stopSelf(startId), never the bare stopSelf(): the bare
+     * one tears the service down even when Android is still holding a start request
+     * it has not delivered yet. That request was made with startForegroundService(),
+     * so it has a five-second clock behind it, and a service that is already gone can
+     * never satisfy it - which is ForegroundServiceDidNotStartInTimeException.
+     *
+     * Two starts racing is the normal case here, not an edge one: an FCM config
+     * update calls LocationTrackingManager from a background coroutine at the same
+     * moment the check in/out screen calls it from ON_RESUME.
+     */
+    private var latestStartId = 0
+
     companion object {
         const val CHANNEL_ID = "location_service_channel"
 
@@ -64,9 +80,22 @@ class LocationForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         createNotificationChannel()
+
+        /*
+         * The very first thing, ahead of anything that could throw or take time.
+         *
+         * We are here because someone called startForegroundService(), which arms a
+         * five-second timer in the system: miss it and the process is killed with
+         * ForegroundServiceDidNotStartInTimeException. Doing this in onStartCommand
+         * is not enough, because onStartCommand only runs if onCreate returned -
+         * anything below that threw used to take the whole process down instead.
+         * onStartCommand calls it again, which is harmless and is what re-arms us
+         * when a second start request arrives while we are already running.
+         */
+        goForeground()
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -90,8 +119,22 @@ class LocationForegroundService : Service() {
             }
         }
 
-        connectivityManager.registerDefaultNetworkCallback(networkCallback)
-        Log.d("TEST_NETWORK", "Network Callback Registered")
+        /*
+         * Offline-queue plumbing, not the point of the service. It throws
+         * TooManyRequestsException once an app has leaked enough callbacks, and a
+         * service that is stopped and started on every resume is exactly how that
+         * happens - so it must not be able to take the service with it.
+         */
+        runCatching {
+
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+
+            Log.d("TEST_NETWORK", "Network Callback Registered")
+
+        }.onFailure {
+
+            Log.e("TEST_NETWORK", "Could not register the network callback", it)
+        }
     }
 
     private fun hasLocationPermission(): Boolean {
@@ -119,12 +162,28 @@ class LocationForegroundService : Service() {
 
         Log.d("SERVICE_TEST", "onStartCommand called | startId=$startId | intent=$intent")
 
+        latestStartId = startId
+
+        /*
+         * Before any decision, and before any check that could make us stop: the
+         * caller reached us through startForegroundService(), which starts a clock.
+         * A service that goes away without ever having shown a notification - which
+         * is what every bail-out below used to do - is not a quiet exit, it is
+         * ForegroundServiceDidNotStartInTimeException and a dead process.
+         */
+        if (!goForeground()) {
+
+            stopSelf(startId)
+
+            return START_NOT_STICKY
+        }
+
         if (!hasLocationPermission()) {
             Log.e(
                 "TEST LOCATION_SERVICE",
                 "❌ Location permission missing"
             )
-            stopSelf()
+            stopQuietly(startId)
             return START_NOT_STICKY
         }
 
@@ -135,7 +194,7 @@ class LocationForegroundService : Service() {
                     "TEST LOCATION_SERVICE",
                     "❌ Background location permission missing"
                 )
-                stopSelf()
+                stopQuietly(startId)
                 return START_NOT_STICKY
             }
         }
@@ -156,12 +215,10 @@ class LocationForegroundService : Service() {
                 "Alarm mode -> the alarm books the readings, stopping"
             )
 
-            stopSelf()
+            stopQuietly(startId)
 
             return START_NOT_STICKY
         }
-
-        goForeground()
 
         val shouldTrack = LocationFixHandler.shouldTrack(this)
 
@@ -177,7 +234,7 @@ class LocationForegroundService : Service() {
                 "❌ Tracking should not run → stopping service"
             )
 
-            finishSingleFix()
+            finishSingleFix(startId)
 
             return START_NOT_STICKY
         }
@@ -203,20 +260,81 @@ class LocationForegroundService : Service() {
         return START_STICKY
     }
 
-    private fun goForeground() {
+    /**
+     * Put the notification up. Returns false only when Android refused it, and the
+     * caller then has to stop - there is nothing this service may do without one.
+     *
+     * The type matters from Android 14 on: asking for the location type without the
+     * location permissions behind it is a SecurityException, so on the way out of a
+     * failed permission check we ask for shortService instead. It needs no
+     * permission and grants no location access - it only buys the moment it takes to
+     * take the notification down again and stop.
+     */
+    private fun goForeground(): Boolean {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
+        val type =
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                !(hasLocationPermission() && hasBackgroundLocationPermission(this))
+            ) {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+            } else {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+            }
+
+        return runCatching {
+
+            ServiceCompat.startForeground(
+                this,
                 NOTIFICATION_ID,
                 createNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                type
             )
-        } else {
-            startForeground(
-                NOTIFICATION_ID,
-                createNotification()
+
+        }.onFailure {
+
+            Log.e(
+                "TEST LOCATION_SERVICE",
+                "Android refused the foreground notification",
+                it
             )
+
+        }.isSuccess
+    }
+
+    /**
+     * Take the notification down and stop. REMOVE, not DETACH: nothing of ours is
+     * meant to stay on screen once the service is finished.
+     *
+     * Wake lock first, then stop: releasing after stopSelf() would run against a
+     * half torn-down service.
+     *
+     * stopSelf(startId) rather than stopSelf(): if another start request came in
+     * while we were deciding to stop, Android refuses this one and keeps the service
+     * alive so that request can still be delivered. Tearing down underneath it would
+     * leave it with a foreground clock it can never satisfy, and the process is
+     * killed with ForegroundServiceDidNotStartInTimeException. The notification only
+     * comes down once the stop has actually been accepted, so we are never left
+     * running without one.
+     */
+    private fun stopQuietly(startId: Int = latestStartId) {
+
+        TrackingWakelock.release()
+
+        if (!stopSelfResult(startId)) {
+
+            Log.d(
+                "TEST LOCATION_SERVICE",
+                "A newer start is still pending -> staying up, it will decide"
+            )
+
+            return
         }
+
+        ServiceCompat.stopForeground(
+            this,
+            ServiceCompat.STOP_FOREGROUND_REMOVE
+        )
     }
 
     /** One reading for one alarm tick, then finish. */
@@ -247,23 +365,10 @@ class LocationForegroundService : Service() {
     }
 
     /**
-     * Take the notification down and stop. REMOVE, not DETACH: in alarm mode the
-     * whole point is that nothing of ours is on screen between two readings.
-     *
-     * Wake lock first, then stop: releasing after stopSelf() would run against a
-     * half torn-down service.
+     * One alarm-mode reading is over. In that mode the whole point is that nothing
+     * of ours is on screen between two readings.
      */
-    private fun finishSingleFix() {
-
-        TrackingWakelock.release()
-
-        ServiceCompat.stopForeground(
-            this,
-            ServiceCompat.STOP_FOREGROUND_REMOVE
-        )
-
-        stopSelf()
-    }
+    private fun finishSingleFix(startId: Int = latestStartId) = stopQuietly(startId)
 
     @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
@@ -278,7 +383,7 @@ class LocationForegroundService : Service() {
         if (!hasLocationPermission()) {
             Log.e("TEST LOCATION_SERVICE", "❌ Location permission missing" )
 
-            stopSelf()
+            stopQuietly()
             return
         }
 
@@ -306,7 +411,7 @@ class LocationForegroundService : Service() {
 
                         fusedLocationClient.removeLocationUpdates(locationCallback)
 
-                        stopSelf()
+                        stopQuietly()
 
                         return
                     }

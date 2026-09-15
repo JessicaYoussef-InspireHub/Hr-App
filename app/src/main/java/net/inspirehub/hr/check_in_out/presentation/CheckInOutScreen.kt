@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
+import android.content.SharedPreferences
 import android.content.Context
 import android.location.LocationManager
 import android.net.ConnectivityManager
@@ -110,6 +111,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import net.inspirehub.hr.InfoIcon
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.check_in_out.data.hasBackgroundLocationPermission
+import net.inspirehub.hr.check_in_out.data.hasForegroundLocationPermission
 import net.inspirehub.hr.settings.data.AttendanceReminderPowerSettings
 
 var timeChangeReceiver: BroadcastReceiver? = null
@@ -344,7 +346,7 @@ fun CheckInOutScreen(
 
                 Log.d("CHECK IN_LOCATION_PERMISSION", "Android 11+ → showing background location dialog")
 
-                showBackgroundLocationDialog = true
+                showBackgroundLocationDialog = sharedPref.getIsTracked()
 
             } else {
 
@@ -486,7 +488,7 @@ fun CheckInOutScreen(
 
                 Log.d("CHECK IN_LOCATION_PERMISSION", "Android 11+ → showing background dialog")
 
-                showBackgroundLocationDialog = true
+                showBackgroundLocationDialog = sharedPref.getIsTracked()
             }
 
             return@LaunchedEffect
@@ -498,6 +500,68 @@ fun CheckInOutScreen(
         Log.d("CHECK IN_LOCATION_PERMISSION", "✅ All location permissions granted")
 
         continueAfterLocationGranted()
+    }
+
+    /*
+     * is_tracked can flip while this screen is already on display: an FCM config
+     * update writes it from a background coroutine. The checks above all run on
+     * entry or on resume, so without this the employee the backend has just started
+     * tracking is never asked for background location - the request waits until the
+     * next time they leave the screen and come back.
+     */
+    DisposableEffect(Unit) {
+
+        val listener =
+            SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+
+                if (key != SharedPrefManager.KEY_IS_TRACKED) {
+                    return@OnSharedPreferenceChangeListener
+                }
+
+                // Written on whichever thread saved the config, so the state below
+                // has to be touched from the main thread.
+                scope.launch {
+
+                    val isTracked = sharedPref.getIsTracked()
+
+                    Log.d(
+                        "CHECK IN_LOCATION_PERMISSION",
+                        "is_tracked changed under the screen -> $isTracked"
+                    )
+
+                    if (!isTracked) {
+
+                        showBackgroundLocationDialog = false
+
+                        return@launch
+                    }
+
+                    if (!hasForegroundLocationPermission(context)) {
+
+                        Log.d(
+                            "CHECK IN_LOCATION_PERMISSION",
+                            "Foreground location missing -> the resume check will ask"
+                        )
+
+                        return@launch
+                    }
+
+                    if (!hasBackgroundLocationPermission(context)) {
+
+                        showBackgroundLocationDialog = true
+
+                        return@launch
+                    }
+
+                    startLocationTrackingIfPossible()
+                }
+            }
+
+        sharedPref.registerChangeListener(listener)
+
+        onDispose {
+            sharedPref.unregisterChangeListener(listener)
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -556,7 +620,7 @@ fun CheckInOutScreen(
 
                     Log.d("CHECK IN_PERMISSION_FLOW", "⚠️ Background permission still missing")
 
-                    showBackgroundLocationDialog = true
+                    showBackgroundLocationDialog = sharedPref.getIsTracked()
 
                     return@LifecycleEventObserver
                 }
@@ -884,7 +948,7 @@ fun CheckInOutScreen(
                         "⚠️ Background location still missing"
                     )
 
-                    showBackgroundLocationDialog = true
+                    showBackgroundLocationDialog = sharedPref.getIsTracked()
 
                     return@LifecycleEventObserver
                 }
@@ -1495,7 +1559,7 @@ fun CheckInOutScreen(
         )
     }
 
-    if (showBackgroundLocationDialog) {
+    if (showBackgroundLocationDialog && sharedPref.getIsTracked()) {
 
         MyDialog(
             title = stringResource(

@@ -76,12 +76,6 @@ fun AttendanceReminderCard() {
     var isCheckOutReminderEnabled by remember { mutableStateOf(sharedPref.isCheckOutReminderEnabled()) }
     var hideAutoNotification by remember { mutableStateOf(sharedPref.isHideAutoNotification()) }
 
-    /*
-     * The switch below governs the tracking notification on the check in/out screen
-     * as well, so it has to be reachable when tracking is the only thing running.
-     */
-    val isLocationTrackingEnabled = remember { sharedPref.getIsTracked() }
-
     var showCheckInDialog by remember { mutableStateOf(false) }
     var showCheckOutDialog by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -574,8 +568,7 @@ fun AttendanceReminderCard() {
 
                 if (
                     isCheckInReminderEnabled ||
-                    isCheckOutReminderEnabled ||
-                    isLocationTrackingEnabled
+                    isCheckOutReminderEnabled
                 ) {
                     MyDivider(
                         horizontalPadding = 20,

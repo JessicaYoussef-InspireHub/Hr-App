@@ -108,11 +108,37 @@ class SharedPrefManager(context: Context) {
 
 
     fun saveIsTracked(value: Boolean) {
-        prefs.edit { putBoolean("is_tracked", value) }
+        prefs.edit { putBoolean(KEY_IS_TRACKED, value) }
     }
 
     fun getIsTracked(): Boolean {
-        return prefs.getBoolean("is_tracked", false)
+        return prefs.getBoolean(KEY_IS_TRACKED, false)
+    }
+
+    /**
+     * For the one screen that has to react to a value changing underneath it: an FCM
+     * config update writes is_tracked from a background thread while the check in/out
+     * screen is already on display, and nothing else would notice until the employee
+     * left the screen and came back.
+     *
+     * The listener is called on the thread that wrote the value, so anything touching
+     * UI state has to hop to the main thread itself.
+     */
+    fun registerChangeListener(
+        listener: SharedPreferences.OnSharedPreferenceChangeListener
+    ) {
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+    }
+
+    fun unregisterChangeListener(
+        listener: SharedPreferences.OnSharedPreferenceChangeListener
+    ) {
+        prefs.unregisterOnSharedPreferenceChangeListener(listener)
+    }
+
+    companion object {
+
+        const val KEY_IS_TRACKED = "is_tracked"
     }
 
     /**
