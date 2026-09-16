@@ -34,6 +34,13 @@ interface OfflineLogDao {
     @Query("DELETE FROM offline_logs WHERE id = :id")
     suspend fun deleteLogById(id: Int)
 
+    /**
+     * Clears exactly the rows that were uploaded. Never use deleteAllLogs() after a send:
+     * a punch inserted between reading the batch and deleting it would be wiped unsent.
+     */
+    @Query("DELETE FROM offline_logs WHERE id IN (:ids)")
+    suspend fun deleteLogsByIds(ids: List<Int>)
+
     @Query("DELETE FROM offline_logs")
     suspend fun deleteAllLogs()
 

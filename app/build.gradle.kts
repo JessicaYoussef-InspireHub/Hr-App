@@ -16,8 +16,8 @@ android {
         applicationId = "net.inspirehub.hr"
         minSdk = 24
         targetSdk = 36
-        versionCode = 36
-        versionName = "1.2.7"
+        versionCode = 40
+        versionName = "1.3.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,6 +45,12 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    lint {
+        // The lint checks bundled in androidx.lifecycle are built against a newer
+        // Kotlin analysis API than the lint shipped with AGP 8.7.3, so
+        // NonNullableMutableLiveDataDetector crashes during lintVitalAnalyzeRelease.
+        disable += "NullSafeMutableLiveData"
     }
 }
 

@@ -11,6 +11,8 @@ import java.util.Locale
 import java.util.TimeZone
 import androidx.work.WorkManager
 import androidx.work.WorkInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class OfflineAttendanceWorker(
     appContext: Context,
@@ -41,18 +43,23 @@ class OfflineAttendanceWorker(
                 )
             }
 
-            val response = sendOfflineAttendanceAction(
-                context = applicationContext,
-                token = token,
-                logs = formattedLogs
-            )
+            val sentIds = logs.map { it.id }
 
-            if (response != null) {
+            val accepted = withContext(Dispatchers.IO) {
+                sendOfflineAttendanceAction(
+                    context = applicationContext,
+                    token = token,
+                    logs = formattedLogs
+                )
+            }
+
+            if (accepted) {
                 Log.d("OfflineWorker", "✅ Successfully sent ${logs.size} logs")
-                offlineDao.deleteAllLogs()
+                // Only the uploaded rows — a punch made while this batch was in flight stays queued.
+                offlineDao.deleteLogsByIds(sentIds)
                 return Result.success()
             } else {
-                Log.e("OfflineWorker", "❌ Failed to send logs, will retry")
+                Log.e("OfflineWorker", "❌ Failed to send logs, keeping them queued and retrying")
                 return Result.retry()
             }
 
@@ -65,6 +72,14 @@ class OfflineAttendanceWorker(
 
 
 
+/**
+ * No longer enqueued: offline punches now go to the offline_logs table and are drained by
+ * [OfflineAttendanceWorker], so there is exactly one delivery path per punch.
+ *
+ * The class is kept because WorkManager persists enqueued jobs across app updates — devices
+ * that upgrade with a pending attendance_tag job still need this worker to deliver it.
+ * Do not enqueue new work here; that reintroduces double-sending.
+ */
 class AttendanceWorker(
     appContext: Context,
     params: WorkerParameters
@@ -119,14 +134,16 @@ class AttendanceWorker(
         Log.d("AttendanceWorker", "🕒 Adjusted action time after diff: $adjustedActionTime")
 
         return try {
-            val result = if (isSingleRecord) {
+            // Must be a Boolean: both senders return a non-null value even when they fail,
+            // so a null check here would report every send as a success.
+            val sent: Boolean = if (isSingleRecord) {
+                Log.d("AttendanceWorker", "one")
                 val res = sendAttendanceAction(
                     context = applicationContext,
                     token, action, lat, lng, adjustedActionTime)
-                Log.d("AttendanceWorker", "one")
-                res
+                res != null && !res.status.equals("Error", ignoreCase = true)
             } else {
-
+                Log.d("AttendanceWorker", "more")
                 val log = mapOf(
                     "action" to action,
                     "lat" to lat,
@@ -134,19 +151,19 @@ class AttendanceWorker(
                     "action_time" to adjustedActionTime,
                     "action_tz" to "UTC"
                 )
-                sendOfflineAttendanceAction(
-                    context = applicationContext,
-                    token, listOf(log))
-
-                Log.d("AttendanceWorker", "more")
+                withContext(Dispatchers.IO) {
+                    sendOfflineAttendanceAction(
+                        context = applicationContext,
+                        token, listOf(log))
+                }
             }
 
 
-            if (result != null) {
-                Log.d("AttendanceWorker", "✅ Worker send success: $result")
+            if (sent) {
+                Log.d("AttendanceWorker", "✅ Worker send success")
                 Result.success()
             } else {
-                Log.e("AttendanceWorker", "❌ Worker send failed (result null)")
+                Log.e("AttendanceWorker", "❌ Worker send failed, will retry")
                 Result.retry()
             }
         } catch (e: Exception) {

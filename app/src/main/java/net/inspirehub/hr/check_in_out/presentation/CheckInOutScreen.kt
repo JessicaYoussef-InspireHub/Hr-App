@@ -72,12 +72,9 @@ import net.inspirehub.hr.appColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.inspirehub.hr.FullLoading
-import net.inspirehub.hr.check_in_out.data.AppDatabase
-import net.inspirehub.hr.check_in_out.data.OfflineLog
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.Date
-import java.util.TimeZone
 import net.inspirehub.hr.BuildConfig
 import net.inspirehub.hr.check_in_out.data.checkLocationUpdatesRaw
 import net.inspirehub.hr.sign_in.data.SignInApiService
@@ -158,7 +155,6 @@ fun CheckInOutScreen(
     val lastCheckOut by viewModel.lastCheckOut.collectAsState()
     val rawDate = lastCheckOut?.substringBefore(" ") ?: ""
     val parts = rawDate.split("-") // [2025, 08, 18]
-    var showOfflineCheckOutDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var offlineMessage by remember { mutableStateOf("") }
     var showInternetRequiredDialog by remember { mutableStateOf(false) }
@@ -1096,7 +1092,7 @@ fun CheckInOutScreen(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                        text = "Last Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                         modifier = Modifier.padding(start = 12.dp),
                         color = colors.onBackgroundColor.copy(alpha = 0.6f),
                         fontSize = 12.sp
@@ -1315,41 +1311,28 @@ fun CheckInOutScreen(
                                         return@launch
                                     }
 
-                                    //  If the operation is check_out, show the OfflineCheckOutDialog
+                                    // 🔹 Case 2: Offline → queue the punch and stop.
+                                    //
+                                    // This branch MUST return. Everything below it is the online
+                                    // path, and getTimeDifferenceWithServer invokes its callback
+                                    // even when the server is unreachable — falling through from
+                                    // here queued the punch a second time and stored a bogus clock
+                                    // skew from a request that never completed.
                                     if (isOffline) {
-
-                                        val db = AppDatabase.getDatabase(context)
-                                        val log = OfflineLog(
-                                            action = nextAction,
-                                            lat = currentLat,
-                                            lng = currentLng,
-                                            action_time = Date().toString(),
-                                            action_tz = TimeZone.getDefault().id
-                                        )
-
                                         if (nextAction == "check_in") {
-                                            coroutineScope.launch {
-                                                // Recording the offline log in the database
-                                                withContext(Dispatchers.IO) {
-                                                    db.offlineLogDao().insertLog(log)
-
-                                                    // Print to confirm
-                                                    val allLogs = db.offlineLogDao().getAllLogs()
-                                                    allLogs.forEach { println("💾 Offline Log: $it") }
-                                                }
+                                            // sendAttendance owns the queue write: offline it saves
+                                            // one offline_logs row (UTC-formatted) and schedules the
+                                            // drain. Writing the row here as well produced duplicates
+                                            // in a second timestamp format.
+                                            viewModel.sendAttendance(token!!, nextAction) {
+                                                isButtonLoading = false
+                                                isErrorDialogLoading = false
                                             }
-
-                                            Log.d(
-                                                "CheckInOutDebug",
-                                                "Updating attendanceStatus in ViewModel"
-                                            )
-
 
                                             // Live attendance update in the UI
                                             viewModel.setAttendanceStatus(nextStatus)
                                             sharedPref.saveLastOfflineActionTime(Date())
 
-                                            isButtonLoading = false
                                             Log.d(
                                                 "CheckInOutDebug",
                                                 "AttendanceStatus after setAttendanceStatus(): $attendanceStatus"
@@ -1359,28 +1342,14 @@ fun CheckInOutScreen(
                                             offlineMessage =
                                                 context.getString(R.string.offline_saved_message)
                                         } else {
-
-
-                                            if (nextAction == "check_out") {
-                                                showErrorDialog = true
-                                                isButtonLoading = false
-                                                isErrorDialogLoading = false
-//                                      return@launch
-                                            }
+                                            // check_out is confirmed first; the queue write happens
+                                            // in the dialog's onConfirm.
+                                            showErrorDialog = true
+                                            isButtonLoading = false
+                                            isErrorDialogLoading = false
                                         }
 
-                                        // Try resending the offline logs if internet access is available later
-                                        if (!isOffline) {
-                                            val token = sharedPref.getToken()
-                                            if (token != null) {
-                                                viewModel.syncOfflineData(token)
-                                            } else {
-                                                Log.d(
-                                                    "CheckInOut",
-                                                    "⚠️ Token is null, cannot sync offline data"
-                                                )
-                                            }
-                                        }
+                                        return@launch
                                     }
 
 
@@ -1390,6 +1359,32 @@ fun CheckInOutScreen(
                                             "CheckInOut",
                                             "🕒 Time difference with server (minutes): $diff"
                                         )
+
+                                        // null = the server was not reached. Connectivity can drop
+                                        // between the isOffline check and this call, so treat it as
+                                        // offline: queue the punch instead of persisting a clock
+                                        // skew and clearing the time-tamper flag on a failed call.
+                                        if (diff == null) {
+                                            Log.w(
+                                                "CheckInOut",
+                                                "⚠️ Server unreachable during time check → queueing offline"
+                                            )
+                                            if (nextAction == "check_out") {
+                                                showErrorDialog = true
+                                                isButtonLoading = false
+                                                isErrorDialogLoading = false
+                                            } else {
+                                                viewModel.sendAttendance(token, nextAction) {
+                                                    isButtonLoading = false
+                                                    isErrorDialogLoading = false
+                                                }
+                                                viewModel.setAttendanceStatus(nextStatus)
+                                                sharedPref.saveLastOfflineActionTime(Date())
+                                                offlineMessage =
+                                                    context.getString(R.string.offline_saved_message)
+                                            }
+                                            return@getTimeDifferenceWithServer
+                                        }
 
                                         sharedPref.saveTimeDifference(diff)
                                         sharedPref.setWasOfflineDuringTimeChange(false)
@@ -1468,36 +1463,6 @@ fun CheckInOutScreen(
                 confirmButtonText = stringResource(R.string.ok),
                 onConfirm = { showFakeLocationDialog = false },
                 onDismiss = { showFakeLocationDialog = false },
-            )
-        }
-
-        if (showOfflineCheckOutDialog) {
-            MyDialog(
-                title = stringResource(R.string.attention),
-                subtitle = stringResource(R.string.are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available),
-                onDismiss = { showOfflineCheckOutDialog = false },
-                dismissButtonText = stringResource(R.string.cancel),
-                confirmButtonText = stringResource(R.string.ok),
-                onConfirm = {
-                    showOfflineCheckOutDialog = false
-                    coroutineScope.launch {
-                        val db = AppDatabase.getDatabase(context)
-                        val log = OfflineLog(
-                            action = "check_out",
-                            lat = currentLat,
-                            lng = currentLng,
-                            action_time = Date().toString(),
-                            action_tz = TimeZone.getDefault().id
-                        )
-                        withContext(Dispatchers.IO) {
-                            db.offlineLogDao().insertLog(log)
-                        }
-                        viewModel.setAttendanceStatus("checked_out")
-                        sharedPref.saveLastOfflineActionTime(Date())
-                        isButtonLoading = false
-                        isErrorDialogLoading = false
-                    }
-                }
             )
         }
 
@@ -1810,7 +1775,8 @@ fun CheckInOutScreen(
                     workedHours ?: 0.0
                 )
             } else {
-                stringResource(R.string.are_you_sure_you_want_to_check_out)
+                // Offline wording: tell the user the punch is queued, not sent.
+                stringResource(R.string.are_you_sure_you_want_to_check_out_now_the_operation_will_be_saved_and_sent_when_the_internet_is_available)
             },
             isLoading = isDialogLoading,
             confirmButtonText = stringResource(R.string.ok),
@@ -1819,31 +1785,41 @@ fun CheckInOutScreen(
                 sharedPref.clearCheckOutScheduledTime()
                 WorkManager.getInstance(context).cancelAllWorkByTag("check_out_reminder_work")
                 isDialogLoading = true
-                viewModel.sendAttendance(token, "check_out") { newStatus ->
-                    isDialogLoading = false
-                    if (newStatus != null) {
-                        // ✅ Success
-                        println("✅ Forced Check Out with status: $newStatus")
-                        showErrorDialog = false
 
-                        if (!isAllowedLocation) {
-                            showNotAllowedDialog = true
-                        }
-                    } else {
-                        // ❌  Error
-                        errorMessage = viewModel.message.value.ifEmpty {
-                            context.getString(R.string.error)
-                        }
-                        showErrorDialog = false
-                        showErrorMessageDialog = true
-                    }
-                }
+                // Offline, sendAttendance queues the punch and reports "queued". The online
+                // result handling below must not also run, or the offline confirmation races
+                // the success/error branches of the same call.
                 if (isOffline) {
+                    viewModel.sendAttendance(token, "check_out") {
+                        isDialogLoading = false
+                        isButtonLoading = false
+                        isErrorDialogLoading = false
+                    }
                     showErrorDialog = false
                     showErrorMessageDialog = false
                     viewModel.setAttendanceStatus("checked_out")
                     sharedPref.saveLastOfflineActionTime(Date())
                     offlineMessage = context.getString(R.string.offline_saved_message)
+                } else {
+                    viewModel.sendAttendance(token, "check_out") { newStatus ->
+                        isDialogLoading = false
+                        if (newStatus != null) {
+                            // ✅ Success
+                            println("✅ Forced Check Out with status: $newStatus")
+                            showErrorDialog = false
+
+                            if (!isAllowedLocation) {
+                                showNotAllowedDialog = true
+                            }
+                        } else {
+                            // ❌  Error
+                            errorMessage = viewModel.message.value.ifEmpty {
+                                context.getString(R.string.error)
+                            }
+                            showErrorDialog = false
+                            showErrorMessageDialog = true
+                        }
+                    }
                 }
             },
             onDismiss = { showErrorDialog = false }

@@ -11,6 +11,7 @@ import androidx.annotation.RequiresPermission
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -29,6 +30,8 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import net.inspirehub.hr.settings.data.LocalAttendanceReminderReceiver
+
+private const val OFFLINE_SYNC_WORK_NAME = "offline_attendance_sync"
 
 class CheckInOutViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -226,7 +229,13 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             .addTag("offline_attendance_tag")
             .build()
 
-        WorkManager.getInstance(context).enqueue(request)
+        // Unique + appended so drains never overlap. Two concurrent drains would both read the
+        // same rows via getAllLogs() and upload the same punches twice.
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            OFFLINE_SYNC_WORK_NAME,
+            ExistingWorkPolicy.APPEND_OR_REPLACE,
+            request
+        )
         Log.d("OfflineWorker", "⏳ OfflineWorker enqueued")
     }
 
@@ -365,7 +374,12 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         return noNetwork || noRealInternet
     }
 
-    fun getTimeDifferenceWithServer(token: String, onResult: (Long) -> Unit) {
+    /**
+     * Reports the device/server clock skew in minutes, or null when the server could not be
+     * reached. Null rather than -1: -1 is a perfectly valid skew (device one minute ahead),
+     * so a sentinel made a failed call indistinguishable from a successful one.
+     */
+    fun getTimeDifferenceWithServer(token: String, onResult: (Long?) -> Unit) {
         viewModelScope.launch {
             try {
                 Log.d("TimeCheck", "🚀 Start calculating the time difference with the server...")
@@ -394,11 +408,11 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                         onResult(diffMinutes)
                     } else {
                         Log.e("TimeCheck", "❌ Failed to convert server time to Date")
-                        onResult(-1)
+                        onResult(null)
                     }
                 } else {
                     Log.e("TimeCheck", "❌ fetchServerTime(token) returned null")
-                    onResult(-1)
+                    onResult(null)
                 }
             } catch (e: Exception) {
                 Log.e(
@@ -406,7 +420,7 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                     "❌ An exception occurred while calculating the time difference: ${e.message}",
                     e
                 )
-                onResult(-1)
+                onResult(null)
             }
         }
     }
@@ -537,41 +551,17 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                 }
             } else {
                 // 🔸 Offline (but the time is right)
+                //
+                // One punch, one delivery path. The row in offline_logs is the record of the
+                // punch; the worker is only the trigger that drains the table once the network
+                // is back. Enqueueing a second, self-contained AttendanceWorker job here would
+                // send the same punch twice.
                 saveOfflineLog(action, _currentLat.value, _currentLng.value, finalActionTime)
-                enqueueWorkManager(token, action, finalActionTime)
+                enqueueOfflineWorker(token)
+                _message.value = "⏳ Attendance queued. Will send when network is back."
                 onComplete("queued")
             }
         }
-    }
-
-    // ✨ I separated the WorkManager part into a special function so that the code would be cleaner.
-    private fun enqueueWorkManager(token: String, action: String, actionTime: String) {
-        val sharedPref = SharedPrefManager(context)
-        val diffMinutes = sharedPref.getTimeDifference()
-
-        val data = workDataOf(
-            "token" to token,
-            "action" to action,
-            "lat" to _currentLat.value.toString(),
-            "lng" to _currentLng.value.toString(),
-            "action_time" to actionTime,
-            "diff_minutes" to diffMinutes.toString()
-        )
-
-        val request = OneTimeWorkRequestBuilder<AttendanceWorker>()
-            .setInputData(data)
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .addTag("attendance_tag")
-            .build()
-
-        WorkManager.getInstance(context).enqueue(request)
-
-        Log.d("Attendance", "⏳ WorkManager job enqueued with data: $data")
-        _message.value = "⏳ Attendance queued. Will send when network is back."
     }
 
     fun getAttendanceStatus(token: String) {

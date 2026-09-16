@@ -110,10 +110,17 @@ suspend fun fetchServerTime(
     }
 }
 
+/**
+ * Uploads a batch of queued offline punches.
+ *
+ * Returns true ONLY when the server actually accepted the batch. Callers delete the
+ * queued rows on true, so anything less than a confirmed accept must return false —
+ * otherwise the punches are dropped without ever reaching the server.
+ */
 fun sendOfflineAttendanceAction(
     context:  Context,
-    token: String, logs: List<Map<String, Any>>) {
-    try {
+    token: String, logs: List<Map<String, Any>>): Boolean {
+    return try {
         println("🟡 [1] ENTERED sendOfflineAttendanceAction()")
         println("🟡 [2] Token received: $token")
         println("🟡 [3] Logs count: ${logs.size}")
@@ -174,12 +181,44 @@ fun sendOfflineAttendanceAction(
         val responseBody = response.body?.string()
         println("🟢 [13] Response Body: $responseBody")
 
+        val httpOk = response.isSuccessful
+        val httpCode = response.code
         response.close()
         println("✅ [14] Request completed and response closed.")
+
+        if (!httpOk) {
+            println("❌ [15] HTTP $httpCode — batch NOT accepted, keeping logs queued.")
+            return false
+        }
+
+        // The endpoint answers 200 even for a rejected batch, so the body decides.
+        val accepted = isOfflineBatchAccepted(responseBody)
+        println(if (accepted) "✅ [16] Batch accepted by server." else "❌ [16] Batch rejected by server, keeping logs queued.")
+        accepted
 
     } catch (e: Exception) {
         println("🔴 [ERR] Exception in sendOfflineAttendanceAction: ${e.message}")
         e.printStackTrace()
+        false
+    }
+}
+
+/**
+ * A JSON-RPC transport error, or a result whose status is "Error", means the batch was
+ * not stored. Anything we cannot parse is treated as a failure so the rows survive and
+ * get retried rather than being silently discarded.
+ */
+private fun isOfflineBatchAccepted(responseBody: String?): Boolean {
+    if (responseBody.isNullOrBlank()) return false
+    return try {
+        val json = Json.parseToJsonElement(responseBody).jsonObject
+        if (json.containsKey("error")) return false
+        val resultObj = json["result"]?.jsonObject ?: return false
+        val status = resultObj["status"]?.jsonPrimitive?.content
+        !status.equals("Error", ignoreCase = true)
+    } catch (e: Exception) {
+        println("🔴 [ERR] Could not parse offline batch response: ${e.message}")
+        false
     }
 }
 
