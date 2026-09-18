@@ -59,6 +59,7 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdateKtx" }
 app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdateKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilCompose" }
 compose = { module = "com.kizitonwose.calendar:compose", version.ref = "compose" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
 core-v352 = { module = "com.google.zxing:core", version.ref = "coreVersion" }

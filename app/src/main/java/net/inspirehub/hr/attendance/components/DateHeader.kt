@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.DateRangeIcon
-import net.inspirehub.hr.DescriptionIcon
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.utils.formatLocalizedDate
@@ -24,9 +23,7 @@ import net.inspirehub.hr.utils.formatLocalizedDate
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DateHeader(
-    date: String,
-    hasPermission: Boolean,
-    size: Int = 18
+    date: String
 ) {
     val colors = appColors()
     val context = LocalContext.current
@@ -53,12 +50,6 @@ fun DateHeader(
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
                 color = colors.onBackgroundColor
-            )
-        }
-
-        if (hasPermission) {
-            DescriptionIcon(
-                size = size.dp
             )
         }
     }

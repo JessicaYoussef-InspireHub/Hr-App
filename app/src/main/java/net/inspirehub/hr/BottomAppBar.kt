@@ -214,7 +214,7 @@ fun BottomBar(
                     }
                 )
 
-//                DropdownMenuItem(
+//              nMenuItem(
 //                    text = {
 //                        Row(
 //                            verticalAlignment = Alignment.CenterVertically

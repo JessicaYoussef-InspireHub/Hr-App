@@ -1,5 +1,6 @@
 package net.inspirehub.hr.utils
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Person
@@ -13,12 +14,22 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.attendance.presentation.AttendanceState
 import net.inspirehub.hr.attendance.presentation.DayStatus
+import androidx.core.graphics.toColorInt
 
 data class AttendanceStatusUi(
     val color: Color,
     val text: String,
     val icon: ImageVector
 )
+
+fun String.toComposeColor(): Color {
+    return try {
+        Color(this.toColorInt())
+    } catch (e: Exception) {
+        Log.d("attendance color" , "error $e")
+        Color.Gray
+    }
+}
 
 @Composable
 fun DayStatus.toUi(): AttendanceStatusUi {
@@ -70,25 +81,5 @@ fun DayStatus.getPercentage(
         }
 
         DayStatus.ABSENT -> 0
-    }
-}
-
-fun DayStatus.getProgress(
-    attendanceStates: List<AttendanceState>
-): Float {
-
-    return when (this) {
-
-        DayStatus.PRESENT -> 1f
-
-        DayStatus.IN_PROGRESS,
-        DayStatus.LATE -> {
-            (attendanceStates
-                .maxOfOrNull { it.workedHoursPercentage }
-                ?.div(100.0)
-                ?: 0.0).toFloat()
-        }
-
-        DayStatus.ABSENT -> 0f
     }
 }

@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.attendance.presentation.AttendanceDay
-import net.inspirehub.hr.attendance.presentation.AttendanceType
 import net.inspirehub.hr.attendance.presentation.getDayStatus
 import net.inspirehub.hr.utils.formatLocalizedTime
 import androidx.compose.foundation.layout.Arrangement

@@ -393,6 +393,9 @@
     <string name="battery_optimization_warning_message">ما زال هذا التطبيق مقيّدًا بواسطة تحسين البطارية، لذلك قد يتم منع التحقق الدوري من الموقع. اضغط هنا للسماح.</string>
     <string name="battery_optimization_allow">السماح</string>
     <string name="hide_auto_notification">إخفاء الإشعار تلقائيًا</string>
+    <string name="good_job">أحسنت</string>
+    <string name="ready_to_start_your_day">هل أنت مستعد لبدء يومك؟</string>
+    <string name="your_workday_is_underway">يوم عملك مستمر، استمر في العمل الرائع!</string>
 
 </resources>
 

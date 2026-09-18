@@ -20,7 +20,7 @@ class SharedPrefManager(context: Context) {
     }
 
     fun isHideAutoNotification(): Boolean {
-        return prefs.getBoolean(HIDE_AUTO_NOTIFICATION, false)
+        return prefs.getBoolean(HIDE_AUTO_NOTIFICATION, true)
     }
 
     fun setLocationPermissionRequested(requested: Boolean) {

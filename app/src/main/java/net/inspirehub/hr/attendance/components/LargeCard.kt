@@ -62,11 +62,7 @@ fun LargeCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
-            DateHeader(
-                date = day.date,
-                hasPermission = day.hasPermission,
-                size = 25
-            )
+            DateHeader(date = day.date  )
 
             AttendanceStatusIcon(
                 status = status
@@ -89,7 +85,6 @@ fun LargeCard(
             )
 
             Progress(
-                status = status,
                 attendanceStates = day.states
             )
         }

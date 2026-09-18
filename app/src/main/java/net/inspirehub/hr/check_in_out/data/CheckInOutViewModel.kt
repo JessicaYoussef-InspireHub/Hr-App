@@ -82,6 +82,11 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         allowedLocationIds: List<Int>
     ) {
 
+        Log.d(
+            "SERVICE_TEST_view_model",
+            "Starting location updates"
+        )
+
         val request = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             3000L
@@ -89,24 +94,95 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             .setMinUpdateDistanceMeters(3f)
             .build()
 
+        /*
+         * ---------------------------------------------------------
+         * 1. Get the first location immediately
+         * ---------------------------------------------------------
+         *
+         * requestLocationUpdates() may take some time before the
+         * first callback is received.
+         *
+         * We use getCurrentLocation() first so the UI can determine
+         * whether the employee is inside or outside the allowed
+         * location as soon as possible.
+         */
+        fusedLocationClient
+            .getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                null
+            )
+            .addOnSuccessListener { location ->
+
+                if (location != null) {
+
+                    Log.d(
+                        "SERVICE_TEST_view_model",
+                        "Initial location received: " +
+                                "lat=${location.latitude}, " +
+                                "lng=${location.longitude}, " +
+                                "accuracy=${location.accuracy}"
+                    )
+
+                    checkLocationAndDistanceAllCompanies(
+                        location = location,
+                        companies = companies,
+                        allowedLocationIds = allowedLocationIds
+                    )
+
+                } else {
+
+                    Log.d(
+                        "SERVICE_TEST_view_model",
+                        "Initial location is null"
+                    )
+                }
+            }
+            .addOnFailureListener { exception ->
+
+                Log.e(
+                    "SERVICE_TEST_view_model",
+                    "Failed to get initial location",
+                    exception
+                )
+            }
+
+        /*
+         * ---------------------------------------------------------
+         * 2. Continue receiving location updates
+         * ---------------------------------------------------------
+         *
+         * This keeps the existing behavior of the screen.
+         * If the employee moves in or out of the allowed range,
+         * _isWithinDistance will be updated automatically.
+         */
         locationCallback = object : LocationCallback() {
 
             override fun onLocationResult(result: LocationResult) {
-                Log.d("SERVICE_TEST_view_model", "Location callback fired")
+
+                Log.d(
+                    "SERVICE_TEST_view_model",
+                    "Location callback fired"
+                )
+
                 val location = result.lastLocation ?: return
 
                 checkLocationAndDistanceAllCompanies(
-                    location,
-                    companies,
-                    allowedLocationIds
+                    location = location,
+                    companies = companies,
+                    allowedLocationIds = allowedLocationIds
                 )
             }
         }
-        Log.d("SERVICE_TEST", "Requesting location updates")
+
         fusedLocationClient.requestLocationUpdates(
             request,
             locationCallback!!,
             null
+        )
+
+        Log.d(
+            "SERVICE_TEST_view_model",
+            "Continuous location updates started"
         )
     }
 

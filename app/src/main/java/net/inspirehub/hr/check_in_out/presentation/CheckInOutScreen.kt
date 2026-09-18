@@ -98,8 +98,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
@@ -185,6 +189,8 @@ fun CheckInOutScreen(
     var showBackgroundLocationDialog by remember { mutableStateOf(false) }
     var awaitingBatteryResult by remember { mutableStateOf(false) }
     var isBatteryUnrestricted by remember { mutableStateOf(AttendanceReminderPowerSettings.isBatteryUnrestricted(context))}
+    var showBatteryWarning by remember { mutableStateOf(false) }
+
 
     fun hasAllLocationPermissions(context: Context): Boolean {
 
@@ -248,6 +254,14 @@ fun CheckInOutScreen(
     }
 
     fun continueAfterLocationGranted() {
+
+        val companies = sharedPref.getCompaniesLatLng()
+        val allowedIds = sharedPref.getAllowedLocationsIds()
+
+        viewModel.startLocationUpdates(
+            companies = companies,
+            allowedLocationIds = allowedIds
+        )
 
         val hasLocationPermission = hasAllLocationPermissions(context)
 
@@ -363,10 +377,11 @@ fun CheckInOutScreen(
             if (isBatteryUnrestricted) {
 
                 Log.d("CHECK IN_BATTERY", "✅ Battery optimization disabled")
-
+                showBatteryWarning = false
             } else {
 
                 Log.d("CHECK IN_BATTERY", "⚠️ Battery optimization still enabled")
+                showBatteryWarning = true
             }
 
             /*
@@ -1032,16 +1047,6 @@ fun CheckInOutScreen(
     }
 
 
-    LaunchedEffect(Unit) {
-        val companies = sharedPref.getCompaniesLatLng()
-        val allowedIds = sharedPref.getAllowedLocationsIds()
-
-        viewModel.startLocationUpdates(
-            companies = companies,
-            allowedLocationIds = allowedIds
-        )
-    }
-
     DisposableEffect(Unit) {
 
         onDispose {
@@ -1191,6 +1196,102 @@ fun CheckInOutScreen(
                             .fillMaxWidth()
                             .padding(bottom = 8.dp)
                     )
+                }
+
+                if (showBatteryWarning && !isBatteryUnrestricted) {
+
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                vertical = 8.dp
+                            )
+                            .clickable {
+                                launchBatteryExemption()
+                            },
+                        shape = RoundedCornerShape(16.dp),
+                        color = colors.transparent,
+                        border = BorderStroke(
+                            1.dp,
+                            colors.error.copy(alpha = 0.25f)
+                        )
+                    ) {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = 14.dp,
+                                    vertical = 12.dp
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Surface(
+                                modifier = Modifier.size(40.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = colors.error.copy(alpha = 0.12f)
+                            ) {
+
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = null,
+                                        tint = colors.error,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(
+                                modifier = Modifier.width(12.dp)
+                            )
+
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+
+                                Text(
+                                    text = stringResource(
+                                        R.string.battery_optimization_warning_title
+                                    ),
+                                    color = colors.error,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Spacer(
+                                    modifier = Modifier.height(3.dp)
+                                )
+
+                                Text(
+                                    text = stringResource(
+                                        R.string.battery_optimization_warning_message
+                                    ),
+                                    color = colors.onBackgroundColor.copy(alpha = 0.75f),
+                                    fontSize = 12.sp,
+                                    lineHeight = 17.sp
+                                )
+                            }
+
+                            Spacer(
+                                modifier = Modifier.width(8.dp)
+                            )
+
+                            Text(
+                                text = stringResource(
+                                    R.string.battery_optimization_allow
+                                ),
+                                color = colors.tertiaryColor,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
 
 
@@ -1750,6 +1851,10 @@ fun CheckInOutScreen(
 
                 showBatteryDialog = false
 
+                // Keep the warning visible because battery optimization is still enabled.
+                isBatteryUnrestricted = AttendanceReminderPowerSettings.isBatteryUnrestricted(context)
+
+                if (!isBatteryUnrestricted) { showBatteryWarning = true }
                 /*
                  * Do NOT block the Check In / Check Out screen.
                  *

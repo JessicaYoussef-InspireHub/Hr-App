@@ -63,6 +63,8 @@ import net.inspirehub.hr.attendance.data.fetchAttendance
 import net.inspirehub.hr.attendance.data.toAttendanceDays
 import net.inspirehub.hr.expenses.components.ExpenseCalendar
 import java.time.YearMonth
+import net.inspirehub.hr.attendance.data.WorkEntryTypesResult
+import net.inspirehub.hr.attendance.data.getWorkEntryTypes
 
 
 data class AttendanceState(
@@ -70,7 +72,10 @@ data class AttendanceState(
     val endMinutes: Int?,
     val workedHoursAndMinutes: String,
     val workedHoursPercentage: Double,
-    val workEntryType : String
+    val workEntryType: String,
+    val workEntryTypeColorHex: String?,
+    val iconId: Int?,
+    val iconImage: String? = null
 )
 
 enum class AttendanceView {
@@ -78,12 +83,6 @@ enum class AttendanceView {
     CARD,
     GRID
 }
-
-enum class AttendanceType {
-    ATTENDANCE,
-    PERMISSION
-}
-
 
 data class AttendanceDay(
     val date: String,
@@ -153,11 +152,38 @@ fun AttendanceScreen(
     var attendanceResponse by remember { mutableStateOf<AttendanceResponse?>(null) }
     var fromDate by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
     var isLoading by remember { mutableStateOf(true) }
-    val allDays = remember(attendanceResponse) { attendanceResponse?.toAttendanceDays() ?: emptyList() }
-    var toDate by remember { mutableStateOf( LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())) }
+    var toDate by remember { mutableStateOf(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth())) }
     var isFilterApplied by rememberSaveable { mutableStateOf(false) }
     var tempFromDate by remember { mutableStateOf(fromDate) }
     var tempToDate by remember { mutableStateOf(toDate) }
+    var workEntryTypes by remember { mutableStateOf<WorkEntryTypesResult?>(null) }
+
+    val allDays = remember(
+        attendanceResponse,
+        workEntryTypes
+    ) {
+
+        val days = attendanceResponse?.toAttendanceDays()
+            ?: emptyList()
+
+        val iconMap = workEntryTypes
+            ?.data
+            ?.values
+            ?.associateBy { it.id }
+            ?: emptyMap()
+
+        days.map { day ->
+
+            day.copy(
+                states = day.states.map { state ->
+
+                    state.copy(
+                        iconImage = iconMap[state.iconId]?.icon_image
+                    )
+                }
+            )
+        }
+    }
 
     val (apiFromDate, apiToDate) = remember(
         selectedFilter,
@@ -217,6 +243,26 @@ fun AttendanceScreen(
             fromDate = apiFromDate.toString(),
             toDate = apiToDate.toString()
         )
+
+        val result = getWorkEntryTypes()
+
+        workEntryTypes = result
+
+        println("WORK_ENTRY_TYPES status = ${result.status}")
+        println("WORK_ENTRY_TYPES count = ${result.count}")
+
+        result.data.forEach { (key, type) ->
+
+            val icon = type.icon_image
+
+            println(
+                "WORK_ENTRY_TYPE " +
+                        "key=$key " +
+                        "id=${type.id} " +
+                        "name=${type.name} " +
+                        "iconPrefix=${icon?.take(100)}"
+            )
+        }
 
         isLoading = false
     }
@@ -434,21 +480,21 @@ fun AttendanceScreen(
 
                         0 -> {
 
-                            val sampleCards = filteredDays
                             when (attendanceView) {
 
                                 AttendanceView.LIST -> {
 
-                                    if (sampleCards.isEmpty()) {
+                                    if (filteredDays.isEmpty()) {
                                         AttendanceEmptyState()
 
                                     } else {
 
                                         LazyColumn(
+                                            modifier = Modifier.fillMaxSize(),
                                             verticalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
 
-                                            items(sampleCards) { day ->
+                                            items(filteredDays) { day ->
 
                                                 ListCard(
                                                     day = day,
@@ -458,47 +504,61 @@ fun AttendanceScreen(
                                                     }
                                                 )
                                             }
-                                        }
-                                    }
-                                }
 
-                                AttendanceView.GRID -> {
-
-                                    if (sampleCards.isEmpty()) {
-                                        AttendanceEmptyState()
-                                    } else {
-                                        LazyVerticalGrid(
-                                            columns = GridCells.Fixed(2),
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentPadding = PaddingValues(0.dp),
-                                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                        ) {
-
-                                            items(sampleCards.size) { index ->
-
-                                                val day = sampleCards[index]
-
-                                                GridCard(
-                                                    day = day,
-                                                    onClick = {
-                                                        selectedDay = it
-                                                        showBottomSheet = true
-                                                    }
+                                            item {
+                                                Spacer(
+                                                    modifier = Modifier.height(10.dp)
                                                 )
                                             }
                                         }
                                     }
                                 }
 
+                                AttendanceView.GRID -> {
+
+                                    if (filteredDays.isEmpty()) {
+                                        AttendanceEmptyState()
+                                    } else {
+                                        LazyVerticalGrid(
+                                            columns = GridCells.Fixed(2),
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentPadding = PaddingValues(bottom = 10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+
+                                            items(filteredDays.size) { index ->
+
+                                                val day = filteredDays[index]
+
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .aspectRatio(0.78f)
+                                                ) {
+
+                                                    GridCard(
+                                                        day = day,
+                                                        onClick = {
+                                                            selectedDay = it
+                                                            showBottomSheet = true
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
                                 AttendanceView.CARD -> {
-                                    if (sampleCards.isEmpty()) {
+                                    if (filteredDays.isEmpty()) {
                                         AttendanceEmptyState()
                                     } else {
                                         LazyColumn(
+                                            modifier = Modifier.fillMaxSize(),
                                             verticalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
-                                            items(sampleCards) { day ->
+                                            items(filteredDays) { day ->
 
                                                 LargeCard(
                                                     day = day,
@@ -506,6 +566,11 @@ fun AttendanceScreen(
                                                         selectedDay = it
                                                         showBottomSheet = true
                                                     }
+                                                )
+                                            }
+                                            item {
+                                                Spacer(
+                                                    modifier = Modifier.height(10.dp)
                                                 )
                                             }
                                         }

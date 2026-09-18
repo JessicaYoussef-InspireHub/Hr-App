@@ -16,8 +16,8 @@ android {
         applicationId = "net.inspirehub.hr"
         minSdk = 24
         targetSdk = 36
-        versionCode = 40
-        versionName = "1.3.3"
+        versionCode = 41
+        versionName = "1.3.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -121,5 +121,7 @@ dependencies {
 
     implementation(libs.firebase.crashlytics.ktx)
     kapt(libs.androidx.room.compiler)
+
+    implementation(libs.coil.svg)
 
 }

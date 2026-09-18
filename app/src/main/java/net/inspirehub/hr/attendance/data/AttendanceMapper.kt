@@ -1,24 +1,11 @@
 package net.inspirehub.hr.attendance.data
 
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
 import net.inspirehub.hr.attendance.presentation.AttendanceDay
 import net.inspirehub.hr.attendance.presentation.AttendanceState
 
-fun JsonElement?.asDateTime(): String? {
+private fun String?.toMinutes(): Int {
 
-    val primitive = this as? JsonPrimitive ?: return null
-
-    val value = primitive.contentOrNull ?: return null
-
-    return if (value == "0") null else value
-}
-
-
-private fun String.toMinutes(): Int {
-
-    if (isBlank() || this == "0")
+    if (this.isNullOrBlank() || this == "0")
         return 0
 
     val dateTime = split(" ")
@@ -33,30 +20,44 @@ private fun String.toMinutes(): Int {
     if (parts.size < 2)
         return 0
 
-    return parts[0].toInt() * 60 + parts[1].toInt()
+    return parts[0].toIntOrNull()?.times(60)
+        ?.plus(parts[1].toIntOrNull() ?: 0)
+        ?: 0
 }
-
-
 
 fun AttendanceResponse.toAttendanceDays(): List<AttendanceDay> {
 
-    return data.map { day ->
+    return data
+        .sortedByDescending { it.date }
+        .map { day ->
 
-        AttendanceDay(
-            date = day.date,
-            hasPermission = day.entries.any {
-                it.work_entry_type == "Permissions"
-            },
-            states = day.entries.map { entry ->
+            AttendanceDay(
+                date = day.date,
 
-                AttendanceState(
-                    startMinutes = entry.from_date.asDateTime()?.toMinutes() ?: 0,
-                    endMinutes = entry.to_date.asDateTime()?.toMinutes(),
-                    workedHoursAndMinutes = entry.duration_time,
-                    workedHoursPercentage = entry.duration,
-                    workEntryType = entry.work_entry_type
-                )
-            }
-        )
-    }
+                hasPermission = day.entries.any {
+                    it.work_entry_type == "Permissions"
+                },
+
+                states = day.entries.map { entry ->
+
+                    val typeInfo = summary[entry.work_entry_type]
+
+                    AttendanceState(
+                        startMinutes = entry.from_date.toMinutes(),
+
+                        endMinutes = entry.to_date?.toMinutes(),
+
+                        workedHoursAndMinutes = entry.duration_time,
+                        workedHoursPercentage = entry.duration,
+
+                        workEntryType = entry.work_entry_type,
+
+                        workEntryTypeColorHex =
+                            typeInfo?.work_entry_type_color_hex,
+
+                        iconId = typeInfo?.id_icon,
+                    )
+                }
+            )
+        }
 }
