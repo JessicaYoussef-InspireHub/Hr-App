@@ -157,8 +157,7 @@ fun CheckInOutScreen(
     var isDialogLoading by remember { mutableStateOf(false) }
     val lastCheckIn by viewModel.lastCheckIn.collectAsState()
     val lastCheckOut by viewModel.lastCheckOut.collectAsState()
-    val rawDate = lastCheckOut?.substringBefore(" ") ?: ""
-    val parts = rawDate.split("-") // [2025, 08, 18]
+
     val coroutineScope = rememberCoroutineScope()
     var offlineMessage by remember { mutableStateOf("") }
     var showInternetRequiredDialog by remember { mutableStateOf(false) }
@@ -729,67 +728,95 @@ fun CheckInOutScreen(
     }
 
 
-    fun formatUtcToLocal(dateTimeString: String): String {
+    fun formatAttendanceDateTime(dateTimeString: String): Pair<String, String> {
         return try {
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            val utcDateTime = LocalDateTime.parse(dateTimeString, formatter)
-            val utcZoned = ZonedDateTime.of(utcDateTime, ZoneOffset.UTC)
-            val localZoned = utcZoned.withZoneSameInstant(ZoneId.systemDefault())
-            val localTime = localZoned.toLocalTime()
+            val inputFormatter =
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+            // Server time is UTC
+            val utcDateTime = LocalDateTime.parse(
+                dateTimeString,
+                inputFormatter
+            )
+
+            // Convert UTC to device local time
+            val localDateTime = ZonedDateTime
+                .of(utcDateTime, ZoneOffset.UTC)
+                .withZoneSameInstant(ZoneId.systemDefault())
+                .toLocalDateTime()
+
+            val localDate = localDateTime.toLocalDate()
+            val localTime = localDateTime.toLocalTime()
 
             val currentLocale = Locale.getDefault()
-            val formattedTime =
-                localTime.format(DateTimeFormatter.ofPattern("h:mm a", currentLocale))
+            val isArabic = currentLocale.language == "ar"
 
-            if (currentLocale.language == "ar") {
-                convertToArabicDigits(formattedTime)
-            } else {
-                formattedTime
+            val timeFormatter = DateTimeFormatter.ofPattern(
+                "h:mm a",
+                currentLocale
+            )
+
+            val timeText = localTime.format(timeFormatter)
+
+            val today = LocalDate.now()
+
+            val dateText = when {
+                localDate == today -> {
+                    if (isArabic) {
+                        "اليوم"
+                    } else {
+                        "Today"
+                    }
+                }
+
+                localDate == today.minusDays(1) -> {
+                    if (isArabic) {
+                        "أمس"
+                    } else {
+                        "Yesterday"
+                    }
+                }
+
+                else -> {
+                    val dateFormatter = DateTimeFormatter.ofPattern(
+                        "d MMMM yyyy",
+                        if (isArabic) Locale("ar") else Locale.ENGLISH
+                    )
+
+                    localDate.format(dateFormatter)
+                }
             }
+
+            val finalDate = if (isArabic) {
+                convertToArabicDigits(dateText)
+            } else {
+                dateText
+            }
+
+            val finalTime = if (isArabic) {
+                convertToArabicDigits(timeText)
+            } else {
+                timeText
+            }
+
+            Pair(finalDate, finalTime)
+
         } catch (e: Exception) {
-            "--:--"
+            Pair("--/--/----", "--:--")
         }
     }
+
 
     val colors = appColors()
 
-    val checkInTime = lastCheckIn?.let { formatUtcToLocal(it) } ?: "--:--"
-    val checkOutTime = lastCheckOut?.let { formatUtcToLocal(it) } ?: "--:--"
+    val checkInDateTime = lastCheckIn?.let {
+        formatAttendanceDateTime(it)
+    } ?: Pair("--/--/----", "--:--")
 
-    val checkOutLabel = remember(parts) {
-        if (parts.size == 3) {
-            val year = parts.getOrNull(0)?.toIntOrNull()
-            val month = parts.getOrNull(1)?.toIntOrNull()
-            val day = parts.getOrNull(2)?.toIntOrNull()
+    val checkOutDateTime = lastCheckOut?.let {
+        formatAttendanceDateTime(it)
+    } ?: Pair("--/--/----", "--:--")
 
-            if (year != null && month != null && day != null) {
-                val checkOutDateLocal = LocalDate.of(year, month, day)
-                val today = LocalDate.now()
-                val daysDiff = ChronoUnit.DAYS.between(checkOutDateLocal, today)
-
-                when (daysDiff) {
-                    0L -> context.getString(R.string.today)
-                    1L -> context.getString(R.string.yesterday)
-                    else -> {
-                        val currentLocale =
-                            if (Locale.getDefault().language == "ar") Locale("ar") else Locale.ENGLISH
-                        val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", currentLocale)
-                        val formattedDate = checkOutDateLocal.format(formatter)
-
-                        if (currentLocale.language == "ar") {
-                            convertToArabicDigits(formattedDate)
-                        } else {
-                            formattedDate
-                        }
-                    }
-                }
-            } else {
-                "--/--/----"
-            }
-        } else {
-            "--/--/----"
-        }
-    }
 
 
     LaunchedEffect(Unit) {
@@ -1159,30 +1186,118 @@ fun CheckInOutScreen(
                 )
 
                 if (isOffline) {
+
                     Text(
-                        text = stringResource(R.string.you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available),
+                        text = stringResource(
+                            R.string.you_are_currently_offline_your_action_will_be_saved_and_sent_once_the_internet_is_available
+                        ),
                         color = colors.error,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium,
                     )
+
                 } else {
-                    Text(
-                        if (attendanceStatus == "checked_in") {
-                            stringResource(
-                                R.string.checked_in_message,
-                                checkInTime
+
+                    when (attendanceStatus) {
+
+                        "checked_in" -> {
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+
+                                // Main message
+                                Text(
+                                    text = stringResource(
+                                        R.string.you_have_successfully_checked_in_at
+                                    ),
+                                    color = colors.onBackgroundColor,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                // Date
+                                Text(
+                                    text = checkInDateTime.first,
+                                    color = colors.onBackgroundColor,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                // Time
+                                Text(
+                                    text = checkInDateTime.second,
+                                    color = colors.onBackgroundColor,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                // Footer message
+                                Text(
+                                    text = stringResource(
+                                        R.string.have_a_blessed_day
+                                    ),
+                                    color = colors.onBackgroundColor,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
+                        "checked_out" -> {
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+
+                                // Main message
+                                Text(
+                                    text = stringResource(
+                                        R.string.you_have_successfully_checked_out_on
+                                    ),
+                                    color = colors.onBackgroundColor,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                // Date
+                                Text(
+                                    text = checkOutDateTime.first,
+                                    color = colors.onBackgroundColor,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                // Time
+                                Text(
+                                    text = checkOutDateTime.second,
+                                    color = colors.onBackgroundColor,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                // Footer message
+                                Text(
+                                    text = stringResource(
+                                        R.string.great_job
+                                    ),
+                                    color = colors.onBackgroundColor,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
+                        else -> {
+
+                            Text(
+                                text = stringResource(R.string.loading),
+                                color = colors.onBackgroundColor,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Medium
                             )
-                        } else if (attendanceStatus == "checked_out") {
-                            stringResource(
-                                R.string.checked_out_message,
-                                checkOutLabel,
-                                checkOutTime
-                            )
-                        } else "Loading",
-                        color = colors.onBackgroundColor,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
-                    )
+                        }
+                    }
                 }
 //                Log.d("disable", "isWithinDistance from state: $isWithinDistance")
 

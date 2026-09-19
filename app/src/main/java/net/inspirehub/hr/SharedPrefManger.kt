@@ -23,17 +23,24 @@ class SharedPrefManager(context: Context) {
         return prefs.getBoolean(HIDE_AUTO_NOTIFICATION, true)
     }
 
-    fun setLocationPermissionRequested(requested: Boolean) {
+    fun saveLoginEmail(email: String) {
         prefs.edit {
-            putBoolean("location_permission_requested", requested)
+            putString("login_email", email)
         }
     }
 
-    fun wasLocationPermissionRequested(): Boolean {
-        return prefs.getBoolean(
-            "location_permission_requested",
-            false
-        )
+    fun getLoginEmail(): String? {
+        return prefs.getString("login_email", null)
+    }
+
+    fun saveLoginPassword(password: String) {
+        prefs.edit {
+            putString("login_password", password)
+        }
+    }
+
+    fun getLoginPassword(): String? {
+        return prefs.getString("login_password", null)
     }
 
     fun saveAttendanceStatus(status: String) {

@@ -98,8 +98,11 @@ Protection Method</string>
     <string name="english">English</string>
     <string name="you_are_checked_in">You are Checked In</string>
     <string name="you_are_checked_out">You are Checked Out</string>
-    <string name="checked_in_message">You have successfully checked in at %1$s\nHave a blessed day</string>
-    <string name="checked_out_message">You have successfully checked out on %1$s at %2$s .. Great job</string>
+    <string name="you_have_successfully_checked_in_at">You have successfully checked in at</string>
+    <string name="you_have_successfully_checked_out_on">You have successfully checked out on</string>
+    <string name="have_a_blessed_day">Have a blessed day</string>
+    <string name="great_job">Great job</string>
+
     <string name="attention">Attention</string>
     <plurals name="check_out_confirmation">
         <item quantity="one">Total worked time: %1$.2f hour\n\nAre you sure you want to check out?</item>

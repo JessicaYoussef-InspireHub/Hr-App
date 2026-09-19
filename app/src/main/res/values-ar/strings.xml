@@ -96,8 +96,10 @@
     <string name="english">English</string>
     <string name="you_are_checked_in">لقد تم تسجيل وصولك</string>
     <string name="you_are_checked_out">لقد تم تسجيل خروجك</string>
-    <string name="checked_in_message">لقد قمت بتسجيل الدخول بنجاح في %1$s\nأتمنى لك يومًا مباركًا</string>
-    <string name="checked_out_message">لقد قمت بتسجيل الخروج بنجاح بتاريخ %1$s في الساعة %2$s .. عمل رائع</string>
+    <string name="you_have_successfully_checked_in_at">لقد تم تسجيل حضورك بنجاح في</string>
+    <string name="you_have_successfully_checked_out_on">لقد تم تسجيل انصرافك بنجاح في</string>
+    <string name="have_a_blessed_day">نتمنى لك يومًا مباركًا</string>
+    <string name="great_job">أحسنت!</string>
     <string name="attention">انتبه</string>
     <plurals name="check_out_confirmation" tools:ignore="MissingQuantity">
         <item quantity="one">إجمالي وقت العمل: %1$.2f ساعة\n\nهل أنت متأكد أنك تريد تسجيل الخروج؟</item>

@@ -244,6 +244,10 @@ fun SignInScreen(
                 Text(stringResource(R.string.login_successful))
 
                 LaunchedEffect(Unit) {
+                    // Save login credentials only after successful sign-in
+                    sharedPref.saveLoginEmail(emailState.value.trim())
+
+                    sharedPref.saveLoginPassword(passwordState.value.trim())
                     if (protectionSkipped) {
                         navController.navigate("CheckInOutScreen")
                     } else {
