@@ -396,5 +396,8 @@ You have</string>
     <string name="good_job">Good job</string>
     <string name="ready_to_start_your_day">Ready to start your day?</string>
     <string name="your_workday_is_underway">Your workday is underway.</string>
+    <string name="expected_hours">Expected Hours</string>
+    <string name="worked_hours">Worked Hours</string>
+    <string name="work_entry_details">Work Entry Details</string>
 
 </resources>

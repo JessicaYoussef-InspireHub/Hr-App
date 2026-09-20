@@ -29,17 +29,24 @@ import net.inspirehub.hr.CloseIcon
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.attendance.presentation.AttendanceFilter
 import java.time.LocalDate
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.ui.platform.LocalContext
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.attendance.data.WorkEntryType
 import net.inspirehub.hr.utils.formatLocalizedDate
 import net.inspirehub.hr.utils.formatLocalizedDateRange
 import net.inspirehub.hr.utils.formatNumber
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
+
+data class AttendanceFilterItem(
+    val id: Int?,
+    val name: String,
+    val iconImage: String?,
+    val colorHex: String?
+)
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -49,16 +56,18 @@ fun FilterBottomSheet(
     currentDate: LocalDate,
     onCurrentDateChange: (LocalDate) -> Unit,
     selectedFilter: TimeFilter,
-    selectedAttendanceFilter: AttendanceFilter,
+    selectedAttendanceFilterId: Int?,
     onTimeFilterSelected: (TimeFilter) -> Unit,
-    onAttendanceFilterSelected: (AttendanceFilter) -> Unit,
+    onAttendanceFilterSelected: (Int?) -> Unit,
     onApply: () -> Unit,
     onReset: () -> Unit,
     fromDate: LocalDate?,
     toDate: LocalDate?,
     onFromDateClick: () -> Unit,
     onToDateClick: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    workEntryTypes: List<WorkEntryType>,
+    workEntryTypeColors: Map<String, String?>,
 ) {
     val colors = appColors()
     var showDateError by remember { mutableStateOf(false) }
@@ -67,6 +76,31 @@ fun FilterBottomSheet(
     val sharedPref = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPref.getLanguage()
     val locale = Locale.forLanguageTag(currentLanguage)
+
+    val attendanceFilterItems = buildList {
+
+        // All
+        add(
+            AttendanceFilterItem(
+                id = null,
+                name = "All",
+                iconImage = null,
+                colorHex = null
+            )
+        )
+
+        // Work Entry Types from API
+        addAll(
+            workEntryTypes.map {
+                AttendanceFilterItem(
+                    id = it.id,
+                    name = it.name,
+                    iconImage = it.icon_image,
+                    colorHex = workEntryTypeColors[it.name]
+                )
+            }
+        )
+    }
 
     val value = when (selectedFilter) {
 
@@ -130,8 +164,7 @@ fun FilterBottomSheet(
             horizontalAlignment = Alignment.Start
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.TopEnd,
             ) {
                 CloseIcon ( onClick = { onDismiss() } )
@@ -147,8 +180,9 @@ fun FilterBottomSheet(
             Spacer(modifier = Modifier.height(12.dp))
 
             AttendanceStatusFilterRow(
-                selectedAttendanceFilter = selectedAttendanceFilter,
-                onAttendanceFilterSelected = onAttendanceFilterSelected
+                selectedAttendanceFilterId = selectedAttendanceFilterId,
+                onAttendanceFilterSelected = onAttendanceFilterSelected,
+                items = attendanceFilterItems
             )
 
             Spacer(Modifier.height(35.dp))

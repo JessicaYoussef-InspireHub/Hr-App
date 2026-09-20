@@ -23,15 +23,11 @@ import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.appColors
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import net.inspirehub.hr.DescriptionIcon
-import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.attendance.presentation.AttendanceDay
 import net.inspirehub.hr.attendance.presentation.getDayStatus
@@ -39,6 +35,7 @@ import net.inspirehub.hr.utils.formatLocalizedDate
 import net.inspirehub.hr.utils.formatLocalizedTime
 import net.inspirehub.hr.utils.getLocalizedWorkedTime
 import net.inspirehub.hr.utils.toUi
+import net.inspirehub.hr.utils.toComposeColor
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -75,6 +72,18 @@ fun TimelineTab(
             val day = days[index]
             val status = getDayStatus(day)
             val statusUi = status.toUi()
+            val apiColors = day.states
+                .mapNotNull {
+                    it.workEntryTypeColorHex
+                        ?.takeIf { color -> color.isNotBlank() }
+                }
+                .distinct()
+                .map {
+                    it.toComposeColor()
+                }
+                .ifEmpty {
+                    listOf(statusUi.color)
+                }
             val workedMinutes = (day.states.sumOf { it.workedHoursPercentage } * 60).toInt()
             val workedHours = workedMinutes / 60
             val remainingMinutes = workedMinutes % 60
@@ -92,12 +101,21 @@ fun TimelineTab(
                     .height(IntrinsicSize.Min)
             ) {
 
-                Box(
+                Column(
                     modifier = Modifier
                         .width(4.dp)
                         .fillMaxHeight()
-                        .background(statusUi.color)
-                )
+                ) {
+                    apiColors.forEach { color ->
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .background(color)
+                        )
+                    }
+                }
 
                 Card(
                     modifier = Modifier
@@ -132,47 +150,14 @@ fun TimelineTab(
                                 color = colors.onBackgroundColor
                             )
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
                                 WorkedHours(
                                     size = 12,
                                     workedText = workedText
                                 )
-
-                                Spacer(Modifier.width(4.dp))
-
-                                Icon(
-                                    imageVector = statusUi.icon,
-                                    contentDescription = statusUi.text,
-                                    tint = statusUi.color,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
                         }
-
-                        if (day.hasPermission) {
-
-                            Spacer(Modifier.height(4.dp))
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-
-                                DescriptionIcon()
-
-                                Spacer(Modifier.width(4.dp))
-
-                                Text(
-                                    text = stringResource(R.string.permission_request),
-                                    color = colors.outline,
-                                    fontSize = 14.sp
-                                )
-                            }
-                        }
-
 
                         Spacer(Modifier.height(12.dp))
+
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween

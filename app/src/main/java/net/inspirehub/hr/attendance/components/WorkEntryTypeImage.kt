@@ -21,7 +21,8 @@ import coil.request.ImageRequest
 @Composable
  fun WorkEntryTypeImage(
     base64Image: String,
-    backgroundColor: Color
+    backgroundColor: Color,
+    size: Int = 50
 ) {
     val context = LocalContext.current
 
@@ -39,7 +40,7 @@ import coil.request.ImageRequest
 
     Box(
         modifier = Modifier
-            .size(50.dp)
+            .size(size.dp)
             .background(
                 backgroundColor.copy(alpha = 0.12f),
                 CircleShape

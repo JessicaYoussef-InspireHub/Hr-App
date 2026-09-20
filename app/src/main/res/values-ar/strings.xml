@@ -398,6 +398,9 @@
     <string name="good_job">أحسنت</string>
     <string name="ready_to_start_your_day">هل أنت مستعد لبدء يومك؟</string>
     <string name="your_workday_is_underway">يوم عملك مستمر، استمر في العمل الرائع!</string>
+    <string name="expected_hours">الساعات المتوقعة</string>
+    <string name="worked_hours">ساعات العمل</string>
+    <string name="work_entry_details">تفاصيل فترات العمل</string>
 
 </resources>
 

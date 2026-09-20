@@ -5,9 +5,42 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.inspirehub.hr.scan_qr_code.data.AppConfig.baseUrl
 import net.inspirehub.hr.time_off.data.client
+
+@Serializable
+data class AttendanceResult(
+    val status: String,
+    val count: Int = 0,
+
+    @SerialName("expected_worked")
+    val expectedWorked: Double = 0.0,
+
+    @SerialName("total_worked_hours")
+    val totalWorkedHours: Double = 0.0,
+
+    val summary: Map<String, AttendanceSummaryItem> = emptyMap()
+)
+
+
+@Serializable
+data class AttendanceSummaryItem(
+    val count: Int = 0,
+
+    @SerialName("total_hours")
+    val totalHours: Double = 0.0,
+
+    @SerialName("total_minutes")
+    val totalMinutes: Double = 0.0,
+
+    @SerialName("work_entry_type_color_hex")
+    val workEntryTypeColorHex: String? = null,
+
+    @SerialName("id_icon")
+    val idIcon: Int? = null
+)
 
 @Serializable
 data class WorkEntryType(

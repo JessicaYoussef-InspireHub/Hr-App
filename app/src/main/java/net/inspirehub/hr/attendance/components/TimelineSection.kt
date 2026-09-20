@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.res.stringResource
 import net.inspirehub.hr.R
 import net.inspirehub.hr.utils.toUi
-
+import net.inspirehub.hr.utils.toComposeColor
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -43,7 +43,7 @@ fun TimeLineSection(
         SharedPrefManager(context).getLanguage()
     }
 
-    val states = day.states
+    val states = day.states.sortedBy { it.startMinutes }
     val status = getDayStatus(day)
     val statusUi = status.toUi()
 
@@ -86,11 +86,11 @@ fun TimeLineSection(
 
             states.forEach { state ->
 
-                val barColor =
-                    if (state.workEntryType == "Permissions")
-                        colors.outline
-                    else
-                        statusUi.color
+                val barColor = state
+                    .workEntryTypeColorHex
+                    ?.takeIf { it.isNotBlank() }
+                    ?.toComposeColor()
+                    ?: statusUi.color
 
                 val end = state.endMinutes ?: state.startMinutes
 

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.material.icons.outlined.BusinessCenter
 import androidx.compose.material3.Card
@@ -34,8 +33,7 @@ import net.inspirehub.hr.appColors
 fun TimeSummaryCard(
     checkIn: String,
     checkOut: String,
-    workedHours: String,
-    breakTime: String
+    workedHours: String
 ) {
     val colors = appColors()
     data class TimeSummaryUi(
@@ -63,12 +61,6 @@ fun TimeSummaryCard(
             workedHours,
             Icons.Outlined.BusinessCenter,
             colors.onError
-        ),
-        TimeSummaryUi(
-            stringResource(R.string.break_time),
-            breakTime,
-            Icons.Default.Coffee,
-            colors.surfaceContainerLow
         )
     )
 
@@ -80,7 +72,7 @@ fun TimeSummaryCard(
     ) {
 
         Column(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(vertical = 20.dp , horizontal = 10.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
@@ -92,7 +84,7 @@ fun TimeSummaryCard(
                 ScheduleIcon(
                     size = 38
                 )
-                Spacer(Modifier.width(15.dp))
+                Spacer(Modifier.width(10.dp))
                 Text(
                     text = stringResource(R.string.time_summary),
                     color = colors.onBackgroundColor,

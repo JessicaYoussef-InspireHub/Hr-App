@@ -214,38 +214,38 @@ fun BottomBar(
                     }
                 )
 
-//              nMenuItem(
-//                    text = {
-//                        Row(
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            Icon(
-//                                Icons.Default.AccessTime,
-//                                stringResource(R.string.AttendanceHistory),
-//                                tint = if (currentRoute == "AttendanceScreen")
-//                                    colors.tertiaryColor
-//                                else
-//                                    colors.onBackgroundColor
-//                            )
-//                            Spacer(modifier = Modifier.width(8.dp))
-//                            Text(
-//                                stringResource(R.string.AttendanceHistory),
-//                                color =
-//                                    if (currentRoute == "AttendanceScreen")
-//                                        colors.tertiaryColor
-//                                    else
-//                                        colors.onBackgroundColor
-//                            )
-//                        }
-//                    }, onClick = {
-//                        moreMenuExpanded = false
-//                        if (currentRoute != "AttendanceScreen") {
-//                            navController.navigate("AttendanceScreen") {
-//                                launchSingleTop = true
-//                            }
-//                        }
-//                    }
-//                )
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.AccessTime,
+                                stringResource(R.string.AttendanceHistory),
+                                tint = if (currentRoute == "AttendanceScreen")
+                                    colors.tertiaryColor
+                                else
+                                    colors.onBackgroundColor
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.AttendanceHistory),
+                                color =
+                                    if (currentRoute == "AttendanceScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor
+                            )
+                        }
+                    }, onClick = {
+                        moreMenuExpanded = false
+                        if (currentRoute != "AttendanceScreen") {
+                            navController.navigate("AttendanceScreen") {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
 
 //                DropdownMenuItem(
 //                    text = {

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.attendance.data.WorkEntryTypeSummary
 import net.inspirehub.hr.attendance.presentation.AttendanceDay
 import java.time.YearMonth
 
@@ -21,8 +22,10 @@ import java.time.YearMonth
 fun CalendarTab(
     currentMonth: YearMonth,
     days: List<AttendanceDay>,
+    summary: Map<String, WorkEntryTypeSummary>,
     totalWorkedHours: Double,
     totalExpectedHours: Double,
+    totalCount: Int,
     onDayClick: (AttendanceDay) -> Unit
 ) {
     val colors = appColors()
@@ -42,9 +45,10 @@ fun CalendarTab(
         Spacer(modifier = Modifier.height(20.dp))
 
         AttendanceSummary(
-            days = days,
+            summary = summary,
             totalWorkedHours = totalWorkedHours,
-            totalExpectedHours = totalExpectedHours
+            totalExpectedHours = totalExpectedHours,
+            totalCount = totalCount
         )
         Spacer(modifier = Modifier.height(40.dp))
     }

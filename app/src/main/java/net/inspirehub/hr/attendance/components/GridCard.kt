@@ -6,8 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -40,43 +43,15 @@ fun GridCard(
 
     val currentLanguage = sharedPref.getLanguage()
 
-    /*
-     * Get all distinct work entry types.
-     */
     val workEntryTypes = day.states
         .filter {
             it.workEntryType.isNotBlank()
         }
         .distinctBy {
-            it.workEntryType
+            it.iconId ?: it.workEntryType
         }
 
-    /*
-     * First entry is used for the main icon.
-     *
-     * The icon is now coming from the API
-     * using iconId -> iconImage.
-     */
-    val firstEntry = workEntryTypes.firstOrNull()
 
-    val firstEntryColor = firstEntry
-        ?.workEntryTypeColorHex
-        ?.toComposeColor()
-        ?: colors.tertiaryColor
-
-    /*
-     * API image for the first work entry.
-     *
-     * Example:
-     *
-     * Attendance -> id 1 -> icon_image
-     * Early      -> id 18 -> icon_image
-     */
-    val firstEntryIconImage = firstEntry?.iconImage
-
-    /*
-     * Calculate worked time.
-     */
     val workedMinutes = (
             day.states.sumOf {
                 it.workedHoursPercentage
@@ -118,48 +93,39 @@ fun GridCard(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
 
-            /*
-             * Date
-             */
-            DateHeader(
-                date = day.date
-            )
+            DateHeader(date = day.date)
 
-            /*
-             * Main work entry icon.
-             *
-             * The image comes from:
-             *
-             * /api/work-entry-types
-             *
-             * and is matched using:
-             *
-             * AttendanceState.iconId
-             */
-            if (!firstEntryIconImage.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(12.dp))
 
-                WorkEntryTypeImage(
-                    base64Image = firstEntryIconImage,
-                    backgroundColor = firstEntryColor
-                )
+            if (workEntryTypes.isNotEmpty()) {
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    workEntryTypes.forEach { entry ->
+
+                        val entryColor = entry
+                            .workEntryTypeColorHex
+                            ?.toComposeColor()
+                            ?: colors.tertiaryColor
+
+                        if (!entry.iconImage.isNullOrBlank()) {
+                            WorkEntryTypeImage(
+                                base64Image = entry.iconImage,
+                                backgroundColor = entryColor
+                            )
+                        }
+                    }
+                }
 
             } else {
 
-                /*
-                 * Fallback to the old icon
-                 * if API image is missing.
-                 */
-                if (!firstEntryIconImage.isNullOrBlank()) {
-                    WorkEntryTypeImage(
-                        base64Image = firstEntryIconImage,
-                        backgroundColor = firstEntryColor
-                    )
-                } else {
-                    StatusCircleIcon(
-                        imageVector = getDayStatus(day).toUi().icon,
-                        tint = firstEntryColor
-                    )
-                }
+                StatusCircleIcon(
+                    imageVector = getDayStatus(day).toUi().icon,
+                    tint = colors.tertiaryColor
+                )
             }
 
             /*

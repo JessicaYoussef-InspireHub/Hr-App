@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,15 +14,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.attendance.presentation.AttendanceDay
-import net.inspirehub.hr.attendance.presentation.getDayStatus
 import net.inspirehub.hr.utils.getLocalizedWorkedTime
-import net.inspirehub.hr.utils.toUi
-
+import net.inspirehub.hr.utils.toComposeColor
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -30,60 +29,135 @@ fun LargeCard(
     onClick: (AttendanceDay) -> Unit
 ) {
 
-    val status = getDayStatus(day)
     val colors = appColors()
-    val workedMinutes = (day.states.sumOf { it.workedHoursPercentage } * 60).toInt()
-    val workedHours = workedMinutes / 60
-    val remainingMinutes = workedMinutes % 60
-    val statusUi = status.toUi()
+
     val context = LocalContext.current
     val sharedPref = SharedPrefManager(context)
     val currentLanguage = sharedPref.getLanguage()
+
+    val workedMinutes = (
+            day.states.sumOf {
+                it.workedHoursPercentage
+            } * 60
+            ).toInt()
+
+    val workedHours = workedMinutes / 60
+    val remainingMinutes = workedMinutes % 60
+
     val workedText = getLocalizedWorkedTime(
         workedHours,
         remainingMinutes,
         currentLanguage
     )
 
+    /*
+     * Work entry types coming from the API.
+     */
+    val workEntryTypes = day.states
+        .filter {
+            it.workEntryType.isNotBlank()
+        }
+        .distinctBy {
+            it.workEntryType
+        }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(day) },
+            .clickable {
+                onClick(day)
+            },
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(3.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 3.dp
+        ),
         colors = CardDefaults.cardColors(
             containerColor = colors.surfaceVariant
         )
     ) {
 
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
-            DateHeader(date = day.date  )
-
-            AttendanceStatusIcon(
-                status = status
+            /*
+             * Date.
+             */
+            DateHeader(
+                date = day.date
             )
 
-            StatusBadge(
-                roundedCorner = 50,
-                text = statusUi.text,
-                color = statusUi.color,
-                fontSize = 16,
-                Modifier.padding(
-                    horizontal = 18.dp,
-                    vertical = 8.dp
-                )
-            )
+            /*
+             * All work entry icons in one row.
+             */
+            if (workEntryTypes.isNotEmpty()) {
 
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    workEntryTypes.forEach { entry ->
+
+                        val entryColor = entry
+                            .workEntryTypeColorHex
+                            ?.toComposeColor()
+                            ?: colors.tertiaryColor
+
+                        if (!entry.iconImage.isNullOrBlank()) {
+
+                            WorkEntryTypeImage(
+                                base64Image = entry.iconImage,
+                                backgroundColor = entryColor
+                            )
+                        }
+                    }
+                }
+
+                /*
+                 * All work entry names below the icons.
+                 */
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+
+                    workEntryTypes.forEach { entry ->
+
+                        val entryColor = entry
+                            .workEntryTypeColorHex
+                            ?.toComposeColor()
+                            ?: colors.tertiaryColor
+
+                        StatusBadge(
+                            roundedCorner = 50,
+                            text = entry.workEntryType,
+                            color = entryColor,
+                            fontSize = 16,
+                            modifier = Modifier.padding(
+                                horizontal = 18.dp,
+                                vertical = 8.dp
+                            )
+                        )
+                    }
+                }
+            }
+
+            /*
+             * Worked hours.
+             */
             WorkedHours(
                 size = 16,
                 workedText = workedText
             )
 
+            /*
+             * Progress.
+             */
             Progress(
                 attendanceStates = day.states
             )

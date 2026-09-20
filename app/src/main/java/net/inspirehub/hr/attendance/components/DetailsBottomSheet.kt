@@ -28,7 +28,6 @@ import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.attendance.presentation.AttendanceDay
-import net.inspirehub.hr.attendance.presentation.getDayStatus
 import net.inspirehub.hr.utils.formatLocalizedDate
 import net.inspirehub.hr.utils.formatLocalizedTime
 import net.inspirehub.hr.utils.getLocalizedWorkedTime
@@ -43,7 +42,6 @@ fun DetailsBottomSheet(
     onDismiss: () -> Unit
 ) {
     val colors = appColors()
-    val status = getDayStatus(day)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
@@ -95,19 +93,6 @@ fun DetailsBottomSheet(
 
             Spacer(Modifier.height(16.dp))
 
-            DetailsStatusCard(
-                lateMinutes = 0,
-                status = status
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            PermissionCard(
-                hasPermission = day.hasPermission
-            )
-
-            Spacer(Modifier.height(12.dp))
-
             TimeSummaryCard(
                 checkIn = firstAttendance?.let {
                     formatLocalizedTime(
@@ -129,16 +114,14 @@ fun DetailsBottomSheet(
                     hours = workedHoursCount,
                     minutes = workedMinutesCount,
                     language = currentLanguage
-                ),
-
-                breakTime = getLocalizedWorkedTime(1, 30, currentLanguage)
+                )
             )
 
             Spacer(Modifier.height(12.dp))
 
-            PunctualityCard(
-                day = day,
-                15
+            DetailsStatusCard(
+                states = day.states,
+                language = currentLanguage
             )
 
             Spacer(Modifier.height(12.dp))

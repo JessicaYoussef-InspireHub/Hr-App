@@ -21,22 +21,21 @@ import net.inspirehub.hr.appColors
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import net.inspirehub.hr.attendance.presentation.AttendanceDay
-import net.inspirehub.hr.attendance.presentation.DayStatus
-import net.inspirehub.hr.attendance.presentation.getDayStatus
+import net.inspirehub.hr.attendance.data.WorkEntryTypeSummary
+import net.inspirehub.hr.utils.toComposeColor
+import java.util.Locale
 
 @Composable
 fun AttendanceSummary(
-    days: List<AttendanceDay>,
+    summary: Map<String, WorkEntryTypeSummary>,
     totalWorkedHours: Double,
-    totalExpectedHours: Double
+    totalExpectedHours: Double,
+    totalCount: Int
 ) {
 
     val colors = appColors()
-    val present = days.count { getDayStatus(it) == DayStatus.PRESENT }
-    val late = days.count { getDayStatus(it) == DayStatus.LATE }
-    val absent = days.count { getDayStatus(it) == DayStatus.ABSENT }
-    val totalSessions = days.size
+
+    val summaryItems = summary.entries.sortedByDescending { it.value.count }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -65,13 +64,7 @@ fun AttendanceSummary(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                AttendanceRing(
-                    present = present,
-                    late = late,
-                    absent = absent,
-                    totalWorkedHours = totalWorkedHours,
-                    totalExpectedHours = totalExpectedHours
-                )
+                AttendanceRing(summary = summary)
 
                 Spacer(Modifier.width(40.dp))
 
@@ -82,28 +75,71 @@ fun AttendanceSummary(
 
                     AttendanceInfoItem(
                         title = stringResource(R.string.total_days),
-                        value = totalSessions.toString()
+                        value = totalCount.toString()
                     )
 
-                    AttendanceInfoItem(
-                        status = DayStatus.PRESENT,
-                        title = stringResource(R.string.present),
-                        value = present.toString()
+                    summaryItems.forEach { entry ->
+
+                        val name = entry.key
+                        val item = entry.value
+
+                        AttendanceSummaryItemRow(
+                            name = name,
+                            count = item.count,
+                            color = item.work_entry_type_color_hex?.toComposeColor()
+                        )
+                    }
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                Column (horizontalAlignment = Alignment.Start){
+
+                    Text(
+                        text = stringResource(R.string.expected_hours),
+                        fontSize = 12.sp,
+                        color = colors.onBackgroundColor.copy(alpha = 0.7f)
                     )
 
-                    AttendanceInfoItem(
-                        status = DayStatus.LATE,
-                        title = stringResource(R.string.late),
-                        value = late.toString()
+                    Text(
+                        text = formatHours(totalExpectedHours),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onBackgroundColor
                     )
+                }
 
-                    AttendanceInfoItem(
-                        status = DayStatus.ABSENT,
-                        title = stringResource(R.string.absent),
-                        value = absent.toString()
+                Column( horizontalAlignment = Alignment.Start ) {
+
+                    Text(
+                        text = stringResource(R.string.worked_hours),
+                        fontSize = 12.sp,
+                        color = colors.onBackgroundColor.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = formatHours(totalWorkedHours),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onBackgroundColor
                     )
                 }
             }
         }
     }
+}
+
+private fun formatHours(hours: Double): String {
+    return String.format(
+        Locale.US,
+        "%.2f h",
+        hours
+    )
 }

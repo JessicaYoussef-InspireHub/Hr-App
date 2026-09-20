@@ -27,7 +27,7 @@ fun AttendanceTabRow(
     val colors = appColors()
 
     LazyRow(
-        modifier = Modifier.fillMaxWidth(0.75f),
+        modifier = Modifier.fillMaxWidth(0.9f),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         contentPadding = PaddingValues(horizontal = 0.dp)

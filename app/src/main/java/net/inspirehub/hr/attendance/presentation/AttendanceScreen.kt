@@ -90,6 +90,7 @@ data class AttendanceDay(
     val hasPermission: Boolean = false
 )
 
+//delete
 fun getDayStatus(day: AttendanceDay): DayStatus {
 
     if (day.states.isEmpty()) {
@@ -109,13 +110,6 @@ enum class DayStatus {
     LATE,
     ABSENT,
     IN_PROGRESS
-}
-
-enum class AttendanceFilter {
-    ALL,
-    PRESENT,
-    LATE,
-    ABSENT
 }
 
 
@@ -139,7 +133,7 @@ fun AttendanceScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
     var selectedFilter by remember { mutableStateOf(TimeFilter.MONTH) }
-    var selectedAttendanceFilter by remember { mutableStateOf(AttendanceFilter.ALL) }
+    var selectedAttendanceFilter by remember {  mutableStateOf<Int?>(null) }
     var attendanceView by rememberSaveable { mutableStateOf(AttendanceView.LIST) }
     var tempSelectedFilter by remember { mutableStateOf(selectedFilter) }
     var tempSelectedAttendanceFilter by remember { mutableStateOf(selectedAttendanceFilter) }
@@ -271,7 +265,7 @@ fun AttendanceScreen(
     fun applyFilters(
         list: List<AttendanceDay>,
         timeFilter: TimeFilter,
-        attendanceFilter: AttendanceFilter
+        attendanceFilterId: Int?
     ): List<AttendanceDay> {
 
         val timeFiltered = when (timeFilter) {
@@ -285,26 +279,14 @@ fun AttendanceScreen(
             }
         }
 
-        return when (attendanceFilter) {
+        // null means All
+        if (attendanceFilterId == null) {
+            return timeFiltered
+        }
 
-            AttendanceFilter.ALL -> timeFiltered
-
-            AttendanceFilter.PRESENT -> {
-                timeFiltered.filter {
-                    getDayStatus(it) == DayStatus.PRESENT
-                }
-            }
-
-            AttendanceFilter.LATE -> {
-                timeFiltered.filter {
-                    getDayStatus(it) == DayStatus.LATE
-                }
-            }
-
-            AttendanceFilter.ABSENT -> {
-                timeFiltered.filter {
-                    getDayStatus(it) == DayStatus.ABSENT
-                }
+        return timeFiltered.filter { day ->
+            day.states.any { state ->
+                state.iconId == attendanceFilterId
             }
         }
     }
@@ -471,9 +453,7 @@ fun AttendanceScreen(
                     }
                 }
 
-                filteredDays.isEmpty() -> {
-                    AttendanceEmptyState()
-                }
+                filteredDays.isEmpty() -> { AttendanceEmptyState() }
 
                 else -> {
                     when (selectedTab) {
@@ -595,12 +575,16 @@ fun AttendanceScreen(
                             CalendarTab(
                                 currentMonth = YearMonth.from(selectedRange),
                                 days = filteredDays,
+                                summary = attendanceResponse?.summary ?: emptyMap(),
                                 onDayClick = { day ->
                                     selectedDay = day
                                     showBottomSheet = true
                                 },
                                 totalWorkedHours = attendanceResponse?.total_worked_hours ?: 0.0,
+
                                 totalExpectedHours = attendanceResponse?.expected_worked ?: 0.0,
+
+                                totalCount = attendanceResponse?.count ?: 0
                             )
                         }
                     }
@@ -615,7 +599,7 @@ fun AttendanceScreen(
                     tempSelectedRange = it
                 },
                 selectedFilter = tempSelectedFilter,
-                selectedAttendanceFilter = tempSelectedAttendanceFilter,
+                selectedAttendanceFilterId = tempSelectedAttendanceFilter,
                 onTimeFilterSelected = {
                     tempSelectedFilter = it
                 },
@@ -644,7 +628,7 @@ fun AttendanceScreen(
                 },
                 onReset = {
                     tempSelectedFilter = TimeFilter.MONTH
-                    tempSelectedAttendanceFilter = AttendanceFilter.ALL
+                    tempSelectedAttendanceFilter = null
 
                     tempSelectedRange = LocalDate.now()
 
@@ -664,7 +648,12 @@ fun AttendanceScreen(
                 onDismiss = {
                     tempSelectedRange = selectedRange
                     showFilterSheet = false
-                }
+                },
+                workEntryTypes = workEntryTypes?.data?.values?.toList() ?: emptyList(),
+                workEntryTypeColors = attendanceResponse
+                    ?.summary
+                    ?.mapValues { it.value.work_entry_type_color_hex }
+                    ?: emptyMap()
             )
         }
 

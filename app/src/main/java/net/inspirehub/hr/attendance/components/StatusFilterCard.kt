@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,17 +22,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.CheckIcon
+import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
 @Composable
 fun StatusFilterCard(
     title: String,
-    icon: ImageVector,
+    iconImage: String?,
     iconColor: Color,
     selected: Boolean,
     onClick: () -> Unit
@@ -72,17 +76,27 @@ fun StatusFilterCard(
         }
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(vertical = 10.dp, horizontal = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
 
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(24.dp)
-            )
+            if (!iconImage.isNullOrBlank()) {
+
+                WorkEntryTypeImage(
+                    base64Image = iconImage,
+                    backgroundColor = iconColor,
+                    size = 24
+                )
+
+            } else {
+
+                Icon(
+                    imageVector = Icons.Outlined.Groups,
+                    contentDescription = stringResource(R.string.all),
+                    tint = iconColor
+                )
+            }
 
             Spacer(Modifier.height(8.dp))
 
@@ -90,7 +104,9 @@ fun StatusFilterCard(
                 text = title,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                color = colors.onBackgroundColor
+                color = colors.onBackgroundColor,
+                lineHeight = 14.sp,
+                textAlign = TextAlign.Center
             )
         }
     }
