@@ -138,6 +138,11 @@ Protection Method</string>
     <string name="enable_now">Enable Now</string>
     <string name="enable_location">Enable Location (GPS)</string>
     <string name="please_enable_gps_so_the_app_can_accurately_detect_your_location">Please enable GPS so the app can accurately detect your location.</string>
+    <string name="location_permission_required">Location Permission Required</string>
+    <string name="location_permission_message">The app needs access to your location to record your attendance. Please allow the location permission to continue.</string>
+    <string name="allow_permission">Allow Permission</string>
+    <string name="gps_off_warning">GPS is turned off. Tap the button to enable it.</string>
+    <string name="location_permission_warning">Location permission is denied. Tap the button to allow it.</string>
     <string name="lunch">Lunch</string>
     <string name="search_your_meal">Search your meal...</string>
     <string name="add">Add</string>

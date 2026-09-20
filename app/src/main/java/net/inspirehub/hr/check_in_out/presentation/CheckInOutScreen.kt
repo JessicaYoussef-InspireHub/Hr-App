@@ -114,6 +114,10 @@ import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.check_in_out.data.hasBackgroundLocationPermission
 import net.inspirehub.hr.check_in_out.data.hasForegroundLocationPermission
 import net.inspirehub.hr.settings.data.AttendanceReminderPowerSettings
+import android.content.IntentFilter
+import android.net.Uri
+import androidx.core.app.ActivityCompat
+import net.inspirehub.hr.protection.presentation.findActivity
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -169,8 +173,20 @@ fun CheckInOutScreen(
     val attendanceStatus by viewModel.attendanceStatus.collectAsState()
     var isInitialLoading by remember { mutableStateOf(false) }
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    var isGpsEnabled by remember { mutableStateOf(false) }
+    var isGpsEnabled by remember {
+        mutableStateOf(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+    }
     var showGpsDialog by remember { mutableStateOf(false) }
+    var hasLocationPermission by remember { mutableStateOf(hasForegroundLocationPermission(context)) }
+    var showLocationPermissionDialog by remember { mutableStateOf(false) }
+
+    /*
+     * The two blockers the user can fix themselves. While either one holds, the
+     * check button stays clickable on purpose: tapping it explains what is wrong
+     * and sends the user to the screen that fixes it, instead of spinning on a
+     * location that will never arrive.
+     */
+    val isLocationBlocked = !hasLocationPermission || !isGpsEnabled
     val lifecycleOwner = LocalLifecycleOwner.current
     var showNotAllowedDialog by remember { mutableStateOf(false) }
     val isAllowedLocation by viewModel.isAllowedLocation.collectAsState()
@@ -719,6 +735,46 @@ fun CheckInOutScreen(
         onDispose { }
     }
 
+    /*
+     * ON_RESUME covers coming back from the settings screens; the providers
+     * broadcast covers toggling GPS from the quick-settings panel, which never
+     * pauses the activity.
+     */
+    DisposableEffect(lifecycleOwner) {
+
+        fun refreshLocationBlockers() {
+            isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            hasLocationPermission = hasForegroundLocationPermission(context)
+            Log.d("GPS_STATUS", "Blockers -> gps=$isGpsEnabled | permission=$hasLocationPermission")
+        }
+
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                refreshLocationBlockers()
+            }
+        }
+
+        val providersReceiver = object : BroadcastReceiver() {
+            override fun onReceive(receiverContext: Context?, intent: Intent?) {
+                refreshLocationBlockers()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        ContextCompat.registerReceiver(
+            context,
+            providersReceiver,
+            IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            runCatching { context.unregisterReceiver(providersReceiver) }
+        }
+    }
+
     @Composable
     fun Modifier.noClickable(): Modifier = this.clickable(
         interactionSource = remember { MutableInteractionSource() },
@@ -1218,15 +1274,7 @@ fun CheckInOutScreen(
 
                                 // Date
                                 Text(
-                                    text = checkInDateTime.first,
-                                    color = colors.onBackgroundColor,
-                                    textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.Medium
-                                )
-
-                                // Time
-                                Text(
-                                    text = checkInDateTime.second,
+                                    text = "${ checkInDateTime.first } - ${ checkInDateTime.second }",
                                     color = colors.onBackgroundColor,
                                     textAlign = TextAlign.Center,
                                     fontWeight = FontWeight.Medium
@@ -1260,17 +1308,9 @@ fun CheckInOutScreen(
                                     fontWeight = FontWeight.Medium
                                 )
 
-                                // Date
+                                // Date + time
                                 Text(
-                                    text = checkOutDateTime.first,
-                                    color = colors.onBackgroundColor,
-                                    textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.Medium
-                                )
-
-                                // Time
-                                Text(
-                                    text = checkOutDateTime.second,
+                                    text = "${checkOutDateTime.first} - ${checkOutDateTime.second}",
                                     color = colors.onBackgroundColor,
                                     textAlign = TextAlign.Center,
                                     fontWeight = FontWeight.Medium
@@ -1301,7 +1341,23 @@ fun CheckInOutScreen(
                 }
 //                Log.d("disable", "isWithinDistance from state: $isWithinDistance")
 
-                if (isWithinDistance == false) {
+                if (isLocationBlocked) {
+                    Text(
+                        text =
+                            if (!hasLocationPermission)
+                                stringResource(R.string.location_permission_warning)
+                            else
+                                stringResource(R.string.gps_off_warning),
+                        color = colors.error,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
+
+                if (isWithinDistance == false && !isLocationBlocked) {
                     Text(
                         text = stringResource(R.string.outside_company_range),
                         color = colors.error,
@@ -1421,8 +1477,9 @@ fun CheckInOutScreen(
                             "checked_out" -> stringResource(R.string.check_in)
                             else -> "..."
                         },
-                        enabled = isWithinDistance == true,
-                        isLoading = isButtonLoading || isWithinDistance == null,
+                        enabled = isWithinDistance == true || isLocationBlocked,
+                        isLoading = isButtonLoading ||
+                                (isWithinDistance == null && !isLocationBlocked),
                         containerColor =
                             if (attendanceStatus == "checked_in")
                                 colors.tertiaryColor
@@ -1434,11 +1491,30 @@ fun CheckInOutScreen(
                             else
                                 colors.tertiaryColor,
                         border =
-                            if (isWithinDistance == true)
+                            if (isWithinDistance == true || isLocationBlocked)
                                 BorderStroke(2.dp, colors.tertiaryColor)
                             else null,
                         onClick = {
-                            if (!isButtonLoading) {
+
+                            // Re-read both blockers on the tap itself: they may have
+                            // changed since the last recomposition.
+                            isGpsEnabled =
+                                locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                            hasLocationPermission = hasForegroundLocationPermission(context)
+
+                            if (!hasLocationPermission) {
+
+                                Log.d("GPS_STATUS", "Button tapped without location permission")
+
+                                showLocationPermissionDialog = true
+
+                            } else if (!isGpsEnabled) {
+
+                                Log.d("GPS_STATUS", "Button tapped while GPS is OFF")
+
+                                showGpsDialog = true
+
+                            } else if (!isButtonLoading) {
                                 coroutineScope.launch {
 
                                     val now = Date()
@@ -1710,6 +1786,62 @@ fun CheckInOutScreen(
                 onDismiss = { showInternetRequiredDialog = false },
             )
         }
+    }
+
+    if (showLocationPermissionDialog) {
+        MyDialog(
+            title = stringResource(R.string.location_permission_required),
+            subtitle = stringResource(R.string.location_permission_message),
+            confirmButtonText = stringResource(R.string.allow_permission),
+            dismissButtonText = stringResource(R.string.cancel),
+            onConfirm = {
+
+                showLocationPermissionDialog = false
+
+                val activity = context.findActivity()
+
+                /*
+                 * The system stops showing the permission dialog once the user has
+                 * denied it for good; from then on App info is the only place where
+                 * it can still be granted.
+                 */
+                val canAskInApp =
+                    activity != null &&
+                            ActivityCompat.shouldShowRequestPermissionRationale(
+                                activity,
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                            )
+
+                if (canAskInApp) {
+
+                    Log.d("CHECK IN_LOCATION_PERMISSION", "Re-requesting foreground permission in app")
+
+                    locationPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+
+                } else {
+
+                    Log.d("CHECK IN_LOCATION_PERMISSION", "Opening app settings for location permission")
+
+                    runCatching {
+                        context.startActivity(
+                            Intent(
+                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.fromParts("package", context.packageName, null)
+                            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                    }.onFailure { noSettings ->
+                        Log.e("CHECK IN_LOCATION_PERMISSION", "No app settings screen available", noSettings)
+                        offlineMessage = context.getString(R.string.unable_open_settings)
+                    }
+                }
+            },
+            onDismiss = { showLocationPermissionDialog = false },
+        )
     }
 
     if (showGpsDialog) {
