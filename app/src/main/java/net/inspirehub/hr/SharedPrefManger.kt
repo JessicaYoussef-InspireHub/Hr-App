@@ -45,15 +45,41 @@ class SharedPrefManager(context: Context) {
 
     fun saveAttendanceStatus(status: String) {
         prefs.edit {
-            putString("attendance_status", status)
+            putString(KEY_ATTENDANCE_STATUS, status)
         }
     }
 
     fun getAttendanceStatus(): String {
         return prefs.getString(
-            "attendance_status",
+            KEY_ATTENDANCE_STATUS,
             "checked_out"
         ) ?: "checked_out"
+    }
+
+    /**
+     * The punch did not come from this device: the backend pushes
+     * attendance_mode_alert when the employee is checked in or out from the web, a
+     * kiosk or by HR, so whatever the check in/out screen is showing is already
+     * stale.
+     *
+     * Stored as "<status>|<written at>" because SharedPreferences only notifies its
+     * listeners when the value really changes - two manual check-outs in a row carry
+     * the same status, and the second one has to reach the screen as well.
+     */
+    fun saveAttendanceAlert(status: String) {
+        prefs.edit {
+            putString(KEY_ATTENDANCE_STATUS, status)
+            putString(
+                KEY_ATTENDANCE_ALERT,
+                "$status|${System.currentTimeMillis()}"
+            )
+        }
+    }
+
+    fun getAttendanceAlertStatus(): String? {
+        return prefs.getString(KEY_ATTENDANCE_ALERT, null)
+            ?.substringBefore('|')
+            ?.takeIf { it.isNotBlank() }
     }
 
     fun setAttendanceReminderEnabled(enabled: Boolean) {
@@ -146,6 +172,10 @@ class SharedPrefManager(context: Context) {
     companion object {
 
         const val KEY_IS_TRACKED = "is_tracked"
+
+        const val KEY_ATTENDANCE_STATUS = "attendance_status"
+
+        const val KEY_ATTENDANCE_ALERT = "attendance_alert"
     }
 
     /**

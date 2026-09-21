@@ -315,6 +315,37 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         Log.d("OfflineWorker", "⏳ OfflineWorker enqueued")
     }
 
+    /**
+     * A punch that did not come from this device, pushed by the backend as
+     * attendance_mode_alert.
+     *
+     * The status is applied first so the button flips immediately even with no
+     * network, then the exact times and worked hours are pulled from the server -
+     * the push says which way the punch went, never when it happened.
+     */
+    fun applyRemoteAttendanceStatus(status: String) {
+
+        Log.d("TEST ATTENDANCE_STATUS", "Remote attendance alert → $status")
+
+        _attendanceStatus.value = status
+
+        val (cachedStatus, checkIn, checkOut) = cache.getStatus()
+
+        if (cachedStatus == status) {
+
+            _lastCheckIn.value = checkIn
+            _lastCheckOut.value = checkOut
+        }
+
+        val token = SharedPrefManager(context).getToken()
+
+        if (token.isNullOrBlank()) {
+            return
+        }
+
+        getAttendanceStatus(token)
+    }
+
     fun setAttendanceStatus(status: String) {
         _attendanceStatus.value = status
 

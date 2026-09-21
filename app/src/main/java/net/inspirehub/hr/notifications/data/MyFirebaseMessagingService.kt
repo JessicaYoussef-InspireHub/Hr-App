@@ -18,7 +18,9 @@ import kotlinx.coroutines.launch
 import net.inspirehub.hr.MainActivity
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
+import net.inspirehub.hr.check_in_out.data.AttendanceCache
 import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
+import net.inspirehub.hr.check_in_out.data.fetchAttendanceStatus
 import net.inspirehub.hr.sign_in.data.getTrackingConfig
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
@@ -120,6 +122,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         }
 
+        /*
+         * A punch recorded somewhere else - web, kiosk, HR. Unlike the config push
+         * this one is also a real notification for the employee, so it is handled
+         * here and then falls through to the Room save / notification / broadcast
+         * below.
+         */
+        if (type == "attendance_mode_alert") {
+
+            handleAttendanceModeAlert(remoteMessage)
+        }
+
         //  Extract data from data payload instead of notification
         val title = remoteMessage.data["title"] ?: remoteMessage.notification?.title ?: "New notification"
         val message = remoteMessage.data["body"] ?: remoteMessage.notification?.body
@@ -137,6 +150,100 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         sendBroadcast(title, message)
     }
 
+
+    /**
+     * point_type says which way the punch went, so the check in/out button can flip
+     * before anything touches the network. The screen polls only when it is opened,
+     * so without this an employee sitting on it after a manual check-out keeps seeing
+     * a Check Out button that the server has already refused.
+     */
+    private fun handleAttendanceModeAlert(remoteMessage: RemoteMessage) {
+
+        val pointType = remoteMessage.data["point_type"]
+
+        val pushedStatus = when (pointType) {
+            "check_in" -> "checked_in"
+            "check_out" -> "checked_out"
+            else -> null
+        }
+
+        if (pushedStatus == null) {
+
+            Log.w(
+                "TEST FCM_ATTENDANCE",
+                "❌ Unknown point_type=$pointType → attendance left untouched"
+            )
+
+            return
+        }
+
+        val sharedPref = SharedPrefManager(applicationContext)
+
+        /*
+         * Written before the network call: the punch already happened, so the screen
+         * must flip even when the device is offline or the status endpoint is slow.
+         */
+        sharedPref.saveAttendanceAlert(pushedStatus)
+
+        Log.d(
+            "TEST FCM_ATTENDANCE",
+            "📩 ${remoteMessage.data["mode_label"]} $pointType → $pushedStatus"
+        )
+
+        val token = sharedPref.getToken()
+
+        if (token.isNullOrBlank()) {
+
+            Log.e("TEST FCM_ATTENDANCE", "❌ Employee token is null → keeping the pushed status")
+
+            return
+        }
+
+        /*
+         * The push carries the direction of the punch but not its time, so the real
+         * times still have to come from the server. They go into the cache the screen
+         * falls back on while it is offline.
+         */
+        CoroutineScope(Dispatchers.IO).launch {
+
+            try {
+
+                val result = fetchAttendanceStatus(
+                    context = applicationContext,
+                    token = token
+                )
+
+                if (result == null) {
+
+                    Log.w(
+                        "TEST FCM_ATTENDANCE",
+                        "⚠️ Status endpoint returned nothing → keeping the pushed status"
+                    )
+
+                    return@launch
+                }
+
+                val serverStatus = result.attendance_status ?: pushedStatus
+
+                AttendanceCache(applicationContext).saveStatus(
+                    status = serverStatus,
+                    checkIn = result.checkInTime ?: result.lastCheckIn,
+                    checkOut = result.lastCheckOut
+                )
+
+                sharedPref.saveAttendanceAlert(serverStatus)
+
+                Log.d(
+                    "TEST FCM_ATTENDANCE",
+                    "✅ Attendance refreshed from the server → $serverStatus"
+                )
+
+            } catch (e: Exception) {
+
+                Log.e("TEST FCM_ATTENDANCE", "❌ Failed to refresh attendance status", e)
+            }
+        }
+    }
 
     private fun sendNotification(title: String?, message: String?) {
         val channelId = "default_channel"

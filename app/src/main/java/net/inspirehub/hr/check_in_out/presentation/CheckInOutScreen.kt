@@ -590,6 +590,31 @@ fun CheckInOutScreen(
         val listener =
             SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
 
+                /*
+                 * A check in or out recorded outside the app - web, kiosk, HR. The
+                 * push handler has already written the new status, so the button only
+                 * has to follow it.
+                 */
+                if (key == SharedPrefManager.KEY_ATTENDANCE_ALERT) {
+
+                    scope.launch {
+
+                        val pushedStatus = sharedPref.getAttendanceAlertStatus()
+                            ?: return@launch
+
+                        Log.d(
+                            "TEST ATTENDANCE_STATUS",
+                            "Attendance alert under the screen -> $pushedStatus"
+                        )
+
+                        isButtonLoading = false
+
+                        viewModel.applyRemoteAttendanceStatus(pushedStatus)
+                    }
+
+                    return@OnSharedPreferenceChangeListener
+                }
+
                 if (key != SharedPrefManager.KEY_IS_TRACKED) {
                     return@OnSharedPreferenceChangeListener
                 }
