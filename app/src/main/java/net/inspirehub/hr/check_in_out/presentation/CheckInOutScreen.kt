@@ -206,6 +206,44 @@ fun CheckInOutScreen(
     var isBatteryUnrestricted by remember { mutableStateOf(AttendanceReminderPowerSettings.isBatteryUnrestricted(context))}
     var showBatteryWarning by remember { mutableStateOf(false) }
 
+    /*
+     * Distance is computed from the foreground location alone, so the updates
+     * have to start as soon as fine/coarse is granted. Starting them only once
+     * background location was granted left every "Allow only while using the
+     * app" employee with isWithinDistance == null forever, which keeps the
+     * check button spinning and disabled. Background location gates the
+     * tracking service, never the button.
+     *
+     * The flag keeps the call idempotent: without it every resume would stack
+     * another LocationCallback on the fused client.
+     */
+    var locationUpdatesStarted by remember { mutableStateOf(false) }
+
+    fun startForegroundLocationUpdatesIfNeeded() {
+
+        if (!hasForegroundLocationPermission(context)) {
+
+            Log.d("CHECK IN_LOCATION_UPDATES", "❌ Foreground location missing → updates not started")
+
+            return
+        }
+
+        if (locationUpdatesStarted) {
+
+            Log.d("CHECK IN_LOCATION_UPDATES", "Updates already running")
+
+            return
+        }
+
+        locationUpdatesStarted = true
+
+        Log.d("CHECK IN_LOCATION_UPDATES", "▶ Starting foreground location updates")
+
+        viewModel.startLocationUpdates(
+            companies = sharedPref.getCompaniesLatLng(),
+            allowedLocationIds = sharedPref.getAllowedLocationsIds()
+        )
+    }
 
     fun hasAllLocationPermissions(context: Context): Boolean {
 
@@ -270,13 +308,7 @@ fun CheckInOutScreen(
 
     fun continueAfterLocationGranted() {
 
-        val companies = sharedPref.getCompaniesLatLng()
-        val allowedIds = sharedPref.getAllowedLocationsIds()
-
-        viewModel.startLocationUpdates(
-            companies = companies,
-            allowedLocationIds = allowedIds
-        )
+        startForegroundLocationUpdatesIfNeeded()
 
         val hasLocationPermission = hasAllLocationPermissions(context)
 
@@ -327,6 +359,12 @@ fun CheckInOutScreen(
                 Log.d("CHECK IN_LOCATION_PERMISSION", "❌ Background location DENIED")
 
                 showBackgroundLocationDialog = false
+
+                /*
+                 * Only tracking is lost here. The employee can still check in
+                 * and out, so the distance updates keep running.
+                 */
+                startForegroundLocationUpdatesIfNeeded()
             }
         }
 
@@ -352,6 +390,12 @@ fun CheckInOutScreen(
             }
 
             Log.d("CHECK IN_LOCATION_PERMISSION", "✅ Foreground location GRANTED")
+
+            /*
+             * Enough for the check button: start the distance updates before
+             * asking for background location, whatever the employee answers.
+             */
+            startForegroundLocationUpdatesIfNeeded()
 
             /*
              * Android 10:
@@ -504,6 +548,12 @@ fun CheckInOutScreen(
             !backgroundGranted
         ) {
 
+            /*
+             * The button only needs foreground location, so it must not wait
+             * for the background answer.
+             */
+            startForegroundLocationUpdatesIfNeeded()
+
             if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
 
                 Log.d("CHECK IN_LOCATION_PERMISSION", "Android 10 → requesting background")
@@ -646,6 +696,8 @@ fun CheckInOutScreen(
 
                     Log.d("CHECK IN_PERMISSION_FLOW", "⚠️ Background permission still missing")
 
+                    startForegroundLocationUpdatesIfNeeded()
+
                     showBackgroundLocationDialog = sharedPref.getIsTracked()
 
                     return@LifecycleEventObserver
@@ -759,14 +811,13 @@ fun CheckInOutScreen(
 
                 viewModel.stopLocationUpdates()
 
-                viewModel.startLocationUpdates(
-                    companies = sharedPref.getCompaniesLatLng(),
-                    allowedLocationIds = sharedPref.getAllowedLocationsIds()
-                )
+                locationUpdatesStarted = false
             }
 
             isGpsEnabled = gpsOn
             hasLocationPermission = permissionOk
+
+            startForegroundLocationUpdatesIfNeeded()
 
             Log.d("GPS_STATUS", "Blockers -> gps=$gpsOn | permission=$permissionOk")
         }
