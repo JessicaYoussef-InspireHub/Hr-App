@@ -743,9 +743,32 @@ fun CheckInOutScreen(
     DisposableEffect(lifecycleOwner) {
 
         fun refreshLocationBlockers() {
-            isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-            hasLocationPermission = hasForegroundLocationPermission(context)
-            Log.d("GPS_STATUS", "Blockers -> gps=$isGpsEnabled | permission=$hasLocationPermission")
+
+            val gpsOn = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            val permissionOk = hasForegroundLocationPermission(context)
+
+            /*
+             * The location updates die with the permission, so grant it back and the
+             * screen would keep saying "no location" until it is left and reopened.
+             * stopLocationUpdates() first, otherwise the old callback is only
+             * overwritten and keeps receiving updates.
+             */
+            if (permissionOk && !hasLocationPermission) {
+
+                Log.d("GPS_STATUS", "Location permission came back -> restarting updates")
+
+                viewModel.stopLocationUpdates()
+
+                viewModel.startLocationUpdates(
+                    companies = sharedPref.getCompaniesLatLng(),
+                    allowedLocationIds = sharedPref.getAllowedLocationsIds()
+                )
+            }
+
+            isGpsEnabled = gpsOn
+            hasLocationPermission = permissionOk
+
+            Log.d("GPS_STATUS", "Blockers -> gps=$gpsOn | permission=$permissionOk")
         }
 
         val observer = LifecycleEventObserver { _, event ->
@@ -1185,14 +1208,6 @@ fun CheckInOutScreen(
                         color = colors.onBackgroundColor.copy(alpha = 0.6f),
                         fontSize = 12.sp
                     )
-//                    Text(
-//                        text = locationAccuracy?.let {
-//                            "new Location accuracy: ${"%.1f".format(Locale.US, it)} m"
-//                        } ?: "Location accuracy: --",
-//                        fontSize = 12.sp,
-//                        color = colors.onBackgroundColor.copy(alpha = 0.6f),
-//                        modifier = Modifier.padding(start = 12.dp, bottom = 8.dp),
-//                    )
                     BottomBar(navController = navController)
                 }
             }

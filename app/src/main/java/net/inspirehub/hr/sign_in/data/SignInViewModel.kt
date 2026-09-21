@@ -89,16 +89,46 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
 
                 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+
                     if (task.isSuccessful) {
+
                         val fcmToken = task.result
+
+                        Log.d(
+                            "FCM_TOKEN",
+                            "FCM token received successfully: $fcmToken"
+                        )
+
                         viewModelScope.launch {
-                            SignInApiService.sendDeviceToken(
-                                employeeData?.employee_token ?: "unknown",
-                                fcmToken
-                            )
+                            try {
+
+                                SignInApiService.sendDeviceToken(
+                                    employeeData?.employee_token ?: "unknown",
+                                    fcmToken
+                                )
+
+                                Log.d(
+                                    "FCM_TOKEN",
+                                    "FCM token sent to server successfully"
+                                )
+
+                            } catch (e: Exception) {
+
+                                Log.e(
+                                    "FCM_TOKEN",
+                                    "Failed to send FCM token to server",
+                                    e
+                                )
+                            }
                         }
+
                     } else {
-                        Log.e("FCM", "Failed to get FCM token")
+
+                        Log.e(
+                            "FCM_TOKEN",
+                            "Failed to get FCM token",
+                            task.exception
+                        )
                     }
                 }
 
