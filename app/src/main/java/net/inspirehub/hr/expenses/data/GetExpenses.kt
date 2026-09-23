@@ -220,6 +220,7 @@ suspend fun renewTokenAndSave(context: Context): String? {
         }
 
         val response = SignInApiService.renewToken(
+            context = context,
             apiKey = apiKey,
             companyId = companyId,
             employeeToken = employeeToken

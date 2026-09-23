@@ -276,6 +276,7 @@ suspend fun sendAttendanceAction(
             val companyId = sharedPref.getCompanyId()
 
             val newTokenResponse = SignInApiService.renewToken(
+                context = context,
                 apiKey = apiKey.orEmpty(),
                 companyId = companyId.orEmpty(),
                 employeeToken = token
@@ -379,6 +380,7 @@ suspend fun fetchAttendanceStatus(
             val companyId = sharedPref.getCompanyId()
 
             val newTokenResponse = SignInApiService.renewToken(
+                context = context,
                 apiKey = apiKey.orEmpty(),
                 companyId = companyId.orEmpty(),
                 employeeToken = token

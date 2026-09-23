@@ -76,6 +76,7 @@ suspend fun fetchExpenseCurrencies(
             println("🔄 Token expired → renewing")
 
             val newTokenResponse = SignInApiService.renewToken(
+                context = context,
                 apiKey = sharedPref.getApiKey().orEmpty(),
                 companyId = sharedPref.getCompanyId().orEmpty(),
                 employeeToken = token

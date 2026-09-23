@@ -1,5 +1,6 @@
 package net.inspirehub.hr.sign_in.data
 
+import android.content.Context
 import android.util.Log
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -58,6 +59,7 @@ object SignInApiService {
 
 
     suspend fun renewToken(
+        context: Context,
         apiKey: String,
         companyId: String,
         employeeToken: String
@@ -67,6 +69,9 @@ object SignInApiService {
             company_id = companyId,
             employee_token = employeeToken
         )
+
+        // A background job can run with the app closed, before MainActivity loads the address.
+        if (AppConfig.baseUrl.isEmpty()) AppConfig.init(context)
 
         return try {
             val response: HttpResponse = httpClient.post(
@@ -79,6 +84,15 @@ object SignInApiService {
 
             val responseBody: String = response.body()
             Log.d("HTTP", "Raw RenewToken Response: $responseBody")
+
+            // The server answered but gave no new key: it refused. Sign out.
+            val result = json.parseToJsonElement(responseBody).jsonObject["result"]?.jsonObject
+            if (result != null && result["new_token"] == null) {
+                SessionExpired.signOut(context)
+                throw RenewTokenRefusedException(
+                    result["message"]?.jsonPrimitive?.content ?: "Token renewal refused"
+                )
+            }
 
             json.decodeFromString<RenewTokenResponse>(responseBody)
 

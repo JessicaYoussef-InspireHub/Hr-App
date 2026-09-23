@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "142274487579",
-    "project_id": "inspire-hub-hr",
-    "storage_bucket": "inspire-hub-hr.firebasestorage.app"
+    "project_number": "709161910409",
+    "firebase_url": "https://inspirehub-hr-default-rtdb.firebaseio.com",
+    "project_id": "inspirehub-hr",
+    "storage_bucket": "inspirehub-hr.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:142274487579:android:e26910367dd691b03e9fbe",
+        "mobilesdk_app_id": "1:709161910409:android:6c6878c78510916880c658",
         "android_client_info": {
           "package_name": "net.inspirehub.hr"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDZk09FKoE3FQOCqoLWJuRuE1dzfRb-ktk"
+          "current_key": "AIzaSyA3-6x9yZbEbMhd3M8SK0jGwxlI0i3ooxg"
         }
       ],
       "services": {

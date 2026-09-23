@@ -199,7 +199,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 val now = Instant.now()
 
                 if (now.isAfter(expiryDate)) {
-                    val renewResponse = SignInApiService.renewToken(apiKey, companyId, currentToken)
+                    val renewResponse = SignInApiService.renewToken(getApplication(), apiKey, companyId, currentToken)
                     Log.d("TOKEN", "New token: ${renewResponse.result.new_token}")
 
                     val sharedPref = SharedPrefManager(getApplication())

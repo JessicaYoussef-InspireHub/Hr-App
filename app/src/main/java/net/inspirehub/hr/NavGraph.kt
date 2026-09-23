@@ -2,6 +2,7 @@ package net.inspirehub.hr
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -28,6 +29,7 @@ import net.inspirehub.hr.protection.presentation.ProtectionScreen
 import net.inspirehub.hr.scan_qr_code.data.ScanQrCodeViewModel
 import net.inspirehub.hr.scan_qr_code.presentation.ScanQrCodeScreen
 import net.inspirehub.hr.settings.presentation.SettingsScreen
+import net.inspirehub.hr.sign_in.data.SessionExpired
 import net.inspirehub.hr.sign_in.presentation.SignInScreen
 import net.inspirehub.hr.splash.presentation.SplashScreen
 import net.inspirehub.hr.time_off.presentation.TimeOffScreen
@@ -80,6 +82,16 @@ fun MyAppNavHost(
 
         // ✅ Fallback for any unexpected case
         else -> "ScanQrCodeScreen"
+    }
+
+    // The server refused to renew the key: go to sign in, with nothing behind it.
+    LaunchedEffect(Unit) {
+        SessionExpired.events.collect {
+            navController.navigate("SignInScreen/${sharedPref.getCompanyId()}/${sharedPref.getApiKey()}") {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
     }
 
     val startDestination = "SplashScreen"
