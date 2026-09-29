@@ -41,6 +41,7 @@
     <string name="sign_in">تسجيل الدخول</string>
     <string name="email_or_password_is_incorrect">البريد الإلكتروني أو كلمة المرور غير صحيحة</string>
     <string name="company_id_or_api_key_is_incorrect">رقم الشركة أو مفتاح الدخول غير صحيح</string>
+    <string name="device_limit_reached">لقد وصلت إلى الحد الأقصى لعدد الأجهزة. برجاء التواصل مع الموارد البشرية إذا كنت تريد استخدام هذا الجهاز كجهازك الأساسي.</string>
     <string name="sign_in_screen">تسجيل الدخول</string>
     <string name="email">بريد إلكتروني</string>
     <string name="password">كلمة المرور</string>

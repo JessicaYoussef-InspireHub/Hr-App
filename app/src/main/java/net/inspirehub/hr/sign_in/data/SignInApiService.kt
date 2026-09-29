@@ -15,6 +15,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.inspirehub.hr.scan_qr_code.data.AppConfig
+import net.inspirehub.hr.utils.getDeviceId
 import io.ktor.client.engine.okhttp.*
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 
@@ -103,7 +104,15 @@ object SignInApiService {
     }
 
 
+    /**
+     * Signs the employee in. Sends the phone's own number (ANDROID_ID) as `mobile_id`
+     * so the server can count how many phones the account uses.
+     *
+     * Note: a refusal from the server is thrown as [SignInFailedException], which
+     * carries the server's error code.
+     */
     suspend fun signIn(
+        context: Context,
         email: String,
         password: String,
         companyId: String,
@@ -113,7 +122,8 @@ object SignInApiService {
             email = email,
             password = password,
             company_id = companyId,
-            api_key = apiKey
+            api_key = apiKey,
+            mobile_id = getDeviceId(context)
         )
 
         val jsonBody = json.encodeToString(
@@ -144,13 +154,19 @@ object SignInApiService {
 
            if (status == "error") {
                 val error = json.decodeFromJsonElement<ErrorResult>(resultElement)
-                throw Exception(error.message)
+                throw SignInFailedException(
+                    message = error.message,
+                    errorCode = error.error_code.orEmpty()
+                )
             } else {
                json.decodeFromString<SignInResponseWrapper>(responseBody)
 
             }
 
         } catch (e: Exception) {
+
+            // The server refused on purpose. That is an answer, not a crash.
+            if (e is SignInFailedException) throw e
 
             var t: Throwable? = e
             while (t != null) {

@@ -25,6 +25,7 @@ import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.sign_in.components.InputFields
 import net.inspirehub.hr.sign_in.data.SignInViewModel
 import net.inspirehub.hr.sign_in.data.SignInUiState
+import net.inspirehub.hr.sign_in.data.SignInFailedException
 import androidx.compose.ui.text.input.ImeAction
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -68,8 +69,13 @@ fun SignInScreen(
 
     val errorMessage: String? = if (uiState is SignInUiState.Error) {
         val msg = (uiState as SignInUiState.Error).message
+        val code = (uiState as SignInUiState.Error).errorCode
 
         when {
+            code == SignInFailedException.DEVICE_LIMIT_REACHED -> {
+                stringResource(R.string.device_limit_reached)
+            }
+
             msg.contains("No company found", ignoreCase = true) -> {
                 dialogMessage.value = stringResource(R.string.company_id_or_api_key_is_incorrect)
                 showDialog.value = true

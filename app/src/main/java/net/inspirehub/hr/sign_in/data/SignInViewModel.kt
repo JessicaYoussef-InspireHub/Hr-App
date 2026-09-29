@@ -19,7 +19,11 @@ sealed class SignInUiState {
     data object Idle : SignInUiState()
     data object Loading : SignInUiState()
     data class Success(val response: SignInResponseWrapper) : SignInUiState()
-    data class Error(val message: String) : SignInUiState()
+    /**
+     * The sign in did not work. [errorCode] is the server's short reason,
+     * for example `DEVICE_LIMIT_REACHED`. It is empty when there is no code.
+     */
+    data class Error(val message: String, val errorCode: String = "") : SignInUiState()
 }
 
 class SignInViewModel(application: Application) : AndroidViewModel(application) {
@@ -31,13 +35,22 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _uiState.value = SignInUiState.Loading
             try {
-                val response = SignInApiService.signIn(email, password, companyId, apiKey)
+                val response = SignInApiService.signIn(
+                    getApplication(),
+                    email,
+                    password,
+                    companyId,
+                    apiKey
+                )
                 val result = response.result
 
                 if (response.result.status == "error") {
 
                     val errorMsg = response.result.message.toString()
-                    _uiState.value = SignInUiState.Error(errorMsg)
+                    _uiState.value = SignInUiState.Error(
+                        message = errorMsg,
+                        errorCode = response.result.message?.error_code.orEmpty()
+                    )
                     return@launch
                 }
 
@@ -141,7 +154,10 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
             } catch (e: Exception) {
                 Log.e("ViewModel", "Sign-in failed", e)
-                _uiState.value = SignInUiState.Error(e.message ?: "Unknown error")
+                _uiState.value = SignInUiState.Error(
+                    message = e.message ?: "Unknown error",
+                    errorCode = (e as? SignInFailedException)?.errorCode.orEmpty()
+                )
             }
         }
     }

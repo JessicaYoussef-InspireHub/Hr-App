@@ -43,6 +43,7 @@ Protection Method</string>
     <string name="sign_in">Sign In</string>
     <string name="email_or_password_is_incorrect">Email or password is incorrect</string>
     <string name="company_id_or_api_key_is_incorrect">Company id or api key is incorrect</string>
+    <string name="device_limit_reached">You have reached your device limit. Please contact your HR if you want to use this device as your main device.</string>
     <string name="sign_in_screen">Sign In</string>
     <string name="email">Email</string>
     <string name="password">Password</string>

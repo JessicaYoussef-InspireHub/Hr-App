@@ -211,6 +211,7 @@ fun SettingsScreen(
 
                                 val response =
                                     SignInApiService.signIn(
+                                        context,
                                         savedEmail,
                                         savedPassword,
                                         companyId,

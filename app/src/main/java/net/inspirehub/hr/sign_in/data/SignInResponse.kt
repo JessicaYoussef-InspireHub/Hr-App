@@ -14,7 +14,9 @@ data class SignInRequest(
     val email: String,
     val password: String,
     val company_id: String,
-    val api_key: String
+    val api_key: String,
+    /** The phone's own number (ANDROID_ID). The server uses it to count devices. */
+    val mobile_id: String
 )
 
 @Serializable
