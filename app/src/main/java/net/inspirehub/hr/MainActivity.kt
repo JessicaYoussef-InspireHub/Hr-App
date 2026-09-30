@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.inspirehub.hr.notifications.data.NotificationDatabase
 import net.inspirehub.hr.notifications.data.NotificationEntity
+import net.inspirehub.hr.notifications.data.PushLogger
 import net.inspirehub.hr.scan_qr_code.data.ScanQrCodeViewModel
 import net.inspirehub.hr.ui.theme.HrTheme
 import androidx.appcompat.app.AppCompatDelegate
@@ -148,6 +149,8 @@ class MainActivity : AppCompatActivity() {
 }
 
     private fun handleNotificationIntent(intent: Intent?) {
+        PushLogger.logOpened(intent)
+
         intent?.extras?.let { extras ->
             val title = extras.getString("title")
             val message = extras.getString("body")

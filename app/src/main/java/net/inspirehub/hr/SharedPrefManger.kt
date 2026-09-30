@@ -176,6 +176,15 @@ class SharedPrefManager(context: Context) {
         const val KEY_ATTENDANCE_STATUS = "attendance_status"
 
         const val KEY_ATTENDANCE_ALERT = "attendance_alert"
+
+        /** The work sites: where each one is and how close counts as inside. */
+        const val KEY_COMPANIES_LAT_LNG = "companies_lat_lng"
+
+        /** Which of the work sites this employee may check in at. */
+        const val KEY_ALLOWED_LOCATIONS_IDS = "allowed_locations_ids"
+
+        /** How many minutes between two tracking readings. */
+        const val KEY_TRACKING_INTERVAL_MINUTES = "tracking_interval_minutes"
     }
 
     /**
@@ -241,11 +250,11 @@ class SharedPrefManager(context: Context) {
     }
 
     fun saveTrackingIntervalMinutes(value: Float) {
-        prefs.edit { putFloat("tracking_interval_minutes", value) }
+        prefs.edit { putFloat(KEY_TRACKING_INTERVAL_MINUTES, value) }
     }
 
     fun getTrackingIntervalMinutes(): Float {
-        return prefs.getFloat("tracking_interval_minutes", 0f)
+        return prefs.getFloat(KEY_TRACKING_INTERVAL_MINUTES, 0f)
     }
 
     fun saveMinDistanceMeters(value: Float) {
@@ -304,11 +313,11 @@ class SharedPrefManager(context: Context) {
 
     fun saveAllowedLocationsIds(ids: List<Int>) {
         val idsString = ids.joinToString(separator = ",")
-        prefs.edit { putString("allowed_locations_ids", idsString) }
+        prefs.edit { putString(KEY_ALLOWED_LOCATIONS_IDS, idsString) }
     }
 
     fun getAllowedLocationsIds(): List<Int> {
-        val idsString = prefs.getString("allowed_locations_ids", "") ?: ""
+        val idsString = prefs.getString(KEY_ALLOWED_LOCATIONS_IDS, "") ?: ""
         return if (idsString.isEmpty()) emptyList()
         else idsString.split(",").mapNotNull { it.toIntOrNull() }
     }
@@ -318,11 +327,11 @@ class SharedPrefManager(context: Context) {
         val listString = companies.joinToString(";") {
             "${it.address.id}|${it.name}|${it.address.latitude},${it.address.longitude}|${it.address.allowed_distance}"
         }
-        prefs.edit { putString("companies_lat_lng", listString) }
+        prefs.edit { putString(KEY_COMPANIES_LAT_LNG, listString) }
     }
 
     fun getCompaniesLatLng(): List<CompanyLocation> {
-        val listString = prefs.getString("companies_lat_lng", "") ?: ""
+        val listString = prefs.getString(KEY_COMPANIES_LAT_LNG, "") ?: ""
         if (listString.isEmpty()) return emptyList()
 
         return listString.split(";").mapNotNull { item ->

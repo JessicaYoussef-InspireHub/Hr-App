@@ -19,9 +19,9 @@ import net.inspirehub.hr.MainActivity
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.check_in_out.data.AttendanceCache
-import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
 import net.inspirehub.hr.check_in_out.data.fetchAttendanceStatus
-import net.inspirehub.hr.sign_in.data.getTrackingConfig
+import net.inspirehub.hr.check_in_out.data.refreshCompanyLocations
+import net.inspirehub.hr.check_in_out.data.refreshTrackingConfig
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -54,12 +54,60 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
+    /**
+     * Every push passes here first, before Firebase decides whether to show it itself
+     * or to call onMessageReceived(). Only logs, then hands the message on unchanged.
+     */
+    override fun handleIntent(intent: Intent) {
+
+        PushLogger.logRaw(intent)
+
+        super.handleIntent(intent)
+    }
+
+    override fun onDeletedMessages() {
+        super.onDeletedMessages()
+
+        PushLogger.logDeleted()
+    }
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
+        PushLogger.logMessage(remoteMessage)
+
         val type = remoteMessage.data["type"]
 
-        if (type == "location_tracking_config_update" || type == "company_location_update") {
+        /*
+         * A work site moved, or the employee may now use other sites. The sites come
+         * from their own address, not from the tracking config, so this push asks for
+         * them. Silent, like the config push.
+         */
+        if (type == "company_location_update") {
+
+            Log.d("TEST FCM_LOCATIONS", "📩 Company locations changed → fetching the new ones")
+
+            val token = SharedPrefManager(applicationContext).getToken()
+
+            if (token.isNullOrBlank()) {
+                Log.e("TEST FCM_LOCATIONS", "❌ Employee token is null")
+                return
+            }
+
+            CoroutineScope(Dispatchers.IO).launch {
+
+                val saved = refreshCompanyLocations(
+                    context = applicationContext,
+                    token = token
+                )
+
+                Log.d("TEST FCM_LOCATIONS", "Company locations saved = $saved")
+            }
+
+            return
+        }
+
+        if (type == "location_tracking_config_update") {
 
             Log.d("TEST FCM_CONFIG", "📩 Tracking config changed → fetching latest config")
 
@@ -74,48 +122,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
             CoroutineScope(Dispatchers.IO).launch {
 
-                try {
-
-                    val response = getTrackingConfig(
-                        context = applicationContext,
-                        employeeToken = token
-                    )
-
-                    val config = response.result
-
-//                    // Save latest values
-                    sharedPref.saveIsTracked(config.is_tracked)
-
-                    sharedPref.saveWorkingHoursOnly(config.working_hours_only)
-
-                    sharedPref.saveTrackingIntervalMinutes(config.tracking_interval_minutes)
-
-                    sharedPref.saveMinDistanceMeters(config.min_distance_meters)
-
-                    sharedPref.saveShowNotification(config.show_notification)
-
-                    Log.d("TEST FCM_CONFIG", "✅ Latest config saved from API")
-
-                    Log.d(
-                        "TEST FCM_CONFIG",
-                        "isTracked=${config.is_tracked} | " +
-                                "workingHoursOnly=${config.working_hours_only} | " +
-                                "interval=${config.tracking_interval_minutes} | " +
-                                "minDistance=${config.min_distance_meters} | " +
-                                "showNotification=${config.show_notification}"
-                    )
-
-
-                    // Update tracking immediately
-                    LocationTrackingManager.updateTracking(
-                        context = applicationContext
-                    )
-
-
-
-                } catch (e: Exception) {
-                    Log.e("TEST FCM_CONFIG", "❌ Failed to fetch tracking config", e)
-                }
+                refreshTrackingConfig(
+                    context = applicationContext,
+                    token = token
+                )
             }
 
             return

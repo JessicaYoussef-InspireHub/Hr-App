@@ -7,6 +7,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
@@ -35,6 +36,35 @@ class LocationForegroundService : Service() {
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
 
     private var isLocationUpdatesStarted = false
+
+    /**
+     * A new tracking interval saved while the service runs, by the FCM config push or
+     * the check in/out screen. A LocationRequest cannot be changed once registered, so
+     * the updates are registered again with the new interval.
+     *
+     * Here and not in onStartCommand: this needs no new start request, and Android 12+
+     * may refuse one while the app is in the background. Kept in a field because
+     * SharedPreferences holds its listeners only weakly. Runs on the main thread.
+     */
+    private val intervalListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+
+            if (key != SharedPrefManager.KEY_TRACKING_INTERVAL_MINUTES) {
+                return@OnSharedPreferenceChangeListener
+            }
+
+            if (!isLocationUpdatesStarted) {
+                return@OnSharedPreferenceChangeListener
+            }
+
+            Log.d("TEST_LOCATION_CONFIG", "Tracking interval changed -> registering the updates again")
+
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+
+            isLocationUpdatesStarted = false
+
+            startLocationUpdates()
+        }
 
     /**
      * The id of the most recent start request we have been handed.
@@ -96,6 +126,8 @@ class LocationForegroundService : Service() {
         goForeground()
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        SharedPrefManager(this).registerChangeListener(intervalListener)
 
         connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -457,6 +489,8 @@ class LocationForegroundService : Service() {
     override fun onDestroy() {
 
         Log.d("SERVICE_TEST", "onDestroy")
+
+        SharedPrefManager(this).unregisterChangeListener(intervalListener)
 
         if (::locationCallback.isInitialized) {
             fusedLocationClient.removeLocationUpdates(locationCallback)

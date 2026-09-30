@@ -75,6 +75,37 @@ object LocationTrackingManager {
         )
     }
 
+    /**
+     * updateTracking() for when the tracking interval has just changed.
+     *
+     * In alarm mode the next reading is already booked with the old interval, and
+     * TrackingAlarmManager.start() leaves a booked alarm alone. So the waiting alarm is
+     * booked again, counted from now. In foreground-service mode the running service
+     * picks the new interval up by itself.
+     */
+    fun applyNewInterval(context: Context) = onGate {
+
+        val appContext = context.applicationContext
+
+        applyTracking(
+            context = appContext,
+            attendanceStatus = null
+        )
+
+        /*
+         * After applyTracking(): it may just have ended the chain, or switched modes.
+         * Only an alarm that is still waiting is booked again; a chain about to start
+         * books itself with the new interval.
+         */
+        if (SharedPrefManager(appContext).getShowNotification()) return@onGate
+
+        if (!TrackingAlarmManager.isScheduled(appContext)) return@onGate
+
+        Log.d("Test TRACKING_MANAGER", "⏱ Interval changed -> booking the next reading again")
+
+        TrackingAlarmManager.scheduleNext(appContext)
+    }
+
     private fun applyTracking(
         context: Context,
         attendanceStatus: String?

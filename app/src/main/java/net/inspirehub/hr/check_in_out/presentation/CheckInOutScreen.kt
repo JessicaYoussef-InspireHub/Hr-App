@@ -76,7 +76,8 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.Date
 import net.inspirehub.hr.BuildConfig
-import net.inspirehub.hr.check_in_out.data.checkLocationUpdatesRaw
+import net.inspirehub.hr.check_in_out.data.refreshCompanyLocations
+import net.inspirehub.hr.check_in_out.data.refreshTrackingConfig
 import net.inspirehub.hr.sign_in.data.SignInApiService
 import net.inspirehub.hr.utils.convertToArabicDigits
 import com.google.firebase.messaging.FirebaseMessaging
@@ -615,6 +616,27 @@ fun CheckInOutScreen(
                     return@OnSharedPreferenceChangeListener
                 }
 
+                /*
+                 * New work sites, saved by the company_location_update push or by the
+                 * check when this screen opens. The in/out answer and the button follow
+                 * them without leaving the screen.
+                 */
+                if (
+                    key == SharedPrefManager.KEY_COMPANIES_LAT_LNG ||
+                    key == SharedPrefManager.KEY_ALLOWED_LOCATIONS_IDS
+                ) {
+
+                    scope.launch {
+
+                        viewModel.updateCompanyLocations(
+                            companies = sharedPref.getCompaniesLatLng(),
+                            allowedLocationIds = sharedPref.getAllowedLocationsIds()
+                        )
+                    }
+
+                    return@OnSharedPreferenceChangeListener
+                }
+
                 if (key != SharedPrefManager.KEY_IS_TRACKED) {
                     return@OnSharedPreferenceChangeListener
                 }
@@ -993,82 +1015,11 @@ fun CheckInOutScreen(
             )
         }
 
-        val response = checkLocationUpdatesRaw(context, token)
-        println("📍 FINAL RESPONSE Update location: $response")
+        // The screen hears the saved sites through the listener above.
+        refreshCompanyLocations(context, token)
 
-        if (response == null) return@LaunchedEffect
-
-        try {
-            val json = org.json.JSONObject(response)
-            val result = json.getJSONObject("result")
-
-            val changed = result.optBoolean("changed", false)
-
-            println("Update location: 📦 BEFORE UPDATE:")
-
-            println("Update location: Allowed IDs (old): ${sharedPref.getAllowedLocationsIds()}")
-            println("Update location: Companies (old): ${sharedPref.getCompaniesLatLng()}")
-
-
-            if (!changed) {
-                println("Update location:📍 No changes in locations")
-                return@LaunchedEffect
-            }
-
-            println("Update location:✅ Locations changed → updating...")
-
-            // ✅ 1. allowed_locations_ids
-            val idsJson = result.optJSONArray("allowed_locations_ids")
-            val idsList = mutableListOf<Int>()
-
-            if (idsJson != null) {
-                for (i in 0 until idsJson.length()) {
-                    idsList.add(idsJson.getInt(i))
-                }
-            }
-
-            sharedPref.saveAllowedLocationsIds(idsList)
-
-            // ✅ 2. company_locations
-            val companiesJson = result.getJSONArray("company_locations")
-
-            val companies = mutableListOf<net.inspirehub.hr.sign_in.data.Company>()
-
-            for (i in 0 until companiesJson.length()) {
-                val item = companiesJson.getJSONObject(i)
-                val name = item.getString("name")
-
-                val address = item.getJSONObject("address")
-
-                val company = net.inspirehub.hr.sign_in.data.Company(
-                    name = name,
-                    address = net.inspirehub.hr.sign_in.data.Address(
-                        id = address.getInt("id"),
-                        street = address.optString("street", ""),
-                        city = address.optString("city", ""),
-                        zip = address.optString("zip", ""),
-                        country = address.optString("country", ""),
-                        latitude = address.getDouble("latitude"),
-                        longitude = address.getDouble("longitude"),
-                        allowed_distance = address.getDouble("allowed_distance")
-                    )
-                )
-
-                companies.add(company)
-            }
-
-            sharedPref.saveCompaniesLatLng(companies)
-
-            println("Update location: 🆕 AFTER UPDATE:")
-
-            println("Update location: Allowed IDs (new): ${sharedPref.getAllowedLocationsIds()}")
-            println("Update location: Companies (new): ${sharedPref.getCompaniesLatLng()}")
-
-            println("Update location: ✅ Locations saved successfully")
-
-        } catch (e: Exception) {
-            println("Update location: 🔴 Error parsing update locations: ${e.message}")
-        }
+        // Catches up a tracking config push that failed while the phone was offline.
+        refreshTrackingConfig(context, token)
     }
 
 
@@ -1625,9 +1576,7 @@ fun CheckInOutScreen(
                                         }
                                     }
 
-                                    // ️Perform an immediate re-check of the site.
-                                    val companies = sharedPref.getCompaniesLatLng()
-                                    val allowedIds = sharedPref.getAllowedLocationsIds()
+                                    // The watcher keeps this answer current, new sites included.
                                     if (isWithinDistance != true) {
                                         showNotAllowedDialog = true
                                         isButtonLoading = false

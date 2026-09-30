@@ -73,6 +73,16 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
     private var hasPrintedDistanceLog = false
     private var locationCallback: LocationCallback? = null
 
+    /*
+     * The sites every reading is measured against. Kept here, not captured by the
+     * location callback, so updateCompanyLocations() can swap them while the updates run.
+     */
+    private var watchedCompanies: List<CompanyLocation> = emptyList()
+    private var watchedAllowedLocationIds: List<Int> = emptyList()
+
+    /** The last reading, so new sites can be judged at once without waiting for a move. */
+    private var lastLocation: Location? = null
+
     private val _locationAccuracy = MutableStateFlow<Float?>(null)
     val locationAccuracy: StateFlow<Float?> = _locationAccuracy
 
@@ -86,6 +96,9 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
             "SERVICE_TEST_view_model",
             "Starting location updates"
         )
+
+        watchedCompanies = companies
+        watchedAllowedLocationIds = allowedLocationIds
 
         val request = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
@@ -125,8 +138,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                     checkLocationAndDistanceAllCompanies(
                         location = location,
-                        companies = companies,
-                        allowedLocationIds = allowedLocationIds
+                        companies = watchedCompanies,
+                        allowedLocationIds = watchedAllowedLocationIds
                     )
 
                 } else {
@@ -168,8 +181,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
                 checkLocationAndDistanceAllCompanies(
                     location = location,
-                    companies = companies,
-                    allowedLocationIds = allowedLocationIds
+                    companies = watchedCompanies,
+                    allowedLocationIds = watchedAllowedLocationIds
                 )
             }
         }
@@ -190,6 +203,33 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         locationCallback?.let {
             fusedLocationClient.removeLocationUpdates(it)
         }
+    }
+
+    /**
+     * New work sites were saved while the screen is open. Swaps them in and judges the
+     * last reading again at once: the updates only fire after a 3 m move, so an employee
+     * standing still would otherwise keep the old site's answer.
+     */
+    @SuppressLint("MissingPermission")
+    fun updateCompanyLocations(
+        companies: List<CompanyLocation>,
+        allowedLocationIds: List<Int>
+    ) {
+
+        watchedCompanies = companies
+        watchedAllowedLocationIds = allowedLocationIds
+
+        hasPrintedDistanceLog = false
+
+        Log.d("SERVICE_TEST_view_model", "Company locations changed -> ${companies.size} sites")
+
+        val location = lastLocation ?: return
+
+        checkLocationAndDistanceAllCompanies(
+            location = location,
+            companies = companies,
+            allowedLocationIds = allowedLocationIds
+        )
     }
 
     fun startPollingAttendance(token: String) {
@@ -395,6 +435,8 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
         companies: List<CompanyLocation>,
         allowedLocationIds: List<Int>
     ) {
+
+        lastLocation = location
 
         if (isLocationFake(location)) {
 
