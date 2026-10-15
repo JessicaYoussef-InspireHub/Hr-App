@@ -2,6 +2,7 @@ package net.inspirehub.hr.time_off.data
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.LocalContext
 import io.ktor.client.HttpClient
@@ -21,9 +22,15 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.inspirehub.hr.SharedPrefManager
-import net.inspirehub.hr.scan_qr_code.data.AppConfig
 import java.time.LocalDate
+import kotlinx.serialization.encodeToString
+import kotlinx.coroutines.CancellationException
 
+@Serializable
+data class TimeOffAttachment(
+    val name: String,
+    val data: String
+)
 
 @Serializable
 data class TimeOffRequestForRequestEmployee(
@@ -41,6 +48,7 @@ data class TimeOffRequestForRequestEmployee(
     val request_unit_hours: Boolean? = null,
     val permission_period: String? = null,
     val permission_duration: Double? = null,
+    val attachments: List<TimeOffAttachment>? = null
 
 )
 
@@ -112,9 +120,17 @@ data class LeaveType(
     val requires_allocation: String,
     val remaining_balance: Float? = null,
     val original_balance: Float? = null,
-    val color: String? = null
+    val color: String? = null,
+    val support_document: Boolean = false
 )
 
+
+private val apiJson = Json {
+    prettyPrint = false
+    isLenient = true
+    ignoreUnknownKeys = true
+    explicitNulls = false
+}
 
 
 private val httpClient = HttpClient {
@@ -124,24 +140,27 @@ private val httpClient = HttpClient {
     }
 
     install(ContentNegotiation) {
-        json(Json {
-            prettyPrint = true
-            isLenient = true
-            ignoreUnknownKeys = true
-        })
+        json(apiJson)
     }
 }
 
 
 
 
+
+
+
 suspend fun fetchEmployeeLeaveTypes(
     context: Context,
-    token: String): LeaveTypeResponse? {
+    token: String
+): LeaveTypeResponse? {
     return try {
         val sharedPref = SharedPrefManager(context)
         val companyUrl = sharedPref.getCompanyUrl()
-        val response: HttpResponse = httpClient.post("$companyUrl/api/request_time_off") {
+
+        val response: HttpResponse = httpClient.post(
+            "$companyUrl/api/request_time_off"
+        ) {
             contentType(ContentType.Application.Json)
             setBody(
                 LeaveTypeRequest(
@@ -152,7 +171,7 @@ suspend fun fetchEmployeeLeaveTypes(
         }
 
         val bodyText = response.bodyAsText()
-        println("✅ Response get_employee_leave_type : $bodyText")
+        Log.d("LEAVE_TYPES", "HTTP status: ${response.status.value}")
 
         val json = Json {
             ignoreUnknownKeys = true
@@ -160,11 +179,16 @@ suspend fun fetchEmployeeLeaveTypes(
         }
 
         json.decodeFromString<LeaveTypeResponse>(bodyText)
+
+    } catch (e: CancellationException) {
+        // Preserve coroutine cancellation when the composable leaves composition.
+        throw e
     } catch (e: Exception) {
-        println("❌ Error fetching leave types: ${e.message}")
+        Log.e("LEAVE_TYPES", "Failed to fetch leave types", e)
         null
     }
 }
+
 
 
 
@@ -245,28 +269,38 @@ suspend fun fetchAndPrintHolidays(
 
 
 
+
 suspend fun sendApiForRequestTimeOff(
     context: Context,
     timeOffRequestForRequestEmployee: TimeOffRequestForRequestEmployee
 ): RequestTimeOffResponse? {
     return try {
-        println("Sending SendApiForRequestTimeOff request...")
         val sharedPref = SharedPrefManager(context)
         val companyUrl = sharedPref.getCompanyUrl()
 
-        val response: HttpResponse = httpClient.post("$companyUrl/api/request_time_off") {
+        val requestJson = apiJson.encodeToString(
+            timeOffRequestForRequestEmployee
+        )
+
+        val jsonObject = apiJson.parseToJsonElement(requestJson).jsonObject
+
+        println("Sending SendApiForRequestTimeOff request...")
+        println("Request fields: ${jsonObject.keys}")
+        println("Attachment name: ${timeOffRequestForRequestEmployee.attachments}")
+
+        val response: HttpResponse = httpClient.post(
+            "$companyUrl/api/request_time_off"
+        ) {
             contentType(ContentType.Application.Json)
-            setBody(timeOffRequestForRequestEmployee)
+            setBody(requestJson)
         }
 
         val rawResponse = response.bodyAsText()
-        println("Request page Raw API response: $rawResponse")
+        println("Request time-off API HTTP status: ${response.status.value}")
+        println("Request time-off API response: $rawResponse")
 
-        val json = Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        }
-        json.decodeFromString<RequestTimeOffResponse>(rawResponse)
+        apiJson.decodeFromString<RequestTimeOffResponse>(rawResponse)
+
     } catch (e: Exception) {
         println("Exception during API call: ${e.message}")
         null

@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.DeleteIcon
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.R
@@ -100,6 +101,7 @@ fun AttachmentsSection(
                         Text(
                             text = file.name,
                             color = colors.onBackgroundColor,
+                            fontSize = 11.sp,
                             textAlign = TextAlign.Center
                         )
                     }

@@ -42,6 +42,7 @@ import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.appColors
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.ui.draw.scale
 import androidx.core.os.LocaleListCompat
 
 
@@ -185,6 +186,7 @@ fun GeneralSettingsCard(
                     onClick = {},
                     trailingIcon = {
                         Switch(
+                            modifier = Modifier.scale(0.8f),
                             checked = isDarkMode,
                             onCheckedChange = { enabled ->
                                 isDarkMode = enabled

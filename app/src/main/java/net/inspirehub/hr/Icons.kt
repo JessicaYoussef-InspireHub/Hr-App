@@ -357,19 +357,6 @@ fun PasswordVisibilityIcon(
 }
 
 @Composable
-fun ArrowRightAlt(){
-    val colors = appColors()
-
-    Icon(
-        imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
-        contentDescription = "",
-        modifier = Modifier
-            .size(20.dp),
-        tint = colors.onBackgroundColor
-    )
-}
-
-@Composable
 fun StatusCircleIcon(
     imageVector: ImageVector,
     tint: Color

@@ -1,10 +1,12 @@
 package net.inspirehub.hr.time_off.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -16,7 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.SharedPrefManager
@@ -60,6 +61,7 @@ fun TimePickerBox(
     }
 
     Row(
+        modifier = Modifier.padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (allowTimeOffWithMinutes) {
@@ -71,15 +73,23 @@ fun TimePickerBox(
                     text = formatNumber(formatHourTo12(selectedHour ?: "9"), currentLanguage),
                     color = colors.onBackgroundColor,
                     modifier = Modifier
-                        .clickable { expandedHour = true }
-                        .padding(start = 10.dp),
-                    fontSize = 14.sp
+                        .clickable { expandedHour = true },
+                    fontSize = 15.sp
                 )
 
                 DropdownMenu(
                     expanded = expandedHour,
                     onDismissRequest = { expandedHour = false },
-                    modifier = Modifier.background(colors.onSecondaryColor)
+                    modifier = Modifier
+                        .background(
+                            color = colors.surfaceContainerHigh,
+                            shape = RoundedCornerShape(12.dp)
+                        ),
+                    border = BorderStroke(
+                        2.dp,
+                        colors.surfaceColor
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     hours.forEach { hour ->
                         DropdownMenuItem(
@@ -87,8 +97,7 @@ fun TimePickerBox(
                                 Text(
                                     formatNumber(hour, currentLanguage),
                                     color = colors.onBackgroundColor,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontSize = 15.sp
                                 )
                             },
                             onClick = {
@@ -114,15 +123,23 @@ fun TimePickerBox(
                     text = formatNumber(selectedMinute ?: "00", currentLanguage),
                     color = colors.onBackgroundColor,
                     modifier = Modifier
-                        .clickable { expandedMinute = true }
-                        .padding(start = 10.dp),
-                    fontSize = 14.sp
+                        .clickable { expandedMinute = true },
+                    fontSize = 15.sp
                 )
 
                 DropdownMenu(
                     expanded = expandedMinute,
                     onDismissRequest = { expandedMinute = false },
-                    modifier = Modifier.background(colors.onSecondaryColor)
+                    modifier = Modifier
+                        .background(
+                            color = colors.surfaceContainerHigh,
+                            shape = RoundedCornerShape(12.dp)
+                        ),
+                    border = BorderStroke(
+                        2.dp,
+                        colors.surfaceColor
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     minutes.forEach { minute ->
                         DropdownMenuItem(
@@ -130,8 +147,7 @@ fun TimePickerBox(
                                 Text(
                                     formatNumber(minute, currentLanguage),
                                     color = colors.onBackgroundColor,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontSize = 15.sp
                                 )
                             },
                             onClick = {
@@ -147,7 +163,6 @@ fun TimePickerBox(
             var expanded by remember { mutableStateOf(false) }
 
             Box {
-
                 Text(
                     text = formatLocalizedTime(
                         hour = (selectedHour ?: "9").toInt(),
@@ -155,16 +170,24 @@ fun TimePickerBox(
                         language = currentLanguage
                     ),
                     modifier = Modifier
-                        .clickable { expanded = true }
-                        .padding(start = 10.dp),
+                        .clickable { expanded = true },
                     color = colors.onBackgroundColor,
-                    fontSize = 14.sp
+                    fontSize = 15.sp
                 )
 
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    modifier = Modifier.background(colors.onSecondaryColor)
+                    modifier = Modifier
+                        .background(
+                            color = colors.surfaceContainerHigh,
+                            shape = RoundedCornerShape(12.dp)
+                        ),
+                    border = BorderStroke(
+                        2.dp,
+                        colors.surfaceColor
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
 
                     timeList.forEach { time ->

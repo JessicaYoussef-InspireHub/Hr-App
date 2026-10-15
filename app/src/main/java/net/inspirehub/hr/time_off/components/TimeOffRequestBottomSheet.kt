@@ -41,7 +41,6 @@ import net.inspirehub.hr.time_off.data.sendApiForRequestTimeOff
 import net.inspirehub.hr.time_off.data.TimeOffRequestForRequestEmployee
 import net.inspirehub.hr.time_off.data.fetchEmployeeLeaveTypes
 import net.inspirehub.hr.time_off.data.getLeaveDuration
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -51,12 +50,10 @@ import kotlinx.serialization.json.contentOrNull
 import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.SmallButtons
 import net.inspirehub.hr.time_off.data.LeaveDurationData
-import net.inspirehub.hr.utils.convertToArabicDigits
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlin.collections.emptyList
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -64,6 +61,37 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.text.font.FontWeight
 import net.inspirehub.hr.CloseIcon
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import android.util.Base64
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.BeachAccess
+import androidx.compose.material.icons.filled.EventAvailable
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.runtime.rememberCoroutineScope
+import net.inspirehub.hr.time_off.data.TimeOffAttachment
+import java.io.IOException
+
+
+private fun readAttachmentAsBase64(
+    context: android.content.Context,
+    uri: Uri
+): String {
+    val bytes = context.contentResolver
+        .openInputStream(uri)
+        ?.use { inputStream -> inputStream.readBytes() }
+        ?: throw IOException("Unable to read selected attachment")
+
+    return Base64.encodeToString(bytes, Base64.NO_WRAP)
+}
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -113,6 +141,7 @@ fun TimeOffRequestBottomSheet(
     var permissionChecked by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val sharedPrefManager = remember { SharedPrefManager(context) }
     val currentLanguage = sharedPrefManager.getLanguage()
 
@@ -130,9 +159,7 @@ fun TimeOffRequestBottomSheet(
     var description by remember { mutableStateOf("") }
     var leaveDurationData by remember { mutableStateOf<LeaveDurationData?>(null) }
 
-    var selectedPermissionPeriod by remember {
-        mutableStateOf(context.getString(R.string.select_permission_period))
-    }
+    var selectedPermissionPeriod by remember { mutableStateOf(context.getString(R.string.select_permission_period)) }
 
     val showPermissionDuration =
         selectedPermissionPeriod == stringResource(R.string.morning_permission) ||
@@ -141,6 +168,90 @@ fun TimeOffRequestBottomSheet(
     val isMidDay = selectedPermissionPeriod == stringResource(R.string.mid_day_permission)
     var permissionPeriodError by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+
+    var selectedAttachments by remember { mutableStateOf<List<AttachmentPicker>>(emptyList()) }
+
+
+    fun getAttachments(): List<TimeOffAttachment>? {
+        if (selectedAttachments.isEmpty()) return null
+
+        return try {
+            selectedAttachments.map { attachment ->
+                TimeOffAttachment(
+                    name = attachment.name,
+                    data = readAttachmentAsBase64(context, attachment.uri)
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("ATTACHMENT_ERROR", "Failed to read attachments", e)
+            errorMessage = if (currentLanguage == "ar") {
+                "حصل خطأ أثناء قراءة أحد الملفات. اختاري الملفات مرة أخرى."
+            } else {
+                "Failed to read one of the files. Please select the files again."
+            }
+            showErrorDialog = true
+            null
+        }
+    }
+
+    val attachmentPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments()
+    ) { uris ->
+
+        Log.d("ATTACHMENT_DEBUG", "Callback triggered")
+        Log.d("ATTACHMENT_DEBUG", "Selected files count: ${uris.size}")
+
+        uris.forEach { uri ->
+            Log.d("ATTACHMENT_DEBUG", "Selected URI: $uri")
+        }
+
+        if (uris.isNotEmpty()) {
+            val newAttachments = uris.map { uri ->
+                val fileName = runCatching {
+                    context.contentResolver.query(
+                        uri,
+                        null,
+                        null,
+                        null,
+                        null
+                    )?.use { cursor ->
+                        val nameIndex = cursor.getColumnIndex(
+                            android.provider.OpenableColumns.DISPLAY_NAME
+                        )
+
+                        if (cursor.moveToFirst() && nameIndex >= 0) {
+                            cursor.getString(nameIndex)
+                        } else {
+                            null
+                        }
+                    }
+                }.getOrNull() ?: uri.lastPathSegment ?: "Selected file"
+
+                Log.d(
+                    "ATTACHMENT_DEBUG",
+                    "File name: $fileName, URI: $uri"
+                )
+
+                AttachmentPicker(
+                    uri = uri,
+                    name = fileName
+                )
+            }
+
+            selectedAttachments = (
+                    selectedAttachments + newAttachments
+                    ).distinctBy { it.uri }
+
+            Log.d(
+                "ATTACHMENT_DEBUG",
+                "Total attachments after selection: ${selectedAttachments.size}"
+            )
+        } else {
+            Log.d("ATTACHMENT_DEBUG", "No files selected")
+        }
+    }
+
 
     val shouldHideTimePicker =
         when {
@@ -196,7 +307,7 @@ fun TimeOffRequestBottomSheet(
     fun calculateLeaveDuration() {
         if (selectedLeaveType == null) return
 
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             try {
                 val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
 
@@ -225,7 +336,7 @@ fun TimeOffRequestBottomSheet(
         Log.d("TIME_DEBUG", "=== START CALC ===")
         Log.d("TIME_DEBUG", "From raw = $selectedFromHour")
         Log.d("TIME_DEBUG", "To raw = $selectedToHour")
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             try {
                 val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
                 val requestDateFrom = selectedStartDate.format(formatter)
@@ -251,16 +362,18 @@ fun TimeOffRequestBottomSheet(
                 Log.d("DEBUG_REQUEST", "leaveTypeId=${selectedLeaveType?.id}")
 
 
-                val response = getLeaveDuration(
-                    context = context,
-                    employeeToken = token,
-                    requestDateFrom = requestDateFrom,
-                    requestDateTo = requestDateTo,
-                    leaveTypeId = selectedLeaveType?.id ?: 0,
-                    requestUnitHours = true,
-                    requestHourFrom = fromHourDouble,
-                    requestHourTo = toHourDouble
-                )
+                val response = withContext(Dispatchers.IO) {
+                    getLeaveDuration(
+                        context = context,
+                        employeeToken = token,
+                        requestDateFrom = requestDateFrom,
+                        requestDateTo = requestDateTo,
+                        leaveTypeId = selectedLeaveType?.id ?: 0,
+                        requestUnitHours = true,
+                        requestHourFrom = fromHourDouble,
+                        requestHourTo = toHourDouble
+                    )
+                }
                 withContext(Dispatchers.Main) {
                     if (response.result.status == "error" || response.result.data?.hours == 0.0) {
                         permissionErrorMessage = if (currentLanguage == "ar") {
@@ -280,8 +393,10 @@ fun TimeOffRequestBottomSheet(
                 }
 
                 Log.d("LEAVE_API_Permission", "Parsed Response: $response")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
-                Log.e("LEAVE_API", "Error in call: ${e.message}", e)
+                Log.e("LEAVE_API", "Error in call", e)
             }
         }
     }
@@ -319,9 +434,17 @@ fun TimeOffRequestBottomSheet(
     }
 
     LaunchedEffect(token) {
-        val result = fetchEmployeeLeaveTypes(context, token)
-        result?.result?.leave_types?.let {
-            leaveTypes = it
+        try {
+            val result = fetchEmployeeLeaveTypes(context, token)
+
+            result?.result?.leave_types?.let { types ->
+                leaveTypes = types
+                Log.d("LEAVE_TYPES", "Loaded ${types.size} leave types")
+            }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e("LEAVE_TYPES", "Error loading leave types", e)
         }
     }
 
@@ -352,6 +475,7 @@ fun TimeOffRequestBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(bottom = 40.dp)
                 .padding(horizontal = 12.dp),
             verticalArrangement = Arrangement.Center,
@@ -370,15 +494,20 @@ fun TimeOffRequestBottomSheet(
                 text = stringResource(R.string.time_off_request),
                 fontWeight = FontWeight.Bold,
                 color = colors.tertiaryColor,
-                fontSize = 20.sp,
+                fontSize = 18.sp,
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp)
             ) {
-                FirstText(stringResource(R.string.time_off_type))
+                FirstText(
+                    icon = Icons.Default.EventAvailable,
+                    label = stringResource(R.string.time_off_type)
+                )
                 Spacer(Modifier.height(8.dp))
                 DropDown(
                     leaveTypes = leaveTypes,
@@ -393,68 +522,41 @@ fun TimeOffRequestBottomSheet(
                     leaveDays = { leaveDays = it }
                 )
 
-                if (leaveTypeError.isNotEmpty()) {
-                    Text(
-                        text = leaveTypeError,
-                        color = colors.error,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(start = 50.dp, top = 4.dp)
-                    )
-                }
+                Spacer(modifier = Modifier.height(10.dp))
 
-
-
-                Spacer(modifier = Modifier.height(15.dp))
                 if (selectedLeaveType != null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    )
-                    {
-                        if (!isHalfDayHide) {
-                            HalfDayCheckbox(
-                                isChecked = isHalfDay,
-                                onCheckedChange = { checked ->
-                                    isHalfDay = checked
-                                    if (checked) {
-                                        permissionChecked = false
-                                    }
-                                },
-                                modifier = Modifier
-                                    .padding(start = 30.dp)
-                            )
-                        }
-                        if (selectedLeaveType?.request_unit == "hour") {
-                            CustomHours(
-                                isCheckedHours = permissionChecked,
-                                onCheckedHoursChange = { checked ->
-                                    permissionChecked = checked
-                                    if (checked) {
-                                        isHalfDay = false
-                                    }
-                                },
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        FirstText(stringResource(R.string.dates))
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Dates(
-                            startDate = selectedStartDate,
-                            lastDate = selectedEndDate,
-                            onStartDateClick = { showStartCalendar = true },
-                            onEndDateClick = { showEndCalendar = true },
-                            isHalfDay = isHalfDay,
-                            halfDayOption = halfDayOption,
-                            onHalfDayOptionChange = { halfDayOption = it },
-                            hideEndDate = permissionChecked || isEndDateHide
+                    if (!isHalfDayHide) {
+                        HalfDayCheckbox(
+                            isChecked = isHalfDay,
+                            onCheckedChange = { checked ->
+                                isHalfDay = checked
+                                if (checked) {
+                                    permissionChecked = false
+                                }
+                            }
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    FirstText(
+                        icon = Icons.Default.EventAvailable,
+                        label = stringResource(R.string.date)
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Dates(
+                        startDate = selectedStartDate,
+                        lastDate = selectedEndDate,
+                        onStartDateClick = { showStartCalendar = true },
+                        onEndDateClick = { showEndCalendar = true },
+                        isHalfDay = isHalfDay,
+                        halfDayOption = halfDayOption,
+                        onHalfDayOptionChange = { halfDayOption = it },
+                        hideEndDate = permissionChecked || isEndDateHide
+                    )
+
 
 
                     if (showStartCalendar) {
@@ -504,7 +606,7 @@ fun TimeOffRequestBottomSheet(
                                         onConfirm = {
                                             Log.d("CALENDAR", "save")
 
-                                            CoroutineScope(Dispatchers.IO).launch {
+                                            scope.launch {
                                                 try {
                                                     val formatter =
                                                         DateTimeFormatter.ofPattern("MM-dd-yyyy")
@@ -627,7 +729,7 @@ fun TimeOffRequestBottomSheet(
                                         onConfirm = {
                                             Log.d("CALENDAR", "save")
 
-                                            CoroutineScope(Dispatchers.IO).launch {
+                                            scope.launch {
                                                 try {
                                                     val formatter =
                                                         DateTimeFormatter.ofPattern("MM-dd-yyyy")
@@ -702,112 +804,138 @@ fun TimeOffRequestBottomSheet(
                     }
 
                     if (selectedLeaveType?.enable_leave_time_slot == true) {
-                        Spacer(modifier = Modifier.height(15.dp))
 
-                        FirstText(stringResource(R.string.permission_period))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                        Spacer(modifier = Modifier.height(15.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 20.dp)
-                        ) {
-                            PermissionPeriodDropdown(
-                                selectedOption = selectedPermissionPeriod,
-                                onOptionSelected = {
-                                    selectedPermissionPeriod = it
-                                    permissionPeriodError = ""
-                                }
-                            )
-                        }
+                    FirstText(
+                        icon = Icons.Default.AccessTime,
+                        label = stringResource(R.string.permission_period)
+                    )
 
-                        if (permissionPeriodError.isNotEmpty()) {
-                            Text(
-                                text = permissionPeriodError,
-                                color = colors.error,
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(start = 20.dp, top = 4.dp)
-                            )
-                        }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                        PermissionPeriodDropdown(
+                            selectedOption = selectedPermissionPeriod,
+                            onOptionSelected = {
+                                selectedPermissionPeriod = it
+                                permissionPeriodError = ""
+                            }
+                        )
+
+                    if (permissionPeriodError.isNotEmpty()) {
+                        Text(
+                            text = permissionPeriodError,
+                            color = colors.error,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 20.dp, top = 4.dp)
+                        )
+                    }
                     }
 
                     if (
-                        selectedLeaveType?.enable_leave_time_slot == true &&
-                        showPermissionDuration
+                        selectedLeaveType?.enable_leave_time_slot == true && showPermissionDuration
                     ) {
-                        Spacer(modifier = Modifier.height(15.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            FirstText(stringResource(R.string.duration))
-                            Spacer(modifier = Modifier.width(10.dp))
-                            PermissionDurationDropdown(
-                                selectedOption = selectedPermissionDuration,
-                                onOptionSelected = {
-                                    selectedPermissionDuration = it
-                                }
-                            )
+                    FirstText(
+                        icon = Icons.Default.AccessTime,
+                        label = stringResource(R.string.duration)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    PermissionDurationDropdown(
+                        selectedOption = selectedPermissionDuration,
+                        onOptionSelected = {
+                            selectedPermissionDuration = it
                         }
+                    )
                     }
 
 
 
                     if (showTimePicker) {
-                        Spacer(modifier = Modifier.height(15.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 15.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            TimePickerBox(
-                                selectedHour = selectedFromHour.split(":").getOrNull(0),
-                                selectedMinute = selectedFromHour.split(":").getOrNull(1),
-                                onHourChange = { hour ->
-                                    val minute =
-                                        selectedFromHour.split(":").getOrNull(1) ?: "00"
-                                    selectedFromHour = "$hour:$minute"
+                            OutlinedCard(
+                                modifier = Modifier
+                                    .weight(1f),
+                                border = BorderStroke(
+                                    2.dp,
+                                    colors.surfaceColor
+                                ),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = colors.transparent
+                                ),
+                                shape = RoundedCornerShape(12.dp)
 
-                                    Log.d("TIME_DEBUG", "FROM hour changed: $selectedFromHour")
+                            ) {
+                                TimePickerBox(
+                                    selectedHour = selectedFromHour.split(":").getOrNull(0),
+                                    selectedMinute = selectedFromHour.split(":").getOrNull(1),
+                                    onHourChange = { hour ->
+                                        val minute =
+                                            selectedFromHour.split(":").getOrNull(1) ?: "00"
+                                        selectedFromHour = "$hour:$minute"
 
-                                    calculatePermissionDuration()
-                                },
+                                        Log.d("TIME_DEBUG", "FROM hour changed: $selectedFromHour")
 
-                                onMinuteChange = { minute ->
-                                    val hour = selectedFromHour.split(":").getOrNull(0) ?: "9"
-                                    selectedFromHour = "$hour:$minute"
+                                        calculatePermissionDuration()
+                                    },
 
-                                    Log.d(
-                                        "TIME_DEBUG",
-                                        "FROM minute changed: $selectedFromHour"
-                                    )
+                                    onMinuteChange = { minute ->
+                                        val hour = selectedFromHour.split(":").getOrNull(0) ?: "9"
+                                        selectedFromHour = "$hour:$minute"
 
-                                    calculatePermissionDuration()
-                                }
-                            )
-                            TimePickerBox(
-                                selectedHour = selectedToHour.split(":").getOrNull(0),
-                                selectedMinute = selectedToHour.split(":").getOrNull(1),
-                                onHourChange = { hour ->
-                                    val minute = selectedToHour.split(":").getOrNull(1) ?: "00"
-                                    selectedToHour = "$hour:$minute"
+                                        Log.d(
+                                            "TIME_DEBUG",
+                                            "FROM minute changed: $selectedFromHour"
+                                        )
 
-                                    Log.d("TIME_DEBUG", "TO hour changed: $selectedToHour")
+                                        calculatePermissionDuration()
+                                    }
+                                )
+                            }
 
-                                    calculatePermissionDuration()
-                                },
+                            Spacer(modifier = Modifier.width(12.dp))
 
-                                onMinuteChange = { minute ->
-                                    val hour = selectedToHour.split(":").getOrNull(0) ?: "5"
-                                    selectedToHour = "$hour:$minute"
+                            OutlinedCard(
+                                modifier = Modifier
+                                    .weight(1f),
+                                border = BorderStroke(
+                                    2.dp,
+                                    colors.surfaceColor
+                                ),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = colors.transparent
+                                ),
+                                shape = RoundedCornerShape(12.dp)
 
-                                    Log.d("TIME_DEBUG", "TO minute changed: $selectedToHour")
+                            ) {
+                                TimePickerBox(
+                                    selectedHour = selectedToHour.split(":").getOrNull(0),
+                                    selectedMinute = selectedToHour.split(":").getOrNull(1),
+                                    onHourChange = { hour ->
+                                        val minute = selectedToHour.split(":").getOrNull(1) ?: "00"
+                                        selectedToHour = "$hour:$minute"
 
-                                    calculatePermissionDuration()
-                                }
-                            )
+                                        Log.d("TIME_DEBUG", "TO hour changed: $selectedToHour")
+
+                                        calculatePermissionDuration()
+                                    },
+
+                                    onMinuteChange = { minute ->
+                                        val hour = selectedToHour.split(":").getOrNull(0) ?: "5"
+                                        selectedToHour = "$hour:$minute"
+
+                                        Log.d("TIME_DEBUG", "TO minute changed: $selectedToHour")
+
+                                        calculatePermissionDuration()
+                                    }
+                                )
+                            }
                         }
                     }
 
@@ -822,65 +950,95 @@ fun TimeOffRequestBottomSheet(
 
                     when {
                         permissionChecked || selectedLeaveType?.request_unit == "hours_only" -> {
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                FirstText(stringResource(R.string.duration))
-                                Spacer(Modifier.width(10.dp))
-                                DurationHours(
-                                    hours = if (
-                                        selectedLeaveType?.enable_leave_time_slot == true &&
-                                        showPermissionDuration
-                                    ) {
-                                        selectedPermissionDuration.hours
-                                    } else {
-                                        leaveHours
-                                    }
-                                )
-                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            FirstText(
+                                icon = Icons.Default.AccessTime,
+                                label = stringResource(R.string.duration)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            DurationHours(
+                                hours = if (
+                                    selectedLeaveType?.enable_leave_time_slot == true &&
+                                    showPermissionDuration
+                                ) {
+                                    selectedPermissionDuration.hours
+                                } else {
+                                    leaveHours
+                                }
+                            )
                         }
 
                         isHalfDay -> {}
 
                         selectedLeaveType?.request_unit == "hour" || selectedLeaveType?.request_unit == "hours_only"
                             -> {
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                FirstText(stringResource(R.string.duration))
-                                Spacer(Modifier.width(10.dp))
-                                DurationHours(hours = 0.0)
-                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                            FirstText(
+                                icon = Icons.Default.AccessTime,
+                                label = stringResource(R.string.duration)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            DurationHours(hours = 0.0)
                         }
 
 
                         else -> {
-                            Spacer(modifier = Modifier.height(15.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                FirstText(stringResource(R.string.duration))
-                                Spacer(Modifier.width(10.dp))
-                                DurationDays(days = leaveDays.toInt())
-                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                            FirstText(
+                                icon = Icons.Default.AccessTime,
+                                label = stringResource(R.string.duration)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            DurationDays(days = leaveDays.toInt())
                         }
                     }
 
 
-                    Spacer(modifier = Modifier.height(15.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        FirstText(stringResource(R.string.description))
-                        DescriptionInput(
-                            description = description,
-                            onDescriptionChange = { description = it }
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    FirstText(
+                        icon = Icons.Outlined.Description,
+                        label = stringResource(R.string.description)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    DescriptionInput(
+                        description = description,
+                        onDescriptionChange = { description = it }
+                    )
+
+
+
+                    if (selectedLeaveType?.support_document == true) {
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        FirstText(
+                            icon = Icons.Default.AttachFile,
+                            label = stringResource(R.string.attachments)
+                        )
+
+                        Spacer(Modifier.height(8.dp))
+
+
+                        AttachmentPicker(
+                            selectedAttachments = selectedAttachments,
+                            onPickAttachments = {
+                                attachmentPicker.launch(
+                                    arrayOf(
+                                        "image/*",
+                                        "application/pdf",
+                                        "application/msword",
+                                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    )
+                                )
+                            },
+                            onRemoveAttachment = { attachment ->
+                                selectedAttachments = selectedAttachments.filterNot {
+                                    it.uri == attachment.uri
+                                }
+                            }
                         )
                     }
 
@@ -888,16 +1046,22 @@ fun TimeOffRequestBottomSheet(
 
                     when {
                         warningMessage != null -> {
-                            Spacer(modifier = Modifier.height(55.dp))
-                            FirstText(stringResource(R.string.casual_leave))
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(20.dp))
+                            FirstText(
+                                icon = Icons.Default.BeachAccess,
+                                label = stringResource(R.string.casual_leave)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                             CasualLeaveWarning(message = warningMessage)
                         }
 
                         leaveDurationData?.check_casual_leave == true -> {
-                            Spacer(modifier = Modifier.height(55.dp))
-                            FirstText(stringResource(R.string.casual_leave))
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(20.dp))
+                            FirstText(
+                                icon = Icons.Default.BeachAccess,
+                                label = stringResource(R.string.casual_leave)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                             CasualLeave(
                                 remainingDays = leaveDurationData?.remaining_casual_days ?: 0.0
                             )
@@ -946,7 +1110,7 @@ fun TimeOffRequestBottomSheet(
                                 Log.d("Jessica SAVE_ACTION", "Permission with custom hour")
 
                                 isLoading = true
-                                CoroutineScope(Dispatchers.IO).launch {
+                                scope.launch {
                                     val startDateStr = selectedStartDate.toString()
 
                                     val fromHourForApi =
@@ -966,7 +1130,8 @@ fun TimeOffRequestBottomSheet(
                                         permission_period = getPermissionPeriodValue(
                                             selectedPermissionPeriod
                                         ),
-                                        permission_duration = selectedPermissionDuration.hours
+                                        permission_duration = selectedPermissionDuration.hours,
+                                        attachments = getAttachments()
                                     )
 
                                     Log.d("Jessica REQUEST_BODY_Permission", request.toString())
@@ -975,7 +1140,9 @@ fun TimeOffRequestBottomSheet(
                                         getPermissionPeriodValue(selectedPermissionPeriod)
                                     )
 
-                                    val response = sendApiForRequestTimeOff(context, request)
+                                    val response = withContext(Dispatchers.IO) {
+                                        sendApiForRequestTimeOff(context, request)
+                                    }
 
 
                                     Log.d("Jessica API_RESPONSE_Permission", response.toString())
@@ -1021,7 +1188,7 @@ fun TimeOffRequestBottomSheet(
                                 Log.d("HALF_DAY", "نص يوم - $halfDayOption")
 
                                 isLoading = true
-                                CoroutineScope(Dispatchers.IO).launch {
+                                scope.launch {
                                     val startDateStr = selectedStartDate.toString()
 
                                     val period = if (halfDayOption == morningText) "am" else "pm"
@@ -1035,12 +1202,15 @@ fun TimeOffRequestBottomSheet(
                                         request_date_to = startDateStr,
                                         request_date_from_period = period,
                                         request_unit_half = true,
-                                        request_unit_hours = true
+                                        request_unit_hours = true,
+                                        attachments = getAttachments()
                                     )
 
                                     Log.d("REQUEST_BODY_HALF_DAY", request.toString())
 
-                                    val response = sendApiForRequestTimeOff(context, request)
+                                    val response = withContext(Dispatchers.IO) {
+                                        sendApiForRequestTimeOff(context, request)
+                                    }
 
                                     Log.d("API_RESPONSE_HALF_DAY", response.toString())
 
@@ -1060,9 +1230,22 @@ fun TimeOffRequestBottomSheet(
                                 return@SmallButtons
                             }
 
+                            if (
+                                selectedLeaveType?.support_document == true && selectedAttachments.isEmpty()
+                            ) {
+                                errorMessage = if (currentLanguage == "ar") {
+                                    "يرجى إرفاق مستند داعم قبل إرسال الطلب."
+                                } else {
+                                    "Please attach a supporting document before submitting."
+                                }
+
+                                showErrorDialog = true
+                                return@SmallButtons
+                            }
+
 
                             isLoading = true
-                            CoroutineScope(Dispatchers.IO).launch {
+                            scope.launch {
                                 val startDateStr = selectedStartDate.toString()
                                 val endDateStr = selectedEndDate.toString()
                                 val request = TimeOffRequestForRequestEmployee(
@@ -1071,12 +1254,15 @@ fun TimeOffRequestBottomSheet(
                                     leave_type_id = selectedLeaveType?.id ?: 0,
                                     description = description,
                                     request_date_from = startDateStr,
-                                    request_date_to = endDateStr
+                                    request_date_to = endDateStr,
+                                    attachments = getAttachments()
                                 )
 
                                 Log.d("REQUEST_BODY", request.toString())
 
-                                val response = sendApiForRequestTimeOff(context, request)
+                                val response = withContext(Dispatchers.IO) {
+                                    sendApiForRequestTimeOff(context, request)
+                                }
 
                                 Log.d("API_RESPONSE", response.toString())
 
@@ -1086,23 +1272,8 @@ fun TimeOffRequestBottomSheet(
                                         onConfirm()
                                     } else {
 
-                                        val locale = Locale.getDefault()
-                                        val formatter =
-                                            DateTimeFormatter.ofPattern("d-M-yyyy", locale)
-
-                                        var startDateStrFormatted =
-                                            selectedStartDate.format(formatter)
-                                        var endDateStrFormatted =
-                                            selectedEndDate.format(formatter)
-
                                         val apiMessage = response?.result?.message ?: ""
 
-                                        if (locale.language == "ar") {
-                                            startDateStrFormatted =
-                                                convertToArabicDigits(startDateStrFormatted)
-                                            endDateStrFormatted =
-                                                convertToArabicDigits(endDateStrFormatted)
-                                        }
 
                                         errorMessage = apiMessage
 

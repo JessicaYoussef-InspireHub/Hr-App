@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,7 +55,7 @@ fun DropDown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val colors = appColors()
-    var isLoading = leaveTypes.isEmpty()
+    val isLoading = leaveTypes.isEmpty()
 
     val defaultType = leaveTypes.find { it.name.equals("Annual Leave", ignoreCase = true) }
     if (selectedLeaveType == null && defaultType != null) {
@@ -74,8 +73,7 @@ fun DropDown(
     } else {
 
         OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
                 .clickable {
                     expanded = true
                 },
@@ -101,8 +99,7 @@ fun DropDown(
                         text = selectedLeaveType?.name
                             ?: stringResource(R.string.select_leave_type),
                         color = colors.onBackgroundColor,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontSize = 16.sp
                     )
 
                     selectedLeaveType?.remaining_balance?.let {
@@ -146,8 +143,7 @@ fun DropDown(
                 .background(
                     color = colors.surfaceContainerHigh,
                     shape = RoundedCornerShape(12.dp)
-                )
-                .width(320.dp),
+                ),
             border = BorderStroke(
                 2.dp,
                 colors.surfaceColor
@@ -176,8 +172,7 @@ fun DropDown(
                                         colors.onSecondaryColor
                                     else
                                         colors.onBackgroundColor,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontSize = 15.sp
                                 )
 
                                 item.remaining_balance?.let {
@@ -199,7 +194,10 @@ fun DropDown(
                                     Text(
                                         text = "$remaining ${stringResource(R.string.remaining_out_of)} $original",
                                         fontSize = 13.sp,
-                                        color = colors.onBackgroundColor.copy(.6f)
+                                        color = if (selectedLeaveType?.id == item.id)
+                                            colors.onSecondaryColor.copy(.6f)
+                                                    else
+                                            colors.onBackgroundColor.copy(.6f)
                                     )
                                 }
                             }
@@ -213,7 +211,6 @@ fun DropDown(
                             onLeaveTypeSelected(item)
                             expanded = false
 
-                            isLoading = true
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
                                     val formatter =
@@ -227,12 +224,10 @@ fun DropDown(
                                     )
                                     withContext(Dispatchers.Main) {
                                         leaveDays(response.result.data?.days ?: 1.0)
-                                        isLoading = false
                                     }
                                 } catch (e: Exception) {
                                     Log.e("LEAVE_DURATION", e.message ?: "error")
                                     withContext(Dispatchers.Main) {
-                                        isLoading = false
                                     }
                                 }
                             }

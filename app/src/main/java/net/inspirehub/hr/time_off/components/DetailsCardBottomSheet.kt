@@ -42,7 +42,6 @@ fun DetailsCardBottomSheet(
     onDelete: (() -> Unit)? = null
 ) {
     val colors = appColors()
-    val statusText = state
 
     val icon = when (state) {
         "validate" -> Icons.Outlined.CheckCircleOutline
@@ -120,7 +119,7 @@ fun DetailsCardBottomSheet(
                         Spacer(Modifier.width(4.dp))
 
                         Text(
-                            statusText,
+                            state,
                             color = leaveColor,
                             fontSize = 12.sp
                         )

@@ -165,7 +165,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
      * point_type says which way the punch went, so the check in/out button can flip
      * before anything touches the network. The screen polls only when it is opened,
      * so without this an employee sitting on it after a manual check-out keeps seeing
-     * a Check Out button that the server has already refused.
+     * a CheckOut button that the server has already refused.
      */
     private fun handleAttendanceModeAlert(remoteMessage: RemoteMessage) {
 

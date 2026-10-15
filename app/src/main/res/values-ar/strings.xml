@@ -52,7 +52,7 @@
     <string name="save">حفظ</string>
     <string name="refused">تم الرفض</string>
     <string name="morning">صباحي</string>
-    <string name="dates">تواريخ:</string>
+    <string name="date">التاريخ:</string>
     <string name="duration">المدة:</string>
     <string name="description">الوصف:</string>
     <string name="casual_leave">إجازة عرضية:</string>
@@ -407,6 +407,10 @@
     <string name="expected_hours">الساعات المتوقعة</string>
     <string name="worked_hours">ساعات العمل</string>
     <string name="work_entry_details">تفاصيل فترات العمل</string>
+    <string name="attachments">مرفقات</string>
+    <string name="period">الفترة</string>
+    <string name="upload_file">رفع ملف</string>
+    <string name="pdf_jbg_png_max_5mb">PDF وJPG وPNG (بحد أقصى 5 ميجابايت)</string>
 
 </resources>
 

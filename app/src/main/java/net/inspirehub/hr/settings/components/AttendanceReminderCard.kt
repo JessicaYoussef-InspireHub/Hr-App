@@ -63,6 +63,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import net.inspirehub.hr.MyDivider
 import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.ui.draw.scale
 import net.inspirehub.hr.settings.data.AttendanceLocationNotification
 
 @Composable
@@ -408,6 +409,7 @@ fun AttendanceReminderCard() {
                     },
                     trailingIcon = {
                         Switch(
+                            modifier = Modifier.scale(0.8f),
                             checked = isCheckInReminderEnabled,
                             onCheckedChange = { enabled ->
                                 if (enabled) {
@@ -451,6 +453,7 @@ fun AttendanceReminderCard() {
                     },
                     trailingIcon = {
                         Switch(
+                            modifier = Modifier.scale(0.8f),
                             checked = isCheckOutReminderEnabled,
                             onCheckedChange = { enabled ->
                                 if (enabled) {
@@ -583,6 +586,7 @@ fun AttendanceReminderCard() {
                         },
                         trailingIcon = {
                             Switch(
+                                modifier = Modifier.scale(0.8f),
                                 checked = hideAutoNotification,
                                 onCheckedChange = { enabled ->
                                     applyHideAutoNotification(enabled)

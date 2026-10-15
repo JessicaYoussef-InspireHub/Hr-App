@@ -54,7 +54,7 @@ Protection Method</string>
     <string name="save">Save</string>
     <string name="refused">Refused</string>
     <string name="morning">Morning</string>
-    <string name="dates">Dates:</string>
+    <string name="date">Date:</string>
     <string name="duration">Duration:</string>
     <string name="description">Description:</string>
     <string name="casual_leave">Casual Leave:</string>
@@ -405,5 +405,9 @@ You have</string>
     <string name="expected_hours">Expected Hours</string>
     <string name="worked_hours">Worked Hours</string>
     <string name="work_entry_details">Work Entry Details</string>
+    <string name="attachments">Attachments</string>
+    <string name="period">Period</string>
+    <string name="upload_file">Upload file</string>
+    <string name="pdf_jbg_png_max_5mb">PDF, JPG, PNG (Max 5MB)</string>
 
 </resources>
