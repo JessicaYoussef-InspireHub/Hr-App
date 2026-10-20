@@ -2,6 +2,7 @@ package net.inspirehub.hr.attendance.presentation
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,6 +40,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import net.inspirehub.hr.FilterAltIcon
 import net.inspirehub.hr.attendance.components.AttendanceTabRow
+import kotlinx.coroutines.CancellationException
 import java.time.LocalDate
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -231,34 +233,47 @@ fun AttendanceScreen(
     LaunchedEffect(apiFromDate, apiToDate) {
         isLoading = true
 
-        attendanceResponse = fetchAttendance(
-            context = context,
-            token = sharedPref.getToken(),
-            fromDate = apiFromDate.toString(),
-            toDate = apiToDate.toString()
-        )
+        try {
 
-        val result = getWorkEntryTypes()
-
-        workEntryTypes = result
-
-        println("WORK_ENTRY_TYPES status = ${result.status}")
-        println("WORK_ENTRY_TYPES count = ${result.count}")
-
-        result.data.forEach { (key, type) ->
-
-            val icon = type.icon_image
-
-            println(
-                "WORK_ENTRY_TYPE " +
-                        "key=$key " +
-                        "id=${type.id} " +
-                        "name=${type.name} " +
-                        "iconPrefix=${icon?.take(100)}"
+            attendanceResponse = fetchAttendance(
+                context = context,
+                token = sharedPref.getToken(),
+                fromDate = apiFromDate.toString(),
+                toDate = apiToDate.toString()
             )
-        }
 
-        isLoading = false
+            val result = getWorkEntryTypes(context)
+
+            workEntryTypes = result
+
+            println("WORK_ENTRY_TYPES status = ${result?.status}")
+            println("WORK_ENTRY_TYPES count = ${result?.count}")
+
+            result?.data?.forEach { (key, type) ->
+
+                val icon = type.icon_image
+
+                println(
+                    "WORK_ENTRY_TYPE " +
+                            "key=$key " +
+                            "id=${type.id} " +
+                            "name=${type.name} " +
+                            "iconPrefix=${icon?.take(100)}"
+                )
+            }
+
+        } catch (e: CancellationException) {
+
+            throw e
+
+        } catch (e: Exception) {
+
+            Log.e("ATTENDANCE_SCREEN", "Failed to load attendance", e)
+
+        } finally {
+
+            isLoading = false
+        }
     }
 
 

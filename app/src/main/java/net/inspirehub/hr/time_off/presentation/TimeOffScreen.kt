@@ -109,7 +109,7 @@ fun TimeOffScreen(
                     val colorHex = if (leaveType.color.isNullOrBlank()) "#00000000" else leaveType.color
                     val safeColor = try {
                         colorHex.toColorInt()
-                    } catch (e: IllegalArgumentException) {
+                    } catch (_: IllegalArgumentException) {
                         android.graphics.Color.TRANSPARENT
                     }
                     leaveTypeColors[leaveType.name] = Color(safeColor)

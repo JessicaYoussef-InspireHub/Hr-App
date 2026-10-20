@@ -116,11 +116,18 @@ fun TimeOffRequestBottomSheet(
     var isHalfDay by remember { mutableStateOf(false) }
     val pleaseChooseTypeText = stringResource(R.string.please_choose_the_time_off_type)
 
+    var startDate by remember { mutableStateOf<LocalDate?>(date) }
+    var endDate by remember { mutableStateOf<LocalDate?>(null) }
+
     var showStartCalendar by remember { mutableStateOf(false) }
     var showEndCalendar by remember { mutableStateOf(false) }
 
     var selectedStartDate by remember { mutableStateOf(date) }
     var selectedEndDate by remember { mutableStateOf(date) }
+
+    var savedStartDate by remember { mutableStateOf(selectedStartDate) }
+    var savedEndDate by remember { mutableStateOf(selectedEndDate) }
+    var savedSelectedDates by remember { mutableStateOf(selectedDates) }
 
     var isLoading by remember { mutableStateOf(false) }
 
@@ -456,16 +463,6 @@ fun TimeOffRequestBottomSheet(
         calculateLeaveDuration()
     }
 
-    fun getDatesBetween(startDate: LocalDate, endDate: LocalDate): Set<LocalDate> {
-        val dates = mutableSetOf<LocalDate>()
-        var date = startDate
-        while (!date.isAfter(endDate)) {
-            dates.add(date)
-            date = date.plusDays(1)
-        }
-        return dates
-    }
-
     ModalBottomSheet(
         containerColor = colors.surfaceContainerHigh,
         contentWindowInsets = { WindowInsets(0) },
@@ -549,8 +546,26 @@ fun TimeOffRequestBottomSheet(
                     Dates(
                         startDate = selectedStartDate,
                         lastDate = selectedEndDate,
-                        onStartDateClick = { showStartCalendar = true },
-                        onEndDateClick = { showEndCalendar = true },
+                        onStartDateClick = {
+                            savedStartDate = selectedStartDate
+                            savedEndDate = selectedEndDate
+                            savedSelectedDates = selectedDates
+
+                            startDate = selectedStartDate
+                            endDate = selectedEndDate
+
+                            showStartCalendar = true
+                        },
+                        onEndDateClick = {
+                            savedStartDate = selectedStartDate
+                            savedEndDate = selectedEndDate
+                            savedSelectedDates = selectedDates
+
+                            startDate = selectedStartDate
+                            endDate = selectedEndDate
+
+                            showEndCalendar = true
+                        },
                         isHalfDay = isHalfDay,
                         halfDayOption = halfDayOption,
                         onHalfDayOptionChange = { halfDayOption = it },
@@ -592,8 +607,13 @@ fun TimeOffRequestBottomSheet(
                                         },
                                         token = token,
                                         onRefreshRequest = onRefreshRequest,
-                                        startDate = tempStartDate,
-                                        endDate = selectedEndDate,
+                                        startDate = startDate,
+                                        endDate = endDate,
+                                        highlightedDate = tempStartDate,
+                                        onDateRangeChange = { newStartDate, newEndDate ->
+                                            startDate = newStartDate
+                                            endDate = newEndDate
+                                        },
                                         weekendDayNames = weekendDayNames,
                                         publicHolidayDates = publicHolidayDates,
                                         dailyRecords = dailyRecords,
@@ -658,23 +678,41 @@ fun TimeOffRequestBottomSheet(
                                             }
 
 
-                                            if (tempStartDate.isBefore(selectedEndDate)) {
-                                                selectedStartDate = tempStartDate
-                                            } else {
-                                                selectedStartDate = selectedEndDate
-                                                selectedEndDate = tempStartDate
-                                            }
+                                            val rangeStart = startDate ?: selectedStartDate
+                                            val rangeEnd = endDate ?: rangeStart
 
-                                            val updatedDates =
-                                                getDatesBetween(
-                                                    selectedStartDate,
-                                                    selectedEndDate
-                                                )
-                                            onDateSelectedChange(updatedDates)
+                                            val normalizedStart = minOf(rangeStart, rangeEnd)
+                                            val normalizedEnd = maxOf(rangeStart, rangeEnd)
+
+                                            selectedStartDate = normalizedStart
+                                            selectedEndDate = normalizedEnd
+
+                                            val rangeDates = generateSequence(normalizedStart) { current ->
+                                                if (current.isBefore(normalizedEnd)) {
+                                                    current.plusDays(1)
+                                                } else {
+                                                    null
+                                                }
+                                            }.toSet()
+
+                                            onDateSelectedChange(rangeDates)
+
+                                            Log.d(
+                                                "CALENDAR_RANGE",
+                                                "Start=$selectedStartDate, End=$selectedEndDate, Dates=$rangeDates"
+                                            )
 
                                             showStartCalendar = false
                                         },
                                         onDismiss = {
+                                            selectedStartDate = savedStartDate
+                                            selectedEndDate = savedEndDate
+
+                                            startDate = savedStartDate
+                                            endDate = savedEndDate
+
+                                            onDateSelectedChange(savedSelectedDates)
+
                                             showStartCalendar = false
                                         },
                                         confirmButtonText = stringResource(R.string.apply),
@@ -716,8 +754,14 @@ fun TimeOffRequestBottomSheet(
                                         },
                                         token = token,
                                         onRefreshRequest = onRefreshRequest,
-                                        startDate = selectedStartDate,
-                                        endDate = tempEndDate,
+                                        startDate = startDate,
+                                        endDate = endDate,
+
+                                        onDateRangeChange = { newStartDate, newEndDate ->
+                                            startDate = newStartDate
+                                            endDate = newEndDate
+                                        },
+                                        highlightedDate = tempEndDate,
                                         weekendDayNames = weekendDayNames,
                                         publicHolidayDates = publicHolidayDates,
                                         dailyRecords = dailyRecords,
@@ -780,15 +824,40 @@ fun TimeOffRequestBottomSheet(
                                             }
 
 
-                                            if (tempEndDate.isAfter(selectedStartDate)) {
-                                                selectedEndDate = tempEndDate
-                                            } else {
-                                                selectedEndDate = selectedStartDate
-                                                selectedStartDate = tempEndDate
-                                            }
+                                            val rangeStart = startDate ?: selectedStartDate
+                                            val rangeEnd = endDate ?: rangeStart
+
+                                            val normalizedStart = minOf(rangeStart, rangeEnd)
+                                            val normalizedEnd = maxOf(rangeStart, rangeEnd)
+
+                                            selectedStartDate = normalizedStart
+                                            selectedEndDate = normalizedEnd
+
+                                            val rangeDates = generateSequence(normalizedStart) { current ->
+                                                if (current.isBefore(normalizedEnd)) {
+                                                    current.plusDays(1)
+                                                } else {
+                                                    null
+                                                }
+                                            }.toSet()
+
+                                            onDateSelectedChange(rangeDates)
+
+                                            Log.d(
+                                                "CALENDAR_RANGE",
+                                                "Start=$selectedStartDate, End=$selectedEndDate, Dates=$rangeDates"
+                                            )
                                             showEndCalendar = false
                                         },
                                         onDismiss = {
+                                            selectedStartDate = savedStartDate
+                                            selectedEndDate = savedEndDate
+
+                                            startDate = savedStartDate
+                                            endDate = savedEndDate
+
+                                            onDateSelectedChange(savedSelectedDates)
+
                                             showEndCalendar = false
                                         },
                                         confirmButtonText = stringResource(R.string.apply),

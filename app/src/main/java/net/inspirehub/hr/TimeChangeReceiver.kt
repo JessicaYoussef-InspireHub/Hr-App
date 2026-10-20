@@ -47,7 +47,7 @@ class TimeChangeReceiver : BroadcastReceiver() {
                 socket.connect(InetSocketAddress("8.8.8.8", 53), 1500)
                 true
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

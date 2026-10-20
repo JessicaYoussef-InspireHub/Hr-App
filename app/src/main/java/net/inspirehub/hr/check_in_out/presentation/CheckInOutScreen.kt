@@ -43,7 +43,6 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.system.exitProcess
 import net.inspirehub.hr.R
@@ -91,13 +90,9 @@ import net.inspirehub.hr.check_in_out.data.LocationTrackingManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -106,12 +101,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
-import androidx.core.net.toUri
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import net.inspirehub.hr.InfoIcon
-import net.inspirehub.hr.MyDialog
 import net.inspirehub.hr.check_in_out.data.hasBackgroundLocationPermission
 import net.inspirehub.hr.check_in_out.data.hasForegroundLocationPermission
 import net.inspirehub.hr.settings.data.AttendanceReminderPowerSettings
@@ -136,7 +127,7 @@ private fun checkInternetConnection(context: Context): Boolean {
             socket.connect(InetSocketAddress("8.8.8.8", 53), 1500)
             true
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 }
@@ -156,8 +147,6 @@ fun CheckInOutScreen(
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
     val token = sharedPref.getToken() ?: ""
-    val currentLat by viewModel.currentLat.collectAsState()
-    val currentLng by viewModel.currentLng.collectAsState()
     val isWithinDistance by viewModel.isWithinDistance.collectAsState()
     var isDialogLoading by remember { mutableStateOf(false) }
     val lastCheckIn by viewModel.lastCheckIn.collectAsState()
@@ -170,7 +159,6 @@ fun CheckInOutScreen(
     var isButtonLoading by remember { mutableStateOf(true) }
     val workedHours by viewModel.workedHours.collectAsState()
     var showErrorDialog by remember { mutableStateOf(false) }
-    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val attendanceStatus by viewModel.attendanceStatus.collectAsState()
     var isInitialLoading by remember { mutableStateOf(false) }
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -200,7 +188,6 @@ fun CheckInOutScreen(
     val employeeFirstName = employeeFullName.split(" ").firstOrNull() ?: employeeFullName
     val scope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
-    val locationAccuracy by viewModel.locationAccuracy.collectAsState()
     var showBatteryDialog by remember { mutableStateOf(false) }
     var showBackgroundLocationDialog by remember { mutableStateOf(false) }
     var awaitingBatteryResult by remember { mutableStateOf(false) }
@@ -485,15 +472,6 @@ fun CheckInOutScreen(
             }
         }
     }
-
-    val backgroundLocationPermissionState =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            rememberPermissionState(
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            )
-        } else {
-            null
-        }
 
     LaunchedEffect(Unit) {
 
@@ -978,7 +956,7 @@ fun CheckInOutScreen(
 
             Pair(finalDate, finalTime)
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Pair("--/--/----", "--:--")
         }
     }

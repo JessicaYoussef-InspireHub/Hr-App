@@ -65,6 +65,7 @@ fun MyCalendarPicker(
     onDateSelected: ((LocalDate) -> Unit)? = null,
     selectedDates: Set<LocalDate>,
     onDateSelectedChange: (Set<LocalDate>) -> Unit,
+    onDateRangeChange: (LocalDate?, LocalDate?) -> Unit = { _, _ -> },
     validatedDates: Map<LocalDate, String> = emptyMap(),
     initialMonth: YearMonth = YearMonth.now(),
     token: String,
@@ -75,9 +76,12 @@ fun MyCalendarPicker(
     endDate: LocalDate? = null,
     weekendDayNames: Set<String> = emptySet(),
     publicHolidayDates: Set<LocalDate> = emptySet(),
+    highlightedDate: LocalDate? = null,
     leaveTypeColors: Map<String, Color> = emptyMap()
 ) {
     var currentMonth by remember { mutableStateOf(initialMonth) }
+    var isSelectingStartDate by remember { mutableStateOf(true) }
+    var isSelectingNewStartDate by remember { mutableStateOf(false) }
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value % 7 // Sunday = 0
     val today = LocalDate.now()
@@ -203,7 +207,7 @@ fun MyCalendarPicker(
                                     .let { if (isDialogMode) it.height(72.dp) else it },
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (index >= firstDayOfWeek && index < totalCells) {
+                                if (index in firstDayOfWeek..<totalCells) {
 
                                     val day = index - firstDayOfWeek + 1
 
@@ -216,13 +220,29 @@ fun MyCalendarPicker(
                                     val date = currentMonth.atDay(day)
 
                                     val isToday = date == today
+                                    val isHighlightedDate = isDialogMode && date == highlightedDate
+                                    val inSelectedRange = when {
 
-                                    val inSelectedRange =
-                                        if (startDate != null && endDate != null) {
+                                        isHighlightedDate -> true
+
+
+                                        // Show the selected date even when only one date is selected.
+                                        isDialogMode && startDate != null && endDate == null ->
+                                            date == startDate
+
+                                        // Show the complete selected range.
+                                        isDialogMode && startDate != null && endDate != null -> {
                                             val minDate = minOf(startDate, endDate)
                                             val maxDate = maxOf(startDate, endDate)
+
                                             !date.isBefore(minDate) && !date.isAfter(maxDate)
-                                        } else { false }
+                                        }
+
+                                        // Fallback to the selected dates passed from the parent.
+                                        isDialogMode -> date in selectedDates
+
+                                        else -> false
+                                    }
 
                                     val isWeekendHoliday = weekendDayNames.map { it.lowercase() }
                                         .contains(date.dayOfWeek.name.lowercase())
@@ -298,17 +318,35 @@ fun MyCalendarPicker(
                                                         dayRecords = matchedDailyRecords to matchedHourlyRecords
 
                                                     } else {
-                                                        val newDates =
-                                                            if (selectedDates.contains(date))
-                                                                selectedDates - date
-                                                            else
-                                                                selectedDates + date
 
-                                                        onDateSelectedChange(newDates)
-                                                        onDateSelected?.invoke(date)
 
-                                                        if (!isDialogMode) {
-                                                            selectedDateForInfoDialog = date
+
+                                                        if (isDialogMode) {
+                                                            if (!isSelectingNewStartDate) {
+                                                                // Select the end date while keeping the current start date.
+                                                                onDateRangeChange(startDate, date)
+                                                                isSelectingNewStartDate = true
+                                                            } else {
+                                                                // Start a new range.
+                                                                onDateRangeChange(date, null)
+                                                                isSelectingNewStartDate = false
+                                                            }
+
+                                                            onDateSelected?.invoke(date)
+                                                        }
+
+                                                        else {
+                                                            // Keep your existing non-dialog behavior here.
+                                                            if (isSelectingStartDate) {
+                                                                onDateSelectedChange(setOf(date))
+                                                                onDateSelected?.invoke(date)
+                                                                selectedDateForInfoDialog = date
+                                                                isSelectingStartDate = false
+                                                            } else {
+                                                                onDateSelectedChange(setOfNotNull(startDate, date))
+                                                                onDateSelected?.invoke(date)
+                                                                isSelectingStartDate = true
+                                                            }
                                                         }
                                                     }
                                                 },

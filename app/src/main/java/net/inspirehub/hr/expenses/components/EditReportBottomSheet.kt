@@ -52,7 +52,6 @@ fun EditReportBottomSheet(
     val removedIds = removedExpenses.map { it.id }.toSet()
     val availableFiltered = availableExpenses.filter { it.id !in removedIds }
     val selectedIds = remember { mutableStateListOf<Int>() }
-    val requiredPaymentMode = paymentMode
     val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
 
     if (!showBottomSheet) return
@@ -199,10 +198,10 @@ fun EditReportBottomSheet(
                 onConfirm = {
                     onDismiss()
                     if (editScreen){
-                        navController.navigate("AddExpensesScreen?source=edit_report&reportId=$reportId&paymentMode=$requiredPaymentMode")
+                        navController.navigate("AddExpensesScreen?source=edit_report&reportId=$reportId&paymentMode=$paymentMode")
                     }
                     else
-                        navController.navigate("AddExpensesScreen?source=create_report&reportId=$reportId&paymentMode=$requiredPaymentMode")
+                        navController.navigate("AddExpensesScreen?source=create_report&reportId=$reportId&paymentMode=$paymentMode")
                 },
                 onDismiss = { onDismiss() },
                 confirmButtonText = stringResource(R.string.new_expense),

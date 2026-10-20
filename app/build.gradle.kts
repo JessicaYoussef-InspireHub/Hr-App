@@ -16,8 +16,8 @@ android {
         applicationId = "net.inspirehub.hr"
         minSdk = 24
         targetSdk = 36
-        versionCode = 44
-        versionName = "1.3.7"
+        versionCode = 46
+        versionName = "1.3.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

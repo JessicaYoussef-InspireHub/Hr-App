@@ -1,46 +1,17 @@
 package net.inspirehub.hr.attendance.data
 
+import android.content.Context
+import android.util.Log
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.serialization.SerialName
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.Serializable
-import net.inspirehub.hr.scan_qr_code.data.AppConfig.baseUrl
+import net.inspirehub.hr.resolveCompanyUrl
 import net.inspirehub.hr.time_off.data.client
 
-@Serializable
-data class AttendanceResult(
-    val status: String,
-    val count: Int = 0,
-
-    @SerialName("expected_worked")
-    val expectedWorked: Double = 0.0,
-
-    @SerialName("total_worked_hours")
-    val totalWorkedHours: Double = 0.0,
-
-    val summary: Map<String, AttendanceSummaryItem> = emptyMap()
-)
-
-
-@Serializable
-data class AttendanceSummaryItem(
-    val count: Int = 0,
-
-    @SerialName("total_hours")
-    val totalHours: Double = 0.0,
-
-    @SerialName("total_minutes")
-    val totalMinutes: Double = 0.0,
-
-    @SerialName("work_entry_type_color_hex")
-    val workEntryTypeColorHex: String? = null,
-
-    @SerialName("id_icon")
-    val idIcon: Int? = null
-)
 
 @Serializable
 data class WorkEntryType(
@@ -64,16 +35,37 @@ data class WorkEntryTypesResponse(
 )
 
 
-suspend fun getWorkEntryTypes(): WorkEntryTypesResult {
+/**
+ * Reads the work entry types the attendance rows are coloured and labelled with.
+ *
+ * Returns null when the call fails. The screen already draws without them, so a
+ * server that is unreachable must not take the screen - or the app - down.
+ */
+suspend fun getWorkEntryTypes(context: Context): WorkEntryTypesResult? {
 
-    val response = client
-        .post("$baseUrl/api/work-entry-types") {
-            contentType(ContentType.Application.Json)
-            setBody("{}")
-        }
-        .body<WorkEntryTypesResponse>()
+    return try {
 
-    return response.result
+        val baseUrl = resolveCompanyUrl(context)
+
+        val response = client
+            .post("$baseUrl/api/work-entry-types") {
+                contentType(ContentType.Application.Json)
+                setBody("{}")
+            }
+            .body<WorkEntryTypesResponse>()
+
+        response.result
+
+    } catch (e: CancellationException) {
+
+        throw e
+
+    } catch (e: Exception) {
+
+        Log.e("WORK_ENTRY_TYPES", "Failed to load work entry types", e)
+
+        null
+    }
 }
 
 

@@ -247,38 +247,38 @@ fun BottomBar(
                     }
                 )
 
-//                DropdownMenuItem(
-//                    text = {
-//                        Row(
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            Icon(
-//                                Icons.Default.HourglassBottom,
-//                                stringResource(R.string.Deduction),
-//                                tint = if (currentRoute == "DeductionScreen")
-//                                    colors.tertiaryColor
-//                                else
-//                                    colors.onBackgroundColor
-//                            )
-//                            Spacer(modifier = Modifier.width(8.dp))
-//                            Text(
-//                                stringResource(R.string.Deduction),
-//                                color =
-//                                    if (currentRoute == "DeductionScreen")
-//                                        colors.tertiaryColor
-//                                    else
-//                                        colors.onBackgroundColor
-//                            )
-//                        }
-//                    }, onClick = {
-//                        moreMenuExpanded = false
-//                        if (currentRoute != "DeductionScreen") {
-//                            navController.navigate("DeductionScreen") {
-//                                launchSingleTop = true
-//                            }
-//                        }
-//                    }
-//                )
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.HourglassBottom,
+                                stringResource(R.string.Deduction),
+                                tint = if (currentRoute == "DeductionScreen")
+                                    colors.tertiaryColor
+                                else
+                                    colors.onBackgroundColor
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.Deduction),
+                                color =
+                                    if (currentRoute == "DeductionScreen")
+                                        colors.tertiaryColor
+                                    else
+                                        colors.onBackgroundColor
+                            )
+                        }
+                    }, onClick = {
+                        moreMenuExpanded = false
+                        if (currentRoute != "DeductionScreen") {
+                            navController.navigate("DeductionScreen") {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
 
                 DropdownMenuItem(
                     text = {
