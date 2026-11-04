@@ -120,7 +120,8 @@ enum class DayStatus {
 @SuppressLint("AutoboxingStateCreation")
 @Composable
 fun AttendanceScreen(
-    navController: NavController
+    navController: NavController,
+    onMenuClick: () -> Unit
 ) {
     val colors = appColors()
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -326,7 +327,8 @@ fun AttendanceScreen(
                 label = stringResource(R.string.AttendanceHistory),
                 onBackClick = {
                     navController.popBackStack()
-                }
+                },
+                onMenuClick = onMenuClick
             )
         },
         bottomBar = {

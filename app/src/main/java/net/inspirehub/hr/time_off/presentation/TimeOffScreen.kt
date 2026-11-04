@@ -58,7 +58,8 @@ import net.inspirehub.hr.time_off.components.ShapesCard
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TimeOffScreen(
-    navController: NavController
+    navController: NavController,
+    onMenuClick: () -> Unit
 ) {
     var selectedDates by remember { mutableStateOf(setOf<LocalDate>()) }
 
@@ -241,7 +242,8 @@ fun TimeOffScreen(
                         navController.navigate("CheckInOutScreen") {
                             popUpTo("CheckInOutScreen") { inclusive = true }
                         }
-                    }
+                    },
+                    onMenuClick = onMenuClick
                 )
             },
             bottomBar = {

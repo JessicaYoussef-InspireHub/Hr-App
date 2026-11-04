@@ -63,7 +63,8 @@ import net.inspirehub.hr.expenses.data.fetchExpensesForReport
 fun EditReportScreen(
     navController: NavController,
     reportId: Int,
-    newExpenseId: Int? = null
+    newExpenseId: Int? = null,
+    onMenuClick: () -> Unit
 ) {
     val colors = appColors()
     val context = LocalContext.current
@@ -165,7 +166,8 @@ fun EditReportScreen(
                             } else {
                                 navController.popBackStack()
                         }
-                    }
+                    },
+                    onMenuClick = onMenuClick
                 )
             },
             bottomBar = {

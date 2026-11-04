@@ -42,6 +42,7 @@ import net.inspirehub.hr.sign_in.data.getTrackingConfig
 @Composable
 fun SettingsScreen(
     navController: NavController,
+    onMenuClick: () -> Unit
 ) {
     val colors = appColors()
 
@@ -73,7 +74,8 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_screen),
                 onBackClick = {
                     navController.popBackStack()
-                }
+                },
+                onMenuClick = onMenuClick
             )
         },
 

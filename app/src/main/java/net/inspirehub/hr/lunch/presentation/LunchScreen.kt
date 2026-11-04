@@ -84,6 +84,7 @@ fun base64ToImageBitmap(
 @Composable
 fun LunchScreen(
     navController: NavController,
+    onMenuClick: () -> Unit
 ) {
     val context = LocalContext.current
     val colors = appColors()
@@ -143,7 +144,8 @@ fun LunchScreen(
         topBar = {
             MyAppBar(
                 stringResource(R.string.lunch),
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onMenuClick = onMenuClick
             )
         },
         bottomBar = { BottomBar(navController = navController) }

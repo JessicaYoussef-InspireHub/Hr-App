@@ -58,7 +58,8 @@ import net.inspirehub.hr.utils.convertToArabicDigits
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotificationsScreen(
-    navController: NavController
+    navController: NavController,
+    onMenuClick: () -> Unit
 ) {
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
@@ -163,7 +164,8 @@ fun NotificationsScreen(
                     navController.navigate("CheckInOutScreen") {
                         popUpTo("CheckInOutScreen") { inclusive = true }
                     }
-                }
+                },
+                onMenuClick = onMenuClick
             )
         },
         bottomBar = { BottomBar(navController = navController) }

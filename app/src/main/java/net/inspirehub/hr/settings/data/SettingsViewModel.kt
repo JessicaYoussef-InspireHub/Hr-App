@@ -12,11 +12,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         sharedPref.clearAll()
     }
 
-    fun changeProtectionMethod() {
-        sharedPref.savePin("")
-        sharedPref.setFingerprintAuthSuccess(false)
-    }
-
     fun logout() {
         sharedPref.saveToken("")
     }

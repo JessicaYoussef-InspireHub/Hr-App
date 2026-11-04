@@ -70,7 +70,8 @@ import net.inspirehub.hr.utils.uriToBase64
 fun EditExpenseScreen(
     navController: NavController,
     expenseId: Int,
-    token: String
+    token: String,
+    onMenuClick: () -> Unit
 ) {
     val context = LocalContext.current
     var expense by remember { mutableStateOf<Expense?>(null) }
@@ -121,11 +122,9 @@ fun EditExpenseScreen(
     LaunchedEffect(expenseId) {
         isFetching = true
 
-        val tokenFromPref = token
-
-        val fetchedCategories = fetchExpenseCategories(context, tokenFromPref)
-        val fetchedTaxes = fetchTaxes(context, tokenFromPref)
-        val allExpenses = fetchExpenses(context, tokenFromPref)
+        val fetchedCategories = fetchExpenseCategories(context, token)
+        val fetchedTaxes = fetchTaxes(context, token)
+        val allExpenses = fetchExpenses(context, token)
 
         expense = allExpenses.expenses.find { it.id == expenseId }
 
@@ -193,7 +192,8 @@ fun EditExpenseScreen(
                         } else {
                             navController.popBackStack()
                         }
-                    }
+                    },
+                    onMenuClick = onMenuClick
                 )
             },
             bottomBar = {
@@ -264,7 +264,7 @@ fun EditExpenseScreen(
             }
         )
         { innerPadding ->
-            expense?.let { exp ->
+            expense?.let {
                 Column(
                     modifier = Modifier
                         .padding(innerPadding)
@@ -306,7 +306,7 @@ fun EditExpenseScreen(
                             onCategorySelected = { category ->
                                 selectedCategory = category
                             },
-                            onDescriptionChange = { text -> }
+                            onDescriptionChange = { }
                         )
                     }
                     Spacer(modifier = Modifier.height(25.dp))
@@ -335,7 +335,7 @@ fun EditExpenseScreen(
                             context = context,
                             initialAmount = expense?.total_amount,
                             onAmountChange = { newAmount -> amount = newAmount },
-                            onConvertedAmountChange = { converted -> },
+                            onConvertedAmountChange = { },
                             onCurrencySelected = { currency -> selectedCurrency = currency },
                             initialCurrencyCode = expense?.currency,
                         )

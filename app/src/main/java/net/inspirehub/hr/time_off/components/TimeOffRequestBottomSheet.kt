@@ -235,10 +235,7 @@ fun TimeOffRequestBottomSheet(
                     }
                 }.getOrNull() ?: uri.lastPathSegment ?: "Selected file"
 
-                Log.d(
-                    "ATTACHMENT_DEBUG",
-                    "File name: $fileName, URI: $uri"
-                )
+                Log.d("ATTACHMENT_DEBUG", "File name: $fileName, URI: $uri")
 
                 AttachmentPicker(
                     uri = uri,
@@ -250,10 +247,7 @@ fun TimeOffRequestBottomSheet(
                     selectedAttachments + newAttachments
                     ).distinctBy { it.uri }
 
-            Log.d(
-                "ATTACHMENT_DEBUG",
-                "Total attachments after selection: ${selectedAttachments.size}"
-            )
+            Log.d("ATTACHMENT_DEBUG", "Total attachments after selection: ${selectedAttachments.size}")
         } else {
             Log.d("ATTACHMENT_DEBUG", "No files selected")
         }
@@ -1013,7 +1007,7 @@ fun TimeOffRequestBottomSheet(
                             text = permissionErrorMessage,
                             color = colors.error,
                             fontSize = 12.sp,
-                            modifier = Modifier.padding(start = 50.dp, top = 4.dp)
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
 
@@ -1213,7 +1207,7 @@ fun TimeOffRequestBottomSheet(
                                         sendApiForRequestTimeOff(context, request)
                                     }
 
-
+                                    Log.d("TIME_OFF_REQUEST", request.toString())
                                     Log.d("Jessica API_RESPONSE_Permission", response.toString())
                                     Log.d("Jessica API_RESPONSE", response.toString())
                                     Log.d("Jessica API_STATUS", response?.result?.status ?: "null")
@@ -1282,6 +1276,7 @@ fun TimeOffRequestBottomSheet(
                                     }
 
                                     Log.d("API_RESPONSE_HALF_DAY", response.toString())
+                                    Log.d("TIME_OFF_REQUEST", request.toString())
 
                                     withContext(Dispatchers.Main) {
                                         isLoading = false
@@ -1334,6 +1329,7 @@ fun TimeOffRequestBottomSheet(
                                 }
 
                                 Log.d("API_RESPONSE", response.toString())
+                                Log.d("TIME_OFF_REQUEST", request.toString())
 
                                 withContext(Dispatchers.Main) {
                                     isLoading = false

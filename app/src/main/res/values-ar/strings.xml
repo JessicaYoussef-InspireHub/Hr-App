@@ -288,7 +288,7 @@
     <string name="discard_changes">هل تريد تجاهل التغييرات؟</string>
     <string name="you_have_unsaved_changes_are_you_sure_you_want_to_discard_them">لديك تغييرات غير محفوظة. هل أنت متأكد من رغبتك في حذفها؟</string>
     <string name="AttendanceHistory">سجل الحضور والانصراف</string>
-    <string name="Deduction">رصيد التأخير</string>
+    <string name="deduction">رصيد التأخير</string>
     <string name="present">حاضر</string>
     <string name="late">متأخر</string>
     <string name="absent">غائب</string>
@@ -393,7 +393,6 @@
     <string name="open_settings">فتح الإعدادات</string>
     <string name="attendance_reminders_active">تذكيرات الحضور مفعّلة</string>
     <string name="work_location_checked_periodically">يتم التحقق من موقع عملك بشكل دوري</string>
-
     <string name="battery_optimization_title">تحسين البطارية</string>
     <string name="battery_optimization_message">يقوم نظام أندرويد بتقييد التطبيقات في الخلفية لتوفير البطارية. وطالما كان هذا التطبيق مقيّدًا، سيتم منع التحقق الدوري من الموقع ولن تصلك تذكيرات الحضور.\n\nبعد الضغط على "فتح الإعدادات"، اختر:\nالسماح / عدم التحسين\n\nثم ارجع إلى التطبيق لإكمال التفعيل.</string>
     <string name="battery_optimization_note">يقوم التطبيق بتشغيل نظام تحديد المواقع لثوانٍ قليلة فقط في كل عملية تحقق، لذلك يظل تأثيره على البطارية بسيطًا.</string>
@@ -401,9 +400,6 @@
     <string name="battery_optimization_warning_message">ما زال هذا التطبيق مقيّدًا بواسطة تحسين البطارية، لذلك قد يتم منع التحقق الدوري من الموقع. اضغط هنا للسماح.</string>
     <string name="battery_optimization_allow">السماح</string>
     <string name="hide_auto_notification">إخفاء الإشعار تلقائيًا</string>
-    <string name="good_job">أحسنت</string>
-    <string name="ready_to_start_your_day">هل أنت مستعد لبدء يومك؟</string>
-    <string name="your_workday_is_underway">يوم عملك مستمر، استمر في العمل الرائع!</string>
     <string name="expected_hours">الساعات المتوقعة</string>
     <string name="worked_hours">ساعات العمل</string>
     <string name="work_entry_details">تفاصيل فترات العمل</string>
@@ -411,6 +407,25 @@
     <string name="period">الفترة</string>
     <string name="upload_file">رفع ملف</string>
     <string name="pdf_jbg_png_max_5mb">PDF وJPG وPNG (بحد أقصى 5 ميجابايت)</string>
+    <string name="this_month_summary">ملخص هذا الشهر</string>
+    <string name="allowed">المسموح</string>
+    <string name="used">المستخدم</string>
+    <string name="remaining">المتبقي</string>
+    <string name="excess">التجاوز</string>
+    <string name="previous_month_overview">نظرة عامة على الشهر الماضي</string>
+    <string name="performance_summary">ملخص الأداء</string>
+    <string name="no_deduction_found">لم يتم العثور على خصومات</string>
+    <string name="new_feature">✨ ميزة جديدة</string>
+    <string name="introducing">اكتشف</string>
+    <string name="a_new_way_to_keep_track_of_your_attendance_deductions">طريقة جديدة لمتابعة دقائق التأخير \nوالخصومات الخاصة بحضورك.</string>
+    <string name="attendance_minimum_gap">الحد المسموح للتأخير</string>
+    <string name="know_your_allowed_free_minutes_and_track_how_much_you_have_used">اعرف عدد الدقائق المجانية المسموح بها وتابع مقدار ما استخدمته منها.</string>
+    <string name="monthly_deduction_summary">ملخص الخصومات الشهرية</string>
+    <string name="view_your_total_deductions_and_remaining_free_minutes">اطّلع على إجمالي دقائق الخصم والدقائق المجانية المتبقية.</string>
+    <string name="check_your_previous_month_deduction_details">راجع تفاصيل الخصومات الخاصة بالشهر السابق.</string>
+    <string name="stay_informed_stay_on_track">تابع رصيدك وكن دائمًا على اطلاع!</string>
+    <string name="explore_deduction">اكتشف رصيد التأخير</string>
+    <string name="skip">تخطي</string>
 
 </resources>
 

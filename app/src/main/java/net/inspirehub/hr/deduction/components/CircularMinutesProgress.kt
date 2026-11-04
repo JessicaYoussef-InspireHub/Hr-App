@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +39,7 @@ fun CircularMinutesProgress(
     val language = remember { SharedPrefManager(context).getLanguage() }
 
     Box(
-        modifier = Modifier.size(140.dp),
+        modifier = Modifier.padding(start = 6.dp , top = 6.dp).size(140.dp),
         contentAlignment = Alignment.Center
     ) {
 

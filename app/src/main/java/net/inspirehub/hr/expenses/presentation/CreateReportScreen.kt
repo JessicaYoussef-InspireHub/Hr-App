@@ -62,7 +62,8 @@ import net.inspirehub.hr.expenses.data.sendReport
 @Composable
 fun CreateReportScreen(
     navController: NavController,
-    type: String
+    type: String,
+    onMenuClick: () -> Unit
 ) {
 
     val colors = appColors()
@@ -132,7 +133,8 @@ fun CreateReportScreen(
                         } else {
                             navController.popBackStack()
                         }
-                    }
+                    },
+                    onMenuClick = onMenuClick
                 )
             },
             bottomBar = {

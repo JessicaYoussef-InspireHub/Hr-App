@@ -67,6 +67,7 @@ import net.inspirehub.hr.expenses.components.ExpensesFilterBottomSheet
 fun ExpensesScreen(
     navController: NavController,
     token: String,
+    onMenuClick: () -> Unit
 ) {
     val colors = appColors()
 
@@ -241,7 +242,8 @@ fun ExpensesScreen(
                         ChecklistIcon(
                             onClick = { isSelectionMode = true }
                         )
-                    }
+                    },
+                    onMenuClick = onMenuClick
                 )
             } else {
                 TopAppBar(

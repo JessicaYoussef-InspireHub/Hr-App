@@ -551,6 +551,7 @@ fun MyCalendarPicker(
 
                             val response = sendApiForRequestTimeOff(context, request)
                             Log.d("API_RESPONSE", response.toString())
+                            Log.d("TIME_OFF_REQUEST", request.toString())
 
                             withContext(Dispatchers.Main) {
                                 showDeleteConfirmation = false

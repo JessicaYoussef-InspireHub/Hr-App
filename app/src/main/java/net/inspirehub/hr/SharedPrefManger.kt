@@ -11,6 +11,18 @@ import java.util.Date
 
 class SharedPrefManager(context: Context) {
 
+    private val KEY_HAS_SEEN_DEDUCTION_INTRO = "has_seen_deduction_intro"
+
+    fun hasSeenDeductionIntro(): Boolean {
+        return prefs.getBoolean(KEY_HAS_SEEN_DEDUCTION_INTRO, false)
+    }
+
+    fun setDeductionIntroSeen() {
+        prefs.edit {
+            putBoolean(KEY_HAS_SEEN_DEDUCTION_INTRO, true)
+        }
+    }
+
     private val HIDE_AUTO_NOTIFICATION = "hide_auto_notification"
 
     fun setHideAutoNotification(hide: Boolean) {
@@ -499,6 +511,13 @@ class SharedPrefManager(context: Context) {
     }
 
     fun clearAll() {
-        prefs.edit { clear() }
+        val hasSeenDeductionIntro = hasSeenDeductionIntro()
+        prefs.edit {
+            clear()
+            putBoolean(
+                KEY_HAS_SEEN_DEDUCTION_INTRO,
+                hasSeenDeductionIntro
+            )
+        }
     }
 }

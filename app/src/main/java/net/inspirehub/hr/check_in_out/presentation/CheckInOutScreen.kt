@@ -2196,3 +2196,642 @@ fun CheckInOutScreen(
         )
     }
 }
+
+
+//@Composable
+//fun DeductionScreenn(
+//    navController: NavController
+//) {
+//
+//    // Fixed demo state: false = checked out, true = checked in
+//    var isCheckedIn by remember { mutableStateOf(false) }
+//
+//    // Fixed demo values
+//    val clientName = "ABC Company"
+//    val branchName = "Main Branch"
+//    val checkInTime = "09:00 AM"
+//    val checkOutTime = "01:30 PM"
+//    val workedHours = if (isCheckedIn) "04:30 hrs" else "04:30 hrs"
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(ScreenBackground)
+//    ) {
+//
+//        Column(
+//            modifier = Modifier
+//                .weight(1f)
+//                .verticalScroll(rememberScrollState())
+//                .padding(horizontal = 20.dp)
+//        ) {
+//
+//            Spacer(modifier = Modifier.height(20.dp))
+//
+//            // Header
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Column {
+//                    Text(
+//                        text = "Attendance",
+//                        fontSize = 26.sp,
+//                        fontWeight = FontWeight.Bold,
+//                        color = MainText
+//                    )
+//
+//                    Spacer(modifier = Modifier.height(4.dp))
+//
+//                    Text(
+//                        text = "Tuesday, October 20, 2026",
+//                        fontSize = 13.sp,
+//                        color = SecondaryText
+//                    )
+//                }
+//
+//                Box(
+//                    modifier = Modifier
+//                        .size(48.dp)
+//                        .clip(RoundedCornerShape(15.dp))
+//                        .background(Color.White),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.CalendarMonth,
+//                        contentDescription = "Calendar",
+//                        tint = PrimaryBlue,
+//                        modifier = Modifier.size(25.dp)
+//                    )
+//                }
+//            }
+//
+//            Spacer(modifier = Modifier.height(22.dp))
+//
+//            // Client card
+//            Card(
+//                modifier = Modifier.fillMaxWidth(),
+//                shape = RoundedCornerShape(18.dp),
+//                colors = CardDefaults.cardColors(
+//                    containerColor = Color.White
+//                ),
+//                elevation = CardDefaults.cardElevation(
+//                    defaultElevation = 0.dp
+//                )
+//            ) {
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(16.dp),
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Box(
+//                        modifier = Modifier
+//                            .size(54.dp)
+//                            .clip(RoundedCornerShape(15.dp))
+//                            .background(LightBlue),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.Work,
+//                            contentDescription = "Client",
+//                            tint = PrimaryBlue,
+//                            modifier = Modifier.size(29.dp)
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.width(13.dp))
+//
+//                    Column(modifier = Modifier.weight(1f)) {
+//                        Text(
+//                            text = "YOUR CLIENT",
+//                            fontSize = 11.sp,
+//                            color = SecondaryText,
+//                            fontWeight = FontWeight.Medium
+//                        )
+//
+//                        Spacer(modifier = Modifier.height(5.dp))
+//
+//                        Text(
+//                            text = clientName,
+//                            fontSize = 18.sp,
+//                            color = MainText,
+//                            fontWeight = FontWeight.Bold
+//                        )
+//
+//                        Spacer(modifier = Modifier.height(3.dp))
+//
+//                        Text(
+//                            text = branchName,
+//                            fontSize = 13.sp,
+//                            color = SecondaryText
+//                        )
+//                    }
+//
+//                    Icon(
+//                        imageVector = Icons.Default.Description,
+//                        contentDescription = "Client details",
+//                        tint = SecondaryText
+//                    )
+//                }
+//            }
+//
+//            Spacer(modifier = Modifier.height(18.dp))
+//
+//            // Main attendance card
+//            Card(
+//                modifier = Modifier.fillMaxWidth(),
+//                shape = RoundedCornerShape(24.dp),
+//                colors = CardDefaults.cardColors(
+//                    containerColor = Color.White
+//                ),
+//                elevation = CardDefaults.cardElevation(
+//                    defaultElevation = 0.dp
+//                )
+//            ) {
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(20.dp),
+//                    horizontalAlignment = Alignment.CenterHorizontally
+//                ) {
+//
+//                    // Status
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Box(
+//                            modifier = Modifier
+//                                .size(48.dp)
+//                                .clip(CircleShape)
+//                                .background(
+//                                    if (isCheckedIn) LightGreen
+//                                    else LightOrange
+//                                ),
+//                            contentAlignment = Alignment.Center
+//                        ) {
+//                            Icon(
+//                                imageVector = if (isCheckedIn)
+//                                    Icons.Default.CheckCircle
+//                                else Icons.Default.Logout,
+//                                contentDescription = null,
+//                                tint = if (isCheckedIn)
+//                                    SuccessGreen
+//                                else Orange,
+//                                modifier = Modifier.size(26.dp)
+//                            )
+//                        }
+//
+//                        Spacer(modifier = Modifier.width(12.dp))
+//
+//                        Column(modifier = Modifier.weight(1f)) {
+//                            Text(
+//                                text = if (isCheckedIn)
+//                                    "Checked In"
+//                                else
+//                                    "Checked Out",
+//                                fontSize = 19.sp,
+//                                fontWeight = FontWeight.Bold,
+//                                color = MainText
+//                            )
+//
+//                            Spacer(modifier = Modifier.height(4.dp))
+//
+//                            Text(
+//                                text = if (isCheckedIn)
+//                                    "Currently working"
+//                                else
+//                                    "Last check-out at $checkOutTime",
+//                                fontSize = 12.sp,
+//                                color = SecondaryText
+//                            )
+//                        }
+//
+//                        Box(
+//                            modifier = Modifier
+//                                .clip(RoundedCornerShape(9.dp))
+//                                .background(
+//                                    if (isCheckedIn) LightGreen
+//                                    else LightOrange
+//                                )
+//                                .padding(
+//                                    horizontal = 12.dp,
+//                                    vertical = 7.dp
+//                                )
+//                        ) {
+//                            Text(
+//                                text = if (isCheckedIn) "IN" else "OUT",
+//                                fontSize = 11.sp,
+//                                fontWeight = FontWeight.Bold,
+//                                color = if (isCheckedIn)
+//                                    SuccessGreen
+//                                else Orange
+//                            )
+//                        }
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(22.dp))
+//
+//                    // Attendance information
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+//                    ) {
+//                        InfoCard(
+//                            modifier = Modifier.weight(1f),
+//                            title = "Last Check In",
+//                            value = checkInTime,
+//                            icon = Icons.Default.Login
+//                        )
+//
+//                        InfoCard(
+//                            modifier = Modifier.weight(1f),
+//                            title = "Worked Today",
+//                            value = workedHours,
+//                            icon = Icons.Default.CalendarToday
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(22.dp))
+//
+//                    // Door illustration
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(220.dp),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        DoorIllustration(
+//                            isCheckedIn = isCheckedIn,
+//                            modifier = Modifier
+//                                .fillMaxHeight()
+//                                .width(270.dp)
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(8.dp))
+//
+//                    Text(
+//                        text = if (isCheckedIn)
+//                            "Your workday is in progress"
+//                        else
+//                            "Ready to start your workday?",
+//                        fontSize = 18.sp,
+//                        fontWeight = FontWeight.Bold,
+//                        color = MainText,
+//                        textAlign = TextAlign.Center
+//                    )
+//
+//                    Spacer(modifier = Modifier.height(7.dp))
+//
+//                    Text(
+//                        text = if (isCheckedIn)
+//                            "Tap below when you're ready to leave"
+//                        else
+//                            "Start your workday with one tap",
+//                        fontSize = 13.sp,
+//                        color = SecondaryText,
+//                        textAlign = TextAlign.Center
+//                    )
+//
+//                    Spacer(modifier = Modifier.height(22.dp))
+//
+//                    // Main button
+//                    Button(
+//                        onClick = {
+//                            isCheckedIn = !isCheckedIn
+//                        },
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(60.dp),
+//                        shape = RoundedCornerShape(17.dp),
+//                        colors = ButtonDefaults.buttonColors(
+//                            containerColor = PrimaryBlue
+//                        )
+//                    ) {
+//                        Icon(
+//                            imageVector = if (isCheckedIn)
+//                                Icons.Default.Logout
+//                            else
+//                                Icons.Default.Login,
+//                            contentDescription = null,
+//                            modifier = Modifier.size(23.dp)
+//                        )
+//
+//                        Spacer(modifier = Modifier.width(10.dp))
+//
+//                        Text(
+//                            text = if (isCheckedIn)
+//                                "Check Out"
+//                            else
+//                                "Check In",
+//                            fontSize = 18.sp,
+//                            fontWeight = FontWeight.Bold
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(22.dp))
+//
+//                    // Location information
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.LocationOn,
+//                            contentDescription = null,
+//                            tint = PrimaryBlue,
+//                            modifier = Modifier.size(25.dp)
+//                        )
+//
+//                        Spacer(modifier = Modifier.width(10.dp))
+//
+//                        Column(modifier = Modifier.weight(1f)) {
+//                            Text(
+//                                text = "Location Verification",
+//                                fontSize = 14.sp,
+//                                fontWeight = FontWeight.SemiBold,
+//                                color = MainText
+//                            )
+//
+//                            Spacer(modifier = Modifier.height(3.dp))
+//
+//                            Text(
+//                                text = "Your location will be checked",
+//                                fontSize = 12.sp,
+//                                color = SecondaryText
+//                            )
+//                        }
+//
+//                        Icon(
+//                            imageVector = Icons.Default.Security,
+//                            contentDescription = null,
+//                            tint = SuccessGreen,
+//                            modifier = Modifier.size(24.dp)
+//                        )
+//                    }
+//                }
+//            }
+//
+//            Spacer(modifier = Modifier.height(20.dp))
+//        }
+//
+//        // Bottom navigation preview
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .background(Color.White)
+//                .navigationBarsPadding()
+//                .padding(
+//                    horizontal = 12.dp,
+//                    vertical = 12.dp
+//                ),
+//            horizontalArrangement = Arrangement.SpaceAround,
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            BottomItem(
+//                title = "Home",
+//                icon = Icons.Default.Home,
+//                selected = false
+//            )
+//
+//            BottomItem(
+//                title = "Attendance",
+//                icon = Icons.Default.CalendarToday,
+//                selected = true
+//            )
+//
+//            BottomItem(
+//                title = "Time Off",
+//                icon = Icons.Default.CalendarMonth,
+//                selected = false
+//            )
+//
+//            BottomItem(
+//                title = "Profile",
+//                icon = Icons.Default.Person,
+//                selected = false
+//            )
+//        }
+//    }
+//}
+//private val PrimaryBlue = Color(0xFF4967D6)
+//private val LightBlue = Color(0xFFE8EDFF)
+//private val ScreenBackground = Color(0xFFF3F5FA)
+//private val MainText = Color(0xFF202B45)
+//private val SecondaryText = Color(0xFF788398)
+//private val SuccessGreen = Color(0xFF218653)
+//private val LightGreen = Color(0xFFE0F4E8)
+//private val Orange = Color(0xFFD97732)
+//private val LightOrange = Color(0xFFFFF0E5)
+//
+//
+//
+//@Composable
+//private fun InfoCard(
+//    modifier: Modifier = Modifier,
+//    title: String,
+//    value: String,
+//    icon: androidx.compose.ui.graphics.vector.ImageVector
+//) {
+//    Column(
+//        modifier = modifier
+//            .clip(RoundedCornerShape(15.dp))
+//            .background(ScreenBackground)
+//            .padding(13.dp)
+//    ) {
+//        Icon(
+//            imageVector = icon,
+//            contentDescription = null,
+//            tint = PrimaryBlue,
+//            modifier = Modifier.size(23.dp)
+//        )
+//
+//        Spacer(modifier = Modifier.height(10.dp))
+//
+//        Text(
+//            text = title,
+//            fontSize = 12.sp,
+//            color = SecondaryText
+//        )
+//
+//        Spacer(modifier = Modifier.height(5.dp))
+//
+//        Text(
+//            text = value,
+//            fontSize = 16.sp,
+//            fontWeight = FontWeight.Bold,
+//            color = MainText
+//        )
+//    }
+//}
+//
+//@Composable
+//private fun BottomItem(
+//    title: String,
+//    icon: androidx.compose.ui.graphics.vector.ImageVector,
+//    selected: Boolean
+//) {
+//    val itemColor = if (selected) PrimaryBlue else SecondaryText
+//
+//    Column(
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.spacedBy(5.dp)
+//    ) {
+//        Icon(
+//            imageVector = icon,
+//            contentDescription = title,
+//            tint = itemColor,
+//            modifier = Modifier.size(23.dp)
+//        )
+//
+//        Text(
+//            text = title,
+//            fontSize = 10.sp,
+//            color = itemColor,
+//            fontWeight = if (selected)
+//                FontWeight.SemiBold
+//            else
+//                FontWeight.Normal
+//        )
+//    }
+//}
+//
+//@Composable
+//private fun DoorIllustration(
+//    isCheckedIn: Boolean,
+//    modifier: Modifier = Modifier
+//) {
+//    val doorColor = if (isCheckedIn)
+//        Color(0xFFB8C9F7)
+//    else
+//        Color(0xFFB8C9F7)
+//
+//    val frameColor = PrimaryBlue
+//    val floorColor = Color(0xFFDDE5F5)
+//
+//    Canvas(modifier = modifier) {
+//        val w = size.width
+//        val h = size.height
+//
+//        // Floor shadow
+//        drawOval(
+//            color = floorColor,
+//            topLeft = Offset(w * 0.16f, h * 0.88f),
+//            size = Size(w * 0.68f, h * 0.08f)
+//        )
+//
+//        // Door frame
+//        drawRoundRect(
+//            color = doorColor,
+//            topLeft = Offset(w * 0.24f, h * 0.12f),
+//            size = Size(w * 0.43f, h * 0.77f),
+//            cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+//                12.dp.toPx()
+//            )
+//        )
+//
+//        // Inner wall
+//        drawRoundRect(
+//            color = Color.White,
+//            topLeft = Offset(w * 0.275f, h * 0.17f),
+//            size = Size(w * 0.35f, h * 0.70f),
+//            cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+//                6.dp.toPx()
+//            )
+//        )
+//
+//        // Door panel
+//        val doorPath = Path().apply {
+//            moveTo(w * 0.49f, h * 0.19f)
+//            lineTo(w * 0.75f, h * 0.27f)
+//            lineTo(w * 0.75f, h * 0.89f)
+//            lineTo(w * 0.49f, h * 0.86f)
+//            close()
+//        }
+//
+//        drawPath(
+//            path = doorPath,
+//            color = if (isCheckedIn)
+//                Color(0xFF9EB3F0)
+//            else
+//                Color(0xFF879FE8)
+//        )
+//
+//        // Door edge
+//        drawLine(
+//            color = Color(0xFF6F89DE),
+//            start = Offset(w * 0.49f, h * 0.19f),
+//            end = Offset(w * 0.49f, h * 0.86f),
+//            strokeWidth = 3.dp.toPx()
+//        )
+//
+//        // Door handle
+//        drawCircle(
+//            color = Color.White,
+//            radius = 4.dp.toPx(),
+//            center = Offset(w * 0.70f, h * 0.56f)
+//        )
+//
+//        // Entry arrow
+//        val arrowColor = PrimaryBlue
+//        val arrowPath = Path().apply {
+//            moveTo(w * 0.20f, h * 0.50f)
+//            lineTo(w * 0.42f, h * 0.50f)
+//            moveTo(w * 0.34f, h * 0.42f)
+//            lineTo(w * 0.42f, h * 0.50f)
+//            lineTo(w * 0.34f, h * 0.58f)
+//        }
+//
+//        drawPath(
+//            path = arrowPath,
+//            color = arrowColor,
+//            style = Stroke(
+//                width = 4.dp.toPx(),
+//                cap = StrokeCap.Round
+//            )
+//        )
+//
+//        // Decorative success indicator
+//        drawCircle(
+//            color = Color(0xFFDCE6FF),
+//            radius = 17.dp.toPx(),
+//            center = Offset(w * 0.79f, h * 0.16f)
+//        )
+//
+//        drawCircle(
+//            color = SuccessGreen,
+//            radius = 10.dp.toPx(),
+//            center = Offset(w * 0.79f, h * 0.16f)
+//        )
+//
+//        // Check mark
+//        val checkPath = Path().apply {
+//            moveTo(w * 0.765f, h * 0.16f)
+//            lineTo(w * 0.785f, h * 0.18f)
+//            lineTo(w * 0.82f, h * 0.135f)
+//        }
+//
+//        drawPath(
+//            path = checkPath,
+//            color = Color.White,
+//            style = Stroke(
+//                width = 2.dp.toPx(),
+//                cap = StrokeCap.Round
+//            )
+//        )
+//
+//        // Frame outline
+//        drawRoundRect(
+//            color = frameColor,
+//            topLeft = Offset(w * 0.24f, h * 0.12f),
+//            size = Size(w * 0.43f, h * 0.77f),
+//            cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+//                12.dp.toPx()
+//            ),
+//            style = Stroke(width = 2.dp.toPx())
+//        )
+//    }
+//}

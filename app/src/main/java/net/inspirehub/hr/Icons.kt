@@ -174,9 +174,9 @@ fun DeleteIcon(
 }
 @Composable
 fun KeyboardArrowRightIcon(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    tint: Color = appColors().onBackgroundColor
 ) {
-    val color = appColors()
 
     Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -184,7 +184,7 @@ fun KeyboardArrowRightIcon(
         modifier = Modifier
             .size(40.dp)
             .clickable { onClick() },
-        tint = color.onBackgroundColor
+        tint = tint
     )
 }
 

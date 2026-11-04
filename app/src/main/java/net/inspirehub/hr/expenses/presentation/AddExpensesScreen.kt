@@ -72,7 +72,8 @@ import net.inspirehub.hr.expenses.components.AttachmentsSection
 fun AddExpensesScreen(
     navController: NavController,
     reportId: Int? = null,
-    source: String = "expenses"
+    source: String = "expenses",
+    onMenuClick: () -> Unit
 ) {
     val colors = appColors()
     val context = LocalContext.current
@@ -165,7 +166,8 @@ fun AddExpensesScreen(
                         } else {
                             navController.popBackStack()
                         }
-                    }
+                    },
+                    onMenuClick = onMenuClick
                 )
             },
             bottomBar = {

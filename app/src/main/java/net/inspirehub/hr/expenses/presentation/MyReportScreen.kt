@@ -60,6 +60,7 @@ import net.inspirehub.hr.utils.formatNumber
 @Composable
 fun MyReportScreen(
     navController: NavController,
+    onMenuClick: () -> Unit
 ) {
     var reports by remember { mutableStateOf<List<ExpenseReport>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -133,7 +134,8 @@ fun MyReportScreen(
                         ChecklistIcon(
                             onClick = { isSelectionMode = !isSelectionMode }
                         )
-                    }
+                    },
+                    onMenuClick = onMenuClick
                 )
             } else {
                 TopAppBar(

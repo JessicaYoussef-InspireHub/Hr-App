@@ -10,6 +10,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import net.inspirehub.hr.Profile.ProfileScreen
 import net.inspirehub.hr.attendance.presentation.AttendanceScreen
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
 import net.inspirehub.hr.deduction.presentation.DeductionScreen
@@ -33,6 +34,10 @@ import net.inspirehub.hr.sign_in.data.SessionExpired
 import net.inspirehub.hr.sign_in.presentation.SignInScreen
 import net.inspirehub.hr.splash.presentation.SplashScreen
 import net.inspirehub.hr.time_off.presentation.TimeOffScreen
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import net.inspirehub.hr.deduction.presentation.WizardDeductionScreen
 
 
 @SuppressLint("NewApi")
@@ -96,208 +101,265 @@ fun MyAppNavHost(
 
     val startDestination = "SplashScreen"
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
-        composable("SplashScreen") {
-            SplashScreen(
-                navController = navController,
-                nextDestination = nextDestination
-            )
+    MyNavigationDrawer(
+        drawerContent = {
+            // Shared drawer items
         }
-
-        composable("DeductionScreen") { DeductionScreen(navController) }
-
-        composable("AttendanceScreen") { AttendanceScreen(navController) }
-
-        composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
-
-        composable("MyReportScreen") { MyReportScreen(navController) }
-
-        composable(
-            route = "CreateReportScreen?type={type}",
-            arguments = listOf(
-                navArgument("type") {
-                    type = NavType.StringType
-                    defaultValue = "company"
-                }
-            )
-        ) { backStackEntry ->
-            val type = backStackEntry.arguments?.getString("type") ?: "company"
-
-            CreateReportScreen(
-                navController = navController,
-                type = type
-            )
-        }
-
-        composable(
-            route = "EditReportScreen/{reportId}?expenseId={expenseId}",
-            arguments = listOf(
-                navArgument("reportId") { type = NavType.IntType },
-                navArgument("expenseId") {
-                    type = NavType.IntType
-                    defaultValue = -1
-                }
-            )
-        ) { backStackEntry ->
-            val reportId = backStackEntry.arguments?.getInt("reportId")!!
-            val expenseId = backStackEntry.arguments?.getInt("expenseId") ?: -1
-
-            EditReportScreen(
-                navController = navController,
-                reportId = reportId,
-                newExpenseId = expenseId
-            )
-        }
-
-        composable("ExpensesScreen") { ExpensesScreen(navController, token = token ?: "") }
-
-        composable(
-            route = "AddExpensesScreen?source={source}&reportId={reportId}&paymentMode={paymentMode}",
-            arguments = listOf(
-                navArgument("source") {
-                    type = NavType.StringType
-                    defaultValue = "expenses"
-                },
-                navArgument("reportId") {
-                    type = NavType.IntType
-                    defaultValue = -1
-                },
-                navArgument("paymentMode") {
-                    type = NavType.StringType
-                    defaultValue = "employee"
-                }
-            )
-        ) { backStackEntry ->
-
-            val source = backStackEntry.arguments?.getString("source") ?: "expenses"
-            val reportId = backStackEntry.arguments?.getInt("reportId") ?: -1
-
-            AddExpensesScreen(
-                navController = navController,
-                reportId = reportId,
-                source = source
-            )
-        }
-
-
-        composable(
-            "EditExpenseScreen/{expenseId}",
-            arguments = listOf(navArgument("expenseId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val expenseId = backStackEntry.arguments?.getInt("expenseId") ?: 0
-            EditExpenseScreen(
-                expenseId = expenseId,
-                token = token ?: "",
-                navController = navController
-            )
-        }
-
-        composable("LunchScreen") {
-            LunchScreen(
-                navController = navController,
-            )
-        }
-
-        composable("TimeOffScreen") {
-            TimeOffScreen(
-                navController = navController
-            )
-        }
-
-        composable("SettingsScreen") {
-            SettingsScreen(
-                navController = navController
-            )
-        }
-
-        composable("NotificationsScreen") {
-            NotificationsScreen(
-                navController = navController
-            )
-        }
-
-        composable(
-            route = "EnterPinScreen?changeMethod={changeMethod}",
-            arguments = listOf(
-                navArgument("changeMethod") {
-                    type = NavType.BoolType
-                    defaultValue = false
-                }
-            )
-        ) { backStackEntry ->
-            val isChangingMethod = backStackEntry.arguments?.getBoolean("changeMethod") ?: false
-            EnterPinScreen(navController = navController, isChangingMethod = isChangingMethod)
-        }
-
-
-
-
-        composable(
-            "confirm_pin/{pin}"
-        ) { backStackEntry ->
-            val pin = backStackEntry.arguments?.getString("pin") ?: ""
-
-            ConfirmPinScreen(
-                navController = navController,
-                pin = pin,
-            )
-        }
-
-
-        composable(
-            route = "PinCodeScreen",
+    ) { onMenuClick ->
+        NavHost(
+            navController = navController,
+            startDestination = startDestination
         ) {
-            PinCodeScreen(
+            composable("SplashScreen") {
+                SplashScreen(
+                    navController = navController,
+                    nextDestination = nextDestination
+                )
+            }
+
+            composable("DeductionScreen") { DeductionScreen(
                 navController = navController,
-            )
-        }
+                onMenuClick = onMenuClick
+            ) }
+
+            composable("AttendanceScreen") { AttendanceScreen(
+                navController = navController,
+                onMenuClick = onMenuClick
+            ) }
+
+            composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
+
+            composable("MyReportScreen") { MyReportScreen(
+                navController ,
+                onMenuClick = onMenuClick) }
+
+            composable("ProfileScreen") { ProfileScreen(navController = navController) }
+
+            composable(
+                route = "CreateReportScreen?type={type}",
+                arguments = listOf(
+                    navArgument("type") {
+                        type = NavType.StringType
+                        defaultValue = "company"
+                    }
+                )
+            ) { backStackEntry ->
+                val type = backStackEntry.arguments?.getString("type") ?: "company"
+
+                CreateReportScreen(
+                    navController = navController,
+                    type = type,
+                    onMenuClick = onMenuClick
+                )
+            }
+
+            composable(
+                route = "EditReportScreen/{reportId}?expenseId={expenseId}",
+                arguments = listOf(
+                    navArgument("reportId") { type = NavType.IntType },
+                    navArgument("expenseId") {
+                        type = NavType.IntType
+                        defaultValue = -1
+                    }
+                )
+            ) { backStackEntry ->
+                val reportId = backStackEntry.arguments?.getInt("reportId")!!
+                val expenseId = backStackEntry.arguments?.getInt("expenseId") ?: -1
+
+                EditReportScreen(
+                    navController = navController,
+                    reportId = reportId,
+                    newExpenseId = expenseId,
+                    onMenuClick = onMenuClick
+                )
+            }
+
+            composable("ExpensesScreen") { ExpensesScreen(
+                navController,
+                token = token ?: "" ,
+                onMenuClick = onMenuClick
+            ) }
+
+            composable(
+                route = "AddExpensesScreen?source={source}&reportId={reportId}&paymentMode={paymentMode}",
+                arguments = listOf(
+                    navArgument("source") {
+                        type = NavType.StringType
+                        defaultValue = "expenses"
+                    },
+                    navArgument("reportId") {
+                        type = NavType.IntType
+                        defaultValue = -1
+                    },
+                    navArgument("paymentMode") {
+                        type = NavType.StringType
+                        defaultValue = "employee"
+                    }
+                )
+            ) { backStackEntry ->
+
+                val source = backStackEntry.arguments?.getString("source") ?: "expenses"
+                val reportId = backStackEntry.arguments?.getInt("reportId") ?: -1
+
+                AddExpensesScreen(
+                    navController = navController,
+                    reportId = reportId,
+                    source = source,
+                    onMenuClick = onMenuClick
+                )
+            }
 
 
-        composable(
-            route = "FingerPrintScreen?changeMethod={changeMethod}",
-            arguments = listOf(
-                navArgument("changeMethod") {
-                    type = NavType.BoolType
-                    defaultValue = false
+            composable(
+                "EditExpenseScreen/{expenseId}",
+                arguments = listOf(navArgument("expenseId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val expenseId = backStackEntry.arguments?.getInt("expenseId") ?: 0
+                EditExpenseScreen(
+                    expenseId = expenseId,
+                    token = token ?: "",
+                    navController = navController,
+                    onMenuClick = onMenuClick
+                )
+            }
+
+            composable("LunchScreen") {
+                LunchScreen(
+                    navController = navController,
+                    onMenuClick = onMenuClick
+                )
+            }
+
+            composable("TimeOffScreen") {
+                TimeOffScreen(
+                    navController = navController,
+                    onMenuClick = onMenuClick
+                )
+            }
+
+            composable("SettingsScreen") {
+                SettingsScreen(
+                    navController = navController,
+                    onMenuClick = onMenuClick
+                )
+            }
+
+            composable("NotificationsScreen") {
+                NotificationsScreen(
+                    navController = navController,
+                    onMenuClick = onMenuClick
+                )
+            }
+
+            composable(
+                route = "EnterPinScreen?changeMethod={changeMethod}",
+                arguments = listOf(
+                    navArgument("changeMethod") {
+                        type = NavType.BoolType
+                        defaultValue = false
+                    }
+                )
+            ) { backStackEntry ->
+                val isChangingMethod = backStackEntry.arguments?.getBoolean("changeMethod") ?: false
+                EnterPinScreen(navController = navController, isChangingMethod = isChangingMethod)
+            }
+
+
+
+
+            composable(
+                "confirm_pin/{pin}"
+            ) { backStackEntry ->
+                val pin = backStackEntry.arguments?.getString("pin") ?: ""
+
+                ConfirmPinScreen(
+                    navController = navController,
+                    pin = pin,
+                )
+            }
+
+
+            composable(
+                route = "PinCodeScreen",
+            ) {
+                PinCodeScreen(
+                    navController = navController,
+                )
+            }
+
+
+            composable(
+                route = "FingerPrintScreen?changeMethod={changeMethod}",
+                arguments = listOf(
+                    navArgument("changeMethod") {
+                        type = NavType.BoolType
+                        defaultValue = false
+                    }
+                )
+            ) { backStackEntry ->
+                val isChangingMethod = backStackEntry.arguments?.getBoolean("changeMethod") ?: false
+                FingerPrintScreen(
+                    navController = navController,
+                    isChangingMethod = isChangingMethod
+                )
+            }
+
+
+
+            composable(
+                route = "ProtectionScreen/{numberToBack}",
+            ) { backStackEntry ->
+                val numberToBack =
+                    backStackEntry.arguments?.getString("numberToBack")?.toIntOrNull() ?: 0
+
+                ProtectionScreen(
+                    navController = navController,
+                    numberToBack = numberToBack
+                )
+            }
+
+
+            composable("CheckInOutScreen") {
+
+                var hasSeenIntro by remember {
+                    mutableStateOf(sharedPref.hasSeenDeductionIntro())
                 }
-            )
-        ) { backStackEntry ->
-            val isChangingMethod = backStackEntry.arguments?.getBoolean("changeMethod") ?: false
-            FingerPrintScreen(
-                navController = navController,
-                isChangingMethod = isChangingMethod
-            )
-        }
+
+                if (hasSeenIntro) {
+
+                    CheckInOutScreen(navController)
+
+                } else {
+
+                    WizardDeductionScreen(
+                        exploreDeduction = {
+                            sharedPref.setDeductionIntroSeen()
+                            navController.navigate("DeductionScreen") {
+                                popUpTo("CheckInOutScreen") {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        onSkip = {
+                            sharedPref.setDeductionIntroSeen()
+                            navController.navigate("CheckInOutScreen") {
+                                popUpTo("CheckInOutScreen") {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    )
+                }
+            }
 
 
 
-        composable(
-            route = "ProtectionScreen/{numberToBack}",
-        ) { backStackEntry ->
-            val numberToBack =
-                backStackEntry.arguments?.getString("numberToBack")?.toIntOrNull() ?: 0
+            composable("SignInScreen/{companyId}/{apiKey}") { backStackEntry ->
+                val companyId = backStackEntry.arguments?.getString("companyId") ?: ""
+                val apiKey = backStackEntry.arguments?.getString("apiKey") ?: ""
 
-            ProtectionScreen(
-                navController = navController,
-                numberToBack = numberToBack
-            )
-        }
-
-        composable("CheckInOutScreen") {
-            CheckInOutScreen(
-                navController
-            )
-        }
-
-
-        composable("SignInScreen/{companyId}/{apiKey}") { backStackEntry ->
-            val companyId = backStackEntry.arguments?.getString("companyId") ?: ""
-            val apiKey = backStackEntry.arguments?.getString("apiKey") ?: ""
-
-            SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey)
+                SignInScreen(navController = navController, companyId = companyId, apiKey = apiKey)
+            }
         }
     }
 }
