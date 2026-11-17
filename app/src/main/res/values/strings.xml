@@ -426,5 +426,28 @@ You have</string>
     <string name="skip">Skip</string>
     <string name="version">Version</string>
     <string name="profile">Profile</string>
+    <string name="my_profile">My Profile</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="work_information">Work Information</string>
+    <string name="work_locations">Work Locations</string>
+    <string name="email_address">Email Address</string>
+    <string name="birthday">Birthday</string>
+    <string name="department">Department</string>
+    <string name="allowed_distance_m">Allowed distance: %1$d m</string>
+    <string name="no_work_locations">No work locations</string>
+
+
+
+
+
+    <string name="profile_feature">YOUR PROFILE</string>
+    <string name="your_profile">Your Profile</string>
+    <string name="all_in_one_place">All in One Place</string>
+    <string name="profile_wizard_description">Everything you need to know about your employee profile, organized in one simple place.</string>
+    <string name="profile_personal_description">View your email address and personal details.</string>
+    <string name="profile_work_description">Find your job title, department and company information.</string>
+    <string name="profile_locations_description">Explore your assigned work locations and their allowed distances.</string>
+    <string name="profile_wizard_footer">Your work information, always within reach.</string>
+    <string name="view_my_profile">View My Profile</string>
 
 </resources>

@@ -158,7 +158,12 @@ fun MyAppNavHost(
                 )
             }
 
-            composable("ProfileScreen") { ProfileScreen() }
+            composable("ProfileScreen") {
+                ProfileScreen(
+                    navController = navController,
+                    onMenuClick = onMenuClick
+                )
+            }
 
             composable(
                 route = "CreateReportScreen?type={type}",

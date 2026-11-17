@@ -428,6 +428,27 @@
     <string name="skip">تخطي</string>
     <string name="version">رقم الإصدار</string>
     <string name="profile">الملف الشخصي</string>
+    <string name="my_profile">ملفي الشخصي</string>
+    <string name="personal_information">المعلومات الشخصية</string>
+    <string name="work_information">معلومات العمل</string>
+    <string name="work_locations">مواقع العمل</string>
+    <string name="email_address">البريد الإلكتروني</string>
+    <string name="birthday">تاريخ الميلاد</string>
+    <string name="department">القسم</string>
+    <string name="allowed_distance_m">المسافة المسموحة: %1$d م</string>
+    <string name="no_work_locations">لا توجد مواقع عمل</string>
+
+
+
+    <string name="profile_feature">ملفك الشخصي</string>
+    <string name="your_profile">ملفك الشخصي</string>
+    <string name="all_in_one_place">كل بياناتك في مكان واحد</string>
+    <string name="profile_wizard_description">كل المعلومات التي تحتاجها عن ملفك الوظيفي والشخصي منظمة في مكان واحد.</string>
+    <string name="profile_personal_description">اطّلع على بريدك الإلكتروني وبياناتك الشخصية.</string>
+    <string name="profile_work_description">تعرف على المسمى الوظيفي والقسم وبيانات الشركة.</string>
+    <string name="profile_locations_description">استعرض مواقع العمل المخصصة لك والمسافات المسموح بها.</string>
+    <string name="profile_wizard_footer">كل معلوماتك الوظيفية في متناول يدك.</string>
+    <string name="view_my_profile">عرض ملفي الشخصي</string>
 
 </resources>
 
