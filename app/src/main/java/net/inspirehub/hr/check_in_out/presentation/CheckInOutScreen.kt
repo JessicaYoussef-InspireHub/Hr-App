@@ -35,7 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import net.inspirehub.hr.BottomBar
+import net.inspirehub.hr.bottom_app_bar.BottomBar
 import net.inspirehub.hr.SharedPrefManager
 import net.inspirehub.hr.check_in_out.data.CheckInOutViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -74,7 +74,6 @@ import net.inspirehub.hr.FullLoading
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.Date
-import net.inspirehub.hr.BuildConfig
 import net.inspirehub.hr.check_in_out.data.refreshCompanyLocations
 import net.inspirehub.hr.check_in_out.data.refreshTrackingConfig
 import net.inspirehub.hr.sign_in.data.SignInApiService
@@ -1203,18 +1202,7 @@ fun CheckInOutScreen(
                 }
             },
             bottomBar = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = "Last Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                        modifier = Modifier.padding(start = 12.dp),
-                        color = colors.onBackgroundColor.copy(alpha = 0.6f),
-                        fontSize = 12.sp
-                    )
                     BottomBar(navController = navController)
-                }
             }
         )
         { innerPadding ->

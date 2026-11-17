@@ -25,6 +25,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import net.inspirehub.hr.BuildConfig
 
 private var hasPrintedServerResponse = false
 
@@ -139,6 +140,7 @@ fun sendOfflineAttendanceAction(
             obj.put("lat", log["lat"])
             obj.put("lng", log["lng"])
             obj.put("action_time", log["action_time"])
+            obj.put("version_number", BuildConfig.VERSION_NAME)
             obj.put("action_tz", log["action_tz"])
             jsonLogs.put(obj)
         }
@@ -240,6 +242,7 @@ suspend fun sendAttendanceAction(
 
         val sharedPref = SharedPrefManager(context)
         val companyUrl = sharedPref.getCompanyUrl()
+        val versionNumber = BuildConfig.VERSION_NAME
 
         val response: HttpResponse = httpClient.post("$companyUrl/api/employee_attendance") {
             contentType(ContentType.Application.Json)
@@ -250,7 +253,8 @@ suspend fun sendAttendanceAction(
                         "action" to action,
                         "lat" to latitude,
                         "lng" to longitude,
-                        "action_time" to currentTime
+                        "action_time" to currentTime,
+                        "version_number" to versionNumber
                     )
                 )
             )

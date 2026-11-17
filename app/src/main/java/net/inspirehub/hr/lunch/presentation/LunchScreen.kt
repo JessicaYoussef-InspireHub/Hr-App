@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import net.inspirehub.hr.BottomBar
+import net.inspirehub.hr.bottom_app_bar.BottomBar
 import net.inspirehub.hr.FullLoading
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R

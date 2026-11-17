@@ -424,5 +424,7 @@ You have</string>
     <string name="stay_informed_stay_on_track">Stay informed. Stay on track!</string>
     <string name="explore_deduction">Explore Deduction</string>
     <string name="skip">Skip</string>
+    <string name="version">Version</string>
+    <string name="profile">Profile</string>
 
 </resources>

@@ -10,7 +10,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import net.inspirehub.hr.Profile.ProfileScreen
 import net.inspirehub.hr.attendance.presentation.AttendanceScreen
 import net.inspirehub.hr.check_in_out.presentation.CheckInOutScreen
 import net.inspirehub.hr.deduction.presentation.DeductionScreen
@@ -38,6 +37,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import net.inspirehub.hr.deduction.presentation.WizardDeductionScreen
+import androidx.navigation.compose.currentBackStackEntryAsState
+import net.inspirehub.hr.drawer.DrawerContent
+import net.inspirehub.hr.drawer.NavigationDrawer
+import net.inspirehub.hr.profile.presentation.ProfileScreen
 
 
 @SuppressLint("NewApi")
@@ -100,10 +103,25 @@ fun MyAppNavHost(
     }
 
     val startDestination = "SplashScreen"
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    MyNavigationDrawer(
-        drawerContent = {
-            // Shared drawer items
+    NavigationDrawer(
+        drawerContent = { closeDrawer ->
+
+            DrawerContent(
+                currentRoute = currentRoute,
+                onNavigate = { route ->
+                    closeDrawer()
+                    if (currentRoute != route) {
+                        navController.navigate(route) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                navController = navController,
+                onClose = closeDrawer
+            )
         }
     ) { onMenuClick ->
         NavHost(
@@ -117,23 +135,30 @@ fun MyAppNavHost(
                 )
             }
 
-            composable("DeductionScreen") { DeductionScreen(
-                navController = navController,
-                onMenuClick = onMenuClick
-            ) }
+            composable("DeductionScreen") {
+                DeductionScreen(
+                    navController = navController,
+                    onMenuClick = onMenuClick
+                )
+            }
 
-            composable("AttendanceScreen") { AttendanceScreen(
-                navController = navController,
-                onMenuClick = onMenuClick
-            ) }
+            composable("AttendanceScreen") {
+                AttendanceScreen(
+                    navController = navController,
+                    onMenuClick = onMenuClick
+                )
+            }
 
             composable("ScanQrCodeScreen") { ScanQrCodeScreen(viewModel, navController) }
 
-            composable("MyReportScreen") { MyReportScreen(
-                navController ,
-                onMenuClick = onMenuClick) }
+            composable("MyReportScreen") {
+                MyReportScreen(
+                    navController,
+                    onMenuClick = onMenuClick
+                )
+            }
 
-            composable("ProfileScreen") { ProfileScreen(navController = navController) }
+            composable("ProfileScreen") { ProfileScreen() }
 
             composable(
                 route = "CreateReportScreen?type={type}",
@@ -174,11 +199,13 @@ fun MyAppNavHost(
                 )
             }
 
-            composable("ExpensesScreen") { ExpensesScreen(
-                navController,
-                token = token ?: "" ,
-                onMenuClick = onMenuClick
-            ) }
+            composable("ExpensesScreen") {
+                ExpensesScreen(
+                    navController,
+                    token = token ?: "",
+                    onMenuClick = onMenuClick
+                )
+            }
 
             composable(
                 route = "AddExpensesScreen?source={source}&reportId={reportId}&paymentMode={paymentMode}",

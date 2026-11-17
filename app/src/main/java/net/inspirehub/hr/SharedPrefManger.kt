@@ -7,6 +7,7 @@ import java.util.Locale
 import androidx.core.content.edit
 import net.inspirehub.hr.check_in_out.data.CompanyLocation
 import net.inspirehub.hr.sign_in.data.Company
+import net.inspirehub.hr.sign_in.data.EmployeeData
 import java.util.Date
 
 class SharedPrefManager(context: Context) {
@@ -197,6 +198,14 @@ class SharedPrefManager(context: Context) {
 
         /** How many minutes between two tracking readings. */
         const val KEY_TRACKING_INTERVAL_MINUTES = "tracking_interval_minutes"
+
+        const val KEY_COMPANY_ADDRESSES = "company_addresses"
+
+        const val KEY_EMPLOYEE_EMAIL = "employee_email"
+        const val KEY_EMPLOYEE_JOB_TITLE = "employee_job_title"
+        const val KEY_EMPLOYEE_DEPARTMENT = "employee_department"
+        const val KEY_EMPLOYEE_BIRTHDAY = "employee_birthday"
+        const val KEY_EMPLOYEE_COMPANY = "employee_company"
     }
 
     /**
@@ -288,6 +297,47 @@ class SharedPrefManager(context: Context) {
         return if (name.isNullOrBlank()) null else name
     }
 
+    /** The rest of the employee data the sign in answer carries, for the profile screen. */
+    fun saveEmployeeProfile(
+        employee: EmployeeData?,
+        companyName: String?
+    ) {
+        if (employee == null) return
+        prefs.edit {
+            putString(KEY_EMPLOYEE_EMAIL, employee.email)
+            putString(KEY_EMPLOYEE_JOB_TITLE, employee.job_title)
+            putString(KEY_EMPLOYEE_DEPARTMENT, employee.department)
+            putString(KEY_EMPLOYEE_BIRTHDAY, employee.birthday)
+            putString(KEY_EMPLOYEE_COMPANY, companyName.orEmpty())
+        }
+    }
+
+    fun getEmployeeEmail(): String? =
+        prefs.getString(KEY_EMPLOYEE_EMAIL, null)?.takeIf { it.isNotBlank() }
+            ?: getLoginEmail()
+
+    fun getEmployeeJobTitle(): String? =
+        prefs.getString(KEY_EMPLOYEE_JOB_TITLE, null)?.takeIf { it.isNotBlank() }
+
+    fun getEmployeeDepartment(): String? =
+        prefs.getString(KEY_EMPLOYEE_DEPARTMENT, null)?.takeIf { it.isNotBlank() }
+
+    fun getEmployeeBirthday(): String? =
+        prefs.getString(KEY_EMPLOYEE_BIRTHDAY, null)?.takeIf { it.isNotBlank() }
+
+    fun getEmployeeCompany(): String? =
+        prefs.getString(KEY_EMPLOYEE_COMPANY, null)?.takeIf { it.isNotBlank() }
+
+    /** Readable address of each work site, keyed by address id. */
+    fun getCompanyAddresses(): Map<Int, String> {
+        val listString = prefs.getString(KEY_COMPANY_ADDRESSES, "") ?: ""
+        if (listString.isEmpty()) return emptyMap()
+        return listString.split(";").mapNotNull { item ->
+            val id = item.substringBefore('|').toIntOrNull() ?: return@mapNotNull null
+            id to item.substringAfter('|')
+        }.toMap()
+    }
+
 
     fun saveAllowTimeOffWithMinutes(value: Boolean) {
         prefs.edit { putBoolean("allow_time_off_With_minutes", value) }
@@ -339,7 +389,24 @@ class SharedPrefManager(context: Context) {
         val listString = companies.joinToString(";") {
             "${it.address.id}|${it.name}|${it.address.latitude},${it.address.longitude}|${it.address.allowed_distance}"
         }
-        prefs.edit { putString(KEY_COMPANIES_LAT_LNG, listString) }
+        // addressId|street, city, country - the separators are stripped from the text
+        val addressesString = companies
+            .filter { it.address.id != null }
+            .joinToString(";") { company ->
+                val text = listOf(
+                    company.address.street,
+                    company.address.city,
+                    company.address.country
+                )
+                    .map { it.replace("|", " ").replace(";", ",").trim() }
+                    .filter { it.isNotBlank() }
+                    .joinToString(", ")
+                "${company.address.id}|$text"
+            }
+        prefs.edit {
+            putString(KEY_COMPANIES_LAT_LNG, listString)
+            putString(KEY_COMPANY_ADDRESSES, addressesString)
+        }
     }
 
     fun getCompaniesLatLng(): List<CompanyLocation> {

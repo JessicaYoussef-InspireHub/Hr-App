@@ -163,6 +163,22 @@ fun GeneralSettingsCard(
                         )
 
                         SettingsLanguage(
+                            label = "العربية (السعودية)",
+                            icon = painterResource(id = R.drawable.saudi),
+                            onClick = {
+                                if (locale.language != "ar" || locale.country != "SA") {
+                                    updateLocale(Locale.forLanguageTag("ar-SA"))
+                                }
+                                expanded = false
+                            }
+                        )
+
+                        MyDivider(
+                            horizontalPadding = 35,
+                            color = colors.surfaceColor
+                        )
+
+                        SettingsLanguage(
                             label = stringResource(R.string.english),
                             icon = painterResource(id = R.drawable.america),
                             onClick = {

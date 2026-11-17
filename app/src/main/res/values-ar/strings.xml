@@ -426,6 +426,8 @@
     <string name="stay_informed_stay_on_track">تابع رصيدك وكن دائمًا على اطلاع!</string>
     <string name="explore_deduction">اكتشف رصيد التأخير</string>
     <string name="skip">تخطي</string>
+    <string name="version">رقم الإصدار</string>
+    <string name="profile">الملف الشخصي</string>
 
 </resources>
 

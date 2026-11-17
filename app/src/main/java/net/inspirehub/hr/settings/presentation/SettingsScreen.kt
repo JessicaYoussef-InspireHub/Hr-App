@@ -27,7 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import net.inspirehub.hr.BottomBar
+import net.inspirehub.hr.bottom_app_bar.BottomBar
 import net.inspirehub.hr.MyAppBar
 import net.inspirehub.hr.R
 import net.inspirehub.hr.SharedPrefManager
@@ -276,55 +276,31 @@ fun SettingsScreen(
                                 // Save employee data
                                 // =====================================================
 
-                                sharedPref.saveToken(
-                                    employeeData?.employee_token ?: ""
-                                )
+                                sharedPref.saveToken(employeeData?.employee_token ?: "")
 
-                                sharedPref.saveTokenExpiry(
-                                    employeeData?.token_expiry ?: ""
-                                )
+                                sharedPref.saveTokenExpiry(employeeData?.token_expiry ?: "")
 
-                                sharedPref.saveCompanyId(
-                                    companyId
-                                )
+                                sharedPref.saveCompanyId(companyId)
 
-                                sharedPref.saveApiKey(
-                                    apiKey
-                                )
+                                sharedPref.saveApiKey(apiKey)
 
-                                sharedPref.saveLatitude(
-                                    companyAddress?.latitude ?: 0.0
-                                )
+                                sharedPref.saveLatitude(companyAddress?.latitude ?: 0.0)
 
-                                sharedPref.saveLongitude(
-                                    companyAddress?.longitude ?: 0.0
-                                )
+                                sharedPref.saveLongitude(companyAddress?.longitude ?: 0.0)
 
-                                sharedPref.saveAllowedDistance(
-                                    companyAddress?.allowed_distance ?: 0.0
-                                )
+                                sharedPref.saveAllowedDistance(companyAddress?.allowed_distance ?: 0.0)
 
-                                sharedPref.saveAllowedLocationsIds(
-                                    employeeData?.allowed_locations_ids
-                                        ?: emptyList()
-                                )
+                                sharedPref.saveAllowedLocationsIds(employeeData?.allowed_locations_ids ?: emptyList())
 
-                                sharedPref.saveCompaniesLatLng(
-                                    companies
-                                )
+                                sharedPref.saveCompaniesLatLng(companies)
 
-                                sharedPref.saveCompanyUrl(
-                                    response.result.company_url ?: ""
-                                )
+                                sharedPref.saveCompanyUrl(response.result.company_url ?: "")
 
-                                sharedPref.saveEmployeeName(
-                                    employeeData?.name ?: ""
-                                )
+                                sharedPref.saveEmployeeName(employeeData?.name ?: "")
 
-                                sharedPref.saveAllowTimeOffWithMinutes(
-                                    response.result.allow_time_off_With_minutes
-                                )
+                                sharedPref.saveEmployeeProfile(employeeData, response.result.company_name)
 
+                                sharedPref.saveAllowTimeOffWithMinutes(response.result.allow_time_off_With_minutes)
 
                                 // =====================================================
                                 // STEP 9

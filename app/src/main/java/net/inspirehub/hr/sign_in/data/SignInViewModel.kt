@@ -88,6 +88,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
                 val sharedPref = SharedPrefManager(getApplication())
 
+                sharedPref.saveEmployeeProfile(employeeData, result.company_name)
+
                 sharedPref.saveIsTracked(trackingConfig.result.is_tracked)
 
                 sharedPref.saveWorkingHoursOnly(trackingConfig.result.working_hours_only)

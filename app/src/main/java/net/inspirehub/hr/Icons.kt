@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -25,7 +24,6 @@ import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.GridView
@@ -37,6 +35,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -68,15 +66,15 @@ fun GeneralIcon(
 @Composable
 fun CloseIcon(
     onClick: () -> Unit,
+    tint: Color = appColors().tertiaryColor,
     contentDescription: String? = stringResource(R.string.close)
 ) {
-    val colors = appColors()
 
     IconButton(onClick = { onClick() }) {
         Icon(
             imageVector = Icons.Default.Close,
             contentDescription = contentDescription,
-            tint = colors.tertiaryColor
+            tint = tint
         )
     }
 }
@@ -103,7 +101,7 @@ fun BackIcon(
 fun AddIcon(
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier.size(14.dp),
     onClick: () -> Unit = {}
-){
+) {
     val colors = appColors()
 
     Icon(
@@ -172,6 +170,7 @@ fun DeleteIcon(
         )
     }
 }
+
 @Composable
 fun KeyboardArrowRightIcon(
     onClick: () -> Unit,
@@ -318,7 +317,7 @@ fun RemoveIcon() {
 @Composable
 fun FingerprintIcon(
     onClick: () -> Unit
-){
+) {
     val colors = appColors()
 
     Icon(
@@ -327,7 +326,7 @@ fun FingerprintIcon(
         modifier = Modifier
             .size(200.dp)
             .clickable {
-               onClick()
+                onClick()
             },
         tint = colors.tertiaryColor
     )
@@ -394,7 +393,7 @@ fun AttachFileIcon() {
 
 @Composable
 fun GridViewIcon(
-    color: Color ,
+    color: Color,
     onClick: () -> Unit
 ) {
     Icon(
@@ -409,13 +408,13 @@ fun GridViewIcon(
 
 @Composable
 fun ViewListIcon(
-    color: Color ,
+    color: Color,
     onClick: () -> Unit
 ) {
     Icon(
         imageVector = Icons.AutoMirrored.Filled.ViewList,
         contentDescription = "ViewList",
-        tint = color ,
+        tint = color,
         modifier = Modifier.clickable {
             onClick()
         }
@@ -424,7 +423,7 @@ fun ViewListIcon(
 
 @Composable
 fun ViewAgendaIcon(
-    color: Color ,
+    color: Color,
     onClick: () -> Unit
 ) {
     Icon(
@@ -439,7 +438,7 @@ fun ViewAgendaIcon(
 
 @Composable
 fun ScheduleIcon(
-    size : Int = 16
+    size: Int = 16
 ) {
     val colors = appColors()
 
@@ -453,33 +452,19 @@ fun ScheduleIcon(
 }
 
 @Composable
-fun DescriptionIcon(
-    size: Dp = 18.dp
-){
-    val colors = appColors()
-
-    Icon(
-        imageVector = Icons.Default.Description,
-        contentDescription = "has Permission",
-        tint = colors.outline,
-        modifier = Modifier.size(size)
-    )
-}
-
-@Composable
-fun DateRangeIcon(){
+fun DateRangeIcon() {
     val colors = appColors()
 
     Icon(
         imageVector = Icons.Default.DateRange,
         contentDescription = "DateRange",
-        tint = colors.onBackgroundColor ,
+        tint = colors.onBackgroundColor,
         modifier = Modifier.size(18.dp)
     )
 }
 
 @Composable
-fun InfoIcon(){
+fun InfoIcon() {
     val colors = appColors()
 
     Icon(
@@ -487,5 +472,18 @@ fun InfoIcon(){
         contentDescription = stringResource(R.string.notes),
         tint = colors.tertiaryColor,
         modifier = Modifier.size(20.dp)
+    )
+}
+
+
+@Composable
+fun OutlinedInfoIcon() {
+    val colors = appColors()
+
+    Icon(
+        imageVector = Icons.Outlined.Info,
+        contentDescription = stringResource(R.string.version),
+        tint = colors.onBackgroundColor.copy(alpha = 0.6f),
+        modifier = Modifier.size(22.dp)
     )
 }

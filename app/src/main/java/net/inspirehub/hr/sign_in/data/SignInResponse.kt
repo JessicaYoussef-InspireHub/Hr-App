@@ -47,7 +47,8 @@ data class EmployeeData(
     val job_title: String,
     val is_active: Boolean,
     val employee_token: String,
-    val token_expiry: String
+    val token_expiry: String,
+    val birthday: String
 )
 
 @Serializable
