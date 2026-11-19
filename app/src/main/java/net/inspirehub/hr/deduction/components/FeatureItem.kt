@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -14,7 +15,7 @@ import net.inspirehub.hr.appColors
 
 @Composable
 fun FeatureItem(
-    icon: String,
+    icon: ImageVector,
     title: String,
     description: String
 ) {
@@ -28,14 +29,16 @@ fun FeatureItem(
             modifier = Modifier
                 .size(44.dp)
                 .background(
-                    color = colors.surfaceVariant,
+                    colors.tertiaryColor.copy(alpha = 0.12f),
                     shape = RoundedCornerShape(12.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = icon,
-                fontSize = 21.sp
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = colors.tertiaryColor,
+                modifier = Modifier.size(23.dp)
             )
         }
 

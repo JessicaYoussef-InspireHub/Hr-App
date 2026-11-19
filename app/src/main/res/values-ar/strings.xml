@@ -415,7 +415,7 @@
     <string name="previous_month_overview">نظرة عامة على الشهر الماضي</string>
     <string name="performance_summary">ملخص الأداء</string>
     <string name="no_deduction_found">لم يتم العثور على خصومات</string>
-    <string name="new_feature">✨ ميزة جديدة</string>
+    <string name="new_feature">ميزة جديدة</string>
     <string name="introducing">اكتشف</string>
     <string name="a_new_way_to_keep_track_of_your_attendance_deductions">طريقة جديدة لمتابعة دقائق التأخير \nوالخصومات الخاصة بحضورك.</string>
     <string name="attendance_minimum_gap">الحد المسموح للتأخير</string>
@@ -445,6 +445,15 @@
     <string name="explore_your_assigned_work_locations_and_their_allowed_distances">استعرض مواقع العمل المخصصة لك والمسافات المسموح بها.</string>
     <string name="your_work_information_always_within_reach">كل معلوماتك الوظيفية في متناول يدك.</string>
     <string name="explore_profile">استكشف الملف الشخصي</string>
+    <string name="saudi_arabic">العربية السعودية</string>
+    <string name="we_have_added_a_new_language_to_make_your_experience_more_familiar_and_comfortable_you_can_now_use_the_app_in_saudi_arabic">أضفنا لغة جديدة لتجعل تجربتك أكثر سهولة وراحة. يمكنك الآن استخدام التطبيق باللغة العربية السعودية!</string>
+    <string name="language_option_arabic">العربية</string>
+    <string name="language_option_saudi">العربية (السعودية)</string>
+    <string name="language_option_english">English</string>
+    <string name="find_your_new_language_in_settings_screen">ستجد لغتك الجديدة في شاشة الإعدادات</string>
+    <string name="go_to_settings_language_and_select">انتقل إلى الإعدادات ← اللغة واختر العربية (السعودية)</string>
+    <string name="explore_settings">استكشف الإعدادات</string>
+
 
 </resources>
 

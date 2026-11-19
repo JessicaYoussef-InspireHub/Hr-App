@@ -413,7 +413,7 @@ You have</string>
     <string name="previous_month_overview">Previous Month Overview</string>
     <string name="performance_summary">Performance Summary</string>
     <string name="no_deduction_found">No Deductions Found</string>
-    <string name="new_feature">✨ NEW FEATURE</string>
+    <string name="new_feature">NEW FEATURE</string>
     <string name="introducing">Introducing</string>
     <string name="a_new_way_to_keep_track_of_your_attendance_deductions">A new way to keep track of your\nattendance deductions.</string>
     <string name="attendance_minimum_gap">Attendance Minimum Gap</string>
@@ -443,5 +443,14 @@ You have</string>
     <string name="explore_your_assigned_work_locations_and_their_allowed_distances">Explore your assigned work locations and their allowed distances.</string>
     <string name="your_work_information_always_within_reach">Your work information, always within reach.</string>
     <string name="explore_profile">Explore Profile</string>
+    <string name="saudi_arabic">Saudi Arabic</string>
+    <string name="we_have_added_a_new_language_to_make_your_experience_more_familiar_and_comfortable_you_can_now_use_the_app_in_saudi_arabic">We have added a new language to make your experience more familiar and comfortable. You can now use the app in Saudi Arabic!</string>
+    <string name="language_option_arabic">العربية</string>
+    <string name="language_option_saudi">العربية (السعودية)</string>
+    <string name="language_option_english">English</string>
+    <string name="find_your_new_language_in_settings_screen">Find your new language in Settings Screen</string>
+    <string name="go_to_settings_language_and_select">Go to Settings → Language and select العربية (السعودية)</string>
+    <string name="explore_settings">Explore Settings</string>
+
 
 </resources>

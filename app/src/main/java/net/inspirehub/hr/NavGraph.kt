@@ -42,6 +42,7 @@ import net.inspirehub.hr.drawer.DrawerContent
 import net.inspirehub.hr.drawer.NavigationDrawer
 import net.inspirehub.hr.profile.presentation.ProfileScreen
 import net.inspirehub.hr.profile.presentation.WizardProfileScreen
+import net.inspirehub.hr.settings.presentation.WizardSaudiLanguageScreen
 
 @SuppressLint("NewApi")
 @Composable
@@ -350,12 +351,35 @@ fun MyAppNavHost(
                 )
             }
 
+            composable("WizardSaudiLanguageScreen") {
+                WizardSaudiLanguageScreen(
+                    exploreSettings = {
+                        navController.navigate("SettingsScreen") {
+                            popUpTo("WizardSaudiLanguageScreen") {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    },
+                    onSkip = {
+                        navController.navigate("CheckInOutScreen") {
+                            popUpTo("WizardSaudiLanguageScreen") {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
 
             composable("CheckInOutScreen") {
 
                 var hasSeenProfileIntro by remember { mutableStateOf(sharedPref.hasSeenProfileIntro()) }
 
                 var hasSeenDeductionIntro by remember { mutableStateOf(sharedPref.hasSeenDeductionIntro()) }
+
+                var hasSeenSaudiLanguageIntro by remember { mutableStateOf(sharedPref.hasSeenSaudiLanguageIntro()) }
 
                 when {
                     // First: Show Profile Wizard
@@ -385,6 +409,8 @@ fun MyAppNavHost(
                         WizardDeductionScreen(
                             exploreDeduction = {
                                 sharedPref.setDeductionIntroSeen()
+                                hasSeenDeductionIntro = true
+
                                 navController.navigate("DeductionScreen") {
                                     popUpTo("CheckInOutScreen") {
                                         inclusive = true
@@ -393,6 +419,8 @@ fun MyAppNavHost(
                             },
                             onSkip = {
                                 sharedPref.setDeductionIntroSeen()
+                                hasSeenDeductionIntro = true
+
                                 navController.navigate("CheckInOutScreen") {
                                     popUpTo("CheckInOutScreen") {
                                         inclusive = true
@@ -401,6 +429,34 @@ fun MyAppNavHost(
                             }
                         )
                     }
+
+                    // Third: Show Saudi Arabic Language Wizard
+                    !hasSeenSaudiLanguageIntro -> {
+
+                        WizardSaudiLanguageScreen(
+                            exploreSettings = {
+                                sharedPref.setSaudiLanguageIntroSeen()
+                                hasSeenSaudiLanguageIntro = true
+
+                                navController.navigate("SettingsScreen") {
+                                    popUpTo("CheckInOutScreen") {
+                                        inclusive = true
+                                    }
+                                }
+                            },
+                            onSkip = {
+                                sharedPref.setSaudiLanguageIntroSeen()
+                                hasSeenSaudiLanguageIntro = true
+
+                                navController.navigate("CheckInOutScreen") {
+                                    popUpTo("CheckInOutScreen") {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        )
+                    }
+
                     // Finally: Show Home
                     else -> {
                         CheckInOutScreen(navController)

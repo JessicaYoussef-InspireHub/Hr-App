@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -146,12 +145,13 @@ fun GeneralSettingsCard(
                     Column {
                         MyDivider(
                             horizontalPadding = 35,
-                            color = colors.surfaceColor
+                            color = colors.surfaceColor,
+                            thickness = 1
                         )
 
                         SettingsLanguage(
-                            label = stringResource(R.string.arabic),
-                            icon = painterResource(id = R.drawable.egypt),
+                            flag = "🇪🇬",
+                            title = stringResource(R.string.language_option_arabic),
                             onClick = {
                                 // Also switch when the current locale is ar-SA.
                                 if (locale.toLanguageTag() != "ar") {
@@ -162,12 +162,13 @@ fun GeneralSettingsCard(
                         )
                         MyDivider(
                             horizontalPadding = 35,
-                            color = colors.surfaceColor
+                            color = colors.surfaceColor,
+                            thickness = 1
                         )
 
                         SettingsLanguage(
-                            label = "العربية (السعودية)",
-                            icon = painterResource(id = R.drawable.saudi),
+                            flag = "🇸🇦",
+                            title = stringResource(R.string.language_option_saudi),
                             onClick = {
                                 if (locale.toLanguageTag() != "ar-SA") {
                                     updateLocale(Locale.forLanguageTag("ar-SA"))
@@ -178,12 +179,13 @@ fun GeneralSettingsCard(
 
                         MyDivider(
                             horizontalPadding = 35,
-                            color = colors.surfaceColor
+                            color = colors.surfaceColor,
+                            thickness = 1
                         )
 
                         SettingsLanguage(
-                            label = stringResource(R.string.english),
-                            icon = painterResource(id = R.drawable.america),
+                            flag = "🇺🇸",
+                            title = stringResource(R.string.language_option_english),
                             onClick = {
                                 if (locale.language != "en") {
                                     updateLocale(Locale.forLanguageTag("en"))

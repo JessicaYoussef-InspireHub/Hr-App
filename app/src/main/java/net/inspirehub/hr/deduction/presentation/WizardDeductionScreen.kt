@@ -8,7 +8,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.HourglassBottom
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -133,7 +136,7 @@ fun WizardDeductionScreen(
                 ) {
 
                     FeatureItem(
-                        icon = "⏱️",
+                        icon = Icons.Outlined.Timer,
                         title = stringResource(R.string.attendance_minimum_gap),
                         description = stringResource(R.string.know_your_allowed_free_minutes_and_track_how_much_you_have_used)
                     )
@@ -144,7 +147,7 @@ fun WizardDeductionScreen(
                     )
 
                     FeatureItem(
-                        icon = "📊",
+                        icon = Icons.Outlined.BarChart,
                         title = stringResource(R.string.monthly_deduction_summary),
                         description = stringResource(R.string.view_your_total_deductions_and_remaining_free_minutes)
                     )
@@ -155,7 +158,7 @@ fun WizardDeductionScreen(
                     )
 
                     FeatureItem(
-                        icon = "📅",
+                        icon = Icons.Outlined.CalendarMonth,
                         title = stringResource(R.string.previous_month_overview),
                         description = stringResource(R.string.check_your_previous_month_deduction_details)
                     )

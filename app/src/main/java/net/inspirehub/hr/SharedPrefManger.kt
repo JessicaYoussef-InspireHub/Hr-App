@@ -15,6 +15,18 @@ class SharedPrefManager(context: Context) {
     private val KEY_HAS_SEEN_DEDUCTION_INTRO = "has_seen_deduction_intro"
     private val KEY_HAS_SEEN_PROFILE_INTRO = "has_seen_profile_intro"
 
+    private val KEY_HAS_SEEN_SAUDI_LANGUAGE_INTRO = "has_seen_saudi_language_intro"
+
+    fun hasSeenSaudiLanguageIntro(): Boolean {
+        return prefs.getBoolean(KEY_HAS_SEEN_SAUDI_LANGUAGE_INTRO, false)
+    }
+
+    fun setSaudiLanguageIntroSeen() {
+        prefs.edit {
+            putBoolean(KEY_HAS_SEEN_SAUDI_LANGUAGE_INTRO, true)
+        }
+    }
+
     fun hasSeenProfileIntro(): Boolean {
         return prefs.getBoolean(KEY_HAS_SEEN_PROFILE_INTRO, false)
     }
@@ -617,6 +629,12 @@ class SharedPrefManager(context: Context) {
             putBoolean(
                 KEY_HAS_SEEN_PROFILE_INTRO,
                 hasSeenProfileIntro
+            )
+
+
+            putBoolean(
+                KEY_HAS_SEEN_SAUDI_LANGUAGE_INTRO,
+                hasSeenSaudiLanguageIntro()
             )
         }
     }
