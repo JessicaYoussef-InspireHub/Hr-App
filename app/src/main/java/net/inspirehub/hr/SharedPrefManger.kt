@@ -13,7 +13,17 @@ import java.util.Date
 class SharedPrefManager(context: Context) {
 
     private val KEY_HAS_SEEN_DEDUCTION_INTRO = "has_seen_deduction_intro"
+    private val KEY_HAS_SEEN_PROFILE_INTRO = "has_seen_profile_intro"
 
+    fun hasSeenProfileIntro(): Boolean {
+        return prefs.getBoolean(KEY_HAS_SEEN_PROFILE_INTRO, false)
+    }
+
+    fun setProfileIntroSeen() {
+        prefs.edit {
+            putBoolean(KEY_HAS_SEEN_PROFILE_INTRO, true)
+        }
+    }
     fun hasSeenDeductionIntro(): Boolean {
         return prefs.getBoolean(KEY_HAS_SEEN_DEDUCTION_INTRO, false)
     }
@@ -579,11 +589,18 @@ class SharedPrefManager(context: Context) {
 
     fun clearAll() {
         val hasSeenDeductionIntro = hasSeenDeductionIntro()
+        val hasSeenProfileIntro = hasSeenProfileIntro()
+
         prefs.edit {
             clear()
             putBoolean(
                 KEY_HAS_SEEN_DEDUCTION_INTRO,
                 hasSeenDeductionIntro
+            )
+
+            putBoolean(
+                KEY_HAS_SEEN_PROFILE_INTRO,
+                hasSeenProfileIntro
             )
         }
     }

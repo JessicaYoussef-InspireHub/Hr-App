@@ -41,7 +41,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import net.inspirehub.hr.drawer.DrawerContent
 import net.inspirehub.hr.drawer.NavigationDrawer
 import net.inspirehub.hr.profile.presentation.ProfileScreen
-
+import net.inspirehub.hr.profile.presentation.WizardProfileScreen
 
 @SuppressLint("NewApi")
 @Composable
@@ -353,34 +353,58 @@ fun MyAppNavHost(
 
             composable("CheckInOutScreen") {
 
-                var hasSeenIntro by remember {
-                    mutableStateOf(sharedPref.hasSeenDeductionIntro())
-                }
+                var hasSeenProfileIntro by remember { mutableStateOf(sharedPref.hasSeenProfileIntro()) }
 
-                if (hasSeenIntro) {
+                var hasSeenDeductionIntro by remember { mutableStateOf(sharedPref.hasSeenDeductionIntro()) }
 
-                    CheckInOutScreen(navController)
+                when {
+                    // First: Show Profile Wizard
+                    !hasSeenProfileIntro -> {
+                        WizardProfileScreen(
+                            exploreProfile = {
+                                sharedPref.setProfileIntroSeen()
+                                hasSeenProfileIntro = true
 
-                } else {
+                                navController.navigate("ProfileScreen")
+                            },
+                            onSkip = {
+                                sharedPref.setProfileIntroSeen()
+                                hasSeenProfileIntro = true
 
-                    WizardDeductionScreen(
-                        exploreDeduction = {
-                            sharedPref.setDeductionIntroSeen()
-                            navController.navigate("DeductionScreen") {
-                                popUpTo("CheckInOutScreen") {
-                                    inclusive = true
+                                navController.navigate("CheckInOutScreen") {
+                                    popUpTo("CheckInOutScreen") {
+                                        inclusive = true
+                                    }
                                 }
                             }
-                        },
-                        onSkip = {
-                            sharedPref.setDeductionIntroSeen()
-                            navController.navigate("CheckInOutScreen") {
-                                popUpTo("CheckInOutScreen") {
-                                    inclusive = true
+                        )
+                    }
+                    // Second: Show Deduction Wizard
+                    !hasSeenDeductionIntro -> {
+
+                        WizardDeductionScreen(
+                            exploreDeduction = {
+                                sharedPref.setDeductionIntroSeen()
+                                navController.navigate("DeductionScreen") {
+                                    popUpTo("CheckInOutScreen") {
+                                        inclusive = true
+                                    }
+                                }
+                            },
+                            onSkip = {
+                                sharedPref.setDeductionIntroSeen()
+                                navController.navigate("CheckInOutScreen") {
+                                    popUpTo("CheckInOutScreen") {
+                                        inclusive = true
+                                    }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
+                    // Finally: Show Home
+                    else -> {
+                        CheckInOutScreen(navController)
+                    }
                 }
             }
 

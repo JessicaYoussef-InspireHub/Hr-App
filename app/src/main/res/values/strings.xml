@@ -440,14 +440,13 @@ You have</string>
 
 
 
-    <string name="profile_feature">YOUR PROFILE</string>
     <string name="your_profile">Your Profile</string>
     <string name="all_in_one_place">All in One Place</string>
-    <string name="profile_wizard_description">Everything you need to know about your employee profile, organized in one simple place.</string>
-    <string name="profile_personal_description">View your email address and personal details.</string>
-    <string name="profile_work_description">Find your job title, department and company information.</string>
-    <string name="profile_locations_description">Explore your assigned work locations and their allowed distances.</string>
-    <string name="profile_wizard_footer">Your work information, always within reach.</string>
-    <string name="view_my_profile">View My Profile</string>
+    <string name="everything_you_need_to_know_about_your_employee_profile_organized_in_one_simple_place">Everything you need to know about your employee profile, organized in one simple place.</string>
+    <string name="view_your_email_address_and_personal_details">View your email address and personal details.</string>
+    <string name="find_your_job_title_department_and_company_information">Find your job title, department and company information.</string>
+    <string name="explore_your_assigned_work_locations_and_their_allowed_distances">Explore your assigned work locations and their allowed distances.</string>
+    <string name="your_work_information_always_within_reach">Your work information, always within reach.</string>
+    <string name="explore_profile">Explore Profile</string>
 
 </resources>

@@ -175,8 +175,7 @@ fun WizardDeductionScreen(
 
             FullButton(
                 onClick = { exploreDeduction() },
-                modifier = Modifier.fillMaxWidth()
-                    .height(56.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
                 label = stringResource(R.string.explore_deduction)
             )
 

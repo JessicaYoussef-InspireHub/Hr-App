@@ -440,15 +440,14 @@
 
 
 
-    <string name="profile_feature">ملفك الشخصي</string>
     <string name="your_profile">ملفك الشخصي</string>
     <string name="all_in_one_place">كل بياناتك في مكان واحد</string>
-    <string name="profile_wizard_description">كل المعلومات التي تحتاجها عن ملفك الوظيفي والشخصي منظمة في مكان واحد.</string>
-    <string name="profile_personal_description">اطّلع على بريدك الإلكتروني وبياناتك الشخصية.</string>
-    <string name="profile_work_description">تعرف على المسمى الوظيفي والقسم وبيانات الشركة.</string>
-    <string name="profile_locations_description">استعرض مواقع العمل المخصصة لك والمسافات المسموح بها.</string>
-    <string name="profile_wizard_footer">كل معلوماتك الوظيفية في متناول يدك.</string>
-    <string name="view_my_profile">عرض ملفي الشخصي</string>
+    <string name="everything_you_need_to_know_about_your_employee_profile_organized_in_one_simple_place">كل المعلومات التي تحتاجها عن ملفك الوظيفي والشخصي منظمة في مكان واحد.</string>
+    <string name="view_your_email_address_and_personal_details">اطّلع على بريدك الإلكتروني وبياناتك الشخصية.</string>
+    <string name="find_your_job_title_department_and_company_information">تعرف على المسمى الوظيفي والقسم وبيانات الشركة.</string>
+    <string name="explore_your_assigned_work_locations_and_their_allowed_distances">استعرض مواقع العمل المخصصة لك والمسافات المسموح بها.</string>
+    <string name="your_work_information_always_within_reach">كل معلوماتك الوظيفية في متناول يدك.</string>
+    <string name="explore_profile">اكنشف الملف الشخصي</string>
 
 </resources>
 

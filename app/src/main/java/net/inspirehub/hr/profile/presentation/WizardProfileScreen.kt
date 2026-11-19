@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.FullButton
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
+import net.inspirehub.hr.profile.components.ProfileWizardItem
 
 @Composable
 fun WizardProfileScreen(
@@ -58,14 +59,13 @@ fun WizardProfileScreen(
                 )
             ) {
                 Text(
-                    text = stringResource(R.string.profile_feature),
+                    text = stringResource(R.string.new_feature),
                     modifier = Modifier.padding(
                         horizontal = 18.dp,
                         vertical = 9.dp
                     ),
                     color = colors.tertiaryColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 16.sp
                 )
             }
 
@@ -83,7 +83,7 @@ fun WizardProfileScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.profile),
                     modifier = Modifier.size(65.dp),
                     tint = colors.tertiaryColor
                 )
@@ -100,7 +100,7 @@ fun WizardProfileScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Business,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.profile),
                         tint = colors.onSecondaryColor,
                         modifier = Modifier.size(20.dp)
                     )
@@ -132,9 +132,9 @@ fun WizardProfileScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = stringResource(R.string.profile_wizard_description),
+                text = stringResource(R.string.everything_you_need_to_know_about_your_employee_profile_organized_in_one_simple_place),
                 fontSize = 16.sp,
-                color = colors.onBackgroundColor.copy(alpha = 0.8f),
+                color = colors.onBackgroundColor,
                 textAlign = TextAlign.Center,
                 lineHeight = 24.sp
             )
@@ -155,9 +155,7 @@ fun WizardProfileScreen(
                     ProfileWizardItem(
                         icon = Icons.Default.Person,
                         title = stringResource(R.string.personal_information),
-                        description = stringResource(
-                            R.string.profile_personal_description
-                        )
+                        description = stringResource(R.string.view_your_email_address_and_personal_details)
                     )
 
                     HorizontalDivider(
@@ -168,9 +166,7 @@ fun WizardProfileScreen(
                     ProfileWizardItem(
                         icon = Icons.Default.WorkOutline,
                         title = stringResource(R.string.work_information),
-                        description = stringResource(
-                            R.string.profile_work_description
-                        )
+                        description = stringResource(R.string.find_your_job_title_department_and_company_information)
                     )
 
                     HorizontalDivider(
@@ -181,9 +177,7 @@ fun WizardProfileScreen(
                     ProfileWizardItem(
                         icon = Icons.Default.LocationOn,
                         title = stringResource(R.string.work_locations),
-                        description = stringResource(
-                            R.string.profile_locations_description
-                        )
+                        description = stringResource(R.string.explore_your_assigned_work_locations_and_their_allowed_distances)
                     )
                 }
             }
@@ -191,7 +185,7 @@ fun WizardProfileScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             Text(
-                text = stringResource(R.string.profile_wizard_footer),
+                text = stringResource(R.string.your_work_information_always_within_reach),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = colors.tertiaryColor,
@@ -205,7 +199,7 @@ fun WizardProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                label = stringResource(R.string.view_my_profile)
+                label = stringResource(R.string.explore_profile)
             )
 
             Row(
@@ -217,7 +211,8 @@ fun WizardProfileScreen(
             ) {
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = colors.tertiaryColor.copy(alpha = 0.25f)
+                    color = colors.tertiaryColor.copy(alpha = 0.25f),
+                    thickness = 1.dp
                 )
 
                 TextButton(onClick = onSkip) {
@@ -230,61 +225,10 @@ fun WizardProfileScreen(
 
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = colors.tertiaryColor.copy(alpha = 0.25f)
+                    color = colors.tertiaryColor.copy(alpha = 0.25f),
+                    thickness = 1.dp
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun ProfileWizardItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    description: String
-) {
-    val colors = appColors()
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .background(
-                    colors.tertiaryColor.copy(alpha = 0.12f),
-                    RoundedCornerShape(12.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = colors.tertiaryColor,
-                modifier = Modifier.size(23.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = title,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.onBackgroundColor
-            )
-
-            Text(
-                text = description,
-                fontSize = 13.sp,
-                color = colors.onBackgroundColor.copy(alpha = 0.7f),
-                lineHeight = 19.sp
-            )
         }
     }
 }
