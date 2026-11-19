@@ -513,12 +513,28 @@ class SharedPrefManager(context: Context) {
         }
     }
 
-    fun saveLanguage(lang: String) {
-        prefs.edit { putString("app_language", lang) }
+    /**
+     * Saves the full BCP-47 language tag: "en", "ar" or "ar-SA".
+     */
+    fun saveLanguage(languageTag: String) {
+        prefs.edit { putString("app_language", languageTag) }
     }
 
+    /**
+     * Full language tag including region ("en", "ar", "ar-SA").
+     * Use this when applying the app locale.
+     */
+    fun getLanguageTag(): String {
+        return prefs.getString("app_language", null)?.takeIf { it.isNotBlank() }
+            ?: Locale.getDefault().language
+    }
+
+    /**
+     * Language code only ("en" or "ar"), so Saudi Arabic still returns "ar".
+     * Used across the app for RTL / Arabic-digit formatting checks.
+     */
     fun getLanguage(): String {
-        return prefs.getString("app_language", null) ?: Locale.getDefault().language
+        return Locale.forLanguageTag(getLanguageTag()).language
     }
 
     fun savePin(pin: String) {

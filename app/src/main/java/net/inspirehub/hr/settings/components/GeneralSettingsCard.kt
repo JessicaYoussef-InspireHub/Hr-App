@@ -54,17 +54,19 @@ fun GeneralSettingsCard(
     val colors = appColors()
     val context = LocalContext.current
     val sharedPref = remember { SharedPrefManager(context) }
-    var locale by remember {  mutableStateOf(Locale.forLanguageTag(sharedPref.getLanguage())) }
+    var locale by remember { mutableStateOf(Locale.forLanguageTag(sharedPref.getLanguageTag())) }
     var expanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var isDarkMode by remember { mutableStateOf(sharedPref.isDarkModeEnabled()) }
 
     fun updateLocale(newLocale: Locale) {
         locale = newLocale
-        sharedPref.saveLanguage(newLocale.language)
+        // Keep the region ("ar-SA") so values-ar-rSA is used and survives app restarts.
+        val tag = newLocale.toLanguageTag()
+        sharedPref.saveLanguage(tag)
 
         AppCompatDelegate.setApplicationLocales(
-            LocaleListCompat.forLanguageTags(newLocale.language)
+            LocaleListCompat.forLanguageTags(tag)
         )
     }
 
@@ -102,7 +104,7 @@ fun GeneralSettingsCard(
 
                 if (showDialog) {
                     val darkMode = sharedPref.isDarkModeEnabled()
-                    val language = sharedPref.getLanguage()
+                    val language = sharedPref.getLanguageTag()
                     MyDialog(
                         onConfirm = {
                             showDialog = false
@@ -151,7 +153,8 @@ fun GeneralSettingsCard(
                             label = stringResource(R.string.arabic),
                             icon = painterResource(id = R.drawable.egypt),
                             onClick = {
-                                if (locale.language != "ar") {
+                                // Also switch when the current locale is ar-SA.
+                                if (locale.toLanguageTag() != "ar") {
                                     updateLocale(Locale.forLanguageTag("ar"))
                                 }
                                 expanded = false
@@ -166,7 +169,7 @@ fun GeneralSettingsCard(
                             label = "العربية (السعودية)",
                             icon = painterResource(id = R.drawable.saudi),
                             onClick = {
-                                if (locale.language != "ar" || locale.country != "SA") {
+                                if (locale.toLanguageTag() != "ar-SA") {
                                     updateLocale(Locale.forLanguageTag("ar-SA"))
                                 }
                                 expanded = false

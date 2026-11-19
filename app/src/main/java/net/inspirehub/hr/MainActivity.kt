@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, true)
         val sharedPref = SharedPrefManager(this)
-        val lang = sharedPref.getLanguage().ifBlank { "en" }
+        val lang = sharedPref.getLanguageTag().ifBlank { "en" }
         val desired = LocaleListCompat.forLanguageTags(lang)
         if (AppCompatDelegate.getApplicationLocales() != desired) {
             AppCompatDelegate.setApplicationLocales(desired)
