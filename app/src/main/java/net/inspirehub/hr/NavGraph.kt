@@ -36,13 +36,14 @@ import net.inspirehub.hr.time_off.presentation.TimeOffScreen
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import net.inspirehub.hr.deduction.presentation.WizardDeductionScreen
+import net.inspirehub.hr.wizard.presentation.WizardDeductionScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
+import net.inspirehub.hr.wizard.presentation.WizardSoundFeedbackScreen
 import net.inspirehub.hr.drawer.DrawerContent
 import net.inspirehub.hr.drawer.NavigationDrawer
 import net.inspirehub.hr.profile.presentation.ProfileScreen
-import net.inspirehub.hr.profile.presentation.WizardProfileScreen
-import net.inspirehub.hr.settings.presentation.WizardSaudiLanguageScreen
+import net.inspirehub.hr.wizard.presentation.WizardProfileScreen
+import net.inspirehub.hr.wizard.presentation.WizardSaudiLanguageScreen
 
 @SuppressLint("NewApi")
 @Composable
@@ -381,6 +382,7 @@ fun MyAppNavHost(
 
                 var hasSeenSaudiLanguageIntro by remember { mutableStateOf(sharedPref.hasSeenSaudiLanguageIntro()) }
 
+                var hasSeenSoundIntro by remember { mutableStateOf(sharedPref.hasSeenSoundIntro()) }
                 when {
                     // First: Show Profile Wizard
                     !hasSeenProfileIntro -> {
@@ -457,6 +459,19 @@ fun MyAppNavHost(
                         )
                     }
 
+                    !hasSeenSoundIntro -> {
+                        WizardSoundFeedbackScreen(
+                            onContinue = {
+                                sharedPref.setSoundIntroSeen()
+                                hasSeenSoundIntro = true
+                            },
+                            onSkip = {
+                                sharedPref.setSoundIntroSeen()
+                                hasSeenSoundIntro = true
+                            }
+                        )
+                    }
+
                     // Finally: Show Home
                     else -> {
                         CheckInOutScreen(navController)
@@ -475,4 +490,3 @@ fun MyAppNavHost(
         }
     }
 }
-

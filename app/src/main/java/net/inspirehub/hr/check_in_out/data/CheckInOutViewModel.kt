@@ -19,8 +19,11 @@ import androidx.work.workDataOf
 import net.inspirehub.hr.SharedPrefManager
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -85,6 +88,17 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
 
     private val _locationAccuracy = MutableStateFlow<Float?>(null)
     val locationAccuracy: StateFlow<Float?> = _locationAccuracy
+
+    /*
+     * One-shot "the server accepted this punch" events, carrying the action
+     * ("check_in" / "check_out"). A SharedFlow with no replay, not a StateFlow: an
+     * event is delivered once to the collector that is active when it is emitted and
+     * is never re-delivered on recomposition or when the screen is re-collected.
+     * An event emitted while nobody collects is dropped, so a stale chime can never
+     * play later.
+     */
+    private val _attendanceSuccessEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val attendanceSuccessEvents: SharedFlow<String> = _attendanceSuccessEvents.asSharedFlow()
 
     @SuppressLint("MissingPermission")
     fun startLocationUpdates(
@@ -687,6 +701,18 @@ class CheckInOutViewModel(application: Application) : AndroidViewModel(applicati
                             context = context,
                             attendanceStatus = "checked_in"
                         )
+                    }
+
+                    /*
+                     * The server confirmed the punch. Only real punches chime: "status"
+                     * is the pre-check-out probe, and a null attendance_status is shown
+                     * as an error by the screen, so it must not sound like a success.
+                     */
+                    if (
+                        (action == "check_in" || action == "check_out") &&
+                        result.attendance_status != null
+                    ) {
+                        _attendanceSuccessEvents.tryEmit(action)
                     }
 
                     onComplete(result.attendance_status)

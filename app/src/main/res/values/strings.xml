@@ -94,7 +94,7 @@ Protection Method</string>
     <string name="security">Security</string>
     <string name="general_settings">General Settings</string>
     <string name="notification">Notifications</string>
-    <string name="account">Account</string>
+    <string name="account_settings">Account Settings</string>
     <string name="arabic">العربية</string>
     <string name="english">English</string>
     <string name="you_are_checked_in">You are Checked In</string>
@@ -451,6 +451,17 @@ You have</string>
     <string name="find_your_new_language_in_settings_screen">Find your new language in Settings Screen</string>
     <string name="go_to_settings_language_and_select">Go to Settings → Language and select العربية (السعودية)</string>
     <string name="explore_settings">Explore Settings</string>
-
+    <string name="sound_feedback">Sound Feedback</string>
+    <string name="attendance_sound_feedback">Attendance Sound Feedback</string>
+    <string name="a_simple_sound_will_let_you_know_when_your_attendance_action_is_successfully_completed">A simple sound will let you know when your attendance action is successfully completed.</string>
+    <string name="successful_check_in_out">Successful Check-In &amp; Check-Out</string>
+    <string name="hear_a_confirmation_sound_after_successfully_checking_in_or_checking_out">Hear a confirmation sound after successfully checking in or checking out.</string>
+    <string name="instant_confirmation">Instant Confirmation</string>
+    <string name="know_that_your_attendance_has_been_recorded_without_having_to_check_the_screen">Know that your attendance has been recorded without having to check the screen.</string>
+    <string name="only_when_successful">Only When Successful</string>
+    <string name="no_sound_will_play_if_the_request_fails_or_the_server_rejects_the_operation">No sound will play if the request fails or the server rejects the operation.</string>
+    <string name="your_attendance_confirmed_with_a_sound">Your attendance, confirmed with a sound!</string>
+    <string name="explore_it">Explore It</string>
+    <string name="refresh_configurations">Refresh Configurations</string>
 
 </resources>

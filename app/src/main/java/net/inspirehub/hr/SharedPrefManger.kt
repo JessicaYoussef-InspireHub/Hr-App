@@ -12,50 +12,59 @@ import java.util.Date
 
 class SharedPrefManager(context: Context) {
 
-    private val KEY_HAS_SEEN_DEDUCTION_INTRO = "has_seen_deduction_intro"
-    private val KEY_HAS_SEEN_PROFILE_INTRO = "has_seen_profile_intro"
+    private val keyHasSeenDeductionIntro = "has_seen_deduction_intro"
+    private val keyHasSeenProfileIntro = "has_seen_profile_intro"
+    private val keyHasSeenSaudiLanguageIntro = "has_seen_saudi_language_intro"
+    private val keyHasSeenSoundIntro = "has_seen_sound_intro"
 
-    private val KEY_HAS_SEEN_SAUDI_LANGUAGE_INTRO = "has_seen_saudi_language_intro"
+    fun hasSeenSoundIntro(): Boolean {
+        return prefs.getBoolean(keyHasSeenSoundIntro, false)
+    }
 
+    fun setSoundIntroSeen() {
+        prefs.edit {
+            putBoolean(keyHasSeenSoundIntro, true)
+        }
+    }
     fun hasSeenSaudiLanguageIntro(): Boolean {
-        return prefs.getBoolean(KEY_HAS_SEEN_SAUDI_LANGUAGE_INTRO, false)
+        return prefs.getBoolean(keyHasSeenSaudiLanguageIntro, false)
     }
 
     fun setSaudiLanguageIntroSeen() {
         prefs.edit {
-            putBoolean(KEY_HAS_SEEN_SAUDI_LANGUAGE_INTRO, true)
+            putBoolean(keyHasSeenSaudiLanguageIntro, true)
         }
     }
 
     fun hasSeenProfileIntro(): Boolean {
-        return prefs.getBoolean(KEY_HAS_SEEN_PROFILE_INTRO, false)
+        return prefs.getBoolean(keyHasSeenProfileIntro, false)
     }
 
     fun setProfileIntroSeen() {
         prefs.edit {
-            putBoolean(KEY_HAS_SEEN_PROFILE_INTRO, true)
+            putBoolean(keyHasSeenProfileIntro, true)
         }
     }
     fun hasSeenDeductionIntro(): Boolean {
-        return prefs.getBoolean(KEY_HAS_SEEN_DEDUCTION_INTRO, false)
+        return prefs.getBoolean(keyHasSeenDeductionIntro, false)
     }
 
     fun setDeductionIntroSeen() {
         prefs.edit {
-            putBoolean(KEY_HAS_SEEN_DEDUCTION_INTRO, true)
+            putBoolean(keyHasSeenDeductionIntro, true)
         }
     }
 
-    private val HIDE_AUTO_NOTIFICATION = "hide_auto_notification"
+    private val hideAutoNotification = "hide_auto_notification"
 
     fun setHideAutoNotification(hide: Boolean) {
         prefs.edit {
-            putBoolean(HIDE_AUTO_NOTIFICATION, hide)
+            putBoolean(hideAutoNotification, hide)
         }
     }
 
     fun isHideAutoNotification(): Boolean {
-        return prefs.getBoolean(HIDE_AUTO_NOTIFICATION, true)
+        return prefs.getBoolean(hideAutoNotification, true)
     }
 
     fun saveLoginEmail(email: String) {
@@ -117,41 +126,31 @@ class SharedPrefManager(context: Context) {
             ?.takeIf { it.isNotBlank() }
     }
 
-    fun setAttendanceReminderEnabled(enabled: Boolean) {
-        prefs.edit {
-            putBoolean("attendance_reminder_enabled", enabled)
-        }
-    }
-
-    fun isAttendanceReminderEnabled(): Boolean {
-        return prefs.getBoolean("attendance_reminder_enabled", false)
-    }
-
-    private val CHECK_IN_REMINDER_ENABLED = "check_in_reminder_enabled"
-    private val CHECK_OUT_REMINDER_ENABLED = "check_out_reminder_enabled"
+    private val checkInReminderEnabled = "check_in_reminder_enabled"
+    private val checkOutReminderEnabled = "check_out_reminder_enabled"
 
     fun setCheckInReminderEnabled(enabled: Boolean) {
         prefs.edit {
-            putBoolean(CHECK_IN_REMINDER_ENABLED, enabled)
+            putBoolean(checkInReminderEnabled, enabled)
         }
     }
 
     fun isCheckInReminderEnabled(): Boolean {
         return prefs.getBoolean(
-            CHECK_IN_REMINDER_ENABLED,
+            checkInReminderEnabled,
             false
         )
     }
 
     fun setCheckOutReminderEnabled(enabled: Boolean) {
         prefs.edit {
-            putBoolean(CHECK_OUT_REMINDER_ENABLED, enabled)
+            putBoolean(checkOutReminderEnabled, enabled)
         }
     }
 
     fun isCheckOutReminderEnabled(): Boolean {
         return prefs.getBoolean(
-            CHECK_OUT_REMINDER_ENABLED,
+            checkOutReminderEnabled,
             false
         )
     }
@@ -236,13 +235,13 @@ class SharedPrefManager(context: Context) {
      *
      *  true  - a long-lived foreground service. Android owns its notification for as
      *          long as the service lives, so the notification is always on screen and
-     *          the hide-auto-notification toggle can only minimise it.
+     *          the hide-auto-notification toggle can only minimize it.
      *  false - an AlarmManager chain that starts the service for one reading and lets
      *          it die again, the same shape as the attendance reminder. Nothing of
      *          ours runs between two readings, so the notification really disappears.
      *
      * Defaults to true so a backend that does not send the field yet keeps the
-     * behaviour it has today.
+     * behavior it has today.
      */
     fun saveShowNotification(value: Boolean) {
         prefs.edit { putBoolean("show_notification", value) }
@@ -388,11 +387,11 @@ class SharedPrefManager(context: Context) {
         context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
     fun saveCompanyUrl(url: String) {
-        prefs.edit { putString("companyurl", url) }
+        prefs.edit { putString("companyUrl", url) }
     }
 
     fun getCompanyUrl(): String? {
-        return prefs.getString("companyurl", null)
+        return prefs.getString("companyUrl", null)
     }
 
     fun saveAllowedLocationsIds(ids: List<Int>) {
@@ -622,19 +621,24 @@ class SharedPrefManager(context: Context) {
         prefs.edit {
             clear()
             putBoolean(
-                KEY_HAS_SEEN_DEDUCTION_INTRO,
+                keyHasSeenDeductionIntro,
                 hasSeenDeductionIntro
             )
 
             putBoolean(
-                KEY_HAS_SEEN_PROFILE_INTRO,
+                keyHasSeenProfileIntro,
                 hasSeenProfileIntro
             )
 
 
             putBoolean(
-                KEY_HAS_SEEN_SAUDI_LANGUAGE_INTRO,
+                keyHasSeenSaudiLanguageIntro,
                 hasSeenSaudiLanguageIntro()
+            )
+
+            putBoolean(
+                keyHasSeenSoundIntro,
+                hasSeenSoundIntro()
             )
         }
     }

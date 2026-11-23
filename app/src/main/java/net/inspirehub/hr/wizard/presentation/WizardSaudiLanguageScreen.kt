@@ -1,10 +1,7 @@
-package net.inspirehub.hr.settings.presentation
+package net.inspirehub.hr.wizard.presentation
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,11 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.FullButton
@@ -27,6 +21,12 @@ import net.inspirehub.hr.MyDivider
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 import net.inspirehub.hr.settings.components.LanguageOption
+import net.inspirehub.hr.wizard.components.IconWizard
+import net.inspirehub.hr.wizard.components.NewFeature
+import net.inspirehub.hr.wizard.components.SkipButton
+import net.inspirehub.hr.wizard.components.SubTitleWizard
+import net.inspirehub.hr.wizard.components.SummaryWizard
+import net.inspirehub.hr.wizard.components.TitleWizard
 
 @Composable
 fun WizardSaudiLanguageScreen(
@@ -48,81 +48,25 @@ fun WizardSaudiLanguageScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            // New feature label
-            Surface(
-                color = colors.tertiaryColor.copy(alpha = 0.22f),
-                shape = RoundedCornerShape(50.dp),
-                border = BorderStroke(
-                    2.dp,
-                    colors.tertiaryColor.copy(alpha = 0.7f)
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.new_feature),
-                    modifier = Modifier.padding(
-                        horizontal = 18.dp,
-                        vertical = 9.dp
-                    ),
-                    color = colors.tertiaryColor,
-                    fontSize = 16.sp
-                )
-            }
+            NewFeature()
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            IconWizard(Icons.Outlined.Language)
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Language illustration
-            Box(
-                modifier = Modifier
-                    .size(115.dp)
-                    .background(
-                        color = colors.surfaceVariant,
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Language,
-                    contentDescription = stringResource(R.string.language),
-                    modifier = Modifier.size(60.dp),
-                    tint = colors.tertiaryColor
-                )
-            }
-
-            Spacer(modifier = Modifier.height(26.dp))
-
-            // Main title
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(color = colors.onBackgroundColor)
-                    ) {
-                        append(stringResource(R.string.introducing))
-                        append("\n")
-                    }
-                    withStyle(
-                        SpanStyle(color = colors.tertiaryColor)
-                    ) {
-                        append(stringResource(R.string.saudi_arabic))
-                        append(" 🇸🇦")
-                    }
-                },
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                lineHeight = 40.sp
+            TitleWizard(
+                stringResource(R.string.introducing),
+                stringResource(R.string.saudi_arabic) + " 🇸🇦" ,
+                "\n"
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = stringResource(R.string.we_have_added_a_new_language_to_make_your_experience_more_familiar_and_comfortable_you_can_now_use_the_app_in_saudi_arabic),
-                fontSize = 16.sp,
-                color = colors.onBackgroundColor,
-                textAlign = TextAlign.Center,
-                lineHeight = 25.sp
-            )
+            SubTitleWizard(stringResource(R.string.we_have_added_a_new_language_to_make_your_experience_more_familiar_and_comfortable_you_can_now_use_the_app_in_saudi_arabic))
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             // Settings screenshot title
             Text(
@@ -205,13 +149,7 @@ fun WizardSaudiLanguageScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = stringResource(R.string.go_to_settings_language_and_select),
-                fontSize = 14.sp,
-                color = colors.tertiaryColor,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
-            )
+            SummaryWizard(stringResource(R.string.go_to_settings_language_and_select))
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -223,33 +161,8 @@ fun WizardSaudiLanguageScreen(
                 label = stringResource(R.string.explore_settings)
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = colors.tertiaryColor.copy(alpha = 0.25f),
-                    thickness = 1.dp
-                )
+            SkipButton( onSkip )
 
-                TextButton(onClick = onSkip) {
-                    Text(
-                        text = stringResource(R.string.skip),
-                        color = colors.tertiaryColor.copy(alpha = 0.7f),
-                        fontSize = 16.sp
-                    )
-                }
-
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = colors.tertiaryColor.copy(alpha = 0.25f),
-                    thickness = 1.dp
-                )
-            }
         }
     }
 }

@@ -92,7 +92,7 @@
     <string name="security">الحماية</string>
     <string name="general_settings">الإعدادات العامة</string>
     <string name="notification">الإشعارات</string>
-    <string name="account">الحساب</string>
+    <string name="account_settings">إعدادات الحساب</string>
     <string name="arabic">العربية</string>
     <string name="english">English</string>
     <string name="you_are_checked_in">تم تسجيل حضورك</string>
@@ -453,6 +453,18 @@
     <string name="find_your_new_language_in_settings_screen">ستجد لغتك الجديدة في شاشة الإعدادات</string>
     <string name="go_to_settings_language_and_select">انتقل إلى الإعدادات ← اللغة واختر العربية (السعودية)</string>
     <string name="explore_settings">استكشف الإعدادات</string>
+    <string name="sound_feedback">التنبيه الصوتي</string>
+    <string name="attendance_sound_feedback">التأكيد الصوتي للحضور</string>
+    <string name="a_simple_sound_will_let_you_know_when_your_attendance_action_is_successfully_completed">صوت بسيط هيأكدلك إن عملية تسجيل الحضور أو الانصراف تمت بنجاح.</string>
+    <string name="successful_check_in_out">تأكيد الحضور والانصراف</string>
+    <string name="hear_a_confirmation_sound_after_successfully_checking_in_or_checking_out">هتسمع صوت تأكيد بعد نجاح تسجيل الحضور أو الانصراف.</string>
+    <string name="instant_confirmation">تأكيد فوري</string>
+    <string name="know_that_your_attendance_has_been_recorded_without_having_to_check_the_screen">اعرف إن تسجيل حضورك تم بنجاح من غير ما تحتاج تراجع الشاشة.</string>
+    <string name="only_when_successful">الصوت عند النجاح فقط</string>
+    <string name="no_sound_will_play_if_the_request_fails_or_the_server_rejects_the_operation">مش هيشتغل أي صوت لو الطلب فشل أو السيرفر رفض العملية.</string>
+    <string name="your_attendance_confirmed_with_a_sound">حضورك وانصرافك، بتأكيد صوتي!</string>
+    <string name="explore_it">استكشفها دلوقتي</string>
+    <string name="refresh_configurations">تحديث الإعدادات</string>
 
 
 </resources>

@@ -390,9 +390,6 @@ fun AttendanceReminderCard() {
         ) {
             Column {
 
-
-
-
                 SettingsItem(
                     label = stringResource(R.string.check_in_reminder),
                     icon = Icons.Default.HowToReg,

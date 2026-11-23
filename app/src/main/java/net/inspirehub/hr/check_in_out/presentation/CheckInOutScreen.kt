@@ -108,6 +108,7 @@ import net.inspirehub.hr.settings.data.AttendanceReminderPowerSettings
 import android.content.IntentFilter
 import android.net.Uri
 import androidx.core.app.ActivityCompat
+import net.inspirehub.hr.check_in_out.components.AttendanceSoundPlayer
 import net.inspirehub.hr.protection.presentation.findActivity
 
 var timeChangeReceiver: BroadcastReceiver? = null
@@ -804,6 +805,24 @@ fun CheckInOutScreen(
 
     LaunchedEffect(Unit) {
         Log.d("TOKEN", "Stored Token: $token")
+    }
+
+    /*
+     * Confirmation chime. The player lives as long as the screen and is released in
+     * onDispose. The event flow is collected once per screen entry (key = viewModel),
+     * so recompositions neither replay nor duplicate the sound.
+     */
+    val attendanceSoundPlayer = remember { AttendanceSoundPlayer(context) }
+
+    DisposableEffect(attendanceSoundPlayer) {
+        onDispose { attendanceSoundPlayer.release() }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.attendanceSuccessEvents.collect { action ->
+            Log.d("AttendanceSound", "Server confirmed $action → playing chime")
+            attendanceSoundPlayer.playSuccess()
+        }
     }
 
     DisposableEffect(isWithinDistance) {

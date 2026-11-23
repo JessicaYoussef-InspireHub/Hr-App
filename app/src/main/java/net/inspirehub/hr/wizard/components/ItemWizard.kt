@@ -1,4 +1,4 @@
-package net.inspirehub.hr.profile.components
+package net.inspirehub.hr.wizard.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,14 +21,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.inspirehub.hr.appColors
 
-
 @Composable
-fun ProfileWizardItem(
+fun ItemWizard(
     icon: ImageVector,
     title: String,
     description: String
-) {
+){
+
     val colors = appColors()
+
 
     Row(
         modifier = Modifier.fillMaxWidth(),
