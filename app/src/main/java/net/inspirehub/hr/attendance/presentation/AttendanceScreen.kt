@@ -324,7 +324,7 @@ fun AttendanceScreen(
         containerColor = colors.onSecondaryColor,
         topBar = {
             MyAppBar(
-                label = stringResource(R.string.AttendanceHistory),
+                label = stringResource(R.string.attendanceHistory),
                 onBackClick = {
                     navController.popBackStack()
                 },

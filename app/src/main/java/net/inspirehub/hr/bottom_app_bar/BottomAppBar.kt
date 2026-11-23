@@ -5,18 +5,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.HourglassBottom
-import androidx.compose.material.icons.filled.LunchDining
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,15 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.compose.material3.Surface
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
 
@@ -45,18 +30,6 @@ fun BottomBar(
     val currentRoute = navBackStackEntry?.destination?.route
 
     val colors = appColors()
-    var moreMenuExpanded by remember { mutableStateOf(false) }
-
-    val moreRoutes = listOf(
-        "AttendanceScreen",
-        "ExpensesScreen",
-        "LunchScreen",
-        "DeductionScreen",
-        "SettingsScreen"
-    )
-
-    val isMoreSelected = currentRoute in moreRoutes
-
     val itemColor = colors.onBackgroundColor
     val selectedColor = colors.tertiaryColor
 
@@ -169,7 +142,7 @@ fun BottomBar(
                     navigateTo(navController, "NotificationsScreen")
                 }
 
-                // More
+                // Attend
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -180,156 +153,14 @@ fun BottomBar(
                         modifier = Modifier,
                         icon = {
                             Icon(
-                                Icons.Default.MoreVert,
-                                contentDescription = stringResource(R.string.more)
+                                Icons.Default.AccessTime,
+                                contentDescription = stringResource(R.string.attend)
                             )
                         },
-                        label = stringResource(R.string.more),
-                        selected = isMoreSelected
+                        label = stringResource(R.string.attend),
+                        selected = currentRoute == "AttendanceScreen"
                     ) {
-                        moreMenuExpanded = true
-                    }
-                }
-            }
-
-
-           // More Menu Popup
-            if (moreMenuExpanded) {
-
-                val density = LocalDensity.current
-
-                val dividerOffsetPx = with(density) { 5.dp.roundToPx() }
-
-                val horizontalMarginPx = with(density) { 5.dp.roundToPx() }
-
-                val menuPositionProvider = remember(density) {
-
-                    object : PopupPositionProvider {
-
-                        override fun calculatePosition(
-                            anchorBounds: IntRect,
-                            windowSize: IntSize,
-                            layoutDirection: LayoutDirection,
-                            popupContentSize: IntSize
-                        ): IntOffset {
-
-                            // Align the menu to the right edge in LTR
-                            // and to the left edge in RTL.
-
-                            val x = if (layoutDirection == LayoutDirection.Ltr) {
-                                anchorBounds.right -
-                                        popupContentSize.width -
-                                        horizontalMarginPx
-                            } else {
-                                anchorBounds.left + horizontalMarginPx
-                            }
-
-                            // Place the bottom edge of the menu
-                            // exactly at the Divider position.
-
-                            val y = anchorBounds.top -
-                                    popupContentSize.height +
-                                    dividerOffsetPx
-
-                            return IntOffset(
-                                x = x,
-                                y = y
-                            )
-                        }
-                    }
-                }
-
-                Popup(
-                    popupPositionProvider = menuPositionProvider,
-                    onDismissRequest = { moreMenuExpanded = false },
-                    properties = PopupProperties(focusable = true)
-                ) {
-
-                    Surface(
-                        modifier = Modifier.width(180.dp),
-                        color = colors.surfaceContainerHigh,
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-
-                        Column(
-                            modifier = Modifier.widthIn(min = 180.dp)
-                        ) {
-
-                            // Attendance
-                            MoreMenuItem(
-                                icon = {
-                                    Icon(
-                                        Icons.Default.AccessTime,
-                                        contentDescription = stringResource(R.string.AttendanceHistory)
-                                    )
-                                },
-                                title = stringResource(R.string.AttendanceHistory),
-                                selected = currentRoute == "AttendanceScreen"
-                            ) {
-                                moreMenuExpanded = false
-                                navigateTo(navController, "AttendanceScreen")
-                            }
-
-                            // Deduction
-                            MoreMenuItem(
-                                icon = {
-                                    Icon(
-                                        Icons.Default.HourglassBottom,
-                                        contentDescription = stringResource(R.string.deduction)
-                                    )
-                                },
-                                title = stringResource(R.string.deduction),
-                                selected = currentRoute == "DeductionScreen"
-                            ) {
-                                moreMenuExpanded = false
-                                navigateTo(navController, "DeductionScreen")
-                            }
-
-                            // Expenses
-                            MoreMenuItem(
-                                icon = {
-                                    Icon(
-                                        Icons.Default.Paid,
-                                        contentDescription = stringResource(R.string.expenses)
-                                    )
-                                },
-                                title = stringResource(R.string.expenses),
-                                selected = currentRoute == "ExpensesScreen"
-                            ) {
-                                moreMenuExpanded = false
-                                navigateTo(navController, "ExpensesScreen")
-                            }
-
-                            // Lunch
-                            MoreMenuItem(
-                                icon = {
-                                    Icon(
-                                        Icons.Default.LunchDining,
-                                        contentDescription = stringResource(R.string.lunch)
-                                    )
-                                },
-                                title = stringResource(R.string.lunch),
-                                selected = currentRoute == "LunchScreen"
-                            ) {
-                                moreMenuExpanded = false
-                                navigateTo(navController, "LunchScreen")
-                            }
-
-                            // Settings
-                            MoreMenuItem(
-                                icon = {
-                                    Icon(
-                                        Icons.Default.Settings,
-                                        contentDescription = stringResource(R.string.settings)
-                                    )
-                                },
-                                title = stringResource(R.string.settings),
-                                selected = currentRoute == "SettingsScreen"
-                            ) {
-                                moreMenuExpanded = false
-                                navigateTo(navController, "SettingsScreen")
-                            }
-                        }
+                        navigateTo(navController, "AttendanceScreen")
                     }
                 }
             }

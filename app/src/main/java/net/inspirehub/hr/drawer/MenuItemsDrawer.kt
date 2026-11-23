@@ -48,7 +48,7 @@ fun MenuItemsDrawer(
         )
 
         DrawerItem(
-            label = stringResource(R.string.AttendanceHistory),
+            label = stringResource(R.string.attendanceHistory),
             icon = Icons.Default.AccessTime,
             selected = currentRoute == "AttendanceScreen",
             onClick = { onNavigate("AttendanceScreen") }

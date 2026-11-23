@@ -103,7 +103,6 @@ Protection Method</string>
     <string name="you_have_successfully_checked_out_on">You have successfully checked out on</string>
     <string name="have_a_blessed_day">Have a blessed day</string>
     <string name="great_job">Great job</string>
-
     <string name="attention">Attention</string>
     <plurals name="check_out_confirmation">
         <item quantity="one">Total worked time: %1$.2f hour\n\nAre you sure you want to check out?</item>
@@ -161,7 +160,6 @@ Protection Method</string>
     <string name="you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed">You are currently at a different branch from your registered one. HR will be informed</string>
     <string name="enable_notifications">Enable Notifications</string>
     <string name="please_enable_notification_permission_to_receive_notifications">Please enable notification permission to receive notifications</string>
-    <string name="more">More</string>
     <string name="invalid_request">Invalid Request</string>
     <string name="apply">Apply</string>
     <string name="expenses">Expenses</string>
@@ -287,7 +285,8 @@ You have</string>
     <string name="no_suppliers_yet">No suppliers yet</string>
     <string name="discard_changes">Discard changes?</string>
     <string name="you_have_unsaved_changes_are_you_sure_you_want_to_discard_them">You have unsaved changes. Are you sure you want to discard them?</string>
-    <string name="AttendanceHistory">Attendance History</string>
+    <string name="attendanceHistory">Attendance History</string>
+    <string name="attend">Attend</string>
     <string name="deduction">Deduction</string>
     <string name="present">Present</string>
     <string name="late">Late</string>

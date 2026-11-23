@@ -163,7 +163,6 @@
     <string name="you_are_currently_at_a_different_branch_from_your_registered_one_hr_will_be_informed">أنت حاليًا في فرع غير فرعك المسجّل، وبيتم إبلاغ الموارد البشرية</string>
     <string name="enable_notifications">تفعيل الإشعارات</string>
     <string name="please_enable_notification_permission_to_receive_notifications">فضلًا فعّل إذن الإشعارات عشان توصلك الإشعارات</string>
-    <string name="more">المزيد</string>
     <string name="invalid_request">طلب غير صالح</string>
     <string name="apply">تطبيق</string>
     <string name="expenses">المصروفات</string>
@@ -289,7 +288,8 @@
     <string name="no_suppliers_yet">ما فيه مورّدين للحين</string>
     <string name="discard_changes">تبغى تتجاهل التغييرات؟</string>
     <string name="you_have_unsaved_changes_are_you_sure_you_want_to_discard_them">عندك تغييرات ما انحفظت. متأكد تبغى تتجاهلها؟</string>
-    <string name="AttendanceHistory">سجل الحضور والانصراف</string>
+    <string name="attendanceHistory">سجل الحضور والانصراف</string>
+    <string name="attend">الحضور</string>
     <string name="deduction">رصيد التأخير</string>
     <string name="present">حاضر</string>
     <string name="late">متأخر</string>
