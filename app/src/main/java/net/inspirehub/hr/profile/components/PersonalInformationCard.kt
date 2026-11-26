@@ -26,6 +26,7 @@ import net.inspirehub.hr.appColors
 import androidx.compose.ui.res.stringResource
 import net.inspirehub.hr.R
 import net.inspirehub.hr.profile.data.loadProfileFromPrefs
+import net.inspirehub.hr.utils.formatNumber
 import java.util.Locale
 
 
@@ -37,6 +38,8 @@ fun PersonalInformationCard(
     val colors = appColors()
     val context = LocalContext.current
     val profile = remember { loadProfileFromPrefs(SharedPrefManager(context)) }
+    val sharedPref = remember { SharedPrefManager(context) }
+    val currentLanguage = sharedPref.getLanguage()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -67,7 +70,10 @@ fun PersonalInformationCard(
             SectionCardItem(
                 icon = Icons.Default.Cake,
                 label = stringResource(R.string.birthday),
-                value = profile.birthday
+                value = formatBirthday(
+                    raw = profile.birthday,
+                    locale = Locale.forLanguageTag(currentLanguage)
+                )
             )
         }
     }
@@ -76,10 +82,27 @@ fun PersonalInformationCard(
 @RequiresApi(Build.VERSION_CODES.O)
 fun formatBirthday(raw: String, locale: Locale): String {
     if (raw.equals("false", ignoreCase = true)) return "-"
+
     return try {
-        java.time.LocalDate.parse(raw.take(10)).format(
-            java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", locale)
+        val date = java.time.LocalDate.parse(raw.take(10))
+
+        val day = formatNumber(
+            date.dayOfMonth.toString(),
+            locale.language
         )
+
+        val month = date.month.getDisplayName(
+            java.time.format.TextStyle.FULL,
+            locale
+        )
+
+        val year = formatNumber(
+            date.year.toString(),
+            locale.language
+        )
+
+        "$day $month $year"
+
     } catch (_: Exception) {
         raw
     }

@@ -95,7 +95,7 @@
     <string name="account_settings">إعدادات الحساب</string>
     <string name="arabic">العربية</string>
     <string name="english">English</string>
-    <string name="you_are_checked_in">تم تسجيل حضورك</string>
+    <string name="checked_in">تم تسجيل حضورك</string>
     <string name="you_are_checked_out">تم تسجيل انصرافك</string>
     <string name="you_have_successfully_checked_in_at">لقد تم تسجيل حضورك بنجاح في</string>
     <string name="you_have_successfully_checked_out_on">لقد تم تسجيل انصرافك بنجاح في</string>
@@ -465,7 +465,20 @@
     <string name="your_attendance_confirmed_with_a_sound">حضورك وانصرافك، بتأكيد صوتي!</string>
     <string name="explore_it">استكشفها دلوقتي</string>
     <string name="refresh_configurations">تحديث الإعدادات</string>
-
+    <string name="monday">الاثنين</string>
+    <string name="tuesday">الثلاثاء</string>
+    <string name="wednesday">الأربعاء</string>
+    <string name="thursday">الخميس</string>
+    <string name="friday">الجمعة</string>
+    <string name="saturday">السبت</string>
+    <string name="sunday">الأحد</string>
+    <string name="today_date_format">%1$s, %2$s-%3$s-%4$s</string>
+    <string name="good_morning">صباح الخير</string>
+    <string name="good_afternoon">طاب يومك</string>
+    <string name="good_evening">مساء الخير</string>
+    <string name="glad_to_see_you_today">سعداء برؤيتك اليوم</string>
+    <string name="you_are_in_first_line">سجّلت</string>
+    <string name="you_are_in_second_line">حضورك.</string>
+    <string name="have_a_great_day">نتمنى لك يوماً سعيداً</string>
 
 </resources>
-

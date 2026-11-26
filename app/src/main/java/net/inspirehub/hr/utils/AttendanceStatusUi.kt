@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import net.inspirehub.hr.R
 import net.inspirehub.hr.appColors
-import net.inspirehub.hr.attendance.presentation.AttendanceState
 import net.inspirehub.hr.attendance.presentation.DayStatus
 import androidx.core.graphics.toColorInt
 
@@ -61,25 +60,5 @@ fun DayStatus.toUi(): AttendanceStatusUi {
             text = stringResource(R.string.in_progress),
             icon = Icons.Default.WorkHistory
         )
-    }
-}
-
-fun DayStatus.getPercentage(
-    attendanceStates: List<AttendanceState>
-): Int {
-
-    return when (this) {
-
-        DayStatus.PRESENT -> 100
-
-        DayStatus.IN_PROGRESS,
-        DayStatus.LATE -> {
-            attendanceStates
-                .maxOfOrNull { it.workedHoursPercentage.toInt() }
-                ?.coerceIn(0, 100)
-                ?: 0
-        }
-
-        DayStatus.ABSENT -> 0
     }
 }

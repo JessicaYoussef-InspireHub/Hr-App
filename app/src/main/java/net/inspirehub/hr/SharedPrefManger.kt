@@ -387,11 +387,11 @@ class SharedPrefManager(context: Context) {
         context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
     fun saveCompanyUrl(url: String) {
-        prefs.edit { putString("companyUrl", url) }
+        prefs.edit { putString("companyurl", url) }
     }
 
     fun getCompanyUrl(): String? {
-        return prefs.getString("companyUrl", null)
+        return prefs.getString("companyurl", null)
     }
 
     fun saveAllowedLocationsIds(ids: List<Int>) {

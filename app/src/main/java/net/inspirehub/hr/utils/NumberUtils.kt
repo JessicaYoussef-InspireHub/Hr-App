@@ -18,7 +18,7 @@ fun convertToArabicDigits(input: String): String {
 }
 
 fun formatNumber(text: String, language: String): String {
-    return if (language == "ar") {
+    return if (language.startsWith("ar")) {
         convertToArabicDigits(text)
     } else {
         text
@@ -89,47 +89,6 @@ fun getLocalizedWorkedTime(
 
             else ->
                 "$minutes m"
-        }
-    }
-}
-
-
-fun getLocalizedHourText(
-    count: Double?,
-    language: String
-): String {
-
-    if (count == null) return ""
-
-    return if (language == "ar") {
-        when {
-            count == 0.5 -> "نصف ساعة"
-            count == 1.0 -> "ساعة"
-            count == 1.5 -> "ساعة ونصف"
-            count == 2.0 -> "ساعتين"
-            count == 2.5 -> "ساعتين ونصف"
-            count in 3.0..10.0 && count % 1 == 0.0 ->
-                "${formatNumber(count.toInt().toString(), language)} ساعات"
-
-            count > 10 && count % 1 == 0.0 ->
-                "${formatNumber(count.toInt().toString(), language)} ساعة"
-
-            count % 1 == 0.5 ->
-                "${formatNumber(count.toInt().toString(), language)} ساعة ونصف"
-
-            else ->
-                "${formatNumber(count.toString(), language)} ساعة"
-        }
-    } else {
-        when {
-            count == 0.5 -> "Half an hour"
-            count == 1.0 -> "1 hour"
-            count == 1.5 -> "1 hour and a half"
-            count == 2.0 -> "2 hours"
-            count == 2.5 -> "2 hours and a half"
-            count % 1 == 0.0 -> "${count.toInt()} hours"
-            count % 1 == 0.5 -> "${count.toInt()} and a half hours"
-            else -> "$count hours"
         }
     }
 }

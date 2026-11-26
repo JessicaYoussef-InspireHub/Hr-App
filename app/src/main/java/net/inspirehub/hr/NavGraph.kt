@@ -474,7 +474,10 @@ fun MyAppNavHost(
 
                     // Finally: Show Home
                     else -> {
-                        CheckInOutScreen(navController)
+                        CheckInOutScreen(
+                            navController = navController,
+                            onMenuClick = onMenuClick
+                        )
                     }
                 }
             }

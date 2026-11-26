@@ -97,7 +97,7 @@ Protection Method</string>
     <string name="account_settings">Account Settings</string>
     <string name="arabic">العربية</string>
     <string name="english">English</string>
-    <string name="you_are_checked_in">You are Checked In</string>
+    <string name="checked_in">Checked In</string>
     <string name="you_are_checked_out">You are Checked Out</string>
     <string name="you_have_successfully_checked_in_at">You have successfully checked in at</string>
     <string name="you_have_successfully_checked_out_on">You have successfully checked out on</string>
@@ -462,5 +462,20 @@ You have</string>
     <string name="your_attendance_confirmed_with_a_sound">Your attendance, confirmed with a sound!</string>
     <string name="explore_it">Explore It</string>
     <string name="refresh_configurations">Refresh Configurations</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+    <string name="today_date_format">%1$s, %2$s-%3$s-%4$s</string>
+    <string name="good_morning">Good Morning</string>
+    <string name="good_afternoon">Good Afternoon</string>
+    <string name="good_evening">Good Evening</string>
+    <string name="glad_to_see_you_today">Glad to see you today</string>
+    <string name="you_are_in_first_line">You’re</string>
+    <string name="you_are_in_second_line">in.</string>
+    <string name="have_a_great_day">Have a great day</string>
 
 </resources>

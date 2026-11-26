@@ -4,7 +4,6 @@ import android.Manifest
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -19,13 +18,11 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -50,18 +47,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.*
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -97,8 +87,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.ui.layout.ContentScale
 import net.inspirehub.hr.InfoIcon
@@ -107,9 +99,24 @@ import net.inspirehub.hr.check_in_out.data.hasForegroundLocationPermission
 import net.inspirehub.hr.settings.data.AttendanceReminderPowerSettings
 import android.content.IntentFilter
 import android.net.Uri
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawBehind
 import androidx.core.app.ActivityCompat
 import net.inspirehub.hr.check_in_out.components.AttendanceSoundPlayer
+import net.inspirehub.hr.check_in_out.components.GreetingHeader
+import net.inspirehub.hr.check_in_out.components.TodayDateHeader
 import net.inspirehub.hr.protection.presentation.findActivity
+import kotlin.time.Duration.Companion.milliseconds
+import androidx.compose.ui.platform.LocalResources
+import net.inspirehub.hr.check_in_out.WeeklyAttendance
+import net.inspirehub.hr.check_in_out.components.AttendanceStatusCard
+import net.inspirehub.hr.check_in_out.components.WelcomeText
+import net.inspirehub.hr.check_in_out.components.YourStatusText
 
 var timeChangeReceiver: BroadcastReceiver? = null
 
@@ -141,6 +148,7 @@ private fun checkInternetConnection(context: Context): Boolean {
 @Composable
 fun CheckInOutScreen(
     navController: NavController,
+    onMenuClick: () -> Unit,
     viewModel: CheckInOutViewModel = viewModel()
 
 ) {
@@ -892,14 +900,6 @@ fun CheckInOutScreen(
         }
     }
 
-    @Composable
-    fun Modifier.noClickable(): Modifier = this.clickable(
-        interactionSource = remember { MutableInteractionSource() },
-        indication = null
-    ) {
-        // no click effect
-    }
-
 
     fun formatAttendanceDateTime(dateTimeString: String): Pair<String, String> {
         return try {
@@ -951,7 +951,7 @@ fun CheckInOutScreen(
                 else -> {
                     val dateFormatter = DateTimeFormatter.ofPattern(
                         "d MMMM yyyy",
-                        if (isArabic) Locale("ar") else Locale.ENGLISH
+                        if (isArabic) Locale.forLanguageTag("ar") else Locale.ENGLISH
                     )
 
                     localDate.format(dateFormatter)
@@ -1118,11 +1118,7 @@ fun CheckInOutScreen(
 
                 isGpsEnabled = gpsStatus
 
-                if (!gpsStatus) {
-                    showGpsDialog = true
-                } else {
-                    showGpsDialog = false
-                }
+                showGpsDialog = !gpsStatus
             }
         }
 
@@ -1148,7 +1144,7 @@ fun CheckInOutScreen(
         while (true) {
             val stillConnected = withContext(Dispatchers.IO) { checkInternetConnection(context) }
             isOffline = !stillConnected
-            delay(3000)
+            delay(3000.milliseconds)
         }
     }
 
@@ -1159,15 +1155,18 @@ fun CheckInOutScreen(
 
     LaunchedEffect(attendanceStatus, lastCheckIn, workedHours) {
         // First time logging in and no data coming from the server
-        if (attendanceStatus == null && lastCheckIn == null && workedHours == null) {
+        if ( attendanceStatus == "Loading..." &&
+            lastCheckIn == null &&
+            workedHours == null)
+        {
             isInitialLoading = false
             isButtonLoading = false
             return@LaunchedEffect
         }
 
         // When the server returns AttendStatus only → Dough to unblock the loading
-        if (attendanceStatus != null) {
-            delay(300)
+        if (attendanceStatus != "Loading...") {
+            delay(300.milliseconds)
             isInitialLoading = false
             isButtonLoading = false
         }
@@ -1175,23 +1174,17 @@ fun CheckInOutScreen(
 
 
     DisposableEffect(Unit) {
-
-        onDispose {
-            viewModel.stopLocationUpdates()
-        }
+        onDispose { viewModel.stopLocationUpdates() }
     }
 
-    val notificationPermission =
-        rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+    val notificationPermission = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
 
     LaunchedEffect(Unit) {
         if (!notificationPermission.status.isGranted) {
             notificationPermission.launchPermissionRequest()
         }
     }
-    BackHandler(enabled = true) {
-        exitProcess(0)
-    }
+    BackHandler(enabled = true) { exitProcess(0) }
 
     LaunchedEffect(offlineMessage) {
         if (offlineMessage.isNotEmpty()) {
@@ -1226,45 +1219,103 @@ fun CheckInOutScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(colors.onSecondaryColor)
+                    .drawBehind {
+                        // Near-black base with a faint green tint, darkening toward the bottom
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF0B110B),
+                                    Color(0xFF060C06),
+                                    Color(0xFF030805)
+                                )
+                            )
+                        )
+                        // Soft green glow behind the "You're in." headline
+                        val glowCenter = Offset(size.width * 0.5f, size.height * 0.40f)
+                        val glowRadius = size.width * 0.62f
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colorStops = arrayOf(
+                                    0.0f to Color(0xFF2F5A12).copy(alpha = 0.95f),
+                                    0.35f to Color(0xFF22420D).copy(alpha = 0.65f),
+                                    0.7f to Color(0xFF122608).copy(alpha = 0.25f),
+                                    1.0f to Color.Transparent
+                                ),
+                                center = glowCenter,
+                                radius = glowRadius
+                            ),
+                            radius = glowRadius,
+                            center = glowCenter
+                        )
+                    }
                     .padding(innerPadding)
-                    .padding(horizontal = 24.dp)
-                    .padding(WindowInsets.navigationBars.asPaddingValues())
-                    .padding(WindowInsets.statusBars.asPaddingValues())
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .padding(horizontal = 10.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Text(
-                    when (attendanceStatus) {
-                        "checked_in" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${
-                            stringResource(
-                                R.string.you_are_checked_in
-                            )
-                        }"
 
-                        "checked_out" -> "${stringResource(R.string.welcome)} $employeeFirstName\n${
-                            stringResource(
-                                R.string.you_are_checked_out
-                            )
-                        }"
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Box(modifier = Modifier.weight(1f)) {
+                        TodayDateHeader()
+                    }
 
-                        else -> "${stringResource(R.string.welcome)} $employeeFirstName\n${
-                            stringResource(
-                                R.string.loading
-                            )
-                        }"
-                    },
-                    color = colors.tertiaryColor,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineLarge,
+                    IconButton(
+                        onClick = onMenuClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Open menu",
+                            tint = colors.onBackgroundColor
+                        )
+                    }
+                }
+
+                GreetingHeader( name = employeeFirstName )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                WelcomeText(stringResource(R.string.glad_to_see_you_today))
+
+                Spacer(modifier = Modifier.height(40.dp))
+
+                WeeklyAttendance()
+
+                Spacer(modifier = Modifier.height(25.dp))
+
+                YourStatusText()
+
+                AttendanceStatusCard(
+                    attendanceStatus = attendanceStatus,
+                    checkInTime = checkInDateTime.second
                 )
 
-                Image(
-                    painter = painterResource(id = R.drawable.check_in_out),
-                    contentDescription = attendanceStatus
-                )
+                Spacer( modifier = Modifier.height(20.dp))
+
+                WelcomeText(stringResource(R.string.have_a_great_day))
+
+
+
+
+
+
+
+
+
+
+
+                Spacer(modifier = Modifier.height(100.dp))
+
+
+                Spacer(modifier = Modifier.height(50.dp))
+
+
+
+
+
+
 
                 if (isOffline) {
 
@@ -1274,7 +1325,7 @@ fun CheckInOutScreen(
                         ),
                         color = colors.error,
                         textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Medium
                     )
 
                 } else {
@@ -1364,7 +1415,6 @@ fun CheckInOutScreen(
                         }
                     }
                 }
-//                Log.d("disable", "isWithinDistance from state: $isWithinDistance")
 
                 if (isLocationBlocked) {
                     Text(
@@ -2144,7 +2194,7 @@ fun CheckInOutScreen(
             title = stringResource(R.string.attention),
             subtitle = if (!isOffline) {
                 val hoursInt = (workedHours ?: 0.0).toInt()
-                LocalContext.current.resources.getQuantityString(
+                LocalResources.current.getQuantityString(
                     R.plurals.check_out_confirmation,
                     hoursInt,
                     workedHours ?: 0.0
